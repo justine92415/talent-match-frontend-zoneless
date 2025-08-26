@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, ViewChild, TemplateRef, ViewContainerRef } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { OverlayModule, Overlay, OverlayRef, OverlayPositionBuilder } from '@angular/cdk/overlay';
+import { TemplatePortal } from '@angular/cdk/portal';
 import { TmfIconEnum } from '@share/icon.enum';
 
 interface City {
@@ -46,12 +48,29 @@ interface UserMenuItem {
 
 @Component({
   selector: 'tmf-header',
-  imports: [MatIconModule],
+  imports: [MatIconModule, OverlayModule],
   templateUrl: './header.html',
   styleUrl: './header.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Header {
+  @ViewChild('cityDropdownTemplate') cityDropdownTemplate!: TemplateRef<any>;
+  @ViewChild('exploreDropdownTemplate') exploreDropdownTemplate!: TemplateRef<any>;
+  @ViewChild('notificationDropdownTemplate') notificationDropdownTemplate!: TemplateRef<any>;
+  @ViewChild('cartDropdownTemplate') cartDropdownTemplate!: TemplateRef<any>;
+  @ViewChild('userDropdownTemplate') userDropdownTemplate!: TemplateRef<any>;
+
+  private cityOverlayRef: OverlayRef | null = null;
+  private exploreOverlayRef: OverlayRef | null = null;
+  private notificationOverlayRef: OverlayRef | null = null;
+  private cartOverlayRef: OverlayRef | null = null;
+  private userOverlayRef: OverlayRef | null = null;
+
+  constructor(
+    private overlay: Overlay,
+    private overlayPositionBuilder: OverlayPositionBuilder,
+    private viewContainerRef: ViewContainerRef
+  ) {}
   // 城市 Mock Data
   cities: City[] = [
     { id: 'all', name: '探索全部' },
@@ -273,5 +292,254 @@ export class Header {
     if (item.id === 'logout') {
       console.log('執行登出邏輯');
     }
+    
+    // 點擊選單項目後關閉下拉選單
+    this.closeUserDropdown();
+  }
+
+  // 城市下拉選單控制
+  toggleCityDropdown(trigger: HTMLElement): void {
+    if (this.cityOverlayRef?.hasAttached()) {
+      this.closeCityDropdown();
+    } else {
+      this.openCityDropdown(trigger);
+    }
+  }
+
+  private openCityDropdown(trigger: HTMLElement): void {
+    this.closeAllDropdowns(); // 關閉其他下拉選單
+    
+    const positionStrategy = this.overlayPositionBuilder
+      .flexibleConnectedTo(trigger)
+      .withPositions([
+        {
+          originX: 'center',
+          originY: 'bottom',
+          overlayX: 'center',
+          overlayY: 'top',
+          offsetY: 1
+        }
+      ]);
+
+    this.cityOverlayRef = this.overlay.create({
+      positionStrategy,
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-transparent-backdrop'
+    });
+
+    const portal = new TemplatePortal(this.cityDropdownTemplate, this.viewContainerRef);
+    this.cityOverlayRef.attach(portal);
+
+    // 點擊背景關閉下拉選單
+    this.cityOverlayRef.backdropClick().subscribe(() => {
+      this.closeCityDropdown();
+    });
+  }
+
+  private closeCityDropdown(): void {
+    if (this.cityOverlayRef) {
+      this.cityOverlayRef.dispose();
+      this.cityOverlayRef = null;
+    }
+  }
+
+  // 探索下拉選單控制
+  toggleExploreDropdown(trigger: HTMLElement): void {
+    if (this.exploreOverlayRef?.hasAttached()) {
+      this.closeExploreDropdown();
+    } else {
+      this.openExploreDropdown(trigger);
+    }
+  }
+
+  private openExploreDropdown(trigger: HTMLElement): void {
+    this.closeAllDropdowns(); // 關閉其他下拉選單
+    
+    const positionStrategy = this.overlayPositionBuilder
+      .flexibleConnectedTo(trigger)
+      .withPositions([
+        {
+          originX: 'start',
+          originY: 'bottom',
+          overlayX: 'start',
+          overlayY: 'top',
+          offsetY: 1,
+          offsetX: -8
+        }
+      ]);
+
+    this.exploreOverlayRef = this.overlay.create({
+      positionStrategy,
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-transparent-backdrop'
+    });
+
+    const portal = new TemplatePortal(this.exploreDropdownTemplate, this.viewContainerRef);
+    this.exploreOverlayRef.attach(portal);
+
+    // 點擊背景關閉下拉選單
+    this.exploreOverlayRef.backdropClick().subscribe(() => {
+      this.closeExploreDropdown();
+    });
+  }
+
+  private closeExploreDropdown(): void {
+    if (this.exploreOverlayRef) {
+      this.exploreOverlayRef.dispose();
+      this.exploreOverlayRef = null;
+    }
+  }
+
+  // 通知下拉選單控制
+  toggleNotificationDropdown(trigger: HTMLElement): void {
+    if (this.notificationOverlayRef?.hasAttached()) {
+      this.closeNotificationDropdown();
+    } else {
+      this.openNotificationDropdown(trigger);
+    }
+  }
+
+  private openNotificationDropdown(trigger: HTMLElement): void {
+    this.closeAllDropdowns(); // 關閉其他下拉選單
+    
+    const positionStrategy = this.overlayPositionBuilder
+      .flexibleConnectedTo(trigger)
+      .withPositions([
+        {
+          originX: 'center',
+          originY: 'bottom',
+          overlayX: 'center',
+          overlayY: 'top',
+          offsetY: 1
+        }
+      ]);
+
+    this.notificationOverlayRef = this.overlay.create({
+      positionStrategy,
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-transparent-backdrop'
+    });
+
+    const portal = new TemplatePortal(this.notificationDropdownTemplate, this.viewContainerRef);
+    this.notificationOverlayRef.attach(portal);
+
+    // 點擊背景關閉下拉選單
+    this.notificationOverlayRef.backdropClick().subscribe(() => {
+      this.closeNotificationDropdown();
+    });
+  }
+
+  private closeNotificationDropdown(): void {
+    if (this.notificationOverlayRef) {
+      this.notificationOverlayRef.dispose();
+      this.notificationOverlayRef = null;
+    }
+  }
+
+  // 購物車下拉選單控制
+  toggleCartDropdown(trigger: HTMLElement): void {
+    if (this.cartOverlayRef?.hasAttached()) {
+      this.closeCartDropdown();
+    } else {
+      this.openCartDropdown(trigger);
+    }
+  }
+
+  private openCartDropdown(trigger: HTMLElement): void {
+    this.closeAllDropdowns(); // 關閉其他下拉選單
+    
+    const positionStrategy = this.overlayPositionBuilder
+      .flexibleConnectedTo(trigger)
+      .withPositions([
+        {
+          originX: 'center',
+          originY: 'bottom',
+          overlayX: 'center',
+          overlayY: 'top',
+          offsetY: 1
+        }
+      ]);
+
+    this.cartOverlayRef = this.overlay.create({
+      positionStrategy,
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-transparent-backdrop'
+    });
+
+    const portal = new TemplatePortal(this.cartDropdownTemplate, this.viewContainerRef);
+    this.cartOverlayRef.attach(portal);
+
+    // 點擊背景關閉下拉選單
+    this.cartOverlayRef.backdropClick().subscribe(() => {
+      this.closeCartDropdown();
+    });
+  }
+
+  private closeCartDropdown(): void {
+    if (this.cartOverlayRef) {
+      this.cartOverlayRef.dispose();
+      this.cartOverlayRef = null;
+    }
+  }
+
+  // 用戶下拉選單控制
+  toggleUserDropdown(trigger: HTMLElement): void {
+    if (this.userOverlayRef?.hasAttached()) {
+      this.closeUserDropdown();
+    } else {
+      this.openUserDropdown(trigger);
+    }
+  }
+
+  private openUserDropdown(trigger: HTMLElement): void {
+    this.closeAllDropdowns(); // 關閉其他下拉選單
+    
+    const positionStrategy = this.overlayPositionBuilder
+      .flexibleConnectedTo(trigger)
+      .withPositions([
+        {
+          originX: 'center',
+          originY: 'bottom',
+          overlayX: 'center',
+          overlayY: 'top',
+          offsetY: 1
+        }
+      ]);
+
+    this.userOverlayRef = this.overlay.create({
+      positionStrategy,
+      hasBackdrop: true,
+      backdropClass: 'cdk-overlay-transparent-backdrop'
+    });
+
+    const portal = new TemplatePortal(this.userDropdownTemplate, this.viewContainerRef);
+    this.userOverlayRef.attach(portal);
+
+    // 點擊背景關閉下拉選單
+    this.userOverlayRef.backdropClick().subscribe(() => {
+      this.closeUserDropdown();
+    });
+  }
+
+  private closeUserDropdown(): void {
+    if (this.userOverlayRef) {
+      this.userOverlayRef.dispose();
+      this.userOverlayRef = null;
+    }
+  }
+
+  // 關閉所有下拉選單的輔助方法
+  private closeAllDropdowns(): void {
+    this.closeCityDropdown();
+    this.closeExploreDropdown();
+    this.closeNotificationDropdown();
+    this.closeCartDropdown();
+    this.closeUserDropdown();
+  }
+
+  // 城市選擇後的處理（需要關閉下拉選單）
+  selectCityAndClose(city: City): void {
+    this.selectCity(city);
+    this.closeCityDropdown();
   }
 }

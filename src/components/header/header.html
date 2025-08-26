@@ -16,7 +16,9 @@
       />
       <div class="hidden lg:flex lg:justify-start lg:items-center lg:h-full">
         <div
-          class="relative py-7 flex justify-start items-center gap-1 w-[6.0625rem] group h-full cursor-pointer after:content-[''] after:absolute after:right-0 after:top-1/2 after:transform after:-translate-y-1/2 after:w-px after:h-6 after:bg-grey-d4"
+          #cityTrigger
+          class="relative py-7 flex justify-start items-center gap-1 w-[6.0625rem] h-full cursor-pointer after:content-[''] after:absolute after:right-0 after:top-1/2 after:transform after:-translate-y-1/2 after:w-px after:h-6 after:bg-grey-d4"
+          (click)="toggleCityDropdown(cityTrigger)"
         >
           <mat-icon
             class="!w-5 !h-5 !text-primary !text-xl !leading-5 material-icons-outlined"
@@ -24,81 +26,18 @@
           ></mat-icon>
           <p class="text-base">{{ selectedCity() }}</p>
 
-          <!-- 下拉選單 -->
-          <div
-            class="absolute top-full left-1/2 transform -translate-x-1/2 w-28 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-          >
-            <ul class="max-h-60 overflow-y-auto">
-              @for (city of cities; track city.id) {
-              <li>
-                <button
-                  class="w-full flex justify-center items-center py-3 px-6 text-base text-grey-33 hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
-                  (click)="selectCity(city)"
-                >
-                  {{ city.name }}
-                </button>
-              </li>
-              }
-            </ul>
-          </div>
         </div>
-        <div class="relative px-6 py-7 flex items-center gap-1 group cursor-pointer">
+        <div
+          #exploreTrigger
+          class="relative px-6 py-7 flex items-center gap-1 cursor-pointer"
+          (click)="toggleExploreDropdown(exploreTrigger)"
+        >
           <p class="text-base">探索</p>
           <mat-icon
             class="!w-5 !h-5 !text-grey-9f !text-xl !leading-5 material-icons-outlined"
             [fontIcon]="TmfIconEnum.KeyboardArrowDown"
           ></mat-icon>
 
-          <!-- 探索下拉選單 -->
-          <div
-            class="absolute top-full -left-2 flex bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-          >
-            <!-- 左側分類選單 -->
-            <div class="py-3 border-r border-grey-d4 bg-grey-f7">
-              <ul class="max-h-60 overflow-y-auto w-[9.0625rem]">
-                @for (category of categories; track category.id) {
-                <li>
-                  <button
-                    class="w-full flex justify-between items-center py-3 px-6 text-base transition-all duration-200 text-left cursor-pointer"
-                    [class]="{
-                      'text-primary': selectedCategory()?.id === category.id,
-                      'text-grey-33 hover:text-primary':
-                        selectedCategory()?.id !== category.id
-                    }"
-                    (click)="selectCategory(category)"
-                  >
-                    <span>{{ category.name }}</span>
-                    @if (category.subcategories.length > 0) {
-                    <mat-icon
-                      class="!w-6 !h-6 !text-base material-icons-outlined"
-                      [fontIcon]="TmfIconEnum.KeyboardArrowRight"
-                    ></mat-icon>
-                    }
-                  </button>
-                </li>
-                }
-              </ul>
-            </div>
-
-            <!-- 右側子分類選單 -->
-            @if (selectedCategory() && selectedCategory()!.subcategories.length
-            > 0) {
-            <div class="py-3 w-60">
-              <div class="flex flex-wrap">
-                @for (subcategory of selectedCategory()!.subcategories; track
-                subcategory.id) {
-                <div class="w-1/2">
-                  <button
-                    class="w-full flex justify-center items-center py-3 px-6 text-base text-grey-33 hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
-                  >
-                    {{ subcategory.name }}
-                  </button>
-                </div>
-                }
-              </div>
-            </div>
-            }
-          </div>
         </div>
       </div>
     </div>
@@ -115,146 +54,34 @@
     <!-- 右側區域：功能按鈕 -->
     <div class="flex justify-end items-center gap-1">
       <div
-        class="relative w-10 py-7 flex justify-center items-center lg:w-16 group"
+        #notificationTrigger
+        class="relative w-10 py-7 flex justify-center items-center lg:w-16"
+        (click)="toggleNotificationDropdown(notificationTrigger)"
       >
         <mat-icon
           class="material-icons-outlined cursor-pointer"
           [fontIcon]="TmfIconEnum.Notifications"
         ></mat-icon>
 
-        <!-- 通知下拉選單 -->
-        <div
-          class="absolute top-full left-1/2 transform -translate-x-1/2 w-70 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-        >
-          <ul class="max-h-75 overflow-y-auto">
-            @for (notification of notifications; track notification.id; let
-            isLast = $last) {
-            <li>
-              <div class="flex items-center gap-3 py-1 px-4">
-                <!-- 圖示容器 -->
-                <div
-                  class="w-12 h-12 rounded-full flex justify-center items-center"
-                  [class]="notification.backgroundColor"
-                >
-                  <mat-icon
-                    class="!w-6 !h-6 material-icons-outlined"
-                    [class]="notification.iconColor"
-                    [fontIcon]="notification.icon"
-                  >
-                  </mat-icon>
-                </div>
-
-                <!-- 文字內容 -->
-                <div class="flex-1">
-                  <p class="text-base text-grey-33 leading-6">
-                    {{ notification.title }}
-                  </p>
-                  <p class="text-sm text-grey-9f leading-5">
-                    {{ notification.timeAgo }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- 分隔線 -->
-              @if (!isLast) {
-              <div class="flex justify-center py-2">
-                <div class="w-full h-px bg-grey-d4 mx-4"></div>
-              </div>
-              }
-            </li>
-            }
-          </ul>
-        </div>
       </div>
       <div
-        class="relative w-10 py-7 flex justify-center items-center lg:w-16 group"
+        #cartTrigger
+        class="relative w-10 py-7 flex justify-center items-center lg:w-16"
+        (click)="toggleCartDropdown(cartTrigger)"
       >
         <mat-icon
           class="material-icons-outlined cursor-pointer"
           [fontIcon]="TmfIconEnum.ShoppingCart"
         ></mat-icon>
 
-        <!-- 購物車下拉選單 -->
-        <div
-          class="absolute top-full left-1/2 transform -translate-x-1/2 w-80 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-        >
-          <!-- 購物車項目 -->
-          <div class="max-h-75 overflow-y-auto">
-            @for (item of cartItems; track item.id; let isLast = $last) {
-            <div class="flex items-start gap-3 py-1 px-4">
-              <!-- 課程圖片 -->
-              <div class="w-21 h-12 bg-grey-d4 rounded-lg flex-shrink-0"></div>
-
-              <!-- 課程資訊 -->
-              <div class="flex-1">
-                <!-- 標籤 -->
-                <div class="flex gap-2 mb-1">
-                  @for (tag of item.tags; track tag) {
-                  <span
-                    class="px-1 py-0.5 bg-grey-d4 text-xs text-grey-33 rounded"
-                    >{{ tag }}</span
-                  >
-                  }
-                </div>
-
-                <!-- 課程標題 -->
-                <h4 class="text-sm font-bold text-grey-33 leading-tight mb-1">
-                  {{ item.title }}
-                </h4>
-
-                <!-- 課程類型和價格 -->
-                <div class="flex justify-between items-end pt-1">
-                  <span class="text-sm text-grey-66">{{
-                    item.courseType
-                  }}</span>
-                  <span class="text-sm font-medium text-grey-33"
-                    >NT$ {{ item.price.toLocaleString() }}</span
-                  >
-                </div>
-              </div>
-            </div>
-
-            <!-- 分隔線 -->
-            @if (!isLast) {
-            <div class="flex justify-center py-2">
-              <div class="w-full h-px bg-grey-d4 mx-4"></div>
-            </div>
-            } }
-          </div>
-
-          <!-- 總計區域 -->
-          <div class="px-4 py-3 bg-white">
-            <!-- 項目數量 -->
-            <div class="flex gap-1 mb-3">
-              <span class="text-sm text-grey-66">共計</span>
-              <span class="text-sm font-medium text-grey-66">{{
-                totalItems
-              }}</span>
-              <span class="text-sm text-grey-66">項課程</span>
-            </div>
-
-            <!-- 總計和結帳按鈕 -->
-            <div class="flex items-center justify-between gap-6">
-              <div class="flex items-baseline gap-1">
-                <span class="text-sm text-grey-33">總計</span>
-                <span class="text-base font-medium text-grey-33">NT$</span>
-                <span class="text-base font-medium text-grey-33">{{
-                  totalPrice.toLocaleString()
-                }}</span>
-              </div>
-
-              <button
-                class="px-4 py-2 bg-primary text-white text-base font-bold rounded-lg hover:bg-orange-55 transition-colors"
-              >
-                前往結帳
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
       <div class="flex justify-center items-center gap-2">
         <!-- avtar -->
-        <div class="relative py-4.5 group">
+        <div
+          #userTrigger
+          class="relative py-4.5"
+          (click)="toggleUserDropdown(userTrigger)"
+        >
           <div class="flex justify-center items-center gap-2 cursor-pointer">
             <div class="w-11 h-11 rounded-full bg-grey-d4"></div>
             <p class="font-inter text-lg font-medium leading-7 snap-normal">
@@ -262,38 +89,235 @@
             </p>
           </div>
 
-          <!-- 用戶下拉選單 -->
-          <div
-            class="absolute top-full left-1/2 transform -translate-x-1/2 w-50 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
-          >
-            <ul class="max-h-96 overflow-y-auto">
-              @for (menuItem of userMenuItems; track menuItem.id) {
-              <!-- 分隔線 -->
-              @if (menuItem.isDivider) {
-              <li>
-                <div class="flex justify-center py-2">
-                  <div class="w-full h-px bg-grey-d4 mx-6"></div>
-                </div>
-              </li>
-              } @else {
-              <!-- 選單項目 -->
-              <li>
-                <button
-                  class="w-full flex items-center gap-2 py-3 px-6 text-base text-grey-33 hover:bg-grey-f7 transition-all duration-200 cursor-pointer"
-                  (click)="onUserMenuItemClick(menuItem)"
-                >
-                  <mat-icon
-                    class="!w-6 !h-6 !text-grey-9f material-icons-outlined"
-                    [fontIcon]="menuItem.icon"
-                  ></mat-icon>
-                  <span>{{ menuItem.label }}</span>
-                </button>
-              </li>
-              } }
-            </ul>
-          </div>
         </div>
       </div>
     </div>
   </div>
 </header>
+
+<!-- CDK Overlay Templates -->
+<!-- 城市下拉選單模板 -->
+<ng-template #cityDropdownTemplate>
+  <div
+    class="w-28 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
+  >
+    <ul class="max-h-60 overflow-y-auto">
+      @for (city of cities; track city.id) {
+      <li>
+        <button
+          class="w-full flex justify-center items-center py-3 px-6 text-base text-grey-33 hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
+          (click)="selectCityAndClose(city)"
+        >
+          {{ city.name }}
+        </button>
+      </li>
+      }
+    </ul>
+  </div>
+</ng-template>
+
+<!-- 探索下拉選單模板 -->
+<ng-template #exploreDropdownTemplate>
+  <div
+    class="flex bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl z-50"
+  >
+    <!-- 左側分類選單 -->
+    <div class="py-3 border-r border-grey-d4 bg-grey-f7">
+      <ul class="max-h-60 overflow-y-auto w-[9.0625rem]">
+        @for (category of categories; track category.id) {
+        <li>
+          <button
+            class="w-full flex justify-between items-center py-3 px-6 text-base transition-all duration-200 text-left cursor-pointer"
+            [class]="{
+              'text-primary': selectedCategory()?.id === category.id,
+              'text-grey-33 hover:text-primary':
+                selectedCategory()?.id !== category.id
+            }"
+            (click)="selectCategory(category)"
+          >
+            <span>{{ category.name }}</span>
+            @if (category.subcategories.length > 0) {
+            <mat-icon
+              class="!w-6 !h-6 !text-base material-icons-outlined"
+              [fontIcon]="TmfIconEnum.KeyboardArrowRight"
+            ></mat-icon>
+            }
+          </button>
+        </li>
+        }
+      </ul>
+    </div>
+
+    <!-- 右側子分類選單 -->
+    @if (selectedCategory() && selectedCategory()!.subcategories.length > 0) {
+    <div class="py-3 w-60">
+      <div class="flex flex-wrap">
+        @for (subcategory of selectedCategory()!.subcategories; track
+        subcategory.id) {
+        <div class="w-1/2">
+          <button
+            class="w-full flex justify-center items-center py-3 px-6 text-base text-grey-33 hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
+          >
+            {{ subcategory.name }}
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+</ng-template>
+
+<!-- 通知下拉選單模板 -->
+<ng-template #notificationDropdownTemplate>
+  <div
+    class="w-70 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
+  >
+    <ul class="max-h-75 overflow-y-auto">
+      @for (notification of notifications; track notification.id; let isLast =
+      $last) {
+      <li>
+        <div class="flex items-center gap-3 py-1 px-4">
+          <!-- 圖示容器 -->
+          <div
+            class="w-12 h-12 rounded-full flex justify-center items-center"
+            [class]="notification.backgroundColor"
+          >
+            <mat-icon
+              class="!w-6 !h-6 material-icons-outlined"
+              [class]="notification.iconColor"
+              [fontIcon]="notification.icon"
+            >
+            </mat-icon>
+          </div>
+
+          <!-- 文字內容 -->
+          <div class="flex-1">
+            <p class="text-base text-grey-33 leading-6">
+              {{ notification.title }}
+            </p>
+            <p class="text-sm text-grey-9f leading-5">
+              {{ notification.timeAgo }}
+            </p>
+          </div>
+        </div>
+
+        <!-- 分隔線 -->
+        @if (!isLast) {
+        <div class="flex justify-center py-2">
+          <div class="w-full h-px bg-grey-d4 mx-4"></div>
+        </div>
+        }
+      </li>
+      }
+    </ul>
+  </div>
+</ng-template>
+
+<!-- 購物車下拉選單模板 -->
+<ng-template #cartDropdownTemplate>
+  <div
+    class="w-80 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
+  >
+    <!-- 購物車項目 -->
+    <div class="max-h-75 overflow-y-auto">
+      @for (item of cartItems; track item.id; let isLast = $last) {
+      <div class="flex items-start gap-3 py-1 px-4">
+        <!-- 課程圖片 -->
+        <div class="w-21 h-12 bg-grey-d4 rounded-lg flex-shrink-0"></div>
+
+        <!-- 課程資訊 -->
+        <div class="flex-1">
+          <!-- 標籤 -->
+          <div class="flex gap-2 mb-1">
+            @for (tag of item.tags; track tag) {
+            <span class="px-1 py-0.5 bg-grey-d4 text-xs text-grey-33 rounded"
+              >{{ tag }}</span
+            >
+            }
+          </div>
+
+          <!-- 課程標題 -->
+          <h4 class="text-sm font-bold text-grey-33 leading-tight mb-1">
+            {{ item.title }}
+          </h4>
+
+          <!-- 課程類型和價格 -->
+          <div class="flex justify-between items-end pt-1">
+            <span class="text-sm text-grey-66">{{ item.courseType }}</span>
+            <span class="text-sm font-medium text-grey-33"
+              >NT$ {{ item.price.toLocaleString() }}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- 分隔線 -->
+      @if (!isLast) {
+      <div class="flex justify-center py-2">
+        <div class="w-full h-px bg-grey-d4 mx-4"></div>
+      </div>
+      } }
+    </div>
+
+    <!-- 總計區域 -->
+    <div class="px-4 py-3 bg-white">
+      <!-- 項目數量 -->
+      <div class="flex gap-1 mb-3">
+        <span class="text-sm text-grey-66">共計</span>
+        <span class="text-sm font-medium text-grey-66">{{ totalItems }}</span>
+        <span class="text-sm text-grey-66">項課程</span>
+      </div>
+
+      <!-- 總計和結帳按鈕 -->
+      <div class="flex items-center justify-between gap-6">
+        <div class="flex items-baseline gap-1">
+          <span class="text-sm text-grey-33">總計</span>
+          <span class="text-base font-medium text-grey-33">NT$</span>
+          <span class="text-base font-medium text-grey-33">{{
+            totalPrice.toLocaleString()
+          }}</span>
+        </div>
+
+        <button
+          class="px-4 py-2 bg-primary text-white text-base font-bold rounded-lg hover:bg-orange-55 transition-colors"
+        >
+          前往結帳
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 用戶下拉選單模板 -->
+<ng-template #userDropdownTemplate>
+  <div
+    class="w-50 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
+  >
+    <ul class="max-h-96 overflow-y-auto">
+      @for (menuItem of userMenuItems; track menuItem.id) {
+      <!-- 分隔線 -->
+      @if (menuItem.isDivider) {
+      <li>
+        <div class="flex justify-center py-2">
+          <div class="w-full h-px bg-grey-d4 mx-6"></div>
+        </div>
+      </li>
+      } @else {
+      <!-- 選單項目 -->
+      <li>
+        <button
+          class="w-full flex items-center gap-2 py-3 px-6 text-base text-grey-33 hover:bg-grey-f7 transition-all duration-200 cursor-pointer"
+          (click)="onUserMenuItemClick(menuItem)"
+        >
+          <mat-icon
+            class="!w-6 !h-6 !text-grey-9f material-icons-outlined"
+            [fontIcon]="menuItem.icon"
+          ></mat-icon>
+          <span>{{ menuItem.label }}</span>
+        </button>
+      </li>
+      } }
+    </ul>
+  </div>
+</ng-template>

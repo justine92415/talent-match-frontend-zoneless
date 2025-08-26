@@ -1,1 +1,150 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+
+/* Custom Color System - 才藝媒合教學平台 */
+@theme {
+  /* 主要色系 - Primary Colors */
+  --color-primary: #F36923;
+  --color-orange-55: #F36923;
+  --color-orange-85: #FABD9E;
+  --color-orange-90: #FCDECF;
+  --color-orange-95: #FEEFE7;
+  
+  /* 輔助色系 - Secondary Colors */
+  --color-blue-50: #0DA6F2;
+  --color-blue-95: #E7F6FE;
+  --color-yellow: #F6BD2B;
+  --color-purple: #8D0099;
+  --color-green: #F6FEE7;
+  
+  /* 自然色系 - Nature Colors */
+  --color-black: #180000;
+  --color-white: #FFFFFF;
+  
+  /* 灰階系統 - Grey Scale */
+  --color-grey-1d: #1D1D1D;
+  --color-grey-33: #333333;
+  --color-grey-66: #666666;
+  --color-grey-9f: #9F9F9F;
+  --color-grey-d4: #D4D4D4;
+  --color-grey-e9: #E9E9E9;
+  --color-grey-f7: #F7F7F7;
+
+  /* Typography System - 字體系統 */
+  /* Font Family */
+  --font-family-sans: "Noto Sans TC", "Inter", sans-serif;
+  
+  /* Font Sizes - 字體大小 */
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-base: 1rem;     /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+  --font-size-4xl: 2.25rem;   /* 36px */
+  --font-size-5xl: 3rem;      /* 48px */
+  --font-size-6xl: 3.75rem;   /* 60px */
+  
+  /* Line Heights - 行高 */
+  --line-height-none: 1;
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* Letter Spacing - 字距 */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.125rem; /* 2% */
+  
+  /* Font Weights - 字重 */
+  --font-weight-normal: 400;   /* R - Regular */
+  --font-weight-medium: 500;   /* M - Medium */
+  --font-weight-bold: 700;     /* B - Bold */
+  --font-weight-black: 900;    /* Bl - Black */
+}
+
+/* Custom Utility Classes using @utility */
+@utility font-noto-sans-tc {
+  font-family: "Noto Sans TC", sans-serif;
+}
+
+@utility font-inter {
+  font-family: "Inter", sans-serif;
+}
+
+/* Typography Utility Classes using @utility */
+@utility text-6xl-bold {
+  font-size: var(--font-size-6xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-none);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-5xl-bold {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-none);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-4xl-bold {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-3xl-bold {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-2xl-bold {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-xl-bold {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-lg-bold {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-base-bold {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-sm-bold {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-widest);
+}
+
+@utility text-xs-bold {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-widest);
+}

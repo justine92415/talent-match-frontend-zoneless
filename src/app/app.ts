@@ -1,10 +1,10 @@
 import { Component, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TmfIcon } from '@components/tmf-icon/tmf-icon';
+import { Header } from "@components/header/header";
 
 @Component({
   selector: 'app-root',
-  imports: [MatIconModule, TmfIcon],
+  imports: [MatIconModule, Header],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

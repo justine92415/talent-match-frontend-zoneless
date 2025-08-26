@@ -15,7 +15,6 @@ export enum TmfIconEnum {
   Share = 'share',
   Close = 'close',
   BookMark = 'bookmark',
-  BookmarkOutline = 'bookmark_outline',
   ActionKey = 'action_key',
   QueueMusic = 'queue_music',
   Skillet = 'skillet',
@@ -46,7 +45,3 @@ export enum TmfIconEnum {
   NotificationsActive = 'notifications_active',
   Campaign = 'campaign',
 }
-
-export type TmfIconType = `${TmfIconEnum}`;
-
-export type TmfIconSize = 'small' | 'medium' | 'large';

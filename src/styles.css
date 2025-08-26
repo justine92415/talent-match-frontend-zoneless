@@ -154,5 +154,7 @@ body {
   letter-spacing: var(--letter-spacing-widest);
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  font-family: "Noto Sans TC", sans-serif;
+}

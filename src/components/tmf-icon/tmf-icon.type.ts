@@ -1,4 +1,4 @@
-export enum TmfIcon {
+export enum TmfIconEnum {
   KeyboardArrowDown = 'keyboard_arrow_down',
   KeyboardArrowUp = 'keyboard_arrow_up',
   KeyboardArrowLeft = 'keyboard_arrow_left',
@@ -47,6 +47,6 @@ export enum TmfIcon {
   Campaign = 'campaign',
 }
 
-export type TmfIconType = `${TmfIcon}`;
+export type TmfIconType = `${TmfIconEnum}`;
 
 export type TmfIconSize = 'small' | 'medium' | 'large';

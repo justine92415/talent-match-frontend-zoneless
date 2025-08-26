@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TmfIcon } from "../components/tmf-icon/tmf-icon";
+import { TmfIcon } from '@components/tmf-icon/tmf-icon';
 
 @Component({
   selector: 'app-root',

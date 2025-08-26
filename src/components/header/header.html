@@ -102,7 +102,7 @@
     class="w-28 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
   >
     <ul class="max-h-60 overflow-y-auto">
-      @for (city of cities; track city.id) {
+      @for (city of cities(); track city.id) {
       <li>
         <button
           class="w-full flex justify-center items-center py-3 px-6 text-base text-grey-33 hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
@@ -124,7 +124,7 @@
     <!-- 左側分類選單 -->
     <div class="py-3 border-r border-grey-d4 bg-grey-f7">
       <ul class="max-h-60 overflow-y-auto w-[9.0625rem]">
-        @for (category of categories; track category.id) {
+        @for (category of categories(); track category.id) {
         <li>
           <button
             class="w-full flex justify-between items-center py-3 px-6 text-base transition-all duration-200 text-left cursor-pointer"
@@ -174,7 +174,7 @@
     class="w-70 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
   >
     <ul class="max-h-75 overflow-y-auto">
-      @for (notification of notifications; track notification.id; let isLast =
+      @for (notification of notifications(); track notification.id; let isLast =
       $last) {
       <li>
         <div class="flex items-center gap-3 py-1 px-4">
@@ -221,7 +221,7 @@
   >
     <!-- 購物車項目 -->
     <div class="max-h-75 overflow-y-auto">
-      @for (item of cartItems; track item.id; let isLast = $last) {
+      @for (item of cartItems(); track item.id; let isLast = $last) {
       <div class="flex items-start gap-3 py-1 px-4">
         <!-- 課程圖片 -->
         <div class="w-21 h-12 bg-grey-d4 rounded-lg flex-shrink-0"></div>
@@ -265,7 +265,7 @@
       <!-- 項目數量 -->
       <div class="flex gap-1 mb-3">
         <span class="text-sm text-grey-66">共計</span>
-        <span class="text-sm font-medium text-grey-66">{{ totalItems }}</span>
+        <span class="text-sm font-medium text-grey-66">{{ totalItems() }}</span>
         <span class="text-sm text-grey-66">項課程</span>
       </div>
 
@@ -275,7 +275,7 @@
           <span class="text-sm text-grey-33">總計</span>
           <span class="text-base font-medium text-grey-33">NT$</span>
           <span class="text-base font-medium text-grey-33">{{
-            totalPrice.toLocaleString()
+            totalPrice().toLocaleString()
           }}</span>
         </div>
 
@@ -295,7 +295,7 @@
     class="w-50 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
   >
     <ul class="max-h-96 overflow-y-auto">
-      @for (menuItem of userMenuItems; track menuItem.id) {
+      @for (menuItem of userMenuItems(); track menuItem.id) {
       <!-- 分隔線 -->
       @if (menuItem.isDivider) {
       <li>

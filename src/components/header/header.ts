@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, ViewChild, TemplateRef, ViewContainerRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, viewChild, TemplateRef, ViewContainerRef, computed } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { TmfIconEnum } from '@share/icon.enum';
@@ -64,11 +64,11 @@ const DROPDOWN_IDS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Header {
-  @ViewChild('cityDropdownTemplate') cityDropdownTemplate!: TemplateRef<any>;
-  @ViewChild('exploreDropdownTemplate') exploreDropdownTemplate!: TemplateRef<any>;
-  @ViewChild('notificationDropdownTemplate') notificationDropdownTemplate!: TemplateRef<any>;
-  @ViewChild('cartDropdownTemplate') cartDropdownTemplate!: TemplateRef<any>;
-  @ViewChild('userDropdownTemplate') userDropdownTemplate!: TemplateRef<any>;
+  readonly cityDropdownTemplate = viewChild.required<TemplateRef<any>>('cityDropdownTemplate');
+  readonly exploreDropdownTemplate = viewChild.required<TemplateRef<any>>('exploreDropdownTemplate');
+  readonly notificationDropdownTemplate = viewChild.required<TemplateRef<any>>('notificationDropdownTemplate');
+  readonly cartDropdownTemplate = viewChild.required<TemplateRef<any>>('cartDropdownTemplate');
+  readonly userDropdownTemplate = viewChild.required<TemplateRef<any>>('userDropdownTemplate');
 
   constructor(
     private dropdownManager: DropdownManagerService,
@@ -77,7 +77,7 @@ export class Header {
 
   ngAfterViewInit(): void {
     // 註冊所有下拉選單
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CITY, this.cityDropdownTemplate, {
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CITY, this.cityDropdownTemplate(), {
       originX: 'center',
       originY: 'bottom',
       overlayX: 'center',
@@ -85,7 +85,7 @@ export class Header {
       offsetY: 0
     });
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.EXPLORE, this.exploreDropdownTemplate, {
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.EXPLORE, this.exploreDropdownTemplate(), {
       originX: 'start',
       originY: 'bottom',
       overlayX: 'start',
@@ -94,7 +94,7 @@ export class Header {
       offsetX: -8
     });
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.NOTIFICATION, this.notificationDropdownTemplate, {
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.NOTIFICATION, this.notificationDropdownTemplate(), {
       originX: 'center',
       originY: 'bottom',
       overlayX: 'center',
@@ -102,7 +102,7 @@ export class Header {
       offsetY: 0
     });
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CART, this.cartDropdownTemplate, {
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CART, this.cartDropdownTemplate(), {
       originX: 'center',
       originY: 'bottom',
       overlayX: 'center',
@@ -110,7 +110,7 @@ export class Header {
       offsetY: 0
     });
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.USER, this.userDropdownTemplate, {
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.USER, this.userDropdownTemplate(), {
       originX: 'center',
       originY: 'bottom',
       overlayX: 'center',
@@ -119,7 +119,7 @@ export class Header {
     });
   }
   // 城市 Mock Data
-  cities: City[] = [
+  readonly cities = signal<City[]>([
     { id: 'all', name: '探索全部' },
     { id: 'taipei', name: '台北市' },
     { id: 'taoyuan', name: '桃園市' },
@@ -132,10 +132,10 @@ export class Header {
     { id: 'keelung', name: '基隆市' },
     { id: 'hualien', name: '花蓮縣' },
     { id: 'taitung', name: '台東縣' },
-  ];
+  ]);
 
   // 課程分類 Mock Data
-  categories: Category[] = [
+  readonly categories = signal<Category[]>([
     {
       id: 'all',
       name: '探索全部',
@@ -189,10 +189,10 @@ export class Header {
         { id: 'jewelry', name: '首飾製作' },
       ],
     },
-  ];
+  ]);
 
   // 通知 Mock Data
-  notifications: Notification[] = [
+  readonly notifications = signal<Notification[]>([
     {
       id: 'class-reminder-1',
       type: 'class',
@@ -220,10 +220,10 @@ export class Header {
       backgroundColor: 'bg-orange-90',
       iconColor: 'text-primary'
     }
-  ];
+  ]);
 
   // 購物車 Mock Data
-  cartItems: CartItem[] = [
+  readonly cartItems = signal<CartItem[]>([
     {
       id: 'cooking-workshop',
       title: '饗宴廚藝：美食烹飪工作坊',
@@ -240,10 +240,10 @@ export class Header {
       price: 1200,
       imageUrl: 'assets/images/piano-course.jpg'
     }
-  ];
+  ]);
 
   // 用戶選單 Mock Data
-  userMenuItems: UserMenuItem[] = [
+  readonly userMenuItems = signal<UserMenuItem[]>([
     {
       id: 'teacher-profile',
       label: '教師資訊管理',
@@ -301,10 +301,16 @@ export class Header {
       label: '登出',
       icon: TmfIconEnum.MoveItem,
     },
-  ];
+  ]);
 
-  selectedCity = signal<string>('台北市');
-  selectedCategory = signal<Category | null>(null);
+  readonly selectedCity = signal<string>('台北市');
+  readonly selectedCategory = signal<Category | null>(null);
+
+  // 使用 computed 創建派生 signal
+  readonly totalItems = computed(() => this.cartItems().length);
+  readonly totalPrice = computed(() => 
+    this.cartItems().reduce((sum, item) => sum + item.price, 0)
+  );
 
   get TmfIconEnum() {
     return TmfIconEnum;
@@ -321,14 +327,6 @@ export class Header {
     } else {
       this.selectedCategory.set(category);
     }
-  }
-
-  get totalItems(): number {
-    return this.cartItems.length;
-  }
-
-  get totalPrice(): number {
-    return this.cartItems.reduce((sum, item) => sum + item.price, 0);
   }
 
   onUserMenuItemClick(item: UserMenuItem): void {

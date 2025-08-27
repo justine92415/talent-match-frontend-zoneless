@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, viewChild, TemplateRef, ViewContainerRef, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, viewChild, TemplateRef, ViewContainerRef, computed, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { TmfIconEnum } from '@share/icon.enum';
@@ -70,54 +70,10 @@ export class Header {
   readonly cartDropdownTemplate = viewChild.required<TemplateRef<any>>('cartDropdownTemplate');
   readonly userDropdownTemplate = viewChild.required<TemplateRef<any>>('userDropdownTemplate');
 
-  constructor(
-    private dropdownManager: DropdownManagerService,
-    private viewContainerRef: ViewContainerRef
-  ) {}
+  dropdownManager = inject(DropdownManagerService);
+  viewContainerRef = inject(ViewContainerRef);
 
-  ngAfterViewInit(): void {
-    // 註冊所有下拉選單
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CITY, this.cityDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
-
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.EXPLORE, this.exploreDropdownTemplate(), {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 0,
-      offsetX: -8
-    });
-
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.NOTIFICATION, this.notificationDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
-
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CART, this.cartDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
-
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.USER, this.userDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
-  }
+  
   // 城市 Mock Data
   readonly cities = signal<City[]>([
     { id: 'all', name: '探索全部' },
@@ -371,5 +327,49 @@ export class Header {
   selectCityAndClose(city: City): void {
     this.selectCity(city);
     this.dropdownManager.closeDropdown(DROPDOWN_IDS.CITY);
+  }
+
+  ngAfterViewInit(): void {
+    // 註冊所有下拉選單
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CITY, this.cityDropdownTemplate(), {
+      originX: 'center',
+      originY: 'bottom',
+      overlayX: 'center',
+      overlayY: 'top',
+      offsetY: 0
+    });
+
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.EXPLORE, this.exploreDropdownTemplate(), {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 0,
+      offsetX: -8
+    });
+
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.NOTIFICATION, this.notificationDropdownTemplate(), {
+      originX: 'center',
+      originY: 'bottom',
+      overlayX: 'center',
+      overlayY: 'top',
+      offsetY: 0
+    });
+
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CART, this.cartDropdownTemplate(), {
+      originX: 'center',
+      originY: 'bottom',
+      overlayX: 'center',
+      overlayY: 'top',
+      offsetY: 0
+    });
+
+    this.dropdownManager.registerDropdown(DROPDOWN_IDS.USER, this.userDropdownTemplate(), {
+      originX: 'center',
+      originY: 'bottom',
+      overlayX: 'center',
+      overlayY: 'top',
+      offsetY: 0
+    });
   }
 }

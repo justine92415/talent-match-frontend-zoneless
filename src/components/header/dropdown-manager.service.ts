@@ -1,5 +1,16 @@
-import { Injectable, TemplateRef, ViewContainerRef, OnDestroy, signal, computed } from '@angular/core';
-import { Overlay, OverlayRef, OverlayPositionBuilder } from '@angular/cdk/overlay';
+import {
+  Injectable,
+  TemplateRef,
+  ViewContainerRef,
+  OnDestroy,
+  signal,
+  computed,
+} from '@angular/core';
+import {
+  Overlay,
+  OverlayRef,
+  OverlayPositionBuilder,
+} from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -25,16 +36,15 @@ interface DropdownConfig {
 }
 
 @Injectable()
-export class DropdownManagerService implements OnDestroy {
+export class DropdownManagerService {
   private dropdownConfigs = new Map<string, DropdownConfig>();
-  private destroy$ = new Subject<void>();
-  
+
   // 追蹤當前開啟的下拉選單
   private readonly activeDropdownId = signal<string | null>(null);
-  
+
   // 計算是否有任何下拉選單開啟
   readonly hasOpenDropdown = computed(() => this.activeDropdownId() !== null);
-  
+
   // 取得當前開啟的下拉選單 ID
   readonly currentActiveDropdown = computed(() => this.activeDropdownId());
 
@@ -43,36 +53,34 @@ export class DropdownManagerService implements OnDestroy {
     private overlayPositionBuilder: OverlayPositionBuilder
   ) {}
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.cleanup();
-  }
-
   // 註冊下拉選單配置
   registerDropdown(
-    id: string, 
-    templateRef: TemplateRef<DropdownTemplateContext>, 
+    id: string,
+    templateRef: TemplateRef<DropdownTemplateContext>,
     positionStrategy: PositionConfig
   ): void {
     this.dropdownConfigs.set(id, {
       templateRef,
       overlayRef: null,
-      positionStrategy
+      positionStrategy,
     });
   }
 
   // 切換下拉選單狀態
-  toggleDropdown(id: string, trigger: HTMLElement, viewContainerRef: ViewContainerRef): void {
+  toggleDropdown(
+    id: string,
+    trigger: HTMLElement,
+    viewContainerRef: ViewContainerRef
+  ): void {
     const config = this.dropdownConfigs.get(id);
     if (!config) return;
 
     // 檢查當前下拉選單是否已開啟
     const isCurrentOpen = this.activeDropdownId() === id;
-    
+
     // 先關閉所有下拉選單
     this.closeAllDropdowns();
-    
+
     // 如果當前下拉選單原本是關閉的，則開啟它
     if (!isCurrentOpen) {
       this.openDropdown(id, trigger, viewContainerRef);
@@ -80,7 +88,11 @@ export class DropdownManagerService implements OnDestroy {
   }
 
   // 開啟下拉選單
-  private openDropdown(id: string, trigger: HTMLElement, viewContainerRef: ViewContainerRef): void {
+  private openDropdown(
+    id: string,
+    trigger: HTMLElement,
+    viewContainerRef: ViewContainerRef
+  ): void {
     try {
       const config = this.dropdownConfigs.get(id);
       if (!config) {
@@ -92,7 +104,7 @@ export class DropdownManagerService implements OnDestroy {
         console.error(`模板引用不存在：${id}`);
         return;
       }
-      
+
       const positionStrategy = this.overlayPositionBuilder
         .flexibleConnectedTo(trigger)
         .withPositions([
@@ -102,14 +114,14 @@ export class DropdownManagerService implements OnDestroy {
             overlayX: config.positionStrategy.overlayX,
             overlayY: config.positionStrategy.overlayY,
             offsetY: config.positionStrategy.offsetY || 0,
-            offsetX: config.positionStrategy.offsetX || 0
-          }
+            offsetX: config.positionStrategy.offsetX || 0,
+          },
         ]);
 
       config.overlayRef = this.overlay.create({
         positionStrategy,
         hasBackdrop: false,
-        scrollStrategy: this.overlay.scrollStrategies.reposition()
+        scrollStrategy: this.overlay.scrollStrategies.reposition(),
       });
 
       if (!config.overlayRef) {
@@ -124,13 +136,11 @@ export class DropdownManagerService implements OnDestroy {
       this.activeDropdownId.set(id);
 
       // 使用 outsidePointerEvents 監聽外部點擊來關閉下拉選單
-      config.overlayRef.outsidePointerEvents()
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => {
-          // 點擊外部任何地方都關閉下拉選單
-          // outsidePointerEvents 已經確保點擊的是外部區域
-          this.closeDropdown(id);
-        });
+      config.overlayRef.outsidePointerEvents().subscribe(() => {
+        // 點擊外部任何地方都關閉下拉選單
+        // outsidePointerEvents 已經確保點擊的是外部區域
+        this.closeDropdown(id);
+      });
     } catch (error) {
       console.error(`開啟下拉選單時發生錯誤：${id}`, error);
       this.closeDropdown(id);
@@ -173,12 +183,6 @@ export class DropdownManagerService implements OnDestroy {
     });
     // 確保 signal 狀態正確
     this.activeDropdownId.set(null);
-  }
-
-  // 清理所有資源
-  cleanup(): void {
-    this.closeAllDropdowns();
-    this.dropdownConfigs.clear();
   }
 
   // 檢查指定下拉選單是否開啟

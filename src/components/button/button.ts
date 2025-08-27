@@ -12,6 +12,9 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
   imports: [MatIconModule, NgClass],
   templateUrl: './button.html',
   styles: `
+    :host {
+      display: block;
+    }
   `,
 })
 export class Button {

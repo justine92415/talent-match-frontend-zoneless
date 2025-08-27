@@ -263,6 +263,10 @@ export class Header {
   readonly selectedCity = signal<string>('台北市');
   readonly selectedCategory = signal<Category | null>(null);
 
+  // Mobile 選單狀態
+  readonly isMobileMenuOpen = signal<boolean>(false);
+  readonly mobileMenuCategories = computed(() => this.categories());
+
   // 使用 computed 創建派生 signal
   readonly totalItems = computed(() => this.cartItems().length);
   readonly totalPrice = computed(() => 
@@ -328,6 +332,25 @@ export class Header {
   selectCityAndClose(city: City): void {
     this.selectCity(city);
     this.dropdownManager.closeDropdown(DROPDOWN_IDS.CITY);
+  }
+
+  // Mobile 選單控制方法
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen.set(!this.isMobileMenuOpen());
+  }
+
+  closeMobileMenu(): void {
+    this.isMobileMenuOpen.set(false);
+  }
+
+  toggleMobileCitySelection(): void {
+    // 這裡可以實作城市選擇邏輯，目前先簡單 console.log
+    console.log('Toggle mobile city selection');
+  }
+
+  onMobileCategoryClick(category: Category): void {
+    console.log('Mobile category clicked:', category.name);
+    // TODO: 實作分類點擊邏輯，可能導航到相應頁面
   }
 
   ngAfterViewInit(): void {

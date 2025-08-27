@@ -100,7 +100,7 @@
 <!-- 城市下拉選單模板 -->
 <ng-template #cityDropdownTemplate>
   <div
-    class="w-28 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
+    class="hidden w-28 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50 lg:block"
   >
     <ul class="max-h-60 overflow-y-auto">
       @for (city of cities(); track city.id) {
@@ -120,7 +120,7 @@
 <!-- 探索下拉選單模板 -->
 <ng-template #exploreDropdownTemplate>
   <div
-    class="flex bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl z-50"
+    class="hidden bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl z-50 lg:flex"
   >
     <!-- 左側分類選單 -->
     <div class="py-3 border-r border-grey-d4 bg-grey-f7">

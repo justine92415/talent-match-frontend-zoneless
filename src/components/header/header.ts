@@ -265,6 +265,7 @@ export class Header {
 
   // Mobile 選單狀態
   readonly isMobileMenuOpen = signal<boolean>(false);
+  readonly expandedCategory = signal<string | null>(null);
   readonly mobileMenuCategories = computed(() => this.categories());
 
   // 使用 computed 創建派生 signal
@@ -341,6 +342,8 @@ export class Header {
 
   closeMobileMenu(): void {
     this.isMobileMenuOpen.set(false);
+    // 關閉選單時也重置展開的分類
+    this.expandedCategory.set(null);
   }
 
   toggleMobileCitySelection(): void {
@@ -349,8 +352,31 @@ export class Header {
   }
 
   onMobileCategoryClick(category: Category): void {
-    console.log('Mobile category clicked:', category.name);
-    // TODO: 實作分類點擊邏輯，可能導航到相應頁面
+    // 如果分類沒有子分類，直接導航
+    if (!category.subcategories || category.subcategories.length === 0) {
+      console.log('Navigate to category:', category.name);
+      // TODO: 實作導航邏輯
+      return;
+    }
+
+    // 有子分類的話，切換展開狀態
+    const currentExpanded = this.expandedCategory();
+    if (currentExpanded === category.id) {
+      // 如果當前分類已展開，則收合
+      this.expandedCategory.set(null);
+    } else {
+      // 否則展開當前分類
+      this.expandedCategory.set(category.id);
+    }
+  }
+
+  onMobileSubcategoryClick(subcategory: Subcategory): void {
+    console.log('Navigate to subcategory:', subcategory.name);
+    // TODO: 實作子分類導航邏輯
+  }
+
+  isCategoryExpanded(categoryId: string): boolean {
+    return this.expandedCategory() === categoryId;
   }
 
   ngAfterViewInit(): void {

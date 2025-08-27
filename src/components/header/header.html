@@ -73,12 +73,12 @@
         ></mat-icon>
       </div>
 
-      @if( false ) {
+      @if( true ) {
         <div class="flex justify-center items-center gap-2">
           <!-- avtar -->
           <div
             #userTrigger
-            class="relative py-4.5"
+            class="relative py-2.5 lg:py-4.5"
             (click)="toggleUserDropdown(userTrigger)"
           >
             <div class="flex justify-center items-center gap-2 cursor-pointer">
@@ -148,15 +148,35 @@
       <!-- 分類選單 -->
       <div class="space-y-0">
         @for (category of mobileMenuCategories(); track category.id) {
-          <div 
-            class="box-border h-12 border-b border-grey-e9 py-3 flex items-center justify-between cursor-pointer hover:bg-grey-f7 transition-colors px-0"
-            (click)="onMobileCategoryClick(category)"
-          >
-            <span class="text-base text-grey-33 flex-1 text-left">{{ category.name }}</span>
-            <mat-icon
-              class="!w-6 !h-6 !text-grey-9f material-icons-outlined"
-              [fontIcon]="TmfIconEnum.KeyboardArrowRight"
-            ></mat-icon>
+          <div class="border-b border-grey-e9">
+            <!-- 主分類項目 -->
+            <div 
+              class="box-border h-12 py-3 flex items-center justify-between cursor-pointer hover:bg-grey-f7 transition-colors px-0"
+              (click)="onMobileCategoryClick(category)"
+            >
+              <span class="text-base text-grey-33 flex-1 text-left">{{ category.name }}</span>
+              @if (category.id !== 'all') {
+                <mat-icon
+                  class="!w-6 !h-6 !text-grey-9f material-icons-outlined transition-transform duration-200"
+                  [class.-rotate-90]="isCategoryExpanded(category.id)"
+                  [fontIcon]="TmfIconEnum.KeyboardArrowDown"
+                ></mat-icon>
+              }
+            </div>
+            
+            <!-- 子分類區域 (手風琴內容) -->
+            @if (category.subcategories && category.subcategories.length > 0 && isCategoryExpanded(category.id)) {
+              <div class="bg-grey-f7 py-2 animate-fadeIn">
+                @for (subcategory of category.subcategories; track subcategory.id) {
+                  <div 
+                    class="pl-6 pr-0 py-2 flex items-center cursor-pointer hover:bg-grey-e9 transition-colors"
+                    (click)="onMobileSubcategoryClick(subcategory)"
+                  >
+                    <span class="text-sm text-grey-66 flex-1 text-left">{{ subcategory.name }}</span>
+                  </div>
+                }
+              </div>
+            }
           </div>
         }
       </div>

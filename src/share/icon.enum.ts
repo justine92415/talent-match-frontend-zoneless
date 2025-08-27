@@ -45,3 +45,5 @@ export enum TmfIconEnum {
   NotificationsActive = 'notifications_active',
   Campaign = 'campaign',
 }
+
+export type TmfIconType = `${TmfIconEnum}` | null;

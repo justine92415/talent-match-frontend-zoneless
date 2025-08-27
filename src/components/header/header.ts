@@ -3,6 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
+import { Button } from "@components/button/button";
 
 interface City {
   id: string;
@@ -57,7 +58,7 @@ const DROPDOWN_IDS = {
 
 @Component({
   selector: 'tmf-header',
-  imports: [MatIconModule, OverlayModule],
+  imports: [MatIconModule, OverlayModule, Button],
   providers: [DropdownManagerService],
   templateUrl: './header.html',
   styleUrl: './header.css',

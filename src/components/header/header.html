@@ -17,7 +17,7 @@
       <div class="hidden lg:flex lg:justify-start lg:items-center lg:h-full">
         <div
           #cityTrigger
-          class="relative py-7 flex justify-start items-center gap-1 w-[6.0625rem] h-full cursor-pointer after:content-[''] after:absolute after:right-0 after:top-1/2 after:transform after:-translate-y-1/2 after:w-px after:h-6 after:bg-grey-d4"
+          class="relative py-5 flex justify-start items-center gap-1 w-[6.0625rem] h-full cursor-pointer after:content-[''] after:absolute after:right-0 after:top-1/2 after:transform after:-translate-y-1/2 after:w-px after:h-6 after:bg-grey-d4 lg:py-7"
           (click)="toggleCityDropdown(cityTrigger)"
         >
           <mat-icon
@@ -25,11 +25,10 @@
             [fontIcon]="TmfIconEnum.PinDrop"
           ></mat-icon>
           <p class="text-base">{{ selectedCity() }}</p>
-
         </div>
         <div
           #exploreTrigger
-          class="relative px-6 py-7 flex items-center gap-1 cursor-pointer"
+          class="relative px-6 py-5 flex items-center gap-1 cursor-pointer lg:py-7"
           (click)="toggleExploreDropdown(exploreTrigger)"
         >
           <p class="text-base">探索</p>
@@ -37,7 +36,6 @@
             class="!w-5 !h-5 !text-grey-9f !text-xl !leading-5 material-icons-outlined"
             [fontIcon]="TmfIconEnum.KeyboardArrowDown"
           ></mat-icon>
-
         </div>
       </div>
     </div>
@@ -55,26 +53,26 @@
     <div class="flex justify-end items-center gap-1">
       <div
         #notificationTrigger
-        class="relative w-10 py-7 flex justify-center items-center lg:w-16"
+        class="relative w-10 py-5 flex justify-center items-center lg:w-16 lg:py-7"
         (click)="toggleNotificationDropdown(notificationTrigger)"
       >
         <mat-icon
           class="material-icons-outlined cursor-pointer"
           [fontIcon]="TmfIconEnum.Notifications"
         ></mat-icon>
-
       </div>
       <div
         #cartTrigger
-        class="relative w-10 py-7 flex justify-center items-center lg:w-16"
+        class="relative w-10 py-5 flex justify-center items-center lg:w-16 lg:py-7"
         (click)="toggleCartDropdown(cartTrigger)"
       >
         <mat-icon
           class="material-icons-outlined cursor-pointer"
           [fontIcon]="TmfIconEnum.ShoppingCart"
         ></mat-icon>
-
       </div>
+
+      @if( false ) {
       <div class="flex justify-center items-center gap-2">
         <!-- avtar -->
         <div
@@ -88,9 +86,12 @@
               Gill WUUUU
             </p>
           </div>
-
         </div>
       </div>
+      } @else {
+      <tmf-button iconPosition="left" variant="secondary" iconName="handshake"> 我要開課 </tmf-button>
+      <tmf-button iconPosition="right" variant="primary" iconName="keyboard_arrow_right"> 登入/註冊 </tmf-button>
+      }
     </div>
   </div>
 </header>
@@ -231,9 +232,9 @@
           <!-- 標籤 -->
           <div class="flex gap-2 mb-1">
             @for (tag of item.tags; track tag) {
-            <span class="px-1 py-0.5 bg-grey-d4 text-xs text-grey-33 rounded"
-              >{{ tag }}</span
-            >
+            <span class="px-1 py-0.5 bg-grey-d4 text-xs text-grey-33 rounded">{{
+              tag
+            }}</span>
             }
           </div>
 

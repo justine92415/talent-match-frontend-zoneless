@@ -20,3 +20,83 @@
     </div>
   </div>
 </section>
+<!-- 課程短影音 Section -->
+<section
+  class="relative flex justify-center items-center w-full py-10 lg:py-20 bg-white"
+>
+  <!-- Background decorative element -->
+  <div class="absolute left-60 top-30 w-80 h-120 opacity-30">
+    <img
+      src="/assets/images/reels_bg_mark.svg"
+      alt=""
+      class="w-full h-full object-contain"
+    />
+  </div>
+
+  <!-- Container -->
+  <div class="relative z-10 container mx-auto px-3 w-full max-w-320">
+    <!-- Section Title -->
+    <tmf-section-title>課程短影音</tmf-section-title>
+
+    <!-- Filter Types -->
+    <div class="flex justify-center items-center gap-3 mb-6 flex-wrap">
+      <!-- Active Filter -->
+      <button
+        class="flex justify-center items-center gap-1 px-3 py-2 bg-primary text-white border border-primary rounded-lg text-base-bold font-noto-sans-tc hover:opacity-90 transition-opacity"
+      >
+        全部
+      </button>
+      <!-- Inactive Filters -->
+      <button
+        class="flex justify-center items-center gap-1 px-3 py-2 bg-white text-grey-33 border border-grey-9f rounded-lg text-base font-noto-sans-tc hover:border-primary hover:text-primary transition-colors"
+      >
+        烹飪料理
+      </button>
+      <button
+        class="flex justify-center items-center gap-1 px-3 py-2 bg-white text-grey-33 border border-grey-9f rounded-lg text-base font-noto-sans-tc hover:border-primary hover:text-primary transition-colors"
+      >
+        理財投資
+      </button>
+      <button
+        class="flex justify-center items-center gap-1 px-3 py-2 bg-white text-grey-33 border border-grey-9f rounded-lg text-base font-noto-sans-tc hover:border-primary hover:text-primary transition-colors"
+      >
+        藝術創作
+      </button>
+      <button
+        class="flex justify-center items-center gap-1 px-3 py-2 bg-white text-grey-33 border border-grey-9f rounded-lg text-base font-noto-sans-tc hover:border-primary hover:text-primary transition-colors"
+      >
+        手作工藝
+      </button>
+      <!-- Filter button -->
+      <button
+        class="flex justify-center items-center gap-1 px-3 py-2 bg-white text-grey-33 border border-grey-9f rounded-lg text-base font-noto-sans-tc hover:border-primary hover:text-primary transition-colors"
+      >
+        <mat-icon [fontIcon]="TmfIcon.Tune"></mat-icon>
+      </button>
+    </div>
+
+    <!-- Video Grid with Navigation -->
+    <div class="relative">
+      <!-- Left Navigation Button - Disabled -->
+      <button
+        class="absolute text-white left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-grey-9f rounded-xl flex justify-center items-center shadow-lg cursor-not-allowed opacity-50"
+      >
+        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowLeft"></mat-icon>
+      </button>
+
+      <!-- Video Cards Grid -->
+      <div class="flex gap-6 overflow-hidden">
+        @for (video of videos; track video.imageSrc) {
+        <tmf-video-card [video]="video"></tmf-video-card>
+        }
+      </div>
+
+      <!-- Right Navigation Button - Active -->
+      <button
+        class="absolute text-white right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center shadow-lg hover:bg-primary/90 transition-colors"
+      >
+        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowRight"></mat-icon>
+      </button>
+    </div>
+  </div>
+</section>

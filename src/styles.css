@@ -1,6 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 
+/* Swiper CSS */
+@import "swiper/css";
+@import "swiper/css/navigation";
+
 /* Custom Color System - 才藝媒合教學平台 */
 @theme {
   /* 主要色系 - Primary Colors */

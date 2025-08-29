@@ -44,6 +44,12 @@ export enum TmfIconEnum {
   Forum = 'forum',
   NotificationsActive = 'notifications_active',
   Campaign = 'campaign',
+  LocationOn = 'location_on',
+  ExpandMore = 'expand_more',
+  Star = 'star',
+  StarHalf = 'star_half',
+  StarOutline = 'star_outline',
+  ArrowForward = 'arrow_forward',
 }
 
 export type TmfIconType = `${TmfIconEnum}` | null;

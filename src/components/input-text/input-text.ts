@@ -1,4 +1,4 @@
-import { Component, input, output, signal, computed } from '@angular/core';
+import { Component, input, output, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { TmfIconType } from '@share/icon.enum';
@@ -12,7 +12,8 @@ import { TmfIconType } from '@share/icon.enum';
       display: block;
       width: 100%;
     }
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InputText {
   // 輸入屬性
@@ -21,7 +22,6 @@ export class InputText {
   iconName = input<TmfIconType | null>(null);
   disabled = input<boolean>(false);
   type = input<'text' | 'email' | 'password' | 'search'>('text');
-  autocomplete = input<string>('on'); // 新增自動完成控制
   
   // 輸出事件
   valueChange = output<string>();

@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'tmf-footer',
+  selector: 'tmf-layout-1-wapper',
   imports: [],
-  templateUrl: './footer.html',
+  templateUrl: './layout-1-wapper.html',
   styles: ``,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Footer {}
+export class Layout1Wapper {
+
+}

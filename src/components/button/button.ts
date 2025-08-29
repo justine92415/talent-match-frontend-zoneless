@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { NgClass } from '@angular/common';
 import { TmfIconType } from '@share/icon.enum';
@@ -16,6 +16,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
       display: block;
     }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Button {
   iconPosition = input<ButtonIconPosition>('right');

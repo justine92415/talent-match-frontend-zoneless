@@ -3,10 +3,11 @@ import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 import { Button } from "@components/button/button";
 import { InputText } from "@components/input-text/input-text";
+import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
 
 @Component({
   selector: 'tmf-sign-up',
-  imports: [MatIcon, Button, InputText],
+  imports: [MatIcon, Button, InputText, Layout1Wapper],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './sign-up.html',
   styles: ``

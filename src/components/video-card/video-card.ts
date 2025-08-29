@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface VideoCardData {
@@ -14,6 +14,7 @@ export interface VideoCardData {
   imports: [],
   templateUrl: './video-card.html',
   styles: ``,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VideoCard {
   @Input() video: VideoCardData = {

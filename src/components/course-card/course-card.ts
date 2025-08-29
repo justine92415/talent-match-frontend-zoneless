@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 
@@ -28,7 +28,8 @@ export interface CourseCardData {
     :host {
       display: block;
     }
-  `
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CourseCard {
   @Input() course!: CourseCardData;

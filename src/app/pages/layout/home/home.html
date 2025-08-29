@@ -196,3 +196,136 @@
     </div>
   </div>
 </section>
+<!-- 如何使用 Section -->
+<section class="relative flex justify-center items-center w-full py-20 bg-grey-f7 overflow-hidden">
+  <!-- Container -->
+  <div class="relative z-10 container mx-auto px-3 w-full max-w-[1320px]">
+    <!-- Section Title -->
+    <tmf-section-title>如何使用</tmf-section-title>
+
+    <!-- Steps Container -->
+    <div class="max-w-4xl mx-auto mt-16 space-y-20">
+      <!-- Step 1 -->
+      <div class="text-center">
+        <!-- Step Number -->
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-grey-33 text-white rounded-lg font-bold text-lg mb-8">
+          1
+        </div>
+        
+        <!-- Step Content -->
+        <h3 class="text-3xl-bold text-grey-33 mb-6">註冊帳號</h3>
+        <p class="text-lg text-grey-66 mb-8 max-w-2xl mx-auto leading-relaxed">
+          在我們的平台上註冊一個帳號,填寫您的基本資料並設置登入密碼。註冊完成後,您將獲得全面的訪問權限,可以開始瀏覽和使用我們的各項功能。
+        </p>
+        
+        <!-- Feature Cards -->
+        <div class="flex flex-col md:flex-row justify-center items-center gap-6 max-w-3xl mx-auto">
+          <div class="bg-white border border-grey-e9 rounded-xl p-6 flex-1 min-h-32">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
+                <mat-icon [fontIcon]="TmfIcon.Check" class="!text-primary !w-4 !h-4 !text-base !leading-4"></mat-icon>
+              </div>
+              <span class="font-medium text-grey-33">快速註冊</span>
+            </div>
+            <p class="text-sm text-grey-66">只需填寫基本資料，幾分鐘完成註冊</p>
+          </div>
+          
+          <div class="bg-white border border-grey-e9 rounded-xl p-6 flex-1 min-h-32">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
+                <mat-icon [fontIcon]="TmfIcon.Check" class="!text-primary !w-4 !h-4 !text-base !leading-4"></mat-icon>
+              </div>
+              <span class="font-medium text-grey-33">安全保護</span>
+            </div>
+            <p class="text-sm text-grey-66">個人資料受到完整加密保護</p>
+          </div>
+          
+          <div class="bg-white border border-grey-e9 rounded-xl p-6 flex-1 min-h-32">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-6 h-6 bg-primary/20 rounded-full flex items-center justify-center">
+                <mat-icon [fontIcon]="TmfIcon.Check" class="!text-primary !w-4 !h-4 !text-base !leading-4"></mat-icon>
+              </div>
+              <span class="font-medium text-grey-33">免費使用</span>
+            </div>
+            <p class="text-sm text-grey-66">註冊完全免費，立即開始使用</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="text-center">
+        <!-- Step Number -->
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-grey-33 text-white rounded-lg font-bold text-lg mb-8">
+          2
+        </div>
+        
+        <!-- Step Content -->
+        <h3 class="text-3xl-bold text-grey-33 mb-6">尋找才藝教學</h3>
+        <p class="text-lg text-grey-66 mb-8 max-w-2xl mx-auto leading-relaxed">
+          瀏覽我們平台上豐富的才藝教學資源，您可以根據興趣和需求，尋找到合適的教學內容。無論您想要學習音樂、舞蹈、美術還是其他才藝，都能在這裡找到適合您的課程。
+        </p>
+        
+        <!-- Mock Interface -->
+        <div class="bg-grey-f7 rounded-2xl p-8 max-w-2xl mx-auto">
+          <div class="bg-white rounded-xl p-6 shadow-sm">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="flex-1 bg-grey-f7 rounded-lg p-3 flex items-center gap-3">
+                <mat-icon [fontIcon]="TmfIcon.Search" class="text-grey-9f !w-5 !h-5"></mat-icon>
+                <span class="text-grey-9f">搜尋您想要的課程...</span>
+              </div>
+              <div class="bg-primary text-white px-4 py-3 rounded-lg">
+                <mat-icon [fontIcon]="TmfIcon.Tune" class="!w-5 !h-5"></mat-icon>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="bg-orange-95 text-primary px-3 py-2 rounded-lg text-sm text-center">音樂</div>
+              <div class="bg-grey-f7 text-grey-66 px-3 py-2 rounded-lg text-sm text-center">舞蹈</div>
+              <div class="bg-grey-f7 text-grey-66 px-3 py-2 rounded-lg text-sm text-center">美術</div>
+              <div class="bg-grey-f7 text-grey-66 px-3 py-2 rounded-lg text-sm text-center">手工藝</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="text-center">
+        <!-- Step Number -->
+        <div class="inline-flex items-center justify-center w-12 h-12 bg-grey-33 text-white rounded-lg font-bold text-lg mb-8">
+          3
+        </div>
+        
+        <!-- Step Content -->
+        <h3 class="text-3xl-bold text-grey-33 mb-6">預約學習課程</h3>
+        <p class="text-lg text-grey-66 mb-8 max-w-2xl mx-auto leading-relaxed">
+          找到心儀的教學內容後，您可以直接預約相應的學習課程。選擇適合您時間和地點的授課老師，並確定預約詳情。完成預約後，您將收到確認郵件，準時參加課程即可。
+        </p>
+        
+        <!-- Mock Calendar -->
+        <div class="bg-orange-95 rounded-2xl p-8 max-w-md mx-auto">
+          <div class="bg-white rounded-xl p-4 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <div class="w-2 h-2 bg-primary rounded-full"></div>
+                <span class="text-sm font-medium text-grey-33">吉他課程預約</span>
+              </div>
+              <span class="text-xs text-grey-9f">10月</span>
+            </div>
+            <div class="text-left space-y-2">
+              <div class="text-sm text-grey-66">導師：Eric Clapton</div>
+              <div class="text-sm text-grey-66">時間：今天 10:00 AM</div>
+              <div class="bg-primary text-white text-xs px-2 py-1 rounded inline-block">已確認</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center mt-20">
+      <button class="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-xl text-lg-bold transition-colors inline-flex items-center gap-2">
+        立即開始使用
+        <mat-icon [fontIcon]="TmfIcon.ArrowForward" class="!w-5 !h-5"></mat-icon>
+      </button>
+    </div>
+  </div>
+</section>

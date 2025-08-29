@@ -34,7 +34,7 @@
   </div>
 
   <!-- Container -->
-  <div class="relative z-10 container mx-auto px-3 w-full max-w-320">
+  <div class="relative z-10 container mx-auto w-full max-w-320">
     <!-- Section Title -->
     <tmf-section-title>課程短影音</tmf-section-title>
 
@@ -76,50 +76,21 @@
     </div>
 
     <!-- Video Grid with Navigation -->
-    <div class="relative">
-      <!-- Left Navigation Button -->
-      <button
-        class="swiper-button-prev-custom absolute text-white left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-grey-9f rounded-xl flex justify-center items-center transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowLeft"></mat-icon>
-      </button>
-
-      <!-- Swiper Container -->
-      <div 
-        #swiperContainer
-        class="swiper overflow-hidden"
-      >
-        <div class="swiper-wrapper">
-          @for (video of videos; track video.imageSrc) {
-            <div class="swiper-slide">
-              <tmf-video-card [video]="video"></tmf-video-card>
-            </div>
-          }
-        </div>
+    <tmf-swiper-wapper [config]="videoSwiperConfig">
+      @for (video of videos; track video.imageSrc) {
+      <div class="swiper-slide">
+        <tmf-video-card [video]="video"></tmf-video-card>
       </div>
-
-      <!-- Right Navigation Button -->
-      <button
-        class="swiper-button-next-custom absolute text-white right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowRight"></mat-icon>
-      </button>
-    </div>
+      }
+    </tmf-swiper-wapper>
   </div>
 </section>
 <!-- 推薦課程 Section -->
-<section class="relative flex justify-center items-center w-full py-20 bg-orange-90">
-  <!-- Background decorative element -->
-  <div class="absolute left-0 top-0 w-full h-10">
-    <img
-      src="/assets/images/section-bg-decorate.svg"
-      alt=""
-      class="w-full h-full object-cover"
-    />
-  </div>
-
+<section
+  class="relative flex justify-center items-center w-full py-20 bg-orange-90"
+>
   <!-- Container -->
-  <div class="relative z-10 container mx-auto px-3 w-full max-w-320">
+  <div class="relative z-10 container mx-auto max-w-320">
     <!-- Section Title -->
     <tmf-section-title>推薦課程</tmf-section-title>
 
@@ -128,43 +99,30 @@
       <span class="text-base-bold text-grey-33">選擇地區</span>
       <div class="flex items-center gap-6 bg-white rounded-xl px-2 py-2">
         <div class="flex items-center gap-1">
-          <mat-icon [fontIcon]="TmfIcon.LocationOn" class="text-primary w-5 h-5"></mat-icon>
+          <mat-icon
+            [fontIcon]="TmfIcon.LocationOn"
+            class="text-primary w-5 h-5"
+          ></mat-icon>
           <span class="text-base text-grey-33">台北市</span>
         </div>
-        <mat-icon [fontIcon]="TmfIcon.ExpandMore" class="text-grey-9f w-5 h-5"></mat-icon>
+        <mat-icon
+          [fontIcon]="TmfIcon.ExpandMore"
+          class="text-grey-9f w-5 h-5"
+        ></mat-icon>
       </div>
     </div>
 
     <!-- Course Cards Grid with Navigation -->
-    <div class="relative">
-      <!-- Left Navigation Button -->
-      <button
-        class="swiper-button-prev-courses absolute left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-grey-9f rounded-xl flex justify-center items-center  transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowLeft" class="text-white"></mat-icon>
-      </button>
-
-      <!-- Swiper Container -->
-      <div 
-        #swiperCoursesContainer
-        class="swiper overflow-hidden"
-      >
-        <div class="swiper-wrapper">
-          @for (course of courses; track course.id) {
-            <div class="swiper-slide">
-              <!-- Course Card -->
-              <tmf-course-card [course]="course"></tmf-course-card>
-            </div>
-          }
-        </div>
+    <tmf-swiper-wapper
+      [config]="courseSwiperConfig"
+      leftIconClasses="text-white"
+    >
+      @for (course of courses; track course.id) {
+      <div class="swiper-slide">
+        <!-- Course Card -->
+        <tmf-course-card class="w-75.5" [course]="course"></tmf-course-card>
       </div>
-
-      <!-- Right Navigation Button -->
-      <button
-        class="swiper-button-next-courses absolute right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowRight" class="text-white"></mat-icon>
-      </button>
-    </div>
+      }
+    </tmf-swiper-wapper>
   </div>
 </section>

@@ -1,24 +1,73 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { SectionTitle } from '@components/components/section-title/section-title';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
+import { SwiperWapper, SwiperConfig } from '@components/swiper-wapper/swiper-wapper';
 import { TmfIconEnum } from '@share/icon.enum';
-import { Swiper } from 'swiper';
-import { Navigation } from 'swiper/modules';
 
 @Component({
   selector: 'tmf-home',
-  imports: [SectionTitle, VideoCard, CourseCard, MatIcon],
+  imports: [SectionTitle, VideoCard, CourseCard, SwiperWapper, MatIcon],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styles: ``
 })
-export default class Home implements AfterViewInit {
-  @ViewChild('swiperContainer', { static: false }) swiperContainer!: ElementRef;
-  @ViewChild('swiperCoursesContainer', { static: false }) swiperCoursesContainer!: ElementRef;
-  private swiper!: Swiper;
-  private coursesSwiper!: Swiper;
+export default class Home {
+  // Swiper configurations
+  videoSwiperConfig: SwiperConfig = {
+    slidesPerView: 4,
+    spaceBetween: 24,
+    breakpoints: {
+      320: {
+        slidesPerView: 1,
+        spaceBetween: 16,
+      },
+      768: {
+        slidesPerView: 2,
+        spaceBetween: 20,
+      },
+      1024: {
+        slidesPerView: 3,
+        spaceBetween: 24,
+      },
+      1280: {
+        slidesPerView: 4,
+        spaceBetween: 24,
+      },
+    }
+  };
+
+  courseSwiperConfig: SwiperConfig = {
+    slidesPerView: 4,
+    spaceBetween: 24,
+    breakpoints: {
+      320: {
+        slidesPerView: 1,
+        spaceBetween: 16,
+      },
+      640: {
+        slidesPerView: 1.2,
+        spaceBetween: 16,
+      },
+      768: {
+        slidesPerView: 2,
+        spaceBetween: 20,
+      },
+      1024: {
+        slidesPerView: 3,
+        spaceBetween: 24,
+      },
+      1280: {
+        slidesPerView: 4,
+        spaceBetween: 24,
+      },
+      1536: {
+        slidesPerView: 4,
+        spaceBetween: 24,
+      },
+    }
+  };
 
   // Math object for template use
   Math = Math;
@@ -165,79 +214,6 @@ export default class Home implements AfterViewInit {
       }
     }
   ];
-
-  ngAfterViewInit() {
-    this.initSwiper();
-    this.initCoursesSwiper();
-  }
-
-  private initSwiper() {
-    this.swiper = new Swiper(this.swiperContainer.nativeElement, {
-      modules: [Navigation],
-      slidesPerView: 4,
-      spaceBetween: 24,
-      navigation: {
-        nextEl: '.swiper-button-next-custom',
-        prevEl: '.swiper-button-prev-custom',
-      },
-      breakpoints: {
-        320: {
-          slidesPerView: 1,
-          spaceBetween: 16,
-        },
-        768: {
-          slidesPerView: 2,
-          spaceBetween: 20,
-        },
-        1024: {
-          slidesPerView: 3,
-          spaceBetween: 24,
-        },
-        1280: {
-          slidesPerView: 4,
-          spaceBetween: 24,
-        },
-      },
-    });
-  }
-
-  private initCoursesSwiper() {
-    this.coursesSwiper = new Swiper(this.swiperCoursesContainer.nativeElement, {
-      modules: [Navigation],
-      slidesPerView: 4,
-      spaceBetween: 24,
-      navigation: {
-        nextEl: '.swiper-button-next-courses',
-        prevEl: '.swiper-button-prev-courses',
-      },
-      breakpoints: {
-        320: {
-          slidesPerView: 1,
-          spaceBetween: 16,
-        },
-        640: {
-          slidesPerView: 1.2,
-          spaceBetween: 16,
-        },
-        768: {
-          slidesPerView: 2,
-          spaceBetween: 20,
-        },
-        1024: {
-          slidesPerView: 3,
-          spaceBetween: 24,
-        },
-        1280: {
-          slidesPerView: 4,
-          spaceBetween: 24,
-        },
-        1536: {
-          slidesPerView: 4,
-          spaceBetween: 24,
-        },
-      },
-    });
-  }
 
   get TmfIcon() {
     return TmfIconEnum;

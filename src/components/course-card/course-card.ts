@@ -24,7 +24,11 @@ export interface CourseCardData {
   selector: 'tmf-course-card',
   imports: [MatIcon],
   templateUrl: './course-card.html',
-  styles: ``
+  styles: `
+    :host {
+      display: block;
+    }
+  `
 })
 export class CourseCard {
   @Input() course!: CourseCardData;

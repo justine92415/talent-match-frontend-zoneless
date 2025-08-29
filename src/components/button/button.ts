@@ -20,5 +20,5 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
 export class Button {
   iconPosition = input<ButtonIconPosition>('right');
   iconName = input<ButtonIconName>(null);
-  variant = input<ButtonVariant>('secondary');
+  variant = input<ButtonVariant>('primary');
 }

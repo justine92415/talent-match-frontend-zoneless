@@ -79,7 +79,7 @@
     <div class="relative">
       <!-- Left Navigation Button -->
       <button
-        class="swiper-button-prev-custom absolute text-white left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-grey-9f rounded-xl flex justify-center items-center shadow-lg transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+        class="swiper-button-prev-custom absolute text-white left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-grey-9f rounded-xl flex justify-center items-center transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         <mat-icon [fontIcon]="TmfIcon.KeyboardArrowLeft"></mat-icon>
       </button>
@@ -100,9 +100,70 @@
 
       <!-- Right Navigation Button -->
       <button
-        class="swiper-button-next-custom absolute text-white right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center shadow-lg hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        class="swiper-button-next-custom absolute text-white right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         <mat-icon [fontIcon]="TmfIcon.KeyboardArrowRight"></mat-icon>
+      </button>
+    </div>
+  </div>
+</section>
+<!-- 推薦課程 Section -->
+<section class="relative flex justify-center items-center w-full py-20 bg-orange-90">
+  <!-- Background decorative element -->
+  <div class="absolute left-0 top-0 w-full h-10">
+    <img
+      src="/assets/images/section-bg-decorate.svg"
+      alt=""
+      class="w-full h-full object-cover"
+    />
+  </div>
+
+  <!-- Container -->
+  <div class="relative z-10 container mx-auto px-3 w-full max-w-320">
+    <!-- Section Title -->
+    <tmf-section-title>推薦課程</tmf-section-title>
+
+    <!-- City Selection -->
+    <div class="flex justify-center items-center gap-4 mb-6">
+      <span class="text-base-bold text-grey-33">選擇地區</span>
+      <div class="flex items-center gap-6 bg-white rounded-xl px-2 py-2">
+        <div class="flex items-center gap-1">
+          <mat-icon [fontIcon]="TmfIcon.LocationOn" class="text-primary w-5 h-5"></mat-icon>
+          <span class="text-base text-grey-33">台北市</span>
+        </div>
+        <mat-icon [fontIcon]="TmfIcon.ExpandMore" class="text-grey-9f w-5 h-5"></mat-icon>
+      </div>
+    </div>
+
+    <!-- Course Cards Grid with Navigation -->
+    <div class="relative">
+      <!-- Left Navigation Button -->
+      <button
+        class="swiper-button-prev-courses absolute left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-grey-9f rounded-xl flex justify-center items-center  transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowLeft" class="text-white"></mat-icon>
+      </button>
+
+      <!-- Swiper Container -->
+      <div 
+        #swiperCoursesContainer
+        class="swiper overflow-hidden"
+      >
+        <div class="swiper-wrapper">
+          @for (course of courses; track course.id) {
+            <div class="swiper-slide">
+              <!-- Course Card -->
+              <tmf-course-card [course]="course"></tmf-course-card>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Right Navigation Button -->
+      <button
+        class="swiper-button-next-courses absolute right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <mat-icon [fontIcon]="TmfIcon.KeyboardArrowRight" class="text-white"></mat-icon>
       </button>
     </div>
   </div>

@@ -126,3 +126,73 @@
     </tmf-swiper-wapper>
   </div>
 </section>
+<!-- 學員導師好評推薦 -->
+<section
+  class="relative flex justify-center bg-grey-f7 items-center w-full py-20 overflow-hidden"
+>
+  <div class="relative w-full">
+    <!-- Background Image -->
+    <img 
+      src="/assets/images/section-bg-decorate.svg" 
+      alt="" 
+      class="absolute inset-0 w-full h-full object-contain opacity-100 z-0"
+    />
+    <!-- Container -->
+    <div class="relative z-10 container mx-auto max-w-320 py-10">
+      <!-- Section Title -->
+      <tmf-section-title>學員導師好評推薦！</tmf-section-title>
+
+      <!-- Main Content -->
+      <div class="flex flex-col items-center gap-6">
+        <!-- First Row -->
+        <div class="flex items-stretch gap-6 w-full">
+          <!-- Rating Summary Card -->
+          <div
+            class="bg-white/35 backdrop-blur-sm rounded-xl border border-white/20 p-6 w-75.5 h-55 flex flex-col items-center justify-center"
+          >
+            <p class="text-grey-9f text-xl-bold mb-3">使用好評高達</p>
+            <div class="flex flex-col items-center gap-1">
+              <span class="text-grey-33 text-5xl font-medium">4.7</span>
+              <div class="flex items-center gap-1">
+                @for (star of [1,2,3,4]; track star) {
+                <mat-icon
+                  [fontIcon]="TmfIcon.Star"
+                  class="!text-yellow !w-5 !h-5"
+                ></mat-icon>
+                }
+                <mat-icon
+                  [fontIcon]="TmfIcon.StarHalf"
+                  class="!text-yellow !w-5 !h-5"
+                ></mat-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- Review Card 1 -->
+          <tmf-review-card [review]="reviews[0]"></tmf-review-card>
+
+          <!-- Review Card 2 -->
+          <tmf-review-card [review]="reviews[1]"></tmf-review-card>
+        </div>
+
+        <!-- Second Row -->
+        <div class="flex justify-center gap-6 w-full">
+          <!-- Review Card 3 -->
+          <tmf-review-card [review]="reviews[2]"></tmf-review-card>
+
+          <!-- Review Card 4 -->
+          <tmf-review-card [review]="reviews[3]"></tmf-review-card>
+        </div>
+
+        <!-- Third Row -->
+        <div class="flex justify-end gap-6 w-full">
+          <!-- Review Card 5 -->
+          <tmf-review-card [review]="reviews[4]"></tmf-review-card>
+
+          <!-- Review Card 6 -->
+          <tmf-review-card [review]="reviews[5]"></tmf-review-card>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

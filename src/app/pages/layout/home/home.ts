@@ -3,12 +3,13 @@ import { MatIcon } from '@angular/material/icon';
 import { SectionTitle } from '@components/components/section-title/section-title';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
+import { ReviewCard, ReviewData } from '@components/review-card/review-card';
 import { SwiperWapper, SwiperConfig } from '@components/swiper-wapper/swiper-wapper';
 import { TmfIconEnum } from '@share/icon.enum';
 
 @Component({
   selector: 'tmf-home',
-  imports: [SectionTitle, VideoCard, CourseCard, SwiperWapper, MatIcon],
+  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styles: ``
@@ -212,6 +213,63 @@ export default class Home {
         score: 4.8,
         count: 156
       }
+    }
+  ];
+
+  reviews: ReviewData[] = [
+    {
+      id: 'review-1',
+      name: 'Eric Clapton',
+      date: '2023-08-09',
+      title: '可以一展長才的平台',
+      content: '可以認識不同領域的高手，並且把喜歡的領域做推廣，是一件開心的事。',
+      rating: 5,
+      avatar: '/assets/images/teacher-avatar-1.jpg'
+    },
+    {
+      id: 'review-2',
+      name: 'Ray Chen',
+      date: '2024-01-01',
+      title: '清楚明白！值得購買的優秀課程',
+      content: '豐富的範例，精細的解說，尤其老師不嫌麻煩線上回答，很有用且精實，沒太多廢話。雖然課程時間不長，但每個都是精華，需要反覆思考！',
+      rating: 4,
+      avatar: '/assets/images/teacher-avatar-2.jpg'
+    },
+    {
+      id: 'review-3',
+      name: '齊齊cy',
+      date: '2024-05-20',
+      title: '非常感謝有一個平台來分享所知所學',
+      content: '感謝爸媽栽培，讓我可以把喜愛的料理帶給更多人，只想說：『媽 我在這裡～』',
+      rating: 5,
+      avatar: '/assets/images/teacher-avatar-3.jpg'
+    },
+    {
+      id: 'review-4',
+      name: 'Gill Wuuuu',
+      date: '2024-01-01',
+      title: '自從開始使用後，考試都考100分',
+      content: '老師非常溫柔，即使是小白，老師都非常願意不厭其煩的指導，讚讚～',
+      rating: 5,
+      avatar: '/assets/images/teacher-avatar-4.jpg'
+    },
+    {
+      id: 'review-5',
+      name: 'Pin',
+      date: '2023-12-03',
+      title: '非常紮實的設計練習',
+      content: '課程的架構就如老師介紹時所說，由淺入深，示範和舉例都不會很難，跟著一起練習就很容易上手。還有一步步教你從頭設計一套新的版型，真的非常實用！',
+      rating: 4.5,
+      avatar: '/assets/images/teacher-avatar-5.jpg'
+    },
+    {
+      id: 'review-6',
+      name: '林雯',
+      date: '2024-04-04',
+      title: '推薦給攝影新手',
+      content: '老師上課很淺顯易懂、每一個章節都短短的、看起來很輕鬆、講解也非常清晰',
+      rating: 5,
+      avatar: '/assets/images/teacher-avatar-6.jpg'
     }
   ];
 

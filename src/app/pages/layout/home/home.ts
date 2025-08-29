@@ -1,6 +1,6 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-import { SectionTitle } from '@components/components/section-title/section-title';
+import { SectionTitle } from '@components/section-title/section-title';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
 import { ReviewCard, ReviewData } from '@components/review-card/review-card';

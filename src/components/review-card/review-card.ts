@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 
@@ -16,7 +16,8 @@ export interface ReviewData {
   selector: 'tmf-review-card',
   imports: [MatIcon],
   templateUrl: './review-card.html',
-  styles: ``
+  styles: ``,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewCard {
   @Input() review!: ReviewData;

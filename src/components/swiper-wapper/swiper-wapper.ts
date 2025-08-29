@@ -1,4 +1,4 @@
-import { Component, input, viewChild, ElementRef, AfterViewInit, OnDestroy, signal } from '@angular/core';
+import { Component, input, viewChild, ElementRef, AfterViewInit, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 import { Swiper } from 'swiper';
@@ -19,7 +19,8 @@ export interface SwiperConfig {
   selector: 'tmf-swiper-wapper',
   imports: [MatIcon],
   templateUrl: './swiper-wapper.html',
-  styles: ``
+  styles: ``,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SwiperWapper implements AfterViewInit, OnDestroy {
   swiperContainer = viewChild.required<ElementRef>('swiperContainer');

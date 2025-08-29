@@ -319,13 +319,45 @@
         </div>
       </div>
     </div>
+  </div>
+</section>
+<!-- CTA Section -->
+<section class="relative flex justify-center items-center w-full py-20 bg-grey-f7 overflow-hidden">
+  <!-- Bottom Dark Background -->
+  <div class="absolute bottom-0 left-0 w-full h-30 bg-grey-1d rounded-t-[3rem]"></div>
+  
+  <!-- Container -->
+  <div class="relative z-10 flex justify-center gap-6 px-40 w-full max-w-320">
+    <!-- 成為會員 CTA Card -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-lg p-6 pt-25 pb-6 w-130 flex flex-col gap-4 relative bg-[url('/assets/images/cta-signup.svg')] bg-no-repeat bg-right-top bg-[length:300px_200px]">
+      <!-- Title -->
+      <h3 class="text-grey-33 font-bold text-3xl-bold leading-9">成為會員</h3>
+      
+      <!-- Description and Arrow -->
+      <div class="flex items-stretch gap-6 relative">
+        <p class="flex-1 text-grey-33 text-base">
+          享有第一時間課程資訊上架消息，用最優惠的價格購買課程，同時能與老師一對一教學。
+        </p>
+        <div class="flex justify-end items-center w-10 h-10">
+          <mat-icon [fontIcon]="TmfIcon.ArrowForward" class="text-grey-66 !w-6 !h-6"></mat-icon>
+        </div>
+      </div>
+    </div>
 
-    <!-- CTA Section -->
-    <div class="text-center mt-20">
-      <button class="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-xl text-lg-bold transition-colors inline-flex items-center gap-2">
-        立即開始使用
-        <mat-icon [fontIcon]="TmfIcon.ArrowForward" class="!w-5 !h-5"></mat-icon>
-      </button>
+    <!-- 成為教師 CTA Card -->
+    <div class="bg-white rounded-xl overflow-hidden shadow-lg p-6 pt-25 pb-6 w-130 flex flex-col gap-4 relative bg-[url('/assets/images/cta-teach.svg')] bg-no-repeat bg-right-top bg-[length:300px_200px]">
+      <!-- Title -->
+      <h3 class="text-grey-33 font-bold text-3xl-bold leading-9">成為教師</h3>
+      
+      <!-- Description and Arrow -->
+      <div class="flex items-stretch gap-6 relative z-10">
+        <p class="flex-1 text-grey-33 text-base">
+          每個人都有擅長的知識技能，足夠的熱情創造更多附加價值，一起將這些技能分享給全世界吧！
+        </p>
+        <div class="flex justify-end items-center w-10 h-10">
+          <mat-icon [fontIcon]="TmfIcon.ArrowForward" class="text-grey-66 !w-6 !h-6"></mat-icon>
+        </div>
+      </div>
     </div>
   </div>
 </section>

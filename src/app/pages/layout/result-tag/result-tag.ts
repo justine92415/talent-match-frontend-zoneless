@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, signal, computed } from '@angular/core';
 import { MatIconModule, MatIconRegistry } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
+import Pagination from '@components/pagination/pagination';
 import { TmfIconEnum } from '@share/icon.enum';
 
 // 定義分類介面
@@ -24,7 +25,7 @@ interface FilterOption {
 
 @Component({
   selector: 'tmf-result-tag',
-  imports: [MatIconModule, CommonModule, CourseCard],
+  imports: [MatIconModule, CommonModule, CourseCard, Pagination],
   templateUrl: './result-tag.html',
   styles: ``
 })
@@ -33,10 +34,10 @@ export default class ResultTag {
   selectedSubCategoryId = 'all-art'; // 預設選中所有藝術
   selectedFilterId = 'latest'; // 預設篩選：最新課程
 
-  // 分頁相關
-  currentPage = 1;
-  totalResults = 120;
-  itemsPerPage = 12;
+  // 分頁相關 (使用 signals)
+  currentPage = signal(1);
+  totalResults = signal(120);
+  itemsPerPage = signal(12);
 
   // 主要分類資料
   mainCategories: Category[] = [
@@ -209,10 +210,10 @@ export default class ResultTag {
     this.matIconReg.setDefaultFontSetClass('material-symbols-outlined');
   }
 
-  // 計算總頁數
-  get totalPages(): number {
-    return Math.ceil(this.totalResults / this.itemsPerPage);
-  }
+  // 計算總頁數 (使用 computed)
+  totalPages = computed(() => {
+    return Math.ceil(this.totalResults() / this.itemsPerPage());
+  });
 
   // 獲取目前選中的分類名稱
   get selectedCategoryName(): string {
@@ -220,49 +221,15 @@ export default class ResultTag {
     return subCategory?.name || '所有藝術';
   }
 
-  // 獲取可見的頁碼
-  get visiblePages(): (number | string)[] {
-    const pages: (number | string)[] = [];
-    const totalPages = this.totalPages;
-    const current = this.currentPage;
-
-    if (totalPages <= 7) {
-      // 如果總頁數 <= 7，顯示所有頁碼
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // 否則顯示省略形式
-      pages.push(1);
-      
-      if (current > 3) {
-        pages.push('...');
-      }
-      
-      const start = Math.max(2, current - 1);
-      const end = Math.min(totalPages - 1, current + 1);
-      
-      for (let i = start; i <= end; i++) {
-        if (i !== 1 && i !== totalPages) {
-          pages.push(i);
-        }
-      }
-      
-      if (current < totalPages - 2) {
-        pages.push('...');
-      }
-      
-      if (totalPages > 1) {
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  }
 
   // TmfIcon getter for template
   get TmfIcon() {
     return TmfIconEnum;
+  }
+
+  // 頁碼變更處理
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
   }
 
   // 選擇主分類
@@ -270,52 +237,22 @@ export default class ResultTag {
     this.selectedMainCategoryId = categoryId;
     this.updateSubCategories(categoryId);
     this.selectedSubCategoryId = this.getDefaultSubCategory(categoryId);
-    this.currentPage = 1; // 重置頁碼
+    this.currentPage.set(1); // 重置頁碼
   }
 
   // 選擇子分類
   selectSubCategory(subCategoryId: string): void {
     this.selectedSubCategoryId = subCategoryId;
-    this.currentPage = 1; // 重置頁碼
+    this.currentPage.set(1); // 重置頁碼
   }
 
   // 選擇篩選選項
   selectFilter(filterId: string): void {
     this.selectedFilterId = filterId;
-    this.currentPage = 1; // 重置頁碼
+    this.currentPage.set(1); // 重置頁碼
     // 這裡可以加入重新排序課程的邏輯
   }
 
-  // 分頁相關方法
-  goToFirstPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage = 1;
-    }
-  }
-
-  goToPreviousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-    }
-  }
-
-  goToNextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-    }
-  }
-
-  goToLastPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage = this.totalPages;
-    }
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-    }
-  }
 
   // 更新子分類（這裡先只處理藝術創作，其他分類可以後續擴展）
   private updateSubCategories(categoryId: string): void {

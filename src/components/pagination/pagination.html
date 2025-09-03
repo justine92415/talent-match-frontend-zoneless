@@ -1,0 +1,65 @@
+<!-- 分頁區塊 -->
+<div class="flex justify-center items-center gap-2 pt-6">
+  <!-- 到第一頁 -->
+  <button
+    (click)="goToFirstPage()"
+    [disabled]="currentPage() === 1"
+    [ngClass]="{
+      'text-grey-9f cursor-not-allowed': currentPage() === 1,
+      'text-grey-33 hover:text-primary cursor-pointer': currentPage() !== 1
+    }"
+    class="w-12 h-12 flex items-center justify-center bg-grey-e9 rounded-lg transition-colors">
+    <mat-icon class="!w-6 !h-6 !text-[24px] !leading-6">first_page</mat-icon>
+  </button>
+
+  <!-- 上一頁 -->
+  <button
+    (click)="goToPreviousPage()"
+    [disabled]="currentPage() === 1"
+    [ngClass]="{
+      'text-grey-9f cursor-not-allowed': currentPage() === 1,
+      'text-grey-33 hover:text-primary cursor-pointer': currentPage() !== 1
+    }"
+    class="w-12 h-12 flex items-center justify-center bg-grey-e9 rounded-lg transition-colors">
+    <mat-icon class="!w-6 !h-6 !text-[24px] !leading-6">chevron_left</mat-icon>
+  </button>
+
+  <!-- 頁碼按鈕 -->
+  @for (page of visiblePages(); track page) {
+    <button
+      (click)="page !== '...' && goToPage(+page)"
+      [ngClass]="{
+        'bg-primary text-white': page === currentPage(),
+        'bg-white text-grey-33 border border-grey-d4 hover:border-primary': page !== currentPage() && page !== '...',
+        'bg-white text-grey-33 cursor-default': page === '...'
+      }"
+      [disabled]="page === '...'"
+      class="w-12 h-12 flex items-center justify-center rounded-lg text-base font-medium transition-colors">
+      {{ page }}
+    </button>
+  }
+
+  <!-- 下一頁 -->
+  <button
+    (click)="goToNextPage()"
+    [disabled]="currentPage() === totalPages()"
+    [ngClass]="{
+      'text-grey-9f cursor-not-allowed': currentPage() === totalPages(),
+      'text-grey-33 hover:text-primary cursor-pointer': currentPage() !== totalPages()
+    }"
+    class="w-12 h-12 flex items-center justify-center bg-white border border-grey-d4 rounded-lg hover:border-primary transition-colors">
+    <mat-icon class="!w-6 !h-6 !text-[24px] !leading-6">chevron_right</mat-icon>
+  </button>
+
+  <!-- 到最後一頁 -->
+  <button
+    (click)="goToLastPage()"
+    [disabled]="currentPage() === totalPages()"
+    [ngClass]="{
+      'text-grey-9f cursor-not-allowed': currentPage() === totalPages(),
+      'text-grey-33 hover:text-primary cursor-pointer': currentPage() !== totalPages()
+    }"
+    class="w-12 h-12 flex items-center justify-center bg-white border border-grey-d4 rounded-lg hover:border-primary transition-colors">
+    <mat-icon class="!w-6 !h-6 !text-[24px] !leading-6">last_page</mat-icon>
+  </button>
+</div>

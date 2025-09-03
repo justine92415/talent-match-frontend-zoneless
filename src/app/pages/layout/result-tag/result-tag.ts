@@ -1,5 +1,5 @@
 import { Component, signal, computed } from '@angular/core';
-import { MatIconModule, MatIconRegistry } from "@angular/material/icon";
+import { MatIconModule } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
 import Pagination from '@components/pagination/pagination';
@@ -202,14 +202,6 @@ export default class ResultTag {
     }
   ];
 
-  constructor(
-    private matIconReg: MatIconRegistry
-  ) {}
-
-  ngOnInit(): void {
-    this.matIconReg.setDefaultFontSetClass('material-symbols-outlined');
-  }
-
   // 計算總頁數 (使用 computed)
   totalPages = computed(() => {
     return Math.ceil(this.totalResults() / this.itemsPerPage());
@@ -220,7 +212,6 @@ export default class ResultTag {
     const subCategory = this.subCategories.find(sub => sub.id === this.selectedSubCategoryId);
     return subCategory?.name || '所有藝術';
   }
-
 
   // TmfIcon getter for template
   get TmfIcon() {

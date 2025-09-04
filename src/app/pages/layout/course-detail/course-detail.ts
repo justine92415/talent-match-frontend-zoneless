@@ -7,10 +7,11 @@ import { CourseDetailSectionTitle } from "@components/course-detail-section-titl
 import { Button } from "@components/button/button";
 import { StarRating } from "@components/star-rating/star-rating";
 import { ReviewCard } from "@components/review-card/review-card";
+import { WeeklyCalendar } from "@components/weekly-calendar/weekly-calendar";
 
 @Component({
   selector: 'tmf-course-detail',
-  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button, StarRating, ReviewCard],
+  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button, StarRating, ReviewCard, WeeklyCalendar],
   templateUrl: './course-detail.html',
   styles: ``
 })

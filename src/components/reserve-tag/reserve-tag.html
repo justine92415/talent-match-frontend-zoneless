@@ -1,0 +1,20 @@
+<div 
+  class="w-full h-full rounded-lg flex justify-center items-center gap-1 transition-colors"
+  [class]="currentConfig().bgColor"
+  [attr.aria-label]="currentConfig().ariaLabel"
+  role="status">
+  
+  <span 
+    class="material-symbols-outlined"
+    [class]="currentConfig().textColor + ' ' + currentConfig().iconSize">
+    {{ currentConfig().icon }}
+  </span>
+  
+  @if (currentConfig().text) {
+    <p 
+      class="text-sm font-bold"
+      [class]="currentConfig().textColor">
+      {{ currentConfig().text }}
+    </p>
+  }
+</div>

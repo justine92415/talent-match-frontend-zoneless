@@ -155,8 +155,8 @@ export class Header {
       type: 'class',
       title: '上課提醒：明天上午9:00有課程...',
       timeAgo: '1 天前',
-      icon: TmfIconEnum.NotificationsActive,
       backgroundColor: 'bg-orange-90',
+      icon: TmfIconEnum.NotificationsActive,
       iconColor: 'text-primary'
     },
     {

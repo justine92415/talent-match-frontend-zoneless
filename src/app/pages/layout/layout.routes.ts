@@ -11,6 +11,16 @@ const routes: Routes = [
     path: 'home',
     loadComponent: () => import('./home/home'),
   },
+  {
+    // 搜尋結果頁 - 標籤
+    path: 'result-tag',
+    loadComponent: () => import('./result-tag/result-tag'),
+  },
+  {
+    // 搜尋結果頁 - 關鍵字
+    path: 'result-keyword',
+    loadComponent: () => import('./result-keyword/result-keyword'),
+  }
 ];
 
 export default routes;

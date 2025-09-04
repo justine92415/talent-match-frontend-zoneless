@@ -1,0 +1,182 @@
+<!-- 分類搜尋結果頁面上半部區塊 -->
+<section class="bg-grey-f7 py-10 pb-20 h-111 overflow-hidden relative border-b border-transparent" style="border-image: linear-gradient(to right, transparent, #8B5CF6, transparent) 1;">
+  <div class="mx-auto container relative">
+    <!-- 背景裝飾圖片 -->
+    <div class="absolute right-[-50px] top-0 w-105 h-105">
+      <img
+        src="assets/images/itemArea_bg.png"
+        alt="背景裝飾"
+        class="w-full h-full object-cover"
+      />
+    </div>
+    <div class="flex flex-col gap-6">
+      <!-- Section Title -->
+      <div class="flex items-start justify-start relative h-19">
+        <!-- Decorative Icon -->
+        <div class="w-16 h-16">
+          <img
+            src="/assets/images/orange-80-decorate.svg"
+            alt=""
+            class="w-full h-full object-contain"
+          />
+        </div>
+        <!-- Title Text - Overlapping the icon at bottom area -->
+        <h2
+          class="absolute -bottom-1 text-3xl font-bold text-grey-33 font-noto-sans-tc tracking-wider text-center"
+        >
+          專業導師群
+        </h2>
+      </div>
+      <div class="flex justify-start gap-6">
+        <!-- 教師卡片 1: 跟著 Eric 學設計 -->
+        <div class="flex flex-col justify-center items-center gap-3 px-4 w-48">
+          <!-- 教師頭像 -->
+          <div class="w-40 h-40 rounded-full bg-grey-d4 border border-grey-e9 overflow-hidden">
+            <img 
+              src="assets/images/teacher-avatar-1.jpg" 
+              alt="跟著 Eric 學設計"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <!-- 教師資訊 -->
+          <div class="flex flex-col justify-center items-center gap-1 w-full">
+            <!-- 教師姓名 -->
+            <h3 class="text-lg-bold text-grey-33 text-center">跟著 Eric 學設計</h3>
+            <!-- 評分 -->
+            <div class="flex items-center gap-1">
+              <div class="flex items-center gap-0">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <mat-icon class="material-symbols-outlined filled !text-yellow !w-3 !h-3 !text-[12px] !leading-3">
+                    {{
+                      star <= Math.floor(4.5)
+                        ? TmfIcon.Star
+                        : star === Math.ceil(4.5) && 4.5 % 1 !== 0
+                        ? TmfIcon.StarHalf
+                        : TmfIcon.StarOutline
+                    }}
+                  </mat-icon>
+                }
+              </div>
+              <div class="flex gap-1">
+                <span class="text-sm font-medium text-grey-33">4.5</span>
+                <span class="text-sm font-medium text-grey-66">(666)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 教師卡片 2: 齊齊cy -->
+        <div class="flex flex-col justify-center items-center gap-3 px-4 w-48">
+          <!-- 教師頭像 -->
+          <div class="w-40 h-40 rounded-full bg-grey-d4 border border-grey-e9 overflow-hidden">
+            <img 
+              src="assets/images/teacher-avatar-2.jpg" 
+              alt="齊齊cy"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <!-- 教師資訊 -->
+          <div class="flex flex-col justify-center items-center gap-1 w-full">
+            <!-- 教師姓名 -->
+            <h3 class="text-lg-bold text-grey-33 text-center">齊齊cy</h3>
+            <!-- 評分 -->
+            <div class="flex items-center gap-1">
+              <div class="flex items-center gap-0">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <mat-icon class="material-symbols-outlined filled !text-yellow !w-3 !h-3 !text-[12px] !leading-3">
+                    {{
+                      star <= Math.floor(5.0)
+                        ? TmfIcon.Star
+                        : star === Math.ceil(5.0) && 5.0 % 1 !== 0
+                        ? TmfIcon.StarHalf
+                        : TmfIcon.StarOutline
+                    }}
+                  </mat-icon>
+                }
+              </div>
+              <div class="flex gap-1">
+                <span class="text-sm font-medium text-grey-33">5.0</span>
+                <span class="text-sm font-medium text-grey-66">(23)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 教師卡片 3: Ray Chen -->
+        <div class="flex flex-col justify-center items-center gap-3 px-4 w-48">
+          <!-- 教師頭像 -->
+          <div class="w-40 h-40 rounded-full bg-grey-d4 border border-grey-e9 overflow-hidden">
+            <img 
+              src="assets/images/teacher-avatar-3.jpg" 
+              alt="Ray Chen"
+              class="w-full h-full object-cover"
+            />
+          </div>
+          <!-- 教師資訊 -->
+          <div class="flex flex-col justify-center items-center gap-1 w-full">
+            <!-- 教師姓名 -->
+            <h3 class="text-lg-bold text-grey-33 text-center">Ray Chen</h3>
+            <!-- 評分 -->
+            <div class="flex items-center gap-1">
+              <div class="flex items-center gap-0">
+                @for (star of [1,2,3,4,5]; track star) {
+                  <mat-icon class="material-symbols-outlined filled !text-yellow !w-3 !h-3 !text-[12px] !leading-3">
+                    {{
+                      star <= Math.floor(4.0)
+                        ? TmfIcon.Star
+                        : star === Math.ceil(4.0) && 4.0 % 1 !== 0
+                        ? TmfIcon.StarHalf
+                        : TmfIcon.StarOutline
+                    }}
+                  </mat-icon>
+                }
+              </div>
+              <div class="flex gap-1">
+                <span class="text-sm font-medium text-grey-33">4.0</span>
+                <span class="text-sm font-medium text-grey-66">(666)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- 課程卡片區塊 -->
+<section class="py-10">
+  <div class="container mx-auto">
+    <!-- 搜尋結果 Header -->
+    <div class="flex justify-between items-center mb-10">
+      <!-- 搜尋結果文字 -->
+      <div class="flex items-end gap-2 text-3xl-bold text-grey-33">
+        <span>共 {{ totalResults() }} 筆與「</span>
+        <span class="text-purple">藝術</span>
+        <span>」相關課程</span>
+      </div>
+      
+      <!-- 篩選選項 -->
+      <div class="flex gap-0">
+        <div class="flex items-center justify-center box-border px-4 border-r border-grey-d4 text-grey-66">最新課程</div>
+        <div class="flex items-center justify-center box-border px-4 border-r border-grey-d4 text-orange-55 text-base-bold">最高人氣</div>
+        <div class="flex items-center justify-center box-border px-4 border-grey-d4 text-grey-66">最低價格</div>
+      </div>
+    </div>
+
+    <!-- 課程卡片網格 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <tmf-course-card 
+        *ngFor="let course of courses; trackBy: trackByCourse"
+        [course]="course"
+        class="w-full">
+      </tmf-course-card>
+    </div>
+
+    <!-- 分頁區塊 -->
+    <tmf-pagination 
+      [currentPage]="currentPage()"
+      [totalResults]="totalResults()"
+      [itemsPerPage]="itemsPerPage()"
+      (pageChange)="onPageChange($event)">
+    </tmf-pagination>
+  </div>
+</section>

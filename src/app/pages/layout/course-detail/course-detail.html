@@ -88,27 +88,8 @@
           <div
             class="flex items-center gap-3 pt-6 xl:flex-grow xl:items-end xl:pt-0"
           >
-            <button
-              (click)="addFavorite()"
-              class="gap-1 rounded-lg border border-white bg-white px-4 py-2 text-primary hover:bg-primary hover:text-white hover:border-primary duration-100"
-            >
-              <div class="flex items-center justify-center">
-                <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
-                  >heart_plus</mat-icon
-                >
-                <p class="text-sm">收藏課程</p>
-              </div>
-            </button>
-
-            <button
-              (click)="copyToClipboard()"
-              class="gap-1 rounded-lg border border-white bg-transparent px-4 py-2 text-white"
-            >
-              <div class="flex items-center justify-center">
-                <mat-icon class="!text-xl !leading-5 !w-5 !h-5">share</mat-icon>
-                <p class="text-sm">分享課程</p>
-              </div>
-            </button>
+            <tmf-button class="h-10" variant="tertiary" iconPosition="left" iconName="heart_plus">收藏課程</tmf-button>
+            <tmf-button class="h-10" variant="ghost" iconPosition="left" iconName="share">分享課程</tmf-button>
           </div>
         </div>
       </div>

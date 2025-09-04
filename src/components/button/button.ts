@@ -5,7 +5,7 @@ import { TmfIconType } from '@share/icon.enum';
 
 type ButtonIconPosition = 'left' | 'right';
 type ButtonIconName = TmfIconType;
-type ButtonVariant = 'primary' | 'secondary' | 'tertiary';
+type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost';
 
 @Component({
   selector: 'tmf-button',

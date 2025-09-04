@@ -5,7 +5,9 @@
     'pr-2' : iconName() && iconPosition() === 'right',
     'text-white bg-primary hover:bg-purple': variant() === 'primary',
     'text-primary border border-primary hover:bg-primary hover:text-white':
-      variant() === 'secondary'
+      variant() === 'secondary',
+    'text-primary bg-white hover:text-white hover:bg-primary' : variant() === 'tertiary',
+    'text-white bg-transparent border border-white hover:bg-white hover:text-primary' : variant() === 'ghost'
   }"
 >
   <p class="text-base font-normal">

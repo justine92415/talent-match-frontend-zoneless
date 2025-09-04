@@ -3,7 +3,7 @@
     [style]="{
       backgroundImage: 'url(' + 'assets/images/guitar-course.png' + ')'
     }"
-    class="relative h-[538px] w-full bg-cover bg-center bg-no-repeat xl:h-[575px]"
+    class="relative h-134.5 w-full bg-cover bg-center bg-no-repeat xl:h-[575px]"
   >
     <div
       class="h-full w-full bg-[#10101099] px-3 pb-12 pt-6 backdrop-blur-sm xl:flex xl:items-center xl:p-0"
@@ -58,17 +58,21 @@
             <div
               class="flex items-center justify-center gap-1 text-white xl:border-r xl:border-grey-9f xl:pr-[0.6875rem]"
             >
-              <mat-icon class="!text-xl !leading-5 !w-5 !h-5">pin_drop</mat-icon>
+              <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
+                >pin_drop</mat-icon
+              >
               <p>台北市 永和區</p>
             </div>
             <div
-              class="flex h-full items-center justify-center gap-1 text-white xl:border-r xl:border-grey-9f xl:pr-[0.6875rem]"
+              class="font-inter flex h-full items-center justify-center gap-1 text-white xl:border-r xl:border-grey-9f xl:pr-[0.6875rem]"
             >
-              <!-- <tmf-star-rating [rating]="course.rate!"></tmf-star-rating> -->
+              <tmf-star-rating [rating]="4"></tmf-star-rating>
               <p class="text-sm font-medium">5.0</p>
               <p class="text-sm font-medium">( 23 )</p>
             </div>
-            <div class="hidden items-center gap-1 text-white xl:flex">
+            <div
+              class="font-inter hidden items-center gap-1 text-white xl:flex"
+            >
               <mat-icon class="!text-xl !leading-5 !w-5 !h-5">face</mat-icon>
               <p>120 人學習</p>
             </div>
@@ -89,7 +93,9 @@
               class="gap-1 rounded-lg border border-white bg-white px-4 py-2 text-primary hover:bg-primary hover:text-white hover:border-primary duration-100"
             >
               <div class="flex items-center justify-center">
-                <mat-icon class="!text-xl !leading-5 !w-5 !h-5">heart_plus</mat-icon>
+                <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
+                  >heart_plus</mat-icon
+                >
                 <p class="text-sm">收藏課程</p>
               </div>
             </button>
@@ -162,7 +168,9 @@
     <div class="mb-6 flex flex-col gap-12 xl:min-w-[845px] xl:pr-6">
       <!-- 課程介紹 -->
       <section id="sectionA" #section>
-        <tmf-course-detail-section-title>課程介紹</tmf-course-detail-section-title>
+        <tmf-course-detail-section-title
+          >課程介紹</tmf-course-detail-section-title
+        >
         <p
           class="mb-4 text-sm text-grey-33 xl:text-base"
           [innerHTML]="'course.content'"
@@ -175,18 +183,21 @@
 
       <!-- 授課時間 -->
       <section id="sectionB" #section>
-        <tmf-course-detail-section-title>授課時間</tmf-course-detail-section-title>
+        <tmf-course-detail-section-title
+          >授課時間</tmf-course-detail-section-title
+        >
 
         <div class="custom-scrollbar w-full overflow-x-auto pb-8">
           <!-- 日曆 -->
-           
         </div>
       </section>
 
       <!-- 學生評論 -->
       <section id="sectionC" #section>
-        <div class="mb-4 flex justify-between">
-          <tmf-course-detail-section-title>學生評論</tmf-course-detail-section-title>
+        <div class="h-9 mb-4 flex justify-between">
+          <tmf-course-detail-section-title
+            >學生評論</tmf-course-detail-section-title
+          >
           <tmf-button variant="secondary" [iconName]="'keyboard_arrow_right'">
             <p class="text-sm font-normal">顯示所有評價</p>
           </tmf-button>
@@ -194,47 +205,28 @@
         <!-- 評論區 -->
         <div class="flex flex-col gap-4">
           <!-- 評論卡片 -->
-          <!-- @for (review of course.reviews; track $index) { @if ($index < 2) {
-          <div
-            class="flex flex-col gap-3 rounded-xl border border-grey-d4 bg-white p-3 xl:gap-6 xl:p-6"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <img
-                  class="h-12 w-12 rounded-full border border-tmf-gray-6"
-                  src="https://fakeimg.pl/48/"
-                  alt=""
-                />
-                <div>
-                  <p class="mb-1 text-base font-medium text-grey-33">
-                    {{ review.nick_name }}
-                  </p>
-                  <tmf-star-rating [rating]="review.rate"></tmf-star-rating>
-                </div>
-              </div>
-              <div
-                class="hidden text-sm font-medium text-grey-9f xl:block xl:self-start"
-              >
-                {{ review.createdAt | date : "yyyy-MM-dd" }}
-              </div>
-            </div>
-            <div>
-              <p
-                class="text-sm text-grey-33"
-                [innerHTML]="review.comment"
-              ></p>
-            </div>
-            <div class="text-sm font-medium text-grey-9f xl:hidden">
-              {{ review.createdAt | date : "yyyy-MM-dd" }}
-            </div>
-          </div>
-          } } -->
+          <tmf-review-card
+            class="w-full"
+            type="bordered"
+            [review]="{
+              id: 'review-1',
+              name: 'Eric Clapton',
+              date: '2023-08-09',
+              title: '可以一展長才的平台',
+              content:
+                '可以認識不同領域的高手，並且把喜歡的領域做推廣，是一件開心的事。',
+              rating: 5,
+              avatar: '/assets/images/teacher-avatar-1.jpg'
+            }"
+          ></tmf-review-card>
         </div>
       </section>
 
       <!-- 教師履歷 -->
       <section id="sectionD" #section>
-        <tmf-course-detail-section-title>教師履歷</tmf-course-detail-section-title>
+        <tmf-course-detail-section-title
+          >教師履歷</tmf-course-detail-section-title
+        >
         <div
           class="flex flex-col gap-3 rounded-xl border border-orange-85 bg-white p-3 xl:gap-6 xl:p-6"
         >
@@ -245,9 +237,7 @@
               alt=""
             />
             <div>
-              <p
-                class="text-lg font-medium text-grey-33 xl:mb-1 xl:text-2xl"
-              >
+              <p class="text-lg font-medium text-grey-33 xl:mb-1 xl:text-2xl">
                 Eric Clapton
               </p>
               <p class="text-sm font-medium text-grey-9f">
@@ -303,7 +293,9 @@
             <button (click)="openTeacherDetailPage()">
               <div class="flex items-center gap-1 text-primary">
                 <p class="text-sm xl:text-base">了解更多教師履歷</p>
-                <mat-icon class="!text-xl !leading-5 !w-5 !h-5">chevron_right</mat-icon>
+                <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
+                  >chevron_right</mat-icon
+                >
               </div>
             </button>
           </div>
@@ -417,7 +409,9 @@
     class="hidden bg-grey-f7 pb-20 pt-10 xl:flex xl:items-center xl:justify-center"
   >
     <div class="xl:container xl:w-320">
-      <tmf-course-detail-section-title>其他推薦課程</tmf-course-detail-section-title>
+      <tmf-course-detail-section-title
+        >其他推薦課程</tmf-course-detail-section-title
+      >
       <div class="flex gap-6">
         <!-- @if (recommendCourse$ | async; as recommendCourses) { @for (
         recommendCourse of recommendCourses; track recommendCourse.course_id ) {

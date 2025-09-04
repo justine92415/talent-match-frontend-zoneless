@@ -5,10 +5,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { CourseDetailSectionTitle } from "@components/course-detail-section-title/course-detail-section-title";
 import { Button } from "@components/button/button";
+import { StarRating } from "@components/star-rating/star-rating";
+import { ReviewCard } from "@components/review-card/review-card";
 
 @Component({
   selector: 'tmf-course-detail',
-  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button],
+  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button, StarRating, ReviewCard],
   templateUrl: './course-detail.html',
   styles: ``
 })

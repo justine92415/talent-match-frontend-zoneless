@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'tmf-course-detail-section-title',
@@ -7,5 +7,6 @@ import { Component } from '@angular/core';
   styles: `
     :host { display: block; }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CourseDetailSectionTitle {}

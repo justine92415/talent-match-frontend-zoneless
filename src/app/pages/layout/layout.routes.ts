@@ -20,6 +20,11 @@ const routes: Routes = [
     // 搜尋結果頁 - 關鍵字
     path: 'result-keyword',
     loadComponent: () => import('./result-keyword/result-keyword'),
+  },
+  {
+    // 課程詳情頁
+    path: 'course-detail/:id',
+    loadComponent: () => import('./course-detail/course-detail'),
   }
 ];
 

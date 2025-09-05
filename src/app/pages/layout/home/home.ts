@@ -6,10 +6,11 @@ import { CourseCard, CourseCardData } from '@components/course-card/course-card'
 import { ReviewCard, ReviewData } from '@components/review-card/review-card';
 import { SwiperWapper, SwiperConfig } from '@components/swiper-wapper/swiper-wapper';
 import { TmfIconEnum } from '@share/icon.enum';
+import { StarRating } from "@components/star-rating/star-rating";
 
 @Component({
   selector: 'tmf-home',
-  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon],
+  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon, StarRating],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styles: ``
@@ -159,7 +160,7 @@ export default class Home {
         avatar: '/assets/images/teacher-avatar-3.jpg'
       },
       rating: {
-        score: 4.0,
+        score: 3.8,
         count: 333
       }
     },

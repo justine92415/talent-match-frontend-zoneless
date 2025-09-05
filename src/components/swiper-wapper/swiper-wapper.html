@@ -6,7 +6,7 @@
     [disabled]="!canGoPrev()"
     (click)="goPrev()"
   >
-    <mat-icon [fontIcon]="TmfIcon.KeyboardArrowLeft"></mat-icon>
+    <mat-icon>{{TmfIcon.KeyboardArrowLeft}}</mat-icon>
   </button>
 
   <!-- Swiper Container -->
@@ -22,6 +22,6 @@
     [disabled]="!canGoNext()"
     (click)="goNext()"
   >
-    <mat-icon [fontIcon]="TmfIcon.KeyboardArrowRight"></mat-icon>
+    <mat-icon> {{TmfIcon.KeyboardArrowRight}} </mat-icon>
   </button>
 </div>

@@ -1,8 +1,10 @@
 <div
   class="box-border h-12 relative flex items-center w-full bg-white rounded-lg border transition-all duration-200"
-  [class]="isFocused() ? 
-    'border-2 border-primary shadow-[0px_0px_8px_0px_rgba(250,189,158,1)]' : 
-    'border border-grey-d4'"
+  [class]="
+    isFocused()
+      ? 'border-2 border-primary shadow-[0px_0px_8px_0px_rgba(250,189,158,1)]'
+      : 'border border-grey-d4'
+  "
 >
   <input
     [type]="type()"
@@ -14,18 +16,15 @@
     (blur)="onBlur()"
     class="flex-1 px-4 py-3 bg-transparent text-grey-33 text-base leading-6 tracking-wider placeholder:text-grey-9f focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
   />
-  
+
   @if (hasIcon()) {
-    <button
-      type="button"
-      (click)="onIconClick()"
-      [disabled]="disabled()"
-      class="flex-shrink-0 p-2 mr-2 text-grey-33 hover:text-primary transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      <mat-icon
-        class="!w-6 !h-6 !text-2xl !leading-6"
-        [fontIcon]="safeIconName()"
-      ></mat-icon>
-    </button>
+  <button
+    type="button"
+    (click)="onIconClick()"
+    [disabled]="disabled()"
+    class="flex-shrink-0 p-2 mr-2 text-grey-33 hover:text-primary transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
+  >
+    <mat-icon class="!w-6 !h-6 !text-2xl !leading-6"> {{ safeIconName() }} </mat-icon>
+  </button>
   }
 </div>

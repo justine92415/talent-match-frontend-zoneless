@@ -1,0 +1,46 @@
+<div class="w-full overflow-x-auto pb-8">
+  <!-- 週曆表格 -->
+  <div class="min-w-160 border border-primary">
+    <!-- 表格結構 -->
+    <div class="flex">
+      <!-- 時間欄位 -->
+      <div class="flex flex-col">
+        <!-- 空白區域（對應星期標題的位置） -->
+        <div class="w-16 h-16 bg-orange-95 border-b border-primary"></div>
+        <!-- 時間列表 -->
+        <div class="w-16 bg-orange-95 border-primary">
+          @for (time of times; track $index; let i = $index) {
+          <div class="h-16 flex flex-col justify-center items-center py-2  border-b border-dashed border-orange-85">
+            <p class="text-base font-black text-grey-33">{{ i + 1 }}</p>
+            <p class="text-sm font-bold text-primary">{{ time }}</p>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- 日期欄位 -->
+      <div class="flex-1 flex">
+        @for (day of schedule; track day.date; let last = $last) {
+        <div class="flex-1 flex flex-col">
+          <!-- 星期標題 -->
+          <div [class]="'h-16 bg-orange-95 border-b border-primary flex flex-col justify-center items-center py-2 px-3 opacity-80'">
+            <p class="text-lg font-bold text-black">{{ day.week }}</p>
+            <p class="text-sm font-bold text-grey-9f">{{ day.date | date : "MM/dd" }}</p>
+          </div>
+          <!-- 時間槽位 -->
+          <div class="flex-1 flex flex-col">
+            @for (slot of day.slots; track $index; let timeIndex = $index; let isLast = $last; let isLastSlot = $last) {
+            <div [class]="'h-16 p-2 opacity-80' + (!isLastSlot ? ' border-b border-dashed border-orange-85' : '')">
+              <tmf-reserve-tag
+                class="w-full h-full"
+                [reserveStatus]="slot.status"
+              ></tmf-reserve-tag>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

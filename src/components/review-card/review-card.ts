@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
-import { TmfIconEnum } from '@share/icon.enum';
+import { NgClass } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  Input,
+} from '@angular/core';
+import { StarRating } from '@components/star-rating/star-rating';
 
 export interface ReviewData {
   id: string;
@@ -12,30 +17,20 @@ export interface ReviewData {
   avatar?: string;
 }
 
+type ReviewCardType = 'bordered' | 'shadowed';
+
 @Component({
   selector: 'tmf-review-card',
-  imports: [MatIcon],
+  imports: [StarRating, NgClass],
   templateUrl: './review-card.html',
-  styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styles: `
+    :host {
+      display: block;
+    }
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReviewCard {
-  @Input() review!: ReviewData;
-
-  get TmfIcon() {
-    return TmfIconEnum;
-  }
-
-  get fullStars(): number[] {
-    return Array.from({ length: Math.floor(this.review.rating) }, (_, i) => i + 1);
-  }
-
-  get hasHalfStar(): boolean {
-    return this.review.rating % 1 !== 0;
-  }
-
-  get emptyStars(): number[] {
-    const emptyCount = 5 - Math.ceil(this.review.rating);
-    return Array.from({ length: emptyCount }, (_, i) => i + 1);
-  }
+  review = input.required<ReviewData>();
+  type = input<ReviewCardType>('bordered');
 }

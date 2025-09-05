@@ -46,20 +46,10 @@
     <div class="mr-4 flex h-10 flex-col items-start justify-between">
       <p class="text-sm font-normal text-grey-9f">評分</p>
       <div class="flex items-center gap-1">
-        <div class="flex items-center gap-0">
-          @for (star of [1,2,3,4,5]; track star) {
-          <mat-icon class="material-symbols-outlined filled !text-yellow !w-3 !h-3 !text-[12px] !leading-3">
-            {{
-              star <= Math.floor(course.rating.score)
-                ? TmfIcon.Star
-                : star === Math.ceil(course.rating.score) &&
-                  course.rating.score % 1 !== 0
-                ? TmfIcon.StarHalf
-                : TmfIcon.StarOutline
-            }}
-          </mat-icon>
-          }
-        </div>
+        <tmf-star-rating
+          [rating]="course.rating.score"
+          starSize="small"
+        ></tmf-star-rating>
         <p class="flex font-inter items-center gap-1 text-sm font-medium">
           <span class="text-black">{{ course.rating.score }}</span>
           <span class="text-grey-66">({{ course.rating.count }})</span>

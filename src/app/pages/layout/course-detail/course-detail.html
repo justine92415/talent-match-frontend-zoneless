@@ -325,16 +325,6 @@
         <div
           class="flex items-center justify-between gap-3 border-b border-dashed border-grey-d4 pb-6 xl:gap-4"
         >
-          <!-- <button
-            class="flex-grow rounded-lg py-2.5 text-base font-bold text-white xl:py-3 xl:text-lg"
-            [ngClass]="{
-              'bg-grey-9f': !this.formGroup.controls.purchase_item_id.value,
-              'bg-primary': this.formGroup.controls.purchase_item_id.value
-            }"
-            (click)="addToCart()"
-          >
-            立即購買
-          </button> -->
           <tmf-button class="w-full h-13" variant="primary" [disabled]="!this.formGroup.controls.purchase_item_id.value">立即購買</tmf-button>
           <button
             class="h-13 w-13 box-border group rounded-lg border p-3 transition-all duration-300 ease-in-out hover:w-auto hover:px-4"

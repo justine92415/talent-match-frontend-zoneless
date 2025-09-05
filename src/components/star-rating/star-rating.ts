@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { MatIconModule } from "@angular/material/icon";
 
+type StarSize = 'small' | 'medium' | 'large';
+
 @Component({
   selector: 'tmf-star-rating',
   imports: [MatIconModule],
@@ -10,7 +12,8 @@ import { MatIconModule } from "@angular/material/icon";
 })
 export class StarRating {
   rating = input<number>(0); // 接收評分，範圍從 0 到 5
-  
+  starSize = input<StarSize>('small'); // 接收星星大小，預設為 'small'
+
   // 確保評分在 0-5 範圍內的計算屬性
   validatedRating = computed(() => {
     const currentRating = this.rating();
@@ -31,6 +34,17 @@ export class StarRating {
     const totalStars = 5;
     const filledStars = this.fullStars().length + this.halfStars();
     return Array(totalStars - filledStars).fill(0);
+  });
+
+  
+
+  starSizeClass = computed(() => {
+    const starSizeConfig: Record<StarSize, string> = {
+      small: '!text-xs !leading-3 !w-3 !h-3', // 小尺寸
+      medium: '!text-base !leading-4 !w-4 !h-4', // 中尺寸
+      large: '!text-xl !leading-5 !w-5 !h-5', // 大尺寸
+    };
+    return `!text-yellow ${starSizeConfig[this.starSize()] || starSizeConfig['small']}`;
   });
   
 }

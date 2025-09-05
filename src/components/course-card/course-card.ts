@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
+import { StarRating } from "@components/star-rating/star-rating";
 
 export interface CourseCardData {
   id: string;
@@ -22,7 +23,7 @@ export interface CourseCardData {
 
 @Component({
   selector: 'tmf-course-card',
-  imports: [MatIcon],
+  imports: [MatIcon, StarRating],
   templateUrl: './course-card.html',
   styles: `
     :host {

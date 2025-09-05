@@ -1,14 +1,14 @@
 <div class="flex items-center">
   @for (item of fullStars(); track $index) {
-  <mat-icon class="filled !text-yellow !text-xs !leading-3 !w-3 !h-3"
+  <mat-icon [class]="'filled ' + starSizeClass()"
     >star</mat-icon
   >
   } @if (halfStars()) {
-  <mat-icon class="!text-yellow !text-xs !leading-3 !w-3 !h-3"
+  <mat-icon [class]="starSizeClass()"
     >star_half</mat-icon
   >
   } @for (item of emptyStars(); track $index) {
-  <mat-icon class="!text-yellow !text-xs !leading-3 !w-3 !h-3"
+  <mat-icon [class]="starSizeClass()"
     >star_border</mat-icon
   >
   }

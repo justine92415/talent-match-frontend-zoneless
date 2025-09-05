@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+import { CurrencyPipe, NgClass } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,9 +11,10 @@ import { WeeklyCalendar } from "@components/weekly-calendar/weekly-calendar";
 
 @Component({
   selector: 'tmf-course-detail',
-  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button, StarRating, ReviewCard, WeeklyCalendar],
+  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button, StarRating, ReviewCard, WeeklyCalendar, CurrencyPipe],
   templateUrl: './course-detail.html',
-  styles: ``
+  styles: `
+  `
 })
 export default class CourseDetail {
   fb = inject(FormBuilder);

@@ -1,15 +1,4 @@
-<button
-  class="w-full h-full box-border flex justify-center gap-1 items-center px-4 rounded-lg cursor-pointer transition-colors duration-200"
-  [ngClass]="{
-    'flex-row-reverse': iconName() && iconPosition() === 'left',
-    'pr-2' : iconName() && iconPosition() === 'right',
-    'text-white bg-primary hover:bg-purple': variant() === 'primary',
-    'text-primary border border-primary hover:bg-primary hover:text-white':
-      variant() === 'secondary',
-    'text-primary bg-white hover:text-white hover:bg-primary' : variant() === 'tertiary',
-    'text-white bg-transparent border border-white hover:bg-white hover:text-primary' : variant() === 'ghost'
-  }"
->
+<button [class]="buttonClasses()" [disabled]="disabled()">
   <p class="text-base font-normal">
     <ng-content></ng-content>
   </p>

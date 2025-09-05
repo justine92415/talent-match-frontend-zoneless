@@ -88,8 +88,20 @@
           <div
             class="flex items-center gap-3 pt-6 xl:flex-grow xl:items-end xl:pt-0"
           >
-            <tmf-button class="h-10" variant="tertiary" iconPosition="left" iconName="heart_plus">收藏課程</tmf-button>
-            <tmf-button class="h-10" variant="ghost" iconPosition="left" iconName="share">分享課程</tmf-button>
+            <tmf-button
+              class="h-10"
+              variant="tertiary"
+              iconPosition="left"
+              iconName="heart_plus"
+              >收藏課程</tmf-button
+            >
+            <tmf-button
+              class="h-10"
+              variant="ghost"
+              iconPosition="left"
+              iconName="share"
+              >分享課程</tmf-button
+            >
           </div>
         </div>
       </div>
@@ -144,7 +156,7 @@
     </ul>
   </nav>
   <div
-    class="flex flex-col gap-6 px-3 pb-12 pt-6 xl:container xl:mx-auto xl:w-[1280px] xl:flex-row xl:px-3 xl:pb-20 xl:pt-10"
+    class="flex flex-col gap-6 pb-12 pt-6 xl:container xl:mx-auto xl:w-320 xl:flex-row xl:pb-20 xl:pt-10"
   >
     <div class="mb-6 flex flex-col gap-12 xl:min-w-[845px] xl:pr-6">
       <!-- 課程介紹 -->
@@ -172,7 +184,6 @@
           <!-- 日曆 -->
           <tmf-weekly-calendar></tmf-weekly-calendar>
         </div>
-         
       </section>
 
       <!-- 學生評論 -->
@@ -239,13 +250,7 @@
             <ul
               class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
             >
-              <!-- @for ( work_experience of course.teacher.work_experiences; track
-              $index ) {
-              <li>
-                {{ work_experience.company_name }} |
-                {{ work_experience.job_title }}
-              </li>
-              } -->
+              <li>2024-至今｜好棒音樂有限公司｜歌曲演唱表演人員</li>
             </ul>
           </div>
           <!-- 教育背景 -->
@@ -254,11 +259,7 @@
             <ul
               class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
             >
-              <!-- <li>
-                {{ course.teacher.learning_experience?.name }}
-                ｜
-                {{ course.teacher.learning_experience?.degree }}
-              </li> -->
+              <li>2018-2022｜國立台灣藝術大學－音樂學系｜學士</li>
             </ul>
           </div>
           <!-- 證照證書 -->
@@ -267,9 +268,7 @@
             <ul
               class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
             >
-              <!-- <li>
-                {{ course.teacher.teaching_certificates?.[0]?.license_name }}
-              </li> -->
+              <li>ISO 9001國際品質認證布拉格音樂機構晉級檢定合格證書</li>
             </ul>
           </div>
           <div class="flex justify-end">
@@ -294,39 +293,39 @@
         <div class="text-xl font-bold text-grey-33">課程方案</div>
         <!-- 方案選擇 -->
         <div class="flex flex-col gap-3" [formGroup]="formGroup">
-          <!-- @for (item of course.price_quantity; track item._id) {
-          <label class="custom-radio">
+          <label
+            class="box-border flex justify-between items-center px-6 py-4 border border-grey-d4 rounded-xl bg-white cursor-pointer transition-colors duration-200 has-[:checked]:border-primary xl:h-24"
+          >
             <input
               type="radio"
               [formControlName]="'purchase_item_id'"
               name="purchase_item_id"
-              [value]="item._id"
-              class="hidden"
+              [value]="'course-1'"
+              class="peer hidden"
             />
             <div>
-              <p class="mb-1 text-sm font-bold text-grey-33 xl:mb-2">
-                {{ item.quantity }} 堂課程
+              <p class="mb-1 text-base-bold text-grey-66 xl:mb-2">
+                1 堂課程
               </p>
               <div
-                class="flex gap-1 text-lg font-medium text-grey-33 xl:text-2xl"
+                class="font-inter flex gap-1 text-lg font-medium text-grey-33 xl:text-2xl"
               >
                 <p>NT$</p>
-                <p>{{ item.price }}</p>
+                <p>{{ 1000 | currency: ' ' : 'symbol':'1.0-0' }}</p>
               </div>
             </div>
             <span
-              class="material-symbols-outlined invisible text-[32px] leading-[32px] text-primary xl:text-[32px] xl:leading-8"
+              class="material-symbols-outlined !text-[32px] !leading-[32px] text-primary transition-opacity duration-200 opacity-0 peer-checked:opacity-100"
             >
               check
             </span>
           </label>
-          } -->
         </div>
         <!-- 立即購買、購物車 -->
         <div
-          class="flex items-center justify-between gap-3 border-b border-dashed border-grey-d4 pb-6"
+          class="flex items-center justify-between gap-3 border-b border-dashed border-grey-d4 pb-6 xl:gap-4"
         >
-          <button
+          <!-- <button
             class="flex-grow rounded-lg py-2.5 text-base font-bold text-white xl:py-3 xl:text-lg"
             [ngClass]="{
               'bg-grey-9f': !this.formGroup.controls.purchase_item_id.value,
@@ -335,34 +334,39 @@
             (click)="addToCart()"
           >
             立即購買
-          </button>
+          </button> -->
+          <tmf-button class="w-full h-13" variant="primary" [disabled]="!this.formGroup.controls.purchase_item_id.value">立即購買</tmf-button>
           <button
-            class="rounded-lg border px-3 py-[0.6875rem]"
+            class="h-13 w-13 box-border group rounded-lg border p-3 transition-all duration-300 ease-in-out hover:w-auto hover:px-4"
             [ngClass]="{
-              'border-grey-9f bg-grey-9f text-white':
+              'border-grey-9f bg-grey-9f text-white cursor-not-allowed':
                 !this.formGroup.controls.purchase_item_id.value,
-              'border-primary bg-white text-primary':
+              'border-primary bg-white text-primary cursor-pointer':
                 this.formGroup.controls.purchase_item_id.value
             }"
             (click)="addToCart()"
           >
-            <span
-              class="material-symbols-outlined flex items-center text-xl leading-5 xl:text-[28px] xl:leading-7"
-              >add_shopping_cart</span
-            >
+            <div class="flex items-center gap-0 group-hover:gap-2 transition-all duration-300 ease-in-out">
+              <span
+                class="material-symbols-outlined flex items-center text-xl leading-5 xl:!text-[28px] xl:!leading-7"
+                >shopping_cart</span
+              >
+              <span
+                class="whitespace-nowrap text-base-bold xl:text-lg-bold xl:leading-7 max-w-0 overflow-hidden transition-all duration-300 ease-in-out group-hover:max-w-30 opacity-0 group-hover:opacity-100"
+                >加入購物車</span
+              >
+            </div>
           </button>
         </div>
         <!-- 問卷 -->
         <div>
-          <p class="mb-3 text-sm text-grey-33 xl:text-base">
+          <p class="mb-3 text-sm text-grey-66 xl:text-base">
             或許你想在上課前先諮詢教師
           </p>
-          <button
-            class="w-full rounded-lg border border-purple bg-white py-[0.6875rem] text-base text-purple duration-100 hover:bg-purple hover:text-white xl:text-lg"
-            (click)="openSurvey()"
-          >
+          
+          <tmf-button variant="secondary" class="h-13" customClasses="bg-white text-purple border border-purple hover:bg-purple hover:text-white cursor-pointer"> 
             填寫課前諮詢問卷
-          </button>
+          </tmf-button>
         </div>
       </div>
     </div>
@@ -374,6 +378,7 @@
     <div class="flex gap-1 text-sm text-grey-33">
       <p>目前方案：</p>
       <p>單堂課程</p>
+      
     </div>
     <div class="flex items-center justify-between">
       <div class="flex gap-1 text-2xl font-medium text-grey-33">

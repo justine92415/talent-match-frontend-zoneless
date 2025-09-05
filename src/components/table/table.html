@@ -1,0 +1,12 @@
+<!-- 表格容器 -->
+<div class="w-full">
+  <!-- 表格標題列 (thead) -->
+  <div class="flex border-b border-grey-d4 bg-grey-66">
+    <ng-content select="[thead]"></ng-content>
+  </div>
+
+  <!-- 表格內容區 (tbody) -->
+  <div class="tbody-container">
+    <ng-content select="[tbody]"></ng-content>
+  </div>
+</div>

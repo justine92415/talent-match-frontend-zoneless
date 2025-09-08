@@ -8,9 +8,7 @@ import {
   signal,
   computed,
   OnDestroy,
-  Renderer2,
-  DOCUMENT,
-  ChangeDetectionStrategy
+  output
 } from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,47 +16,50 @@ import { Overlay, OverlayRef, OverlayConfig } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { ViewContainerRef } from '@angular/core';
 
-export interface SelectOption {
-  value: any;
+export interface SearchOption {
+  value: string;
   label: string;
 }
 
+export interface GlobalSearchValue {
+  type: string;
+  query: string;
+}
+
 @Component({
-  selector: 'tmf-input-select',
+  selector: 'tmf-input-global-search',
   imports: [MatIconModule],
-  templateUrl: './input-select.html',
-  styles: `
-    :host ::ng-deep .cdk-overlay-pane {
-      background: white !important;
-      border: 1px solid #F97316 !important;
-      border-radius: 12px !important;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
-    }
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  templateUrl: './input-global-search.html',
+  styles: ``,
 })
-export class InputSelect implements ControlValueAccessor, OnDestroy {
-  @ViewChild('trigger', { read: ElementRef }) trigger!: ElementRef;
+export class InputGlobalSearch implements ControlValueAccessor, OnDestroy {
+  @ViewChild('searchContainer', { read: ElementRef }) searchContainer!: ElementRef;
   @ViewChild('dropdownTemplate') dropdownTemplate!: TemplateRef<any>;
 
   // Input properties
-  placeholder = input<string>('請選擇');
-  options = input.required<SelectOption[]>();
+  placeholder = input<string>('準備好啟程了嗎？');
+  
+  // Output events
+  searchSubmit = output<GlobalSearchValue>();
+
+  // Search options
+  searchOptions = signal<SearchOption[]>([
+    { value: 'course', label: '依課程' },
+    { value: 'teacher', label: '依教師' }
+  ]);
 
   // Control state
-  private _value = signal<any>(null);
+  private _selectedOption = signal<SearchOption>(this.searchOptions()[0]);
+  private _searchValue = signal<string>('');
   isDisabled = signal<boolean>(false);
-  isOpen = signal<boolean>(false);
+  isDropdownOpen = signal<boolean>(false);
 
   // Computed properties
-  selectedValue = computed(() => this._value());
-  selectedLabel = computed(() => {
-    const option = this.options().find(opt => opt.value === this._value());
-    return option?.label || '';
-  });
+  selectedOption = computed(() => this._selectedOption());
+  searchValue = computed(() => this._searchValue());
 
   // Control value accessor callbacks
-  private onChangeCallback = (value: any) => {};
+  private onChangeCallback = (value: GlobalSearchValue) => {};
   private onTouchedCallback = () => {};
 
   // CDK Overlay
@@ -81,15 +82,22 @@ export class InputSelect implements ControlValueAccessor, OnDestroy {
   }
 
   // ControlValueAccessor implementation
-  writeValue(value: any): void {
-    this._value.set(value);
+  writeValue(value: GlobalSearchValue): void {
+    if (value) {
+      // Find matching search option
+      const option = this.searchOptions().find(opt => opt.value === value.type);
+      if (option) {
+        this._selectedOption.set(option);
+      }
+      this._searchValue.set(value.query || '');
+    }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: GlobalSearchValue) => void): void {
     this.onChangeCallback = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouchedCallback = fn;
   }
 
@@ -97,11 +105,27 @@ export class InputSelect implements ControlValueAccessor, OnDestroy {
     this.isDisabled.set(isDisabled);
   }
 
+  // Event handlers
+  onSearchInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const query = target.value;
+    this._searchValue.set(query);
+    this.emitValue();
+  }
+
+  onTouched(): void {
+    this.onTouchedCallback();
+  }
+
+  onSearchClick(): void {
+    this.performSearch();
+  }
+
   // Dropdown methods
   toggleDropdown(): void {
     if (this.isDisabled()) return;
     
-    if (this.isOpen()) {
+    if (this.isDropdownOpen()) {
       this.closeDropdown();
     } else {
       this.openDropdown();
@@ -109,14 +133,14 @@ export class InputSelect implements ControlValueAccessor, OnDestroy {
   }
 
   openDropdown(): void {
-    if (this.overlayRef) return;
+    if (this.overlayRef || !this.searchContainer) return;
 
     const overlayConfig = new OverlayConfig({
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-transparent-backdrop',
       scrollStrategy: this.overlay.scrollStrategies.close(),
       positionStrategy: this.overlay.position()
-        .flexibleConnectedTo(this.trigger)
+        .flexibleConnectedTo(this.searchContainer)
         .withPositions([
           {
             originX: 'start',
@@ -140,7 +164,7 @@ export class InputSelect implements ControlValueAccessor, OnDestroy {
       this.closeDropdown();
     });
 
-    this.isOpen.set(true);
+    this.isDropdownOpen.set(true);
   }
 
   closeDropdown(): void {
@@ -148,13 +172,29 @@ export class InputSelect implements ControlValueAccessor, OnDestroy {
       this.overlayRef.dispose();
       this.overlayRef = null;
     }
-    this.isOpen.set(false);
+    this.isDropdownOpen.set(false);
   }
 
-  selectOption(option: SelectOption): void {
-    this._value.set(option.value);
-    this.onChangeCallback(option.value);
-    this.onTouchedCallback();
+  selectSearchType(option: SearchOption): void {
+    this._selectedOption.set(option);
+    this.emitValue();
     this.closeDropdown();
+  }
+
+  // Helper methods
+  private emitValue(): void {
+    const value: GlobalSearchValue = {
+      type: this.selectedOption().value,
+      query: this.searchValue()
+    };
+    this.onChangeCallback(value);
+  }
+
+  private performSearch(): void {
+    const value: GlobalSearchValue = {
+      type: this.selectedOption().value,
+      query: this.searchValue()
+    };
+    this.searchSubmit.emit(value);
   }
 }

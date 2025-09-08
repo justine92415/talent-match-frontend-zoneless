@@ -30,7 +30,7 @@ const routes: Routes = [
     // 購物車
     path: 'cart',
     loadComponent: () => import('./cart/cart'),
-  }
+  },
 ];
 
 export default routes;

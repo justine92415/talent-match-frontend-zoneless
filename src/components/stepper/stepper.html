@@ -1,0 +1,24 @@
+<!-- 步驟指示器 -->
+<div class="flex items-center justify-center gap-2">
+  @for (stepConfig of stepsConfig(); track stepConfig.id) {
+    <!-- 步驟項目 -->
+    <div class="flex items-center gap-2">
+      <div 
+        [class]="stepConfig.circleClasses"
+        (click)="onStepClick(stepConfig.id)"
+      >
+        <span class="font-inter text-base font-medium">{{ stepConfig.id }}</span>
+      </div>
+      
+      <!-- 只有當前步驟或所有步驟都顯示標籤（根據 showOnlyCurrentLabel 設定） -->
+      @if (stepConfig.showLabel) {
+        <span [class]="stepConfig.labelClasses">{{ stepConfig.label }}</span>
+      }
+    </div>
+    
+    <!-- 分隔線（除了最後一個步驟） -->
+    @if (!stepConfig.isLastStep) {
+      <div [class]="stepConfig.separatorClasses"></div>
+    }
+  }
+</div>

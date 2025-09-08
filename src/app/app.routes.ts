@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/reset-password/reset-password'),
   },
   {
+    path: 'dashboard',
+    loadComponent: () => import('./pages/dashboard-layout/dashboard-layout'),
+    loadChildren: () => import('./pages/dashboard-layout/dashboard-layout.routes'),
+  },
+  {
     path: '',
     loadComponent: () => import('./pages/layout/layout'),
     loadChildren: () => import('./pages/layout/layout.routes'),

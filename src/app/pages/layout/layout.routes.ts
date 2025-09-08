@@ -31,14 +31,6 @@ const routes: Routes = [
     path: 'cart',
     loadComponent: () => import('./cart/cart'),
   },
-  {
-    path: 'student',
-    loadChildren: () => import('./student/student.routes').then(m => m.default)
-  },
-  {
-    path: 'teacher',
-    loadChildren: () => import('./teacher/teacher.routes').then(m => m.default)
-  }
 ];
 
 export default routes;

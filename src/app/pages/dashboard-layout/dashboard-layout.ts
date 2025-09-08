@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { Header } from "@components/header/header";
 import { Footer } from "@components/footer/footer";
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
+import { DashboardSidebar } from "@components/dashboard-sidebar/dashboard-sidebar";
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'tmf-dashboard-layout',
-  imports: [Header, RouterOutlet, Footer, MatIcon, RouterLink, RouterLinkActive],
+  imports: [Header, RouterOutlet, Footer, DashboardSidebar],
   templateUrl: './dashboard-layout.html',
   styles: ``
 })

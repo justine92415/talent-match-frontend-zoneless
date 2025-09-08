@@ -25,6 +25,11 @@ const routes: Routes = [
     // 課程詳情頁
     path: 'course-detail/:id',
     loadComponent: () => import('./course-detail/course-detail'),
+  },
+  {
+    // 購物車
+    path: 'cart',
+    loadComponent: () => import('./cart/cart'),
   }
 ];
 

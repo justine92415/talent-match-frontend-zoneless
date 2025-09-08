@@ -30,6 +30,14 @@ const routes: Routes = [
     // 購物車
     path: 'cart',
     loadComponent: () => import('./cart/cart'),
+  },
+  {
+    path: 'student',
+    loadChildren: () => import('./student/student.routes').then(m => m.default)
+  },
+  {
+    path: 'teacher',
+    loadChildren: () => import('./teacher/teacher.routes').then(m => m.default)
   }
 ];
 

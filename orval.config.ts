@@ -8,7 +8,7 @@ export default defineConfig({
     output: {
       target: './src/app/api/generated',
       client: 'angular',
-      mode: 'split',
+      mode: 'tags-split', // 根據 OpenAPI tags 自動分組
       override: {
         angular: {
           provideIn: 'root',

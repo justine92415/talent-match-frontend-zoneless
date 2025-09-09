@@ -1,4 +1,5 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { SectionTitle } from '@components/section-title/section-title';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
@@ -7,15 +8,23 @@ import { ReviewCard, ReviewData } from '@components/review-card/review-card';
 import { SwiperWapper, SwiperConfig } from '@components/swiper-wapper/swiper-wapper';
 import { TmfIconEnum } from '@share/icon.enum';
 import { StarRating } from "@components/star-rating/star-rating";
+import { InputGlobalSearch, GlobalSearchValue } from "@components/form/input-global-search/input-global-search";
+import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'tmf-home',
-  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon, StarRating],
+  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon, StarRating, ReactiveFormsModule, InputGlobalSearch, JsonPipe],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styles: ``
 })
 export default class Home {
+  fb = inject(FormBuilder);
+
+  // Form for global search testing
+  searchForm = this.fb.group({
+    globalSearch: this.fb.control<GlobalSearchValue>({ type: 'course', query: '' })
+  });
   // Swiper configurations
   videoSwiperConfig: SwiperConfig = {
     slidesPerView: 4,
@@ -276,5 +285,10 @@ export default class Home {
 
   get TmfIcon() {
     return TmfIconEnum;
+  }
+
+  onGlobalSearch(searchValue: GlobalSearchValue) {
+    console.log('Global search submitted:', searchValue);
+    // Handle search logic here
   }
 }

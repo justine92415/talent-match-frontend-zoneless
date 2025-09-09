@@ -28,15 +28,19 @@
       </div>
 
       <!-- Form -->
-      <form class="space-y-6">
+      <form class="space-y-6" [formGroup]="form">
         <tmf-input-text
           type="email"
           placeholder="信箱"
-          type="email"
+          formControlName="email"
         ></tmf-input-text>
 
         <div class="space-y-2">
-          <tmf-input-text type="password" placeholder="密碼"></tmf-input-text>
+          <tmf-input-text
+            type="password"
+            placeholder="密碼"
+            formControlName="password"
+          ></tmf-input-text>
           <div class="flex justify-end">
             <a
               href="/reset-password"
@@ -81,6 +85,10 @@
           </div>
         </tmf-button>
       </form>
+
+      <pre>
+        {{ form.value | json }}
+      </pre>
     </div>
   </div>
 </tmf-layout-1-wapper>

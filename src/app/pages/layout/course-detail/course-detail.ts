@@ -1,4 +1,4 @@
-import { CurrencyPipe, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,10 +8,11 @@ import { Button } from "@components/button/button";
 import { StarRating } from "@components/star-rating/star-rating";
 import { ReviewCard } from "@components/review-card/review-card";
 import { WeeklyCalendar } from "@components/weekly-calendar/weekly-calendar";
+import { InputPlan } from "@components/form/input-plan/input-plan";
 
 @Component({
   selector: 'tmf-course-detail',
-  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button, StarRating, ReviewCard, WeeklyCalendar, CurrencyPipe],
+  imports: [MatIconModule, NgClass, RouterLink, ReactiveFormsModule, CourseDetailSectionTitle, Button, StarRating, ReviewCard, WeeklyCalendar, InputPlan],
   templateUrl: './course-detail.html',
   styles: `
   `

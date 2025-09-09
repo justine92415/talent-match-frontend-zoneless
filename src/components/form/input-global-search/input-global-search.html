@@ -1,0 +1,82 @@
+<!-- Global Search Input Container -->
+<div class="relative">
+  <!-- Search Input with Dropdown -->
+  <div
+    #searchContainer
+    class="box-border h-12 relative px-4 py-3 flex items-center gap-4 w-full bg-white rounded-lg border border-grey-d4 transition-all duration-200 focus-within:border-2 focus-within:border-primary focus-within:shadow-[0px_0px_8px_0px_rgba(250,189,158,1)]"
+    [class.border-red-500]="ctrlDir.touched && ctrlDir.invalid"
+  >
+    <!-- Left Dropdown Section -->
+    <div class="flex items-center">
+      <button
+        #dropdownTrigger
+        type="button"
+        class="flex items-center gap-1 text-grey-33 text-base leading-6 focus:outline-none"
+        (click)="toggleDropdown()"
+        [disabled]="isDisabled()"
+      >
+        <span>{{ selectedOption().label || "依課程" }}</span>
+        <mat-icon
+          class="!w-5 !h-5 !text-base transition-transform duration-200"
+        >
+          keyboard_arrow_down
+        </mat-icon>
+      </button>
+    </div>
+
+    <div class="flex items-center flex-1">
+      <!-- Search Input -->
+      <input
+        type="text"
+        [value]="searchValue()"
+        (input)="onSearchInput($event)"
+        (blur)="onTouched()"
+        [placeholder]="placeholder()"
+        [disabled]="isDisabled()"
+        class="flex-1 bg-transparent text-grey-33 text-base leading-6 tracking-wider placeholder:text-grey-9f focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+      />
+
+      <!-- Search Icon -->
+      <button
+        type="button"
+        class="flex items-center text-grey-33 hover:text-primary transition-colors duration-200 cursor-pointer"
+        (click)="onSearchClick()"
+        [disabled]="isDisabled()"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Dropdown Options -->
+  <ng-template #dropdownTemplate>
+    <div
+      class="bg-white rounded-xl shadow-lg py-3 z-50 w-full"
+      style="background-color: white !important"
+    >
+      <ul class="max-h-60 overflow-y-auto">
+        @for (option of searchOptions(); track option.value) {
+        <li>
+          <button
+            type="button"
+            class="w-full flex items-center px-6 py-3 text-base text-grey-33 hover:bg-grey-f7 hover:text-orange-55 transition-colors duration-200 cursor-pointer text-left"
+            [class.bg-grey-f7]="selectedOption().value === option.value"
+            (click)="selectSearchType(option)"
+          >
+            {{ option.label }}
+          </button>
+        </li>
+        }
+      </ul>
+    </div>
+  </ng-template>
+</div>
+
+<!-- Error Message -->
+<div>
+  @if(ctrlDir.touched && ctrlDir.invalid) {
+  <div class="mt-1 text-sm text-red-500">
+    {{ ctrlDir.getError("error") }}
+  </div>
+  }
+</div>

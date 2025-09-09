@@ -1,0 +1,29 @@
+<label
+  class="box-border flex justify-between items-center px-6 py-4 border border-grey-d4 rounded-xl bg-white cursor-pointer transition-colors duration-200 has-[:checked]:border-primary xl:h-24"
+>
+  <input
+    type="radio"
+    [value]="value()"
+    [name]="name()"
+    (change)="onChange($event)"
+    (blur)="onTouched()"
+    [disabled]="isDisabled()"
+    class="peer hidden"
+  />
+  <div>
+    <p class="mb-1 text-base-bold text-grey-66 xl:mb-2">
+      {{ title() }}
+    </p>
+    <div
+      class="font-inter flex gap-1 text-lg font-medium text-grey-33 xl:text-2xl"
+    >
+      <p>NT$</p>
+      <p>{{ price() | currency: ' ' : 'symbol':'1.0-0' }}</p>
+    </div>
+  </div>
+  <span
+    class="material-symbols-outlined !text-[32px] !leading-[32px] text-primary transition-opacity duration-200 opacity-0 peer-checked:opacity-100"
+  >
+    check
+  </span>
+</label>

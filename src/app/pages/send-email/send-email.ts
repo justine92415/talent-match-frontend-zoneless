@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { InputText } from "@components/input-text/input-text";
+import { InputText } from "@components/form/input-text/input-text";
 import { Button } from "@components/button/button";
 import { Layout1Wapper } from "@components/layout-1-wapper/layout-1-wapper";
 

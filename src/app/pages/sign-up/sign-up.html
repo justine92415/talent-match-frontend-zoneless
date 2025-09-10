@@ -28,14 +28,45 @@
       </div>
 
       <!-- Form -->
-      <form class="space-y-6">
-        <tmf-input-text placeholder="暱稱"></tmf-input-text>
-        <tmf-input-text type="email" placeholder="信箱"></tmf-input-text>
-        <tmf-input-text type="password" placeholder="密碼"></tmf-input-text>
-        <tmf-input-text type="password" placeholder="確認密碼"></tmf-input-text>
+      <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Error Message -->
+        @if (errorMessage()) {
+          <div
+            class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
 
-        <tmf-button class="h-15" [iconName]="'arrow_forward'"
-          >註冊帳號</tmf-button
+        <tmf-input-text
+          formControlName="nickName"
+          placeholder="暱稱"
+        ></tmf-input-text>
+
+        <tmf-input-text
+          type="email"
+          formControlName="email"
+          placeholder="信箱"
+        ></tmf-input-text>
+
+        <tmf-input-text
+          type="password"
+          formControlName="password"
+          placeholder="密碼"
+        ></tmf-input-text>
+
+        <tmf-input-text
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="確認密碼"
+        ></tmf-input-text>
+
+        <tmf-button
+          type="submit"
+          class="h-15"
+          [iconName]="'arrow_forward'"
+          [disabled]="!signUpForm.valid || isLoading()"
+          >{{ isLoading() ? "註冊中..." : "註冊帳號" }}</tmf-button
         >
 
         <!-- Divider -->

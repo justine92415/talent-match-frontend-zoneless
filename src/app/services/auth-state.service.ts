@@ -15,7 +15,7 @@ export class AuthStateService {
   private isAuthenticated = signal<boolean>(false);
 
   readonly user = this.userProfile.asReadonly();
-  readonly isLoggedIn = computed(() => this.isAuthenticated() && this.tokenService.isLoggedIn());
+  readonly isLoggedIn = computed(() => !!this.tokenService.getAccessToken());
   readonly userRole = computed(() => this.userProfile()?.role || null);
   readonly userName = computed(() => this.userProfile()?.nick_name || this.userProfile()?.name || null);
 
@@ -32,38 +32,39 @@ export class AuthStateService {
   }
 
   initializeAuthState(): void {
-    const hasToken = this.tokenService.isLoggedIn();
+    const hasToken = !!this.tokenService.getAccessToken();
+    this.isAuthenticated.set(hasToken);
     
     if (!hasToken) {
-      this.isAuthenticated.set(false);
       this.userProfile.set(null);
-      return;
     }
+    // 使用者資料會在需要時才載入
+    // 例如：個人頁面或透過其他方式觸發
+  }
 
-    // 如果有 token，嘗試從 API 獲取使用者資料
-    this.authService.getApiAuthProfile()
-      .pipe(
-        catchError((error) => {
-          console.error('Failed to get user profile:', error);
-          // API 失敗時清除登入狀態
-          this.clearAuthState();
-          return of(null);
-        })
-      )
-      .subscribe({
-        next: (response) => {
-          if (response?.data?.user) {
-            this.userProfile.set(response.data.user);
-            this.isAuthenticated.set(true);
-          } else {
-            this.clearAuthState();
-          }
-        }
-      });
+  // 新增：單純檢查 token 是否存在（同步方法）
+  hasToken(): boolean {
+    return !!this.tokenService.getAccessToken();
   }
 
   updateUserProfile(user: UserProfile): void {
     this.userProfile.set(user);
+  }
+
+  // 按需載入使用者資料（返回 Observable，讓調用方處理訂閱）
+  loadUserProfile() {
+    if (!this.hasToken()) {
+      this.clearAuthState();
+      return of(null);
+    }
+
+    return this.authService.getApiAuthProfile().pipe(
+      catchError((error) => {
+        console.error('Failed to get user profile:', error);
+        this.clearAuthState();
+        return of(null);
+      })
+    );
   }
 
   refreshToken() {

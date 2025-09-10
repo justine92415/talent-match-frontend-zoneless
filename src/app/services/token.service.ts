@@ -20,9 +20,6 @@ export class TokenService {
     return localStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
-  isLoggedIn(): boolean {
-    return !!this.getAccessToken();
-  }
 
   clearTokens(): void {
     localStorage.removeItem(this.ACCESS_TOKEN_KEY);

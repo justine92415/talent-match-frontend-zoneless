@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, viewChild, TemplateRef, ViewContainerRef, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, viewChild, TemplateRef, ViewContainerRef, computed, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { Router, RouterLink } from '@angular/router';
@@ -66,7 +66,7 @@ const DROPDOWN_IDS = {
   styleUrl: './header.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Header {
+export class Header implements OnInit {
   readonly cityDropdownTemplate = viewChild.required<TemplateRef<any>>('cityDropdownTemplate');
   readonly exploreDropdownTemplate = viewChild.required<TemplateRef<any>>('exploreDropdownTemplate');
   readonly notificationDropdownTemplate = viewChild.required<TemplateRef<any>>('notificationDropdownTemplate');
@@ -82,6 +82,22 @@ export class Header {
   readonly isLoggedIn = this.authStateService.isLoggedIn;
   readonly currentUser = this.authStateService.user;
   readonly userName = this.authStateService.userName;
+
+  ngOnInit() {
+    // 如果已登入但沒有使用者資料，就載入
+    if (this.isLoggedIn() && !this.currentUser()) {
+      this.authStateService.loadUserProfile().subscribe({
+        next: (response) => {
+          if (response?.data?.user) {
+            this.authStateService.updateUserProfile(response.data.user);
+          }
+        },
+        error: (error) => {
+          console.error('Failed to load user profile:', error);
+        }
+      });
+    }
+  }
 
   
   // 城市 Mock Data

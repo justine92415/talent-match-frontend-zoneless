@@ -6,7 +6,10 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authStateService = inject(AuthStateService);
   const router = inject(Router);
 
-  if (authStateService.isLoggedIn()) {
+  // 檢查是否有 token（同步方法）
+  const hasToken = authStateService.hasToken();
+  
+  if (hasToken) {
     return true;
   } else {
     // 未登入時導向登入頁面，並記住原本要去的頁面
@@ -22,7 +25,10 @@ export const guestOnlyGuard: CanActivateFn = (route, state) => {
   const authStateService = inject(AuthStateService);
   const router = inject(Router);
 
-  if (!authStateService.isLoggedIn()) {
+  // 檢查是否有 token（同步方法）
+  const hasToken = authStateService.hasToken();
+  
+  if (!hasToken) {
     return true;
   } else {
     // 已登入時導向首頁

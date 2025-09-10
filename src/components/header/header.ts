@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
 import { Button } from '@components/button/button';
@@ -58,6 +58,7 @@ interface UserMenuItem {
   label: string;
   icon: string;
   isDivider?: boolean;
+  route?: string; // 路由路徑
 }
 
 // 下拉選單 ID 常數
@@ -97,6 +98,7 @@ export class Header implements OnInit, AfterViewInit {
   dropdownManager = inject(DropdownManagerService);
   viewContainerRef = inject(ViewContainerRef);
   authService = inject(AuthService);
+  private router = inject(Router);
 
   // 認證相關的計算屬性
   isAuthenticated = this.authService.isAuthenticated;
@@ -270,53 +272,68 @@ export class Header implements OnInit, AfterViewInit {
     if (role === 'teacher') {
       return [
         {
-          id: 'teacher-profile',
+          id: 'teacher-info',
           label: '教師資訊管理',
           icon: TmfIconEnum.Face,
+          route: '/dashboard/teacher/info',
         },
         {
-          id: 'video-management',
+          id: 'teacher-videos',
           label: '影片管理',
           icon: TmfIconEnum.SmartDisplay,
+          route: '/dashboard/teacher/videos',
         },
         {
-          id: 'calendar-management',
-          label: '行事曆管理',
+          id: 'teacher-reservation',
+          label: '預約管理',
           icon: TmfIconEnum.EditCalendar,
+          route: '/dashboard/teacher/reservation',
         },
         {
-          id: 'course-management',
+          id: 'teacher-courses',
           label: '課程管理',
           icon: TmfIconEnum.LabProfile,
+          route: '/dashboard/teacher/courses',
         },
         {
-          id: 'transaction-history',
+          id: 'teacher-record',
           label: '交易紀錄',
           icon: TmfIconEnum.AccountBalanceWallet,
+          route: '/dashboard/teacher/record',
         },
         ...commonItems,
       ];
     } else if (role === 'student') {
       return [
         {
-          id: 'student-profile',
+          id: 'student-info',
           label: '學員資訊',
           icon: TmfIconEnum.Face,
+          route: '/dashboard/student/info',
         },
         {
-          id: 'my-courses',
+          id: 'student-courses',
           label: '我的課程',
           icon: TmfIconEnum.LabProfile,
+          route: '/dashboard/student/courses',
         },
         {
-          id: 'favorites',
+          id: 'student-favorites',
           label: '收藏清單',
           icon: TmfIconEnum.Favorite,
+          route: '/dashboard/student/favorites',
         },
         {
-          id: 'purchase-history',
-          label: '購買紀錄',
+          id: 'student-calendar',
+          label: '行事曆',
+          icon: TmfIconEnum.EditCalendar,
+          route: '/dashboard/student/calendar',
+        },
+        {
+          id: 'student-record',
+          label: '交易紀錄',
           icon: TmfIconEnum.AccountBalanceWallet,
+          route: '/dashboard/student/record',
         },
         ...commonItems,
       ];
@@ -366,13 +383,13 @@ export class Header implements OnInit, AfterViewInit {
   onUserMenuItemClick(item: UserMenuItem): void {
     if (item.isDivider) return;
 
-    console.log('點擊用戶選單項目：', item.label);
-    
     if (item.id === 'logout') {
       this.authService.logout();
+    } else if (item.route) {
+      // 有路由則導航
+      this.router.navigate([item.route]);
     } else {
-      // TODO: 實作其他選單項目的功能導航
-      console.log(`導航到: ${item.label}`);
+      console.log(`點擊選單項目: ${item.label} (無路由設定)`);
     }
 
     // 點擊選單項目後關閉下拉選單

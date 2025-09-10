@@ -1,18 +1,22 @@
 import { Routes } from '@angular/router';
+import { studentGuard, teacherGuard } from '@app/guards/role.guard';
+import { dashboardRedirectGuard } from '@app/guards/role-redirect.guard';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'student',
-    pathMatch: 'full',
+    canActivate: [dashboardRedirectGuard],
+    children: []
   },
   {
     path: 'student',
-    loadChildren: () => import('../layout/student/student.routes').then(m => m.default)
+    loadChildren: () => import('../layout/student/student.routes').then(m => m.default),
+    canActivate: [studentGuard]
   },
   {
     path: 'teacher',
-    loadChildren: () => import('../layout/teacher/teacher.routes').then(m => m.default)
+    loadChildren: () => import('../layout/teacher/teacher.routes').then(m => m.default),
+    canActivate: [teacherGuard]
   }
 ];
 

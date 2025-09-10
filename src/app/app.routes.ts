@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { guestGuard } from './guards/auth.guard';
+import { guestGuard, authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -26,6 +26,7 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard-layout/dashboard-layout'),
     loadChildren: () => import('./pages/dashboard-layout/dashboard-layout.routes'),
+    canActivate: [authGuard],
   },
   {
     path: '',

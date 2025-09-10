@@ -1,9 +1,19 @@
-import { ChangeDetectionStrategy, Component, signal, viewChild, TemplateRef, ViewContainerRef, computed, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  signal,
+  viewChild,
+  TemplateRef,
+  ViewContainerRef,
+  computed,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
-import { Button } from "@components/button/button";
+import { Button } from '@components/button/button';
 
 interface City {
   id: string;
@@ -53,7 +63,7 @@ const DROPDOWN_IDS = {
   EXPLORE: 'explore',
   NOTIFICATION: 'notification',
   CART: 'cart',
-  USER: 'user'
+  USER: 'user',
 } as const;
 
 @Component({
@@ -64,33 +74,27 @@ const DROPDOWN_IDS = {
   styleUrl: './header.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Header implements OnInit {
-  readonly cityDropdownTemplate = viewChild.required<TemplateRef<any>>('cityDropdownTemplate');
-  readonly exploreDropdownTemplate = viewChild.required<TemplateRef<any>>('exploreDropdownTemplate');
-  readonly notificationDropdownTemplate = viewChild.required<TemplateRef<any>>('notificationDropdownTemplate');
-  readonly cartDropdownTemplate = viewChild.required<TemplateRef<any>>('cartDropdownTemplate');
-  readonly userDropdownTemplate = viewChild.required<TemplateRef<any>>('userDropdownTemplate');
+export class Header {
+  readonly cityDropdownTemplate = viewChild.required<TemplateRef<any>>(
+    'cityDropdownTemplate',
+  );
+  readonly exploreDropdownTemplate = viewChild.required<TemplateRef<any>>(
+    'exploreDropdownTemplate',
+  );
+  readonly notificationDropdownTemplate = viewChild.required<TemplateRef<any>>(
+    'notificationDropdownTemplate',
+  );
+  readonly cartDropdownTemplate = viewChild.required<TemplateRef<any>>(
+    'cartDropdownTemplate',
+  );
+  readonly userDropdownTemplate = viewChild.required<TemplateRef<any>>(
+    'userDropdownTemplate',
+  );
 
   dropdownManager = inject(DropdownManagerService);
   viewContainerRef = inject(ViewContainerRef);
 
-  ngOnInit() {
-    // 如果已登入但沒有使用者資料，就載入
-    if (this.isLoggedIn() && !this.currentUser()) {
-      this.authStateService.loadUserProfile().subscribe({
-        next: (response) => {
-          if (response?.data?.user) {
-            this.authStateService.updateUserProfile(response.data.user);
-          }
-        },
-        error: (error) => {
-          console.error('Failed to load user profile:', error);
-        }
-      });
-    }
-  }
 
-  
   // 城市 Mock Data
   readonly cities = signal<City[]>([
     { id: 'all', name: '探索全部' },
@@ -173,7 +177,7 @@ export class Header implements OnInit {
       timeAgo: '1 天前',
       backgroundColor: 'bg-orange-90',
       icon: TmfIconEnum.NotificationsActive,
-      iconColor: 'text-primary'
+      iconColor: 'text-primary',
     },
     {
       id: 'system-update-1',
@@ -182,7 +186,7 @@ export class Header implements OnInit {
       timeAgo: '4 天前',
       icon: TmfIconEnum.Campaign,
       backgroundColor: 'bg-blue-95',
-      iconColor: 'text-blue-50'
+      iconColor: 'text-blue-50',
     },
     {
       id: 'class-reminder-2',
@@ -191,8 +195,8 @@ export class Header implements OnInit {
       timeAgo: '1 週前',
       icon: TmfIconEnum.NotificationsActive,
       backgroundColor: 'bg-orange-90',
-      iconColor: 'text-primary'
-    }
+      iconColor: 'text-primary',
+    },
   ]);
 
   // 購物車 Mock Data
@@ -203,7 +207,7 @@ export class Header implements OnInit {
       tags: ['高手班', '烹飪料理'],
       courseType: '十堂課程',
       price: 12000,
-      imageUrl: 'assets/images/cooking-course.jpg'
+      imageUrl: 'assets/images/cooking-course.jpg',
     },
     {
       id: 'piano-masterclass',
@@ -211,8 +215,8 @@ export class Header implements OnInit {
       tags: ['大師班', '音樂', '鋼琴'],
       courseType: '單堂課程',
       price: 1200,
-      imageUrl: 'assets/images/piano-course.jpg'
-    }
+      imageUrl: 'assets/images/piano-course.jpg',
+    },
   ]);
 
   // 用戶選單 Mock Data
@@ -286,8 +290,8 @@ export class Header implements OnInit {
 
   // 使用 computed 創建派生 signal
   readonly totalItems = computed(() => this.cartItems().length);
-  readonly totalPrice = computed(() => 
-    this.cartItems().reduce((sum, item) => sum + item.price, 0)
+  readonly totalPrice = computed(() =>
+    this.cartItems().reduce((sum, item) => sum + item.price, 0),
   );
 
   get TmfIconEnum() {
@@ -309,40 +313,60 @@ export class Header implements OnInit {
 
   onUserMenuItemClick(item: UserMenuItem): void {
     if (item.isDivider) return;
-    
+
     console.log('點擊用戶選單項目：', item.label);
     // TODO: 實作各個選單項目的功能
     if (item.id === 'logout') {
       console.log('執行登出邏輯');
     }
-    
+
     // 點擊選單項目後關閉下拉選單
     this.dropdownManager.closeDropdown(DROPDOWN_IDS.USER);
   }
 
   // 城市下拉選單控制
   toggleCityDropdown(trigger: HTMLElement): void {
-    this.dropdownManager.toggleDropdown(DROPDOWN_IDS.CITY, trigger, this.viewContainerRef);
+    this.dropdownManager.toggleDropdown(
+      DROPDOWN_IDS.CITY,
+      trigger,
+      this.viewContainerRef,
+    );
   }
 
   // 探索下拉選單控制
   toggleExploreDropdown(trigger: HTMLElement): void {
-    this.dropdownManager.toggleDropdown(DROPDOWN_IDS.EXPLORE, trigger, this.viewContainerRef);
+    this.dropdownManager.toggleDropdown(
+      DROPDOWN_IDS.EXPLORE,
+      trigger,
+      this.viewContainerRef,
+    );
   }
 
   // 通知下拉選單控制
   toggleNotificationDropdown(trigger: HTMLElement): void {
-    this.dropdownManager.toggleDropdown(DROPDOWN_IDS.NOTIFICATION, trigger, this.viewContainerRef);
+    this.dropdownManager.toggleDropdown(
+      DROPDOWN_IDS.NOTIFICATION,
+      trigger,
+      this.viewContainerRef,
+    );
   }
 
   // 購物車下拉選單控制
   toggleCartDropdown(trigger: HTMLElement): void {
-    this.dropdownManager.toggleDropdown(DROPDOWN_IDS.CART, trigger, this.viewContainerRef);
+    this.dropdownManager.toggleDropdown(
+      DROPDOWN_IDS.CART,
+      trigger,
+      this.viewContainerRef,
+    );
   }
 
   // 用戶下拉選單控制
   toggleUserDropdown(trigger: HTMLElement): void {
-    this.dropdownManager.toggleDropdown(DROPDOWN_IDS.USER, trigger, this.viewContainerRef);
+    this.dropdownManager.toggleDropdown(
+      DROPDOWN_IDS.USER,
+      trigger,
+      this.viewContainerRef,
+    );
   }
 
   // 城市選擇後的處理（需要關閉下拉選單）
@@ -397,45 +421,65 @@ export class Header implements OnInit {
 
   ngAfterViewInit(): void {
     // 註冊所有下拉選單
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CITY, this.cityDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
+    this.dropdownManager.registerDropdown(
+      DROPDOWN_IDS.CITY,
+      this.cityDropdownTemplate(),
+      {
+        originX: 'center',
+        originY: 'bottom',
+        overlayX: 'center',
+        overlayY: 'top',
+        offsetY: 0,
+      },
+    );
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.EXPLORE, this.exploreDropdownTemplate(), {
-      originX: 'start',
-      originY: 'bottom',
-      overlayX: 'start',
-      overlayY: 'top',
-      offsetY: 0,
-      offsetX: -8
-    });
+    this.dropdownManager.registerDropdown(
+      DROPDOWN_IDS.EXPLORE,
+      this.exploreDropdownTemplate(),
+      {
+        originX: 'start',
+        originY: 'bottom',
+        overlayX: 'start',
+        overlayY: 'top',
+        offsetY: 0,
+        offsetX: -8,
+      },
+    );
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.NOTIFICATION, this.notificationDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
+    this.dropdownManager.registerDropdown(
+      DROPDOWN_IDS.NOTIFICATION,
+      this.notificationDropdownTemplate(),
+      {
+        originX: 'center',
+        originY: 'bottom',
+        overlayX: 'center',
+        overlayY: 'top',
+        offsetY: 0,
+      },
+    );
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.CART, this.cartDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
+    this.dropdownManager.registerDropdown(
+      DROPDOWN_IDS.CART,
+      this.cartDropdownTemplate(),
+      {
+        originX: 'center',
+        originY: 'bottom',
+        overlayX: 'center',
+        overlayY: 'top',
+        offsetY: 0,
+      },
+    );
 
-    this.dropdownManager.registerDropdown(DROPDOWN_IDS.USER, this.userDropdownTemplate(), {
-      originX: 'center',
-      originY: 'bottom',
-      overlayX: 'center',
-      overlayY: 'top',
-      offsetY: 0
-    });
+    this.dropdownManager.registerDropdown(
+      DROPDOWN_IDS.USER,
+      this.userDropdownTemplate(),
+      {
+        originX: 'center',
+        originY: 'bottom',
+        overlayX: 'center',
+        overlayY: 'top',
+        offsetY: 0,
+      },
+    );
   }
 }

@@ -74,30 +74,20 @@
         </mat-icon>
       </div>
 
-      @if(isLoggedIn()) {
+      @if( true ) {
       <div class="flex justify-center items-center gap-2">
-        <!-- avatar -->
+        <!-- avtar -->
         <div
           #userTrigger
           class="relative py-2.5 lg:py-4.5"
           (click)="toggleUserDropdown(userTrigger)"
         >
           <div class="flex justify-center items-center gap-2 cursor-pointer">
-            <div class="w-11 h-11 rounded-full bg-grey-d4 flex justify-center items-center">
-              @if (currentUser()?.avatar_image) {
-                <img 
-                  [src]="currentUser()?.avatar_image" 
-                  [alt]="userName() || '使用者頭像'"
-                  class="w-full h-full rounded-full object-cover"
-                />
-              } @else {
-                <mat-icon class="text-grey-66">person</mat-icon>
-              }
-            </div>
+            <div class="w-11 h-11 rounded-full bg-grey-d4"></div>
             <p
               class="font-inter hidden text-lg font-medium leading-7 snap-normal lg:block"
             >
-              {{ userName() || '使用者' }}
+              Gill WUUUU
             </p>
           </div>
         </div>
@@ -117,7 +107,6 @@
           iconPosition="right"
           variant="primary"
           iconName="keyboard_arrow_right"
-          (click)="goToLogin()"
         >
           登入/註冊
         </tmf-button>
@@ -214,37 +203,10 @@
   </div>
 
   <div class="flex flex-col gap-4 pb-4">
-    @if(isLoggedIn()) {
-      <!-- 已登入：顯示使用者資訊和登出按鈕 -->
-      <div class="flex items-center gap-3 p-4 bg-grey-f7 rounded-xl">
-        <div class="w-12 h-12 rounded-full bg-grey-d4 flex justify-center items-center">
-          @if (currentUser()?.avatar_image) {
-            <img 
-              [src]="currentUser()?.avatar_image" 
-              [alt]="userName() || '使用者頭像'"
-              class="w-full h-full rounded-full object-cover"
-            />
-          } @else {
-            <mat-icon class="text-grey-66">person</mat-icon>
-          }
-        </div>
-        <div class="flex-1">
-          <p class="text-base font-medium text-grey-33">{{ userName() || '使用者' }}</p>
-          <p class="text-sm text-grey-66">{{ currentUser()?.email }}</p>
-        </div>
-      </div>
-      <tmf-button class="h-12" variant="secondary" (click)="logout()">登出</tmf-button>
-      <tmf-button class="h-12" variant="secondary">我要開課</tmf-button>
-    } @else {
-      <!-- 未登入：顯示登入和開課按鈕 -->
-      <tmf-button 
-        class="h-12" 
-        variant="primary" 
-        iconName="keyboard_arrow_right"
-        (click)="goToLogin()"
-      >登入/註冊</tmf-button>
-      <tmf-button class="h-12" variant="secondary">我要開課</tmf-button>
-    }
+    <tmf-button class="h-12" variant="primary" iconName="keyboard_arrow_right"
+      >登入/註冊</tmf-button
+    >
+    <tmf-button class="h-12" variant="secondary">我要開課</tmf-button>
   </div>
 </div>
 }

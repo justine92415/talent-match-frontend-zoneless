@@ -1,11 +1,9 @@
 import { ChangeDetectionStrategy, Component, signal, viewChild, TemplateRef, ViewContainerRef, computed, inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { Router, RouterLink } from '@angular/router';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
 import { Button } from "@components/button/button";
-import { AuthStateService } from '../../app/services/auth-state.service';
 
 interface City {
   id: string;
@@ -60,7 +58,7 @@ const DROPDOWN_IDS = {
 
 @Component({
   selector: 'tmf-header',
-  imports: [MatIconModule, OverlayModule, Button, RouterLink],
+  imports: [MatIconModule, OverlayModule, Button],
   providers: [DropdownManagerService],
   templateUrl: './header.html',
   styleUrl: './header.css',
@@ -75,13 +73,6 @@ export class Header implements OnInit {
 
   dropdownManager = inject(DropdownManagerService);
   viewContainerRef = inject(ViewContainerRef);
-  authStateService = inject(AuthStateService);
-  router = inject(Router);
-
-  // 登入狀態相關的 computed
-  readonly isLoggedIn = this.authStateService.isLoggedIn;
-  readonly currentUser = this.authStateService.user;
-  readonly userName = this.authStateService.userName;
 
   ngOnInit() {
     // 如果已登入但沒有使用者資料，就載入
@@ -320,29 +311,13 @@ export class Header implements OnInit {
     if (item.isDivider) return;
     
     console.log('點擊用戶選單項目：', item.label);
-    
+    // TODO: 實作各個選單項目的功能
     if (item.id === 'logout') {
-      this.logout();
-    } else {
-      // TODO: 實作其他選單項目的功能
-      console.log('導向：', item.label);
+      console.log('執行登出邏輯');
     }
     
     // 點擊選單項目後關閉下拉選單
     this.dropdownManager.closeDropdown(DROPDOWN_IDS.USER);
-  }
-
-  logout(): void {
-    this.authStateService.clearAuthState();
-    this.router.navigate(['/']);
-  }
-
-  goToLogin(): void {
-    this.router.navigate(['/login']);
-  }
-
-  goToSignUp(): void {
-    this.router.navigate(['/sign-up']);
   }
 
   // 城市下拉選單控制

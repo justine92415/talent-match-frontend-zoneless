@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { InputText } from '@components/form/input-text/input-text';
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
@@ -8,25 +8,15 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { emailValidator, passwordValidator } from '@share/validator';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { finalize } from 'rxjs';
-import { AuthenticationService } from '../../api/generated/authentication/authentication.service';
-import { AuthStateService } from '../../services/auth-state.service';
 
 @Component({
   selector: 'tmf-login',
-  imports: [
-    MatIcon,
-    InputText,
-    Button,
-    Layout1Wapper,
-    ReactiveFormsModule,
-    RouterLink,
-  ],
+  imports: [MatIcon, InputText, Button, Layout1Wapper, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styles: ``,
 })
 export default class Login {
-  private fb = inject(FormBuilder);
+  fb = inject(FormBuilder);
   private location = inject(Location);
   private router = inject(Router);
   private route = inject(ActivatedRoute);

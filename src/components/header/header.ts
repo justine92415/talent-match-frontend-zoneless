@@ -8,6 +8,7 @@ import {
   computed,
   inject,
   OnInit,
+  AfterViewInit,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -76,7 +77,7 @@ const DROPDOWN_IDS = {
   styleUrl: './header.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Header {
+export class Header implements OnInit, AfterViewInit {
   readonly cityDropdownTemplate = viewChild.required<TemplateRef<any>>(
     'cityDropdownTemplate',
   );
@@ -99,8 +100,9 @@ export class Header {
 
   // 認證相關的計算屬性
   isAuthenticated = this.authService.isAuthenticated;
-  userName = this.authService.userName;
-  userRole = this.authService.userRole;
+  user = this.authService.user;
+  userName = computed(() => this.user()?.nick_name || this.user()?.name || '用戶');
+  userRole = computed(() => this.user()?.role);
 
 
   // 城市 Mock Data
@@ -339,6 +341,13 @@ export class Header {
 
   get TmfIconEnum() {
     return TmfIconEnum;
+  }
+
+  ngOnInit(): void {
+    // 如果已登入但沒有用戶資訊，則載入
+    if (this.isAuthenticated() && !this.user()) {
+      this.authService.loadUserProfile().subscribe();
+    }
   }
 
   selectCity(city: City): void {

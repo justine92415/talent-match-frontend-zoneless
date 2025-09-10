@@ -16,7 +16,7 @@ export interface AuthTokens {
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: User | null;
+  user: User | null; // 從 API 獲取的完整用戶資訊
   tokens: AuthTokens | null;
   loading: boolean;
   error: string | null;
@@ -25,7 +25,6 @@ interface AuthState {
 const STORAGE_KEY = {
   ACCESS_TOKEN: 'tmf_access_token',
   REFRESH_TOKEN: 'tmf_refresh_token',
-  USER: 'tmf_user',
 } as const;
 
 @Injectable({
@@ -57,34 +56,22 @@ export class AuthService {
   private initializeAuthState(): void {
     const accessToken = localStorage.getItem(STORAGE_KEY.ACCESS_TOKEN);
     const refreshToken = localStorage.getItem(STORAGE_KEY.REFRESH_TOKEN);
-    const userData = localStorage.getItem(STORAGE_KEY.USER);
 
-    if (accessToken && refreshToken && userData) {
-      try {
-        const user: User = JSON.parse(userData);
-        const tokens: AuthTokens = {
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          token_type: 'Bearer',
-          expires_in: 3600 // 預設值，實際會從 token 解析
-        };
+    if (accessToken && refreshToken) {
+      const tokens: AuthTokens = {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        token_type: 'Bearer',
+        expires_in: 3600
+      };
 
-        if (this.isTokenValid(accessToken)) {
-          this.updateAuthState({
-            isAuthenticated: true,
-            user,
-            tokens,
-            loading: false,
-            error: null
-          });
-        } else {
-          // Token 過期，嘗試刷新
-          this.refreshTokenSilently();
-        }
-      } catch (error) {
-        console.error('Failed to parse stored user data:', error);
-        this.clearStoredAuth();
-      }
+      this.updateAuthState({
+        isAuthenticated: true,
+        user: null, // 用戶資訊稍後從 API 獲取
+        tokens,
+        loading: false,
+        error: null
+      });
     }
   }
 
@@ -118,7 +105,7 @@ export class AuthService {
       loading: false,
       error: null
     });
-    this.router.navigate(['/login']);
+    this.router.navigate(['/home']);
   }
 
   refreshToken(): Observable<boolean> {
@@ -176,7 +163,6 @@ export class AuthService {
     // 保存到 localStorage
     localStorage.setItem(STORAGE_KEY.ACCESS_TOKEN, access_token);
     localStorage.setItem(STORAGE_KEY.REFRESH_TOKEN, refresh_token);
-    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(user));
 
     // 更新狀態
     this.updateAuthState({
@@ -198,37 +184,37 @@ export class AuthService {
     });
   }
 
-  private refreshTokenSilently(): void {
-    this.refreshToken().subscribe({
-      next: (success) => {
-        if (!success) {
-          this.clearStoredAuth();
-        }
-      },
-      error: () => {
-        this.clearStoredAuth();
-      }
-    });
-  }
 
   private clearStoredAuth(): void {
     localStorage.removeItem(STORAGE_KEY.ACCESS_TOKEN);
     localStorage.removeItem(STORAGE_KEY.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEY.USER);
   }
 
   private updateAuthState(newState: AuthState): void {
     this.authState.set(newState);
   }
 
-  private isTokenValid(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Math.floor(Date.now() / 1000);
-      return payload.exp > currentTime;
-    } catch {
-      return false;
+
+  loadUserProfile(): Observable<boolean> {
+    if (!this.isAuthenticated()) {
+      return of(false);
     }
+
+    return this.authApi.getApiAuthProfile().pipe(
+      tap((response) => {
+        if (response.status === 'success' && response.data?.user) {
+          this.updateAuthState({
+            ...this.authState(),
+            user: response.data.user
+          });
+        }
+      }),
+      map((response) => response.status === 'success' && !!response.data?.user),
+      catchError((error) => {
+        console.error('Failed to load user profile:', error);
+        return of(false);
+      })
+    );
   }
 
   clearError(): void {

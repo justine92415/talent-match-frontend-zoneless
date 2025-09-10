@@ -14,6 +14,20 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'ghost';
     :host {
       display: block;
     }
+    
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid transparent;
+      border-top: 2px solid currentColor;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -22,18 +36,20 @@ export class Button {
   iconName = input<ButtonIconName>(null);
   variant = input<ButtonVariant>('primary');
   disabled = input<boolean>(false);
+  loading = input<boolean>(false);
   customClasses = input<string>('');
 
   // 預計算按鈕樣式
   buttonClasses = computed(() => {
     const variant = this.variant();
     const isDisabled = this.disabled();
+    const isLoading = this.loading();
     const baseClasses = 'w-full h-full box-border flex justify-center gap-1 items-center px-4 rounded-lg transition-colors duration-200';
     
-    // disabled 狀態覆蓋所有 variant 樣式
-    if (isDisabled) {
-      const iconClasses = this.iconName() && this.iconPosition() === 'left' ? 'flex-row-reverse' : '';
-      const paddingClasses = this.iconName() && this.iconPosition() === 'right' ? 'pr-2' : '';
+    // disabled 或 loading 狀態覆蓋所有 variant 樣式
+    if (isDisabled || isLoading) {
+      const iconClasses = this.iconName() && this.iconPosition() === 'left' && !isLoading ? 'flex-row-reverse' : '';
+      const paddingClasses = this.iconName() && this.iconPosition() === 'right' && !isLoading ? 'pr-2' : '';
       
       return [baseClasses, 'border-grey-9f bg-grey-9f text-white cursor-not-allowed', iconClasses, paddingClasses]
         .filter(Boolean)

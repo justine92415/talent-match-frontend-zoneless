@@ -54,7 +54,6 @@ export class InputText implements ControlValueAccessor {
     this.ctrlDir.statusChanges?.pipe(
       distinctUntilChanged(),
     ).subscribe(() => {
-      console.log('Status changed:', this.ctrlDir.status, this.ctrlDir.errors);
       this.cdr.markForCheck();
     });
   }

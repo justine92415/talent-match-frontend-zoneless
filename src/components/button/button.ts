@@ -38,6 +38,7 @@ export class Button {
   disabled = input<boolean>(false);
   loading = input<boolean>(false);
   customClasses = input<string>('');
+  type = input<'button' | 'submit' | 'reset'>('button');
 
   // 預計算按鈕樣式
   buttonClasses = computed(() => {

@@ -11,9 +11,11 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
+import { RouterLink } from '@angular/router';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
 import { Button } from '@components/button/button';
+import { AuthService } from '@app/services/auth.service';
 
 interface City {
   id: string;
@@ -68,7 +70,7 @@ const DROPDOWN_IDS = {
 
 @Component({
   selector: 'tmf-header',
-  imports: [MatIconModule, OverlayModule, Button],
+  imports: [MatIconModule, OverlayModule, Button, RouterLink],
   providers: [DropdownManagerService],
   templateUrl: './header.html',
   styleUrl: './header.css',
@@ -93,6 +95,12 @@ export class Header {
 
   dropdownManager = inject(DropdownManagerService);
   viewContainerRef = inject(ViewContainerRef);
+  authService = inject(AuthService);
+
+  // 認證相關的計算屬性
+  isAuthenticated = this.authService.isAuthenticated;
+  userName = this.authService.userName;
+  userRole = this.authService.userRole;
 
 
   // 城市 Mock Data
@@ -219,66 +227,101 @@ export class Header {
     },
   ]);
 
-  // 用戶選單 Mock Data
-  readonly userMenuItems = signal<UserMenuItem[]>([
-    {
-      id: 'teacher-profile',
-      label: '教師資訊管理',
-      icon: TmfIconEnum.Face,
-    },
-    {
-      id: 'video-management',
-      label: '影片管理',
-      icon: TmfIconEnum.SmartDisplay,
-    },
-    {
-      id: 'calendar-management',
-      label: '行事曆管理',
-      icon: TmfIconEnum.EditCalendar,
-    },
-    {
-      id: 'course-management',
-      label: '課程管理',
-      icon: TmfIconEnum.LabProfile,
-    },
-    {
-      id: 'transaction-history',
-      label: '交易紀錄',
-      icon: TmfIconEnum.AccountBalanceWallet,
-    },
-    {
-      id: 'account-settings',
-      label: '帳戶管理',
-      icon: TmfIconEnum.Settings,
-    },
-    {
-      id: 'divider-1',
-      label: '',
-      icon: '',
-      isDivider: true,
-    },
-    {
-      id: 'messages',
-      label: '訊息',
-      icon: TmfIconEnum.Forum,
-    },
-    {
-      id: 'announcements',
-      label: '公告',
-      icon: TmfIconEnum.Notifications,
-    },
-    {
-      id: 'divider-2',
-      label: '',
-      icon: '',
-      isDivider: true,
-    },
-    {
-      id: 'logout',
-      label: '登出',
-      icon: TmfIconEnum.MoveItem,
-    },
-  ]);
+  // 用戶選單 - 根據角色動態生成
+  readonly userMenuItems = computed<UserMenuItem[]>(() => {
+    const role = this.userRole();
+    const commonItems: UserMenuItem[] = [
+      {
+        id: 'account-settings',
+        label: '帳戶管理',
+        icon: TmfIconEnum.Settings,
+      },
+      {
+        id: 'divider-1',
+        label: '',
+        icon: '',
+        isDivider: true,
+      },
+      {
+        id: 'messages',
+        label: '訊息',
+        icon: TmfIconEnum.Forum,
+      },
+      {
+        id: 'announcements',
+        label: '公告',
+        icon: TmfIconEnum.Notifications,
+      },
+      {
+        id: 'divider-2',
+        label: '',
+        icon: '',
+        isDivider: true,
+      },
+      {
+        id: 'logout',
+        label: '登出',
+        icon: TmfIconEnum.MoveItem,
+      },
+    ];
+
+    if (role === 'teacher') {
+      return [
+        {
+          id: 'teacher-profile',
+          label: '教師資訊管理',
+          icon: TmfIconEnum.Face,
+        },
+        {
+          id: 'video-management',
+          label: '影片管理',
+          icon: TmfIconEnum.SmartDisplay,
+        },
+        {
+          id: 'calendar-management',
+          label: '行事曆管理',
+          icon: TmfIconEnum.EditCalendar,
+        },
+        {
+          id: 'course-management',
+          label: '課程管理',
+          icon: TmfIconEnum.LabProfile,
+        },
+        {
+          id: 'transaction-history',
+          label: '交易紀錄',
+          icon: TmfIconEnum.AccountBalanceWallet,
+        },
+        ...commonItems,
+      ];
+    } else if (role === 'student') {
+      return [
+        {
+          id: 'student-profile',
+          label: '學員資訊',
+          icon: TmfIconEnum.Face,
+        },
+        {
+          id: 'my-courses',
+          label: '我的課程',
+          icon: TmfIconEnum.LabProfile,
+        },
+        {
+          id: 'favorites',
+          label: '收藏清單',
+          icon: TmfIconEnum.Favorite,
+        },
+        {
+          id: 'purchase-history',
+          label: '購買紀錄',
+          icon: TmfIconEnum.AccountBalanceWallet,
+        },
+        ...commonItems,
+      ];
+    }
+
+    return commonItems;
+  });
 
   readonly selectedCity = signal<string>('台北市');
   readonly selectedCategory = signal<Category | null>(null);
@@ -315,9 +358,12 @@ export class Header {
     if (item.isDivider) return;
 
     console.log('點擊用戶選單項目：', item.label);
-    // TODO: 實作各個選單項目的功能
+    
     if (item.id === 'logout') {
-      console.log('執行登出邏輯');
+      this.authService.logout();
+    } else {
+      // TODO: 實作其他選單項目的功能導航
+      console.log(`導航到: ${item.label}`);
     }
 
     // 點擊選單項目後關閉下拉選單

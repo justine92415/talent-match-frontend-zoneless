@@ -31,7 +31,7 @@
       </div>
 
       <!-- Form -->
-      <form class="space-y-6" [formGroup]="form">
+      <form class="space-y-6" [formGroup]="form" (ngSubmit)="onSubmit()">
         <tmf-input-text
           type="email"
           placeholder="信箱"

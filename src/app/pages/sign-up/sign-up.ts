@@ -1,7 +1,8 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { Location } from '@angular/common';
 import { finalize } from 'rxjs';
 import { TmfIconEnum } from '@share/icon.enum';
 import { nickNameValidator, userEmailValidator, passwordValidator, confirmPasswordValidator, passwordMatchValidator } from '@share/validator';
@@ -13,7 +14,7 @@ import { RegisterRequest } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-sign-up',
-  imports: [MatIcon, Button, InputText, Layout1Wapper, ReactiveFormsModule],
+  imports: [MatIcon, Button, InputText, Layout1Wapper, ReactiveFormsModule, RouterLink],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './sign-up.html',
   styles: ``
@@ -22,6 +23,7 @@ export default class SignUp {
   private fb = inject(FormBuilder);
   private authService = inject(AuthenticationService);
   private router = inject(Router);
+  private location = inject(Location);
 
   signUpForm: FormGroup;
   isLoading = signal(false);
@@ -38,6 +40,10 @@ export default class SignUp {
 
   get TmfIcon() {
     return TmfIconEnum;
+  }
+
+  goBack() {
+    this.location.back();
   }
 
   onSubmit() {

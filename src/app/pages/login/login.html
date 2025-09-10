@@ -7,6 +7,7 @@
       <!-- Sign Up Link -->
       <div class="flex items-center justify-between mb-6">
         <button
+          (click)="goBack()"
           class="cursor-pointer flex items-center text-grey-66 hover:text-grey-33 transition-colors"
         >
           <mat-icon class="!w-6 !h-6">
@@ -16,7 +17,9 @@
 
         <div class="text-grey-66">
           還不是會員?
-          <a href="/sign-up" class="text-primary font-medium hover:underline"
+          <a
+            [routerLink]="['/sign-up']"
+            class="text-primary font-medium hover:underline"
             >註冊</a
           >
         </div>
@@ -43,7 +46,7 @@
           ></tmf-input-text>
           <div class="flex justify-end">
             <a
-              href="/reset-password"
+              [routerLink]="['/reset-password']"
               class="text-sm text-grey-66 hover:text-primary hover:underline"
             >
               忘記密碼？
@@ -85,10 +88,6 @@
           </div>
         </tmf-button>
       </form>
-
-      <pre>
-        {{ form.value | json }}
-      </pre>
     </div>
   </div>
 </tmf-layout-1-wapper>

@@ -5,20 +5,26 @@ import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { JsonPipe } from '@angular/common';
 import { emailValidator } from '@share/validator';
+import { RouterLink } from '@angular/router';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'tmf-login',
-  imports: [MatIcon, InputText, Button, Layout1Wapper, ReactiveFormsModule, JsonPipe],
+  imports: [MatIcon, InputText, Button, Layout1Wapper, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styles: ``,
 })
 export default class Login {
   fb = inject(FormBuilder);
+  private location = inject(Location);
 
   get TmfIcon() {
     return TmfIconEnum;
+  }
+
+  goBack() {
+    this.location.back();
   }
 
   form = this.fb.group({

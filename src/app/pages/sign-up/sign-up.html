@@ -8,6 +8,8 @@
       <div class="flex items-center justify-between mb-6">
         <button
           class="cursor-pointer flex items-center text-grey-66 hover:text-grey-33 transition-colors"
+          (click)="goBack()"
+          type="button"
         >
           <mat-icon class="!w-6 !h-6">
             {{ TmfIcon.KeyboardArrowLeft }}
@@ -15,7 +17,7 @@
         </button>
         <div class="text-grey-66">
           已經是會員?
-          <a href="/login" class="text-primary font-medium hover:underline"
+          <a [routerLink]="['/login']" class="text-primary font-medium hover:underline"
             >登入</a
           >
         </div>

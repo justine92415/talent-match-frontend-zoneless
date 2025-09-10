@@ -1,34 +1,91 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { InputText } from '@components/form/input-text/input-text';
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { emailValidator } from '@share/validator';
-import { RouterLink } from '@angular/router';
+import { emailValidator, passwordValidator } from '@share/validator';
+import { RouterLink, Router } from '@angular/router';
 import { Location } from '@angular/common';
+import { finalize } from 'rxjs';
+import { AuthenticationService } from '../../api/generated/authentication/authentication.service';
+import { AuthStateService } from '../../services/auth-state.service';
 
 @Component({
   selector: 'tmf-login',
-  imports: [MatIcon, InputText, Button, Layout1Wapper, ReactiveFormsModule, RouterLink],
+  imports: [
+    MatIcon,
+    InputText,
+    Button,
+    Layout1Wapper,
+    ReactiveFormsModule,
+    RouterLink,
+  ],
   templateUrl: './login.html',
   styles: ``,
 })
 export default class Login {
-  fb = inject(FormBuilder);
+  private fb = inject(FormBuilder);
   private location = inject(Location);
+  private router = inject(Router);
+  private authService = inject(AuthenticationService);
+  private authStateService = inject(AuthStateService);
+
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
 
   get TmfIcon() {
     return TmfIconEnum;
   }
 
+  form = this.fb.group({
+    email: ['', emailValidator],
+    password: ['', passwordValidator],
+  });
+
   goBack() {
     this.location.back();
   }
 
-  form = this.fb.group({
-    email: ['',emailValidator],
-    password: [''],
-  });
+  onSubmit() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    const loginData = {
+      email: this.form.value.email!,
+      password: this.form.value.password!,
+    };
+
+    this.authService
+      .postApiAuthLogin(loginData)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: (response) => {
+          if (
+            response?.data?.user &&
+            response.data.access_token &&
+            response.data.refresh_token
+          ) {
+            this.authStateService.setAuthState(
+              response.data.user,
+              response.data.access_token,
+              response.data.refresh_token,
+            );
+
+            this.router.navigate(['/']);
+          } else {
+            this.errorMessage.set('登入回應格式錯誤，請稍後再試');
+          }
+        },
+        error: (error) => {
+          console.error('Login error:', error);
+        },
+      });
+  }
 }

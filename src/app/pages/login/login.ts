@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { InputText } from '@components/form/input-text/input-text';
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
@@ -20,8 +20,6 @@ export default class Login {
   private location = inject(Location);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private authService = inject(AuthenticationService);
-  private authStateService = inject(AuthStateService);
 
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -52,33 +50,5 @@ export default class Login {
       email: this.form.value.email!,
       password: this.form.value.password!,
     };
-
-    this.authService
-      .postApiAuthLogin(loginData)
-      .pipe(finalize(() => this.isLoading.set(false)))
-      .subscribe({
-        next: (response) => {
-          if (
-            response?.data?.user &&
-            response.data.access_token &&
-            response.data.refresh_token
-          ) {
-            this.authStateService.setAuthState(
-              response.data.user,
-              response.data.access_token,
-              response.data.refresh_token,
-            );
-
-            // 登入成功後導向原本要去的頁面，或首頁
-            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-            this.router.navigateByUrl(returnUrl);
-          } else {
-            this.errorMessage.set('登入回應格式錯誤，請稍後再試');
-          }
-        },
-        error: (error) => {
-          console.error('Login error:', error);
-        },
-      });
   }
 }

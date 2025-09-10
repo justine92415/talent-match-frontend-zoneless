@@ -1,12 +1,15 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { TokenService } from './token.service';
 import { UserProfile } from '../api/generated/talentMatchAPI.schemas';
+import { AuthenticationService } from '../api/generated/authentication/authentication.service';
+import { catchError, of, switchMap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthStateService {
   private tokenService = inject(TokenService);
+  private authService = inject(AuthenticationService);
   
   private userProfile = signal<UserProfile | null>(null);
   private isAuthenticated = signal<boolean>(false);
@@ -30,14 +33,65 @@ export class AuthStateService {
 
   initializeAuthState(): void {
     const hasToken = this.tokenService.isLoggedIn();
-    this.isAuthenticated.set(hasToken);
     
     if (!hasToken) {
+      this.isAuthenticated.set(false);
       this.userProfile.set(null);
+      return;
     }
+
+    // 如果有 token，嘗試從 API 獲取使用者資料
+    this.authService.getApiAuthProfile()
+      .pipe(
+        catchError((error) => {
+          console.error('Failed to get user profile:', error);
+          // API 失敗時清除登入狀態
+          this.clearAuthState();
+          return of(null);
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response?.data?.user) {
+            this.userProfile.set(response.data.user);
+            this.isAuthenticated.set(true);
+          } else {
+            this.clearAuthState();
+          }
+        }
+      });
   }
 
   updateUserProfile(user: UserProfile): void {
     this.userProfile.set(user);
+  }
+
+  refreshToken() {
+    const refreshToken = this.tokenService.getRefreshToken();
+    if (!refreshToken) {
+      this.clearAuthState();
+      return of(null);
+    }
+
+    return this.authService.postApiAuthRefreshToken({ refresh_token: refreshToken })
+      .pipe(
+        switchMap((response) => {
+          if (response?.data?.access_token && response.data.refresh_token) {
+            // 更新 tokens
+            this.tokenService.setTokens(
+              response.data.access_token,
+              response.data.refresh_token
+            );
+            return of(response.data.access_token);
+          } else {
+            this.clearAuthState();
+            return of(null);
+          }
+        }),
+        catchError(() => {
+          this.clearAuthState();
+          return of(null);
+        })
+      );
   }
 }

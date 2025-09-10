@@ -6,7 +6,7 @@ import { TmfIconEnum } from '@share/icon.enum';
 import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { emailValidator, passwordValidator } from '@share/validator';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { finalize } from 'rxjs';
 import { AuthenticationService } from '../../api/generated/authentication/authentication.service';
@@ -29,6 +29,7 @@ export default class Login {
   private fb = inject(FormBuilder);
   private location = inject(Location);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private authService = inject(AuthenticationService);
   private authStateService = inject(AuthStateService);
 
@@ -40,8 +41,8 @@ export default class Login {
   }
 
   form = this.fb.group({
-    email: ['', emailValidator],
-    password: ['', passwordValidator],
+    email: ['test001@gmail.com', emailValidator],
+    password: ['1qaz2wsx', passwordValidator],
   });
 
   goBack() {
@@ -78,7 +79,9 @@ export default class Login {
               response.data.refresh_token,
             );
 
-            this.router.navigate(['/']);
+            // 登入成功後導向原本要去的頁面，或首頁
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+            this.router.navigateByUrl(returnUrl);
           } else {
             this.errorMessage.set('登入回應格式錯誤，請稍後再試');
           }

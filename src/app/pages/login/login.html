@@ -56,22 +56,21 @@
 
         <!-- Error Message -->
         @if (errorMessage()) {
-          <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+          <div
+            class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+          >
             {{ errorMessage() }}
           </div>
         }
 
-        <tmf-button 
-          class="h-15" 
+        <tmf-button
+          class="h-15"
           [iconName]="'arrow_forward'"
           [disabled]="isLoading() || form.invalid"
+          [loading]="isLoading()"
           type="submit"
         >
-          @if (isLoading()) {
-            登入中...
-          } @else {
-            登入
-          }
+          登入
         </tmf-button>
 
         <!-- Divider -->

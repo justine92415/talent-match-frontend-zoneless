@@ -1,5 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -8,8 +8,8 @@ import { nickNameValidator, userEmailValidator, passwordValidator, confirmPasswo
 import { Button } from "@components/button/button";
 import { InputText } from "@components/form/input-text/input-text";
 import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
-import { AuthenticationService } from '../../api/generated/authentication/authentication.service';
-import { RegisterRequest } from '../../api/generated/talentMatchAPI.schemas';
+import { AuthenticationService } from '@app/api/generated/authentication/authentication.service';
+import { RegisterRequest } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-sign-up',

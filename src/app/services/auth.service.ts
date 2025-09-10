@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { AuthenticationService } from '@app/api/generated/authentication/authentication.service';
-import type { LoginResponse, PostApiAuthLoginBody, PostApiAuthRefreshTokenBody, UserProfile } from '@app/api/generated/talentMatchAPI.schemas';
+import type { LoginResponse, PostApiAuthLoginBody, PostApiAuthRefreshBody, UserProfile } from '@app/api/generated/talentMatchAPI.schemas';
 
 export type User = UserProfile;
 
@@ -117,11 +117,11 @@ export class AuthService {
       return of(false);
     }
 
-    const refreshData: PostApiAuthRefreshTokenBody = {
+    const refreshData: PostApiAuthRefreshBody = {
       refresh_token: refreshToken
     };
 
-    return this.authApi.postApiAuthRefreshToken(refreshData).pipe(
+    return this.authApi.postApiAuthRefresh(refreshData).pipe(
       tap((response) => {
         if (response.status === 'success' && response.data) {
           this.handleLoginSuccess(response.data);

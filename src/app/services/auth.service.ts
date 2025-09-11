@@ -34,7 +34,7 @@ export interface JWTPayload {
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: User | null; // 從 API 獲取的完整用戶資訊
+  user: User | undefined; // 從 API 獲取的完整用戶資訊
   roles: string[]; // 從 JWT token 解碼的角色資訊
   tokens: AuthTokens | null;
   loading: boolean;
@@ -57,7 +57,7 @@ export class AuthService {
 
   private readonly authState = signal<AuthState>({
     isAuthenticated: false,
-    user: null,
+    user: undefined,
     roles: [],
     tokens: null,
     loading: false,
@@ -106,7 +106,7 @@ export class AuthService {
 
         this.updateAuthState({
           isAuthenticated: true,
-          user: null, // 用戶資訊稍後從 API 獲取
+          user: undefined, // 用戶資訊稍後從 API 獲取
           roles,
           tokens,
           loading: false,
@@ -118,7 +118,7 @@ export class AuthService {
         this.clearStoredAuth();
         this.updateAuthState({
           isAuthenticated: false,
-          user: null,
+          user: undefined,
           roles: [],
           tokens: null,
           loading: false,
@@ -154,7 +154,7 @@ export class AuthService {
     this.clearStoredAuth();
     this.updateAuthState({
       isAuthenticated: false,
-      user: null,
+      user: undefined,
       roles: [],
       tokens: null,
       loading: false,

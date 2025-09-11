@@ -1,13 +1,16 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { MatIconModule } from "@angular/material/icon";
 import { InputText } from "@components/form/input-text/input-text";
 import { Button } from "@components/button/button";
 import { AuthService } from '@app/services/auth.service';
+import { InfoView } from './info-view/info-view';
+import { InfoEditForm } from './info-edit-form/info-edit-form';
 
 @Component({
   selector: 'tmf-info',
-  imports: [ReactiveFormsModule, MatIconModule, InputText, Button],
+  imports: [ReactiveFormsModule, MatIconModule, Button, InfoView, InfoEditForm],
   templateUrl: './info.html',
   styles: ``
 })
@@ -18,8 +21,9 @@ export default class Info implements OnInit {
   user = this.authService.user;
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
+  isEditMode = signal(false);
 
-  profileForm!: FormGroup ;
+  profileForm!: FormGroup;
 
   // 選項資料
   genderOptions = [
@@ -90,6 +94,14 @@ export default class Info implements OnInit {
 
   onCancel(): void {
     this.loadUserData(); // 重置表單
+    this.isEditMode.set(false);
+  }
+
+  toggleEditMode(): void {
+    this.isEditMode.set(!this.isEditMode());
+    if (this.isEditMode()) {
+      this.errorMessage.set(null);
+    }
   }
 
   onAvatarUpload(): void {

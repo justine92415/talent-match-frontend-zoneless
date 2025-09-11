@@ -7,10 +7,10 @@ import { InputText } from "@components/form/input-text/input-text";
 
 @Component({
   selector: 'tmf-info-edit-form',
-  imports: [ReactiveFormsModule, MatIconModule, InputText, JsonPipe],
+  imports: [ReactiveFormsModule, MatIconModule, InputText],
   templateUrl: './info-edit-form.html',
   styles: ``,
-  // changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InfoEditForm {
   user = input<UserProfile>();

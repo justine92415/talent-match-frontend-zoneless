@@ -301,4 +301,17 @@ export class AuthService {
       error: null
     });
   }
+
+  // 更新用戶資料 (用於個人資料編輯後同步狀態)
+  updateUserProfile(updatedUser: Partial<UserProfile>): void {
+    const currentState = this.authState();
+    if (currentState.user && currentState.isAuthenticated) {
+      const newUser = { ...currentState.user, ...updatedUser };
+      this.updateAuthState({
+        ...currentState,
+        user: newUser
+      });
+      console.log('User profile updated in AuthService:', newUser);
+    }
+  }
 }

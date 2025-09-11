@@ -11,10 +11,10 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { AuthenticationService } from '@app/api/generated/authentication/authentication.service';
+import { AuthService } from '@app/services/auth.service';
 import { InfoView } from './info-view/info-view';
 import { InfoEditForm } from './info-edit-form/info-edit-form';
 import { InfoViewSkeleton } from './info-view-skeleton/info-view-skeleton';
-import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'tmf-info',
@@ -25,24 +25,21 @@ import { JsonPipe } from '@angular/common';
     InfoView,
     InfoEditForm,
     InfoViewSkeleton,
-    JsonPipe
   ],
   templateUrl: './info.html',
   styles: ``,
 })
-export default class Info implements OnInit {
+export default class Info {
   private fb = inject(FormBuilder);
   private authenticationService = inject(AuthenticationService);
+  private authService = inject(AuthService);
 
   // 使用 resource API 獲取用戶資料，並使用 switchMap 轉換為 UserProfile
   userProfileResource = rxResource({
     stream: () =>
       this.authenticationService
         .getApiAuthProfile()
-        .pipe(
-          delay(1000 * 3),
-          switchMap((response) => of(response.data?.user))
-        ),
+        .pipe(switchMap((response) => of(response.data?.user))),
   });
 
   // 直接從 resource 中獲取 UserProfile
@@ -53,57 +50,75 @@ export default class Info implements OnInit {
   errorMessage = signal<string | null>(null);
   isEditMode = signal(false);
 
-  profileForm!: FormGroup;
+  profileForm = this.fb.nonNullable.group({
+    nick_name: [
+      '',
+      [Validators.required, Validators.minLength(1), Validators.maxLength(50)],
+    ],
+    name: ['', [Validators.maxLength(100)]],
+    email: [{ value: '', disabled: true }],
+    birthday: [''],
+    contact_phone: ['', [Validators.pattern(/^[0-9+\-\s()]*$/)]], // 修改為可選
+  });
 
   private userDataEffect = effect(() => {
     this.loadUserData();
   });
 
-  ngOnInit(): void {
-    this.initializeForm();
-  }
-
-  private initializeForm(): void {
-    this.profileForm = this.fb.group({
-      nickName: ['', [Validators.required, Validators.minLength(2)]],
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      email: [{ value: '', disabled: true }],
-      birthDate: [''],
-      phone: ['', [Validators.pattern(/^09\d{8}$/)]],
-      bio: ['', [Validators.maxLength(500)]], // 注意：UserProfile 中沒有此欄位，可能需要後端新增
-    });
-  }
-
   private loadUserData(): void {
     const currentUser = this.user();
     if (currentUser && this.profileForm) {
-      this.profileForm.patchValue({
-        nickName: currentUser.nick_name || '',
+      const userData = {
+        nick_name: currentUser.nick_name || '',
         name: currentUser.name || '',
         email: currentUser.email || '',
-        birthDate: currentUser.birthday || '',
-        phone: currentUser.contact_phone || '',
-      });
+        birthday: currentUser.birthday || '',
+        contact_phone: currentUser.contact_phone || '',
+      };
+      this.profileForm.patchValue(userData);
     }
   }
 
   onSubmit(): void {
-    if ( this.profileForm.invalid ) return;
+    if (this.profileForm.invalid) return;
 
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const formData = this.profileForm.getRawValue();
-    console.log('Profile data to save:', formData);
+    const { nick_name, name, birthday, contact_phone } =
+      this.profileForm.getRawValue();
 
-    // TODO: 實作 API 調用
-    setTimeout(() => {
-      this.isLoading.set(false);
-      console.log('Profile saved successfully');
-    }, 1000);
+    // 構造 API 請求參數，對應 UpdateProfileRequest 介面
+    const updateRequest = {
+      nick_name,
+      name,
+      birthday,
+      contact_phone,
+    };
+
+    this.authenticationService.putApiAuthProfile(updateRequest).subscribe({
+      next: ({ data }) => {
+        this.isLoading.set(false);
+        if (data?.user) {
+          this.user.update(() => data.user);
+          // 同步更新 AuthService 中的使用者資料，讓 header 也能同步
+          this.authService.updateUserProfile(data.user);
+        }
+
+        // 切換回檢視模式
+        this.isEditMode.set(false);
+      },
+      error: (error) => {
+        this.isLoading.set(false);
+        this.loadUserData();
+        
+        this.handleApiError(error);
+      },
+    });
   }
 
   onCancel(): void {
+    this.loadUserData();
     this.isEditMode.set(false);
   }
 
@@ -114,7 +129,44 @@ export default class Info implements OnInit {
     }
   }
 
+  private handleApiError(error: any): void {
+    // 處理驗證錯誤
+    if (error?.error?.code === 'VALIDATION_ERROR' && error?.error?.errors) {
+      const errors = error.error.errors;
+      
+      // 建立友善的錯誤訊息
+      const errorMessages: string[] = [];
+      
+      // 欄位名稱對應表
+      const fieldNames: Record<string, string> = {
+        'nick_name': '暱稱',
+        'name': '真實姓名',
+        'birthday': '生日',
+        'contact_phone': '手機號碼',
+        'email': '信箱'
+      };
+      
+      Object.entries(errors).forEach(([field, messages]) => {
+        const fieldName = fieldNames[field] || field;
+        if (Array.isArray(messages)) {
+          messages.forEach(msg => {
+            errorMessages.push(`${fieldName}: ${msg}`);
+          });
+        }
+      });
+      
+      this.errorMessage.set(errorMessages.join('、'));
+    } else {
+      // 處理其他錯誤
+      if (error?.error?.message) {
+        this.errorMessage.set(error.error.message);
+      } else {
+        this.errorMessage.set('更新個人資料時發生錯誤，請稍後再試。');
+      }
+    }
+  }
+
   onAvatarUpload(): void {
-    console.log('Upload avatar');
+    // TODO: 實作頭像上傳功能
   }
 }

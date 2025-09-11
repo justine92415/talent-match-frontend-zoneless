@@ -32,6 +32,7 @@
           [loading]="isLoading()"
           [disabled]="profileForm.invalid || isLoading()"
           form="profileForm"
+          (click)="onSubmit()"
         >
           儲存變更
         </tmf-button>

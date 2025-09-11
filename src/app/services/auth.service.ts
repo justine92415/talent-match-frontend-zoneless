@@ -1,18 +1,17 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
 import { AuthenticationService } from '@app/api/generated/authentication/authentication.service';
-import type { 
-  LoginSuccessResponse, 
-  LoginRequest, 
-  RefreshTokenRequest, 
+import type {
+  LoginSuccessResponse,
+  LoginRequest,
+  RefreshTokenRequest,
   RefreshTokenSuccessResponse,
-  RegisterSuccessResponse,
   GetProfileResponse,
   UserProfile,
-  AuthSuccessData
+  AuthSuccessData,
 } from '@app/api/generated/talentMatchAPI.schemas';
 
 export type User = UserProfile;
@@ -270,7 +269,7 @@ export class AuthService {
     }
 
     console.log('Loading user profile...');
-    return this.authApi.getAuthProfile().pipe(
+    return this.authApi.getApiAuthProfile().pipe(
       tap((response: GetProfileResponse) => {
         if (response.status === 'success' && response.data?.user) {
           console.log('User profile loaded successfully');

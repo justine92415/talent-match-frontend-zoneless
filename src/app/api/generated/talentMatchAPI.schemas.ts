@@ -198,13 +198,22 @@ export const ResetPasswordSuccessResponseStatus = {
   success: 'success',
 } as const;
 
+/**
+ * 回應資料（此 API 無回傳資料）
+ * @nullable
+ */
+export type ResetPasswordSuccessResponseData = unknown | null;
+
 export interface ResetPasswordSuccessResponse {
   /** 回應狀態 */
   status?: ResetPasswordSuccessResponseStatus;
   /** 成功訊息 */
   message?: string;
-  /** 回應資料（此 API 無回傳資料） */
-  data?: null;
+  /**
+   * 回應資料（此 API 無回傳資料）
+   * @nullable
+   */
+  data?: ResetPasswordSuccessResponseData;
 }
 
 export type ResetPasswordValidationErrorResponseAllOf = {
@@ -241,13 +250,22 @@ export const ForgotPasswordSuccessResponseStatus = {
   success: 'success',
 } as const;
 
+/**
+ * 回應資料（此 API 無回傳資料）
+ * @nullable
+ */
+export type ForgotPasswordSuccessResponseData = unknown | null;
+
 export interface ForgotPasswordSuccessResponse {
   /** 回應狀態 */
   status?: ForgotPasswordSuccessResponseStatus;
   /** 成功訊息 */
   message?: string;
-  /** 回應資料（此 API 無回傳資料） */
-  data?: null;
+  /**
+   * 回應資料（此 API 無回傳資料）
+   * @nullable
+   */
+  data?: ForgotPasswordSuccessResponseData;
 }
 
 export type ForgotPasswordValidationErrorResponseAllOf = {
@@ -490,13 +508,22 @@ export type UpdateProfileBusinessErrorAllOf = {
 export type UpdateProfileBusinessError = BusinessErrorResponse &
   UpdateProfileBusinessErrorAllOf;
 
+/**
+ * 回應資料（此 API 無回傳資料）
+ * @nullable
+ */
+export type DeleteProfileResponseData = unknown | null;
+
 export interface DeleteProfileResponse {
   /** 回應狀態 */
   status?: string;
   /** 成功訊息 */
   message?: string;
-  /** 回應資料（此 API 無回傳資料） */
-  data?: null;
+  /**
+   * 回應資料（此 API 無回傳資料）
+   * @nullable
+   */
+  data?: DeleteProfileResponseData;
 }
 
 export type PostApiAuthRegister400 =
@@ -515,7 +542,7 @@ export type PostApiAuthResetPassword400 =
   | ResetPasswordValidationErrorResponse
   | ResetPasswordBusinessErrorResponse;
 
-export type PutAuthProfile400 =
+export type PutApiAuthProfile400 =
   | UpdateProfileValidationError
   | UpdateProfileBusinessError;
 

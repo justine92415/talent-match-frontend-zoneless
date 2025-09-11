@@ -247,19 +247,19 @@ export class AuthenticationService {
 
  * @summary 取得使用者個人資料
  */
-  getAuthProfile<TData = GetProfileResponse>(
+  getApiAuthProfile<TData = GetProfileResponse>(
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  getAuthProfile<TData = GetProfileResponse>(
+  getApiAuthProfile<TData = GetProfileResponse>(
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  getAuthProfile<TData = GetProfileResponse>(
+  getApiAuthProfile<TData = GetProfileResponse>(
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  getAuthProfile<TData = GetProfileResponse>(
+  getApiAuthProfile<TData = GetProfileResponse>(
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.get<TData>(`/auth/profile`, options);
+    return this.http.get<TData>(`/api/auth/profile`, options);
   }
   /**
  * 更新當前已認證使用者的個人資料，支援部分更新。
@@ -284,23 +284,27 @@ export class AuthenticationService {
 
  * @summary 更新使用者個人資料
  */
-  putAuthProfile<TData = UpdateProfileResponse>(
+  putApiAuthProfile<TData = UpdateProfileResponse>(
     updateProfileRequest: UpdateProfileRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  putAuthProfile<TData = UpdateProfileResponse>(
+  putApiAuthProfile<TData = UpdateProfileResponse>(
     updateProfileRequest: UpdateProfileRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  putAuthProfile<TData = UpdateProfileResponse>(
+  putApiAuthProfile<TData = UpdateProfileResponse>(
     updateProfileRequest: UpdateProfileRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  putAuthProfile<TData = UpdateProfileResponse>(
+  putApiAuthProfile<TData = UpdateProfileResponse>(
     updateProfileRequest: UpdateProfileRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.put<TData>(`/auth/profile`, updateProfileRequest, options);
+    return this.http.put<TData>(
+      `/api/auth/profile`,
+      updateProfileRequest,
+      options,
+    );
   }
   /**
  * 軟刪除當前已認證使用者的帳號，保留資料以供稽核和復原。
@@ -325,19 +329,19 @@ export class AuthenticationService {
 
  * @summary 刪除使用者帳號
  */
-  deleteAuthProfile<TData = DeleteProfileResponse>(
+  deleteApiAuthProfile<TData = DeleteProfileResponse>(
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  deleteAuthProfile<TData = DeleteProfileResponse>(
+  deleteApiAuthProfile<TData = DeleteProfileResponse>(
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  deleteAuthProfile<TData = DeleteProfileResponse>(
+  deleteApiAuthProfile<TData = DeleteProfileResponse>(
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  deleteAuthProfile<TData = DeleteProfileResponse>(
+  deleteApiAuthProfile<TData = DeleteProfileResponse>(
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.delete<TData>(`/auth/profile`, options);
+    return this.http.delete<TData>(`/api/auth/profile`, options);
   }
 }
 
@@ -350,6 +354,7 @@ export type PostApiAuthForgotPasswordClientResult =
   NonNullable<ForgotPasswordSuccessResponse>;
 export type PostApiAuthResetPasswordClientResult =
   NonNullable<ResetPasswordSuccessResponse>;
-export type GetAuthProfileClientResult = NonNullable<GetProfileResponse>;
-export type PutAuthProfileClientResult = NonNullable<UpdateProfileResponse>;
-export type DeleteAuthProfileClientResult = NonNullable<DeleteProfileResponse>;
+export type GetApiAuthProfileClientResult = NonNullable<GetProfileResponse>;
+export type PutApiAuthProfileClientResult = NonNullable<UpdateProfileResponse>;
+export type DeleteApiAuthProfileClientResult =
+  NonNullable<DeleteProfileResponse>;

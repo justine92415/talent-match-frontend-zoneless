@@ -8,6 +8,8 @@
       <div class="flex items-center justify-between mb-6">
         <button
           class="cursor-pointer flex items-center text-grey-66 hover:text-grey-33 transition-colors"
+          (click)="goBack()"
+          type="button"
         >
           <mat-icon class="!w-6 !h-6">
             {{ TmfIcon.KeyboardArrowLeft }}
@@ -15,7 +17,7 @@
         </button>
         <div class="text-grey-66">
           已經是會員?
-          <a href="/login" class="text-primary font-medium hover:underline"
+          <a [routerLink]="['/login']" class="text-primary font-medium hover:underline"
             >登入</a
           >
         </div>
@@ -28,13 +30,45 @@
       </div>
 
       <!-- Form -->
-      <form class="space-y-6">
-        <tmf-input-text placeholder="暱稱"></tmf-input-text>
-        <tmf-input-text type="email" placeholder="信箱"></tmf-input-text>
-        <tmf-input-text type="password" placeholder="密碼"></tmf-input-text>
-        <tmf-input-text type="password" placeholder="確認密碼"></tmf-input-text>
+      <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <!-- Error Message -->
+        @if (errorMessage()) {
+          <div
+            class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
+          >
+            {{ errorMessage() }}
+          </div>
+        }
 
-        <tmf-button class="h-15" [iconName]="'arrow_forward'"
+        <tmf-input-text
+          formControlName="nickName"
+          placeholder="暱稱"
+        ></tmf-input-text>
+
+        <tmf-input-text
+          type="email"
+          formControlName="email"
+          placeholder="信箱"
+        ></tmf-input-text>
+
+        <tmf-input-text
+          type="password"
+          formControlName="password"
+          placeholder="密碼"
+        ></tmf-input-text>
+
+        <tmf-input-text
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="確認密碼"
+        ></tmf-input-text>
+
+        <tmf-button
+          type="submit"
+          class="h-15"
+          [iconName]="'arrow_forward'"
+          [disabled]="!signUpForm.valid || isLoading()"
+          [loading]="isLoading()"
           >註冊帳號</tmf-button
         >
 

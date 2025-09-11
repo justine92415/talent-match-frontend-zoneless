@@ -1,43 +1,38 @@
 <nav
-  class="w-75.5 h-full bg-white shadow-lg rounded-xl p-6 flex-shrink-0 flex justify-between flex-col gap-6"
+  class="w-75.5 h-190 bg-white shadow-lg rounded-xl p-6 flex-shrink-0 flex justify-between flex-col gap-6"
 >
   <div class="flex justify-between items-center">
     <p class="text-xl-bold leading-7">個人管理</p>
     <p
       class="text-base-bold px-2 py-1 rounded-sm text-orange-55 bg-grey-f7"
     >
-      學生
+      {{ roleLabel() }}
     </p>
   </div>
+  
   <ul class="flex flex-col gap-1 grow">
-    <li>
-      <a
-        class="p-3 rounded-lg cursor-pointer flex items-center gap-3 text-grey-33 text-base hover:bg-orange-55 hover:text-white transition-colors duration-200"
-        [routerLink]="'/dashboard/student/info'"
-        [routerLinkActive]="['bg-orange-55', '!text-white']"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <mat-icon>face</mat-icon>
-        <p>基本資訊</p>
-      </a>
-    </li>
-    <li>
-      <a
-        class="p-3 rounded-lg cursor-pointer flex items-center gap-3 text-grey-33 text-base hover:bg-orange-55 hover:text-white transition-colors duration-200"
-        [routerLink]="'/dashboard/student/favorites'"
-        [routerLinkActive]="['bg-orange-55', '!text-white']"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <mat-icon>favorite</mat-icon>
-        <p>收藏課程</p>
-      </a>
-    </li>
+    @for (item of navigationItems(); track item.id) {
+      <li>
+        <a
+          class="p-3 rounded-lg cursor-pointer flex items-center gap-3 text-grey-33 text-base hover:bg-orange-55 hover:text-white transition-colors duration-200"
+          [routerLink]="item.route"
+          [routerLinkActive]="['bg-orange-55', '!text-white']"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <p>{{ item.label }}</p>
+        </a>
+      </li>
+    }
   </ul>
-  <a
-    class="p-3 rounded-lg cursor-pointer flex items-center gap-3 text-grey-33 text-base hover:bg-orange-55 hover:text-white transition-colors duration-200"
-    [routerLink]="'/dashboard/teacher'"
-  >
-    <mat-icon>restart_alt</mat-icon>
-    <p>切換為老師</p>
-  </a>
+
+  @if (canSwitchRole()) {
+    <button
+      class="p-3 rounded-lg cursor-pointer flex items-center gap-3 text-grey-33 text-base hover:bg-orange-55 hover:text-white transition-colors duration-200"
+      (click)="switchRole()"
+    >
+      <mat-icon>restart_alt</mat-icon>
+      <p>{{ switchTargetLabel() }}</p>
+    </button>
+  }
 </nav>

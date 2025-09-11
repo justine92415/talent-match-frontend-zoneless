@@ -104,7 +104,7 @@ export class Header implements OnInit, AfterViewInit {
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
   userName = computed(() => this.user()?.nick_name || this.user()?.name || '用戶');
-  userRole = computed(() => this.user()?.role);
+  userRole = computed(() => this.user()?.account_status);
 
 
   // 城市 Mock Data

@@ -26,30 +26,43 @@ export class DashboardSidebar {
   private router = inject(Router);
 
   user = this.authService.user;
-  userRole = computed(() => this.user()?.role);
+  roles = this.authService.roles;
+  userRole = computed(() => this.roles()[0] || null); // 取第一個角色作為主要角色
 
   // 角色顯示標籤
   roleLabel = computed(() => {
-    const role = this.userRole();
-    return role === 'student' ? '學生' : 
-           role === 'teacher' ? '教師' : 
-           role === 'admin' ? '管理員' : '用戶';
+    const roles = this.roles();
+    if (roles.includes('teacher') && roles.includes('student')) {
+      return '教師・學生';
+    } else if (roles.includes('teacher')) {
+      return '教師';
+    } else if (roles.includes('student')) {
+      return '學生';
+    } else if (roles.includes('admin')) {
+      return '管理員';
+    } else {
+      return '用戶';
+    }
   });
 
   // 根據角色生成導航選單
   navigationItems = computed<SidebarMenuItem[]>(() => {
-    const role = this.userRole();
+    const roles = this.roles();
+    const items: SidebarMenuItem[] = [];
     
-    if (role === 'student') {
-      return [
+    // 基本資訊對所有角色都顯示
+    items.push({
+      id: 'info',
+      label: '基本資訊',
+      icon: 'face',
+      route: '/dashboard/info'
+    });
+    
+    // 學生相關功能
+    if (roles.includes('student')) {
+      items.push(
         {
-          id: 'info',
-          label: '基本資訊',
-          icon: 'face',
-          route: '/dashboard/student/info'
-        },
-        {
-          id: 'courses',
+          id: 'student-courses',
           label: '我的課程',
           icon: 'lab_profile',
           route: '/dashboard/student/courses'
@@ -61,26 +74,17 @@ export class DashboardSidebar {
           route: '/dashboard/student/favorites'
         },
         {
-          id: 'calendar',
-          label: '行事曆',
+          id: 'student-calendar',
+          label: '學習行事曆',
           icon: 'edit_calendar',
           route: '/dashboard/student/calendar'
-        },
-        {
-          id: 'record',
-          label: '交易紀錄',
-          icon: 'account_balance_wallet',
-          route: '/dashboard/student/record'
         }
-      ];
-    } else if (role === 'teacher') {
-      return [
-        {
-          id: 'info',
-          label: '基本資訊',
-          icon: 'face',
-          route: '/dashboard/teacher/info'
-        },
+      );
+    }
+    
+    // 教師相關功能
+    if (roles.includes('teacher')) {
+      items.push(
         {
           id: 'videos',
           label: '影片管理',
@@ -94,44 +98,27 @@ export class DashboardSidebar {
           route: '/dashboard/teacher/reservation'
         },
         {
-          id: 'courses',
+          id: 'teacher-courses',
           label: '課程管理',
           icon: 'lab_profile',
           route: '/dashboard/teacher/courses'
-        },
-        {
-          id: 'record',
-          label: '交易紀錄',
-          icon: 'account_balance_wallet',
-          route: '/dashboard/teacher/record'
         }
-      ];
+      );
     }
     
-    return [];
+    // 交易紀錄對所有角色都顯示
+    items.push({
+      id: 'record',
+      label: '交易紀錄',
+      icon: 'account_balance_wallet',
+      route: '/dashboard/record'
+    });
+    
+    return items;
   });
 
-  // 角色切換功能
-  switchRole() {
-    const currentRole = this.userRole();
-    if (currentRole === 'student') {
-      this.router.navigate(['/dashboard/teacher']);
-    } else if (currentRole === 'teacher') {
-      this.router.navigate(['/dashboard/student']);
-    }
-  }
-
-  // 檢查是否可以切換角色
-  canSwitchRole = computed(() => {
-    const role = this.userRole();
-    // 這裡可以根據實際業務邏輯判斷用戶是否同時具有兩種角色
-    // 目前簡單假設所有用戶都可以切換
-    return role === 'student' || role === 'teacher';
-  });
-
-  // 獲取切換目標角色的標籤
-  switchTargetLabel = computed(() => {
-    const currentRole = this.userRole();
-    return currentRole === 'student' ? '切換為教師' : '切換為學生';
+  // 檢查是否同時擁有多個角色
+  hasMultipleRoles = computed(() => {
+    return this.roles().length > 1;
   });
 }

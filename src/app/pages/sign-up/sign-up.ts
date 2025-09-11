@@ -67,9 +67,11 @@ export default class SignUp {
           })
         )
         .subscribe({
-          next: () => {
-            // 註冊成功後導向到登入頁面或首頁
-            this.router.navigate(['/login']);
+          next: (response) => {
+            if (response.status === 'success') {
+              // 註冊成功後導向到登入頁面或首頁
+              this.router.navigate(['/login']);
+            }
           },
           error: (error: any) => {
             this.errorMessage.set(error.error?.message || '註冊失敗，請稍後再試');

@@ -46,6 +46,7 @@
     <!-- 中間區域：平板版 Logo -->
     <div class="hidden md:flex justify-center items-center">
       <img
+        routerLink="/"
         class="w-[7.75rem] h-10 cursor-pointer lg:w-50 lg:h-16"
         src="assets/images/logo.svg"
         alt="Talent Match Frontend Logo"
@@ -73,20 +74,24 @@
         </mat-icon>
       </div>
 
-      @if( true ) {
+      @if( isAuthenticated() ) {
       <div class="flex justify-center items-center gap-2">
-        <!-- avtar -->
+        <!-- 用戶頭像 -->
         <div
           #userTrigger
           class="relative py-2.5 lg:py-4.5"
           (click)="toggleUserDropdown(userTrigger)"
         >
           <div class="flex justify-center items-center gap-2 cursor-pointer">
-            <div class="w-11 h-11 rounded-full bg-grey-d4"></div>
+            <div class="w-11 h-11 rounded-full bg-primary-95 flex items-center justify-center">
+              <mat-icon class="!text-primary !text-2xl">
+                {{ TmfIconEnum.Face }}
+              </mat-icon>
+            </div>
             <p
               class="font-inter hidden text-lg font-medium leading-7 snap-normal lg:block"
             >
-              Gill WUUUU
+              {{ userName() || '用戶' }}
             </p>
           </div>
         </div>
@@ -106,6 +111,7 @@
           iconPosition="right"
           variant="primary"
           iconName="keyboard_arrow_right"
+          routerLink="/login"
         >
           登入/註冊
         </tmf-button>

@@ -1,10 +1,14 @@
-<button [class]="buttonClasses()" [disabled]="disabled()">
-  <p class="text-base font-normal">
-    <ng-content></ng-content>
-  </p>
-  @if(iconName(); as icon){
-    <mat-icon
-      class="material-icons-outlined !w-5 !h-5 !text-xl !leading-5"
-    >{{ icon }}</mat-icon>
+<button [class]="buttonClasses()" [disabled]="disabled() || loading()" [type]="type()">
+  @if(loading()) {
+    <div class="loading-spinner"></div>
+  } @else {
+    <p class="text-base font-normal">
+      <ng-content></ng-content>
+    </p>
+    @if(iconName(); as icon){
+      <mat-icon
+        class="material-icons-outlined !w-5 !h-5 !text-xl !leading-5"
+      >{{ icon }}</mat-icon>
+    }
   }
 </button>

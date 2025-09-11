@@ -3243,7 +3243,7 @@ export type PostApiAuthLoginBody = {
   password: string;
 };
 
-export type PostApiAuthRefreshTokenBody = {
+export type PostApiAuthRefreshBody = {
   /** 有效的 refresh token */
   refresh_token: string;
 };

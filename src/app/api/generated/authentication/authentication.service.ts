@@ -25,7 +25,7 @@ import type {
   LoginResponse,
   PostApiAuthForgotPasswordBody,
   PostApiAuthLoginBody,
-  PostApiAuthRefreshTokenBody,
+  PostApiAuthRefreshBody,
   PutApiAuthProfileBody,
   RefreshTokenResponse,
   RegisterRequest,
@@ -117,25 +117,25 @@ export class AuthenticationService {
    * 使用有效的 refresh token 來取得新的 access token 和 refresh token
    * @summary 刷新 Access Token
    */
-  postApiAuthRefreshToken<TData = RefreshTokenResponse>(
-    postApiAuthRefreshTokenBody: PostApiAuthRefreshTokenBody,
+  postApiAuthRefresh<TData = RefreshTokenResponse>(
+    postApiAuthRefreshBody: PostApiAuthRefreshBody,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  postApiAuthRefreshToken<TData = RefreshTokenResponse>(
-    postApiAuthRefreshTokenBody: PostApiAuthRefreshTokenBody,
+  postApiAuthRefresh<TData = RefreshTokenResponse>(
+    postApiAuthRefreshBody: PostApiAuthRefreshBody,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  postApiAuthRefreshToken<TData = RefreshTokenResponse>(
-    postApiAuthRefreshTokenBody: PostApiAuthRefreshTokenBody,
+  postApiAuthRefresh<TData = RefreshTokenResponse>(
+    postApiAuthRefreshBody: PostApiAuthRefreshBody,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  postApiAuthRefreshToken<TData = RefreshTokenResponse>(
-    postApiAuthRefreshTokenBody: PostApiAuthRefreshTokenBody,
+  postApiAuthRefresh<TData = RefreshTokenResponse>(
+    postApiAuthRefreshBody: PostApiAuthRefreshBody,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.post<TData>(
-      `/api/auth/refresh-token`,
-      postApiAuthRefreshTokenBody,
+      `/api/auth/refresh`,
+      postApiAuthRefreshBody,
       options,
     );
   }
@@ -290,8 +290,7 @@ export class AuthenticationService {
 
 export type PostApiAuthRegisterClientResult = NonNullable<RegisterResponse>;
 export type PostApiAuthLoginClientResult = NonNullable<LoginResponse>;
-export type PostApiAuthRefreshTokenClientResult =
-  NonNullable<RefreshTokenResponse>;
+export type PostApiAuthRefreshClientResult = NonNullable<RefreshTokenResponse>;
 export type PostApiAuthForgotPasswordClientResult =
   NonNullable<ForgotPasswordResponse>;
 export type PostApiAuthResetPasswordClientResult =

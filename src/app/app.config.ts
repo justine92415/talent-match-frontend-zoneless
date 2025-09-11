@@ -5,6 +5,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { apiBaseUrlInterceptor } from './interceptors/api-base-url.interceptor';
 import { AuthService } from './services/auth.service';
 
 // Material Icons 初始化函式
@@ -28,7 +29,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([apiBaseUrlInterceptor, authInterceptor])),
     // Material Icons 全域配置
     {
       provide: APP_INITIALIZER,

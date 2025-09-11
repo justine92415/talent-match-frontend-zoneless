@@ -20,6 +20,7 @@
       "@pages/*": ["app/pages/*"],
       "@components/*": ["components/*"],
       "@share/*": ["share/*"],
+      "@environments/*": ["environments/*"],
       "@/*": ["*"]
     }
   },

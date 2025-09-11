@@ -41,6 +41,8 @@ interface AuthState {
   error: string | null;
 }
 
+type Role = 'student' | 'teacher' | 'admin';
+
 const STORAGE_KEY = {
   ACCESS_TOKEN: 'tmf_access_token',
   REFRESH_TOKEN: 'tmf_refresh_token',
@@ -75,12 +77,12 @@ export class AuthService {
   }
 
   // 檢查是否擁有特定角色
-  hasRole(role: string): boolean {
+  hasRole(role: Role): boolean {
     return this.authState().roles.includes(role);
   }
 
   // 檢查是否擁有任一角色
-  hasAnyRole(roles: string[]): boolean {
+  hasAnyRole(roles: Role[]): boolean {
     const userRoles = this.authState().roles;
     return roles.some(role => userRoles.includes(role));
   }

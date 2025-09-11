@@ -3,13 +3,11 @@
 >
   <div class="flex justify-between items-center">
     <p class="text-xl-bold leading-7">個人管理</p>
-    <p
-      class="text-base-bold px-2 py-1 rounded-sm text-orange-55 bg-grey-f7"
-    >
+    <p class="text-base-bold px-2 py-1 rounded-sm text-orange-55 bg-grey-f7">
       {{ roleLabel() }}
     </p>
   </div>
-  
+
   <ul class="flex flex-col gap-1 grow">
     @for (item of navigationItems(); track item.id) {
       <li>

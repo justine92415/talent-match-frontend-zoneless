@@ -269,7 +269,7 @@ export class Header implements OnInit, AfterViewInit {
       },
     ];
 
-    if (role === 'teacher') {
+    if (this.authService.hasRole('teacher')) {
       return [
         {
           id: 'teacher-info',
@@ -303,7 +303,7 @@ export class Header implements OnInit, AfterViewInit {
         },
         ...commonItems,
       ];
-    } else if (role === 'student') {
+    } else if (this.authService.hasRole('student')) {
       return [
         {
           id: 'student-info',

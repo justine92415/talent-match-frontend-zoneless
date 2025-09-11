@@ -16,6 +16,7 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   const publicEndpoints = [
     '/api/auth/login',
     '/api/auth/register',
+    '/api/auth/refresh',
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
     '/api/health'
@@ -35,8 +36,23 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && !isPublicEndpoint) {
+        console.log('401 error intercepted, attempting token refresh');
         return handle401Error(authReq, next, authService, router);
       }
+      
+      // 處理其他認證相關錯誤
+      if (error.status === 403 && !isPublicEndpoint) {
+        console.warn('Access forbidden (403), clearing auth state');
+        authService.logout();
+        return throwError(() => error);
+      }
+
+      // 處理伺服器錯誤時的 token 驗證
+      if (error.status >= 500 && !isPublicEndpoint) {
+        console.warn('Server error encountered, user may need to re-authenticate');
+        // 對於伺服器錯誤，我們不立即登出，但 AuthService 中的 loadUserProfile 會處理
+      }
+
       return throwError(() => error);
     })
   );
@@ -64,27 +80,32 @@ function handle401Error(
 
     const token = authService.getAccessToken();
     if (token) {
+      console.log('Attempting to refresh token due to 401 error');
       return authService.refreshToken().pipe(
         switchMap((success: boolean) => {
           isRefreshing = false;
           if (success) {
+            console.log('Token refresh successful, retrying original request');
             const newToken = authService.getAccessToken();
             refreshTokenSubject.next(newToken);
             return next(addTokenHeader(request, newToken));
           } else {
             // Refresh failed, redirect to login
+            console.log('Token refresh failed, logging out user');
             authService.logout();
             return throwError(() => new Error('Token refresh failed'));
           }
         }),
         catchError((err) => {
           isRefreshing = false;
+          console.log('Token refresh error, logging out user:', err);
           authService.logout();
           return throwError(() => err);
         })
       );
     } else {
       isRefreshing = false;
+      console.log('No token available for refresh, logging out user');
       authService.logout();
       return throwError(() => new Error('No token available'));
     }

@@ -1,3 +1,4 @@
+import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from "@angular/material/icon";
@@ -6,10 +7,10 @@ import { InputText } from "@components/form/input-text/input-text";
 
 @Component({
   selector: 'tmf-info-edit-form',
-  imports: [ReactiveFormsModule, MatIconModule, InputText],
+  imports: [ReactiveFormsModule, MatIconModule, InputText, JsonPipe],
   templateUrl: './info-edit-form.html',
   styles: ``,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InfoEditForm {
   user = input<UserProfile>();
@@ -19,6 +20,8 @@ export class InfoEditForm {
   submitForm = output<void>();
   avatarUpload = output<void>();
 
+
+  
   onSubmit(): void {
     this.submitForm.emit();
   }

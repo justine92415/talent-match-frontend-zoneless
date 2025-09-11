@@ -1,7 +1,7 @@
 import { rxResource } from '@angular/core/rxjs-interop';
 import { delay, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, effect } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -14,6 +14,7 @@ import { AuthenticationService } from '@app/api/generated/authentication/authent
 import { InfoView } from './info-view/info-view';
 import { InfoEditForm } from './info-edit-form/info-edit-form';
 import { InfoViewSkeleton } from './info-view-skeleton/info-view-skeleton';
+import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'tmf-info',
@@ -24,6 +25,7 @@ import { InfoViewSkeleton } from './info-view-skeleton/info-view-skeleton';
     InfoView,
     InfoEditForm,
     InfoViewSkeleton,
+    JsonPipe
   ],
   templateUrl: './info.html',
   styles: ``,
@@ -53,6 +55,10 @@ export default class Info implements OnInit {
 
   profileForm!: FormGroup;
 
+  private userDataEffect = effect(() => {
+    this.loadUserData();
+  });
+
   ngOnInit(): void {
     this.initializeForm();
   }
@@ -66,6 +72,19 @@ export default class Info implements OnInit {
       phone: ['', [Validators.pattern(/^09\d{8}$/)]],
       bio: ['', [Validators.maxLength(500)]], // 注意：UserProfile 中沒有此欄位，可能需要後端新增
     });
+  }
+
+  private loadUserData(): void {
+    const currentUser = this.user();
+    if (currentUser && this.profileForm) {
+      this.profileForm.patchValue({
+        nickName: currentUser.nick_name || '',
+        name: currentUser.name || '',
+        email: currentUser.email || '',
+        birthDate: currentUser.birthday || '',
+        phone: currentUser.contact_phone || '',
+      });
+    }
   }
 
   onSubmit(): void {

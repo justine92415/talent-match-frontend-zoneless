@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatIconModule } from "@angular/material/icon";
-import { UserProfile } from '@app/api/generated/talentMatchAPI.schemas';
+import { GetProfileResponse } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-info-view',
@@ -11,5 +11,5 @@ import { UserProfile } from '@app/api/generated/talentMatchAPI.schemas';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InfoView {
-  user = input<UserProfile>();
+  user = input<GetProfileResponse>();
 }

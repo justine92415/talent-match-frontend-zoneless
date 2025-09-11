@@ -11,6 +11,7 @@
         type="button"
         (click)="toggleEditMode()"
         [iconName]="'settings'"
+        [disabled]="userProfileResource.isLoading()"
       >
         編輯資料
       </tmf-button>
@@ -40,7 +41,28 @@
 
   <!-- Main Content -->
   <div>
-    @if (isEditMode()) {
+    @if (userProfileResource.isLoading()) {
+      <!-- Loading State -->
+      <div class="flex items-center justify-center py-16">
+        <div class="flex flex-col items-center gap-4">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-55"></div>
+          <p class="text-grey-9f">載入用戶資料中...</p>
+        </div>
+      </div>
+    } @else if (userProfileResource.error()) {
+      <!-- Error State -->
+      <div class="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg">
+        <h3 class="font-medium mb-2">無法載入用戶資料</h3>
+        <p class="text-sm">{{ userProfileResource.error()?.message || '發生未知錯誤，請稍後再試' }}</p>
+        <button
+          type="button"
+          (click)="userProfileResource.reload()"
+          class="mt-3 px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md text-sm transition-colors"
+        >
+          重新載入
+        </button>
+      </div>
+    } @else if (userProfileResource.status() === 'resolved') {
       <!-- Edit Mode -->
       <tmf-info-edit-form
         [user]="user()"

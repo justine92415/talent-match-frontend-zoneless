@@ -42,18 +42,18 @@
   <!-- Main Content -->
   <div>
     @if (userProfileResource.isLoading()) {
-      <!-- Loading State -->
-      <div class="flex items-center justify-center py-16">
-        <div class="flex flex-col items-center gap-4">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-55"></div>
-          <p class="text-grey-9f">載入用戶資料中...</p>
-        </div>
-      </div>
+      <tmf-info-view-skeleton></tmf-info-view-skeleton>
     } @else if (userProfileResource.error()) {
       <!-- Error State -->
-      <div class="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg">
+      <div
+        class="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg"
+      >
         <h3 class="font-medium mb-2">無法載入用戶資料</h3>
-        <p class="text-sm">{{ userProfileResource.error()?.message || '發生未知錯誤，請稍後再試' }}</p>
+        <p class="text-sm">
+          {{
+            userProfileResource.error()?.message || "發生未知錯誤，請稍後再試"
+          }}
+        </p>
         <button
           type="button"
           (click)="userProfileResource.reload()"
@@ -62,68 +62,69 @@
           重新載入
         </button>
       </div>
-    } @else if (userProfileResource.status() === 'resolved') {
-      <!-- Edit Mode -->
-      <tmf-info-edit-form
-        [user]="user()"
-        [profileForm]="profileForm"
-        [errorMessage]="errorMessage()"
-        (submitForm)="onSubmit()"
-        (avatarUpload)="onAvatarUpload()"
-      ></tmf-info-edit-form>
     } @else {
-      <!-- Preview Mode -->
-      <tmf-info-view
-        [user]="user()"
-      ></tmf-info-view>
+      @if (isEditMode()) {
+        <!-- Edit Mode -->
+        <tmf-info-edit-form
+          [user]="user()"
+          [profileForm]="profileForm"
+          [errorMessage]="errorMessage()"
+          (submitForm)="onSubmit()"
+          (avatarUpload)="onAvatarUpload()"
+        ></tmf-info-edit-form>
+      } @else {
+        <!-- Preview Mode -->
+        <tmf-info-view [user]="user()"></tmf-info-view>
+      }
     }
   </div>
 
-    <!-- Additional Settings -->
-    <div class="mt-8 pt-8 border-t border-grey-e9">
-      <h2 class="text-xl font-semibold text-grey-33 mb-6">帳戶設定</h2>
-      
-      <div class="space-y-4">
-        <!-- Password Change -->
-        <div class="flex items-center justify-between p-4 border border-grey-e9 rounded-lg hover:bg-grey-f7 transition-colors duration-200">
-          <div class="flex items-center gap-3">
-            <mat-icon class="text-grey-66">lock</mat-icon>
-            <div>
-              <h3 class="font-medium text-grey-33">變更密碼</h3>
-              <p class="text-sm text-grey-9f">定期更換密碼以確保帳戶安全</p>
-            </div>
-          </div>
-          <tmf-button variant="secondary" size="sm">
-            變更
-          </tmf-button>
-        </div>
+  <!-- Additional Settings -->
+  <div class="mt-8 pt-8 border-t border-grey-e9">
+    <h2 class="text-xl font-semibold text-grey-33 mb-6">帳戶設定</h2>
 
-        <!-- Privacy Settings -->
-        <div class="flex items-center justify-between p-4 border border-grey-e9 rounded-lg hover:bg-grey-f7 transition-colors duration-200">
-          <div class="flex items-center gap-3">
-            <mat-icon class="text-grey-66">privacy_tip</mat-icon>
-            <div>
-              <h3 class="font-medium text-grey-33">隱私設定</h3>
-              <p class="text-sm text-grey-9f">管理您的個人資訊顯示權限</p>
-            </div>
+    <div class="space-y-4">
+      <!-- Password Change -->
+      <div
+        class="flex items-center justify-between p-4 border border-grey-e9 rounded-lg hover:bg-grey-f7 transition-colors duration-200"
+      >
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-grey-66">lock</mat-icon>
+          <div>
+            <h3 class="font-medium text-grey-33">變更密碼</h3>
+            <p class="text-sm text-grey-9f">定期更換密碼以確保帳戶安全</p>
           </div>
-          <tmf-button variant="secondary" size="sm">
-            設定
-          </tmf-button>
         </div>
+        <tmf-button variant="secondary" size="sm"> 變更 </tmf-button>
+      </div>
 
-        <!-- Account Deletion -->
-        <div class="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
-          <div class="flex items-center gap-3">
-            <mat-icon class="text-red-500">delete_forever</mat-icon>
-            <div>
-              <h3 class="font-medium text-red-600">刪除帳戶</h3>
-              <p class="text-sm text-red-500">永久刪除您的帳戶及所有相關資料</p>
-            </div>
+      <!-- Privacy Settings -->
+      <div
+        class="flex items-center justify-between p-4 border border-grey-e9 rounded-lg hover:bg-grey-f7 transition-colors duration-200"
+      >
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-grey-66">privacy_tip</mat-icon>
+          <div>
+            <h3 class="font-medium text-grey-33">隱私設定</h3>
+            <p class="text-sm text-grey-9f">管理您的個人資訊顯示權限</p>
           </div>
-          <tmf-button variant="primary" size="sm">
-            刪除
-          </tmf-button>
         </div>
+        <tmf-button variant="secondary" size="sm"> 設定 </tmf-button>
+      </div>
+
+      <!-- Account Deletion -->
+      <div
+        class="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50"
+      >
+        <div class="flex items-center gap-3">
+          <mat-icon class="text-red-500">delete_forever</mat-icon>
+          <div>
+            <h3 class="font-medium text-red-600">刪除帳戶</h3>
+            <p class="text-sm text-red-500">永久刪除您的帳戶及所有相關資料</p>
+          </div>
+        </div>
+        <tmf-button variant="primary" size="sm"> 刪除 </tmf-button>
       </div>
     </div>
+  </div>
+</div>

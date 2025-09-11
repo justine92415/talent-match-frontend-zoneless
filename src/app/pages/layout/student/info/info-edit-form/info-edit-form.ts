@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from "@angular/material/icon";
-import { GetProfileResponse } from '@app/api/generated/talentMatchAPI.schemas';
+import { UserProfile } from '@app/api/generated/talentMatchAPI.schemas';
 import { InputText } from "@components/form/input-text/input-text";
 
 @Component({
@@ -12,7 +12,7 @@ import { InputText } from "@components/form/input-text/input-text";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InfoEditForm {
-  user = input<GetProfileResponse>();
+  user = input<UserProfile>();
   profileForm = input.required<FormGroup>();
   errorMessage = input<string | null>();
   

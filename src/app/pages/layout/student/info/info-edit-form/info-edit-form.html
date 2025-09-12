@@ -1,0 +1,96 @@
+<!-- Edit Mode Form -->
+<form id="profileForm" [formGroup]="profileForm()" (ngSubmit)="onSubmit()" class="space-y-8">
+  <!-- Profile Avatar Section -->
+  <div class="flex flex-col items-center mb-8">
+    <div class="relative mb-4">
+      <div class="w-32 h-32 rounded-full bg-grey-e9 flex items-center justify-center overflow-hidden">
+        <img
+          [src]="user()?.avatar_image || 'assets/images/orange-80-decorate.svg'"
+          alt="用戶頭像"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      <button
+        type="button"
+        (click)="onAvatarUpload()"
+        class="absolute bottom-0 right-0 w-10 h-10 cursor-pointer bg-white text-primary rounded-full flex items-center justify-center hover:bg-orange-55 hover:text-white transition-colors duration-200 shadow-lg"
+      >
+        <mat-icon class="!w-5 !h-5 !text-xl leading-5">camera_alt</mat-icon>
+      </button>
+    </div>
+    <h3 class="text-lg font-medium text-grey-33 mb-1">更換大頭照</h3>
+    <p class="text-sm text-grey-9f">建議使用 JPG、PNG 格式，檔案大小不超過 2MB</p>
+  </div>
+
+  <!-- Error Message -->
+  @if (errorMessage()) {
+    <div class="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Personal Information Form -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left Column -->
+    <div class="space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-grey-33 mb-2">
+          暱稱 <span class="text-red-500">*</span>
+        </label>
+        <tmf-input-text
+          placeholder="請輸入暱稱"
+          formControlName="nick_name"
+        ></tmf-input-text>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-grey-33 mb-2">
+          真實姓名
+        </label>
+        <tmf-input-text
+          placeholder="請輸入真實姓名"
+          formControlName="name"
+        ></tmf-input-text>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-grey-33 mb-2">
+          信箱
+        </label>
+        <div class="relative">
+          <tmf-input-text
+            type="email"
+            placeholder="example@email.com"
+            formControlName="email"
+          ></tmf-input-text>
+          <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <span class="text-xs text-grey-9f bg-grey-f7 px-2 py-1 rounded">不可修改</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-grey-33 mb-2">
+          生日
+        </label>
+        <tmf-input-text
+          placeholder="選擇生日"
+          formControlName="birthday"
+        ></tmf-input-text>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-grey-33 mb-2">
+          手機號碼
+        </label>
+        <tmf-input-text
+          placeholder="請輸入手機號碼"
+          formControlName="contact_phone"
+        ></tmf-input-text>
+      </div>
+    </div>
+  </div>
+</form>

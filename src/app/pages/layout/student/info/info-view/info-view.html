@@ -1,0 +1,88 @@
+<!-- Preview Mode -->
+<div class="space-y-8">
+  <!-- Profile Avatar Section -->
+  <div class="flex flex-col items-center mb-8">
+    <div class="w-32 h-32 rounded-full bg-grey-e9 flex items-center justify-center overflow-hidden">
+      <img
+        [src]="user()?.avatar_image || 'assets/images/orange-80-decorate.svg'"
+        alt="用戶頭像"
+        class="w-full h-full object-cover"
+      />
+    </div>
+  </div>
+
+  <!-- Personal Information Cards -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left Column -->
+    <div class="space-y-6">
+      <!-- Nickname Card -->
+      <div class="flex items-center gap-4 p-4 bg-grey-f7 rounded-lg">
+        <div class="w-10 h-10 text-primary bg-white border border-orange-55 rounded-full flex items-center justify-center">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-grey-9f font-medium uppercase tracking-wide">暱稱</p>
+          <p class="text-grey-33 font-medium text-sm">{{ user()?.nick_name || '尚未設定' }}</p>
+        </div>
+      </div>
+
+      <!-- Real Name Card -->
+      <div class="flex items-center gap-4 p-4 bg-grey-f7 rounded-lg">
+        <div class="w-10 h-10 text-primary bg-white border border-orange-55 rounded-full flex items-center justify-center">
+          <mat-icon>badge</mat-icon>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-grey-9f font-medium uppercase tracking-wide">真實姓名</p>
+          <p class="text-grey-33 font-medium text-sm">{{ user()?.name || '尚未設定' }}</p>
+        </div>
+      </div>
+
+      <!-- Email Card -->
+      <div class="flex items-center gap-4 p-4 bg-grey-f7 rounded-lg">
+        <div class="w-10 h-10 text-primary bg-white border border-orange-55 rounded-full flex items-center justify-center">
+          <mat-icon>email</mat-icon>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-grey-9f font-medium uppercase tracking-wide">信箱</p>
+          <p class="text-grey-33 font-medium text-sm">{{ user()?.email || '尚未設定' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="space-y-6">
+      <!-- Birthday Card -->
+      <div class="flex items-center gap-4 p-4 bg-grey-f7 rounded-lg">
+        <div class="w-10 h-10 text-primary bg-white border border-orange-55 rounded-full flex items-center justify-center">
+          <mat-icon>cake</mat-icon>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-grey-9f font-medium uppercase tracking-wide">生日</p>
+          <p class="text-grey-33 font-medium text-sm">{{ user()?.birthday || '尚未設定' }}</p>
+        </div>
+      </div>
+
+      <!-- Phone Card -->
+      <div class="flex items-center gap-4 p-4 bg-grey-f7 rounded-lg">
+        <div class="w-10 h-10 text-primary bg-white border border-orange-55 rounded-full flex items-center justify-center">
+          <mat-icon>phone</mat-icon>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-grey-9f font-medium uppercase tracking-wide">手機號碼</p>
+          <p class="text-grey-33 font-medium text-sm">{{ user()?.contact_phone || '尚未設定' }}</p>
+        </div>
+      </div>
+
+      <!-- Join Date Card -->
+      <div class="flex items-center gap-4 p-4 bg-grey-f7 rounded-lg">
+        <div class="w-10 h-10 text-primary bg-white border border-orange-55 rounded-full flex items-center justify-center">
+          <mat-icon>calendar_today</mat-icon>
+        </div>
+        <div class="flex-1">
+          <p class="text-xs text-grey-9f font-medium uppercase tracking-wide">加入日期</p>
+          <p class="text-grey-33 font-medium text-sm">{{ user()?.created_at ? (user()?.created_at | date:'yyyy年MM月dd日') : '尚未設定' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

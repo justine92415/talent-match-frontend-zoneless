@@ -104,7 +104,7 @@ export class Header implements OnInit, AfterViewInit {
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
   userName = computed(() => this.user()?.nick_name || this.user()?.name || '用戶');
-  userRole = computed(() => this.user()?.role);
+  userRole = computed(() => this.user()?.account_status);
 
 
   // 城市 Mock Data
@@ -269,7 +269,7 @@ export class Header implements OnInit, AfterViewInit {
       },
     ];
 
-    if (role === 'teacher') {
+    if (this.authService.hasRole('teacher')) {
       return [
         {
           id: 'teacher-info',
@@ -303,7 +303,7 @@ export class Header implements OnInit, AfterViewInit {
         },
         ...commonItems,
       ];
-    } else if (role === 'student') {
+    } else if (this.authService.hasRole('student')) {
       return [
         {
           id: 'student-info',

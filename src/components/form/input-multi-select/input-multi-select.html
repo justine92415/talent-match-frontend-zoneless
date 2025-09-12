@@ -48,16 +48,19 @@
             [class.text-primary]="isOptionSelected(option)"
             (click)="toggleOption(option)"
           >
-            <!-- Checkbox -->
-            <div class="flex items-center">
-              <input
-                type="checkbox"
-                class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2"
-                [checked]="isOptionSelected(option)"
-                readonly
-              />
-            </div>
+            <!-- Hidden Checkbox -->
+            <input
+              type="checkbox"
+              class="peer hidden"
+              [checked]="isOptionSelected(option)"
+              readonly
+            />
             <span class="flex-1">{{ option.label }}</span>
+            <span
+              class="material-symbols-outlined !text-[20px] !leading-[20px] text-primary transition-opacity duration-200 opacity-0 peer-checked:opacity-100"
+            >
+              check
+            </span>
           </button>
         </li>
         }

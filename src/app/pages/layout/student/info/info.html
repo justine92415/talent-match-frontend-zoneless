@@ -71,7 +71,8 @@
           [profileForm]="profileForm"
           [errorMessage]="errorMessage()"
           (submitForm)="onSubmit()"
-          (avatarUpload)="onAvatarUpload()"
+          (avatarUploadSuccess)="onAvatarUploadSuccess($event)"
+          (avatarUploadError)="onAvatarUploadError($event)"
         ></tmf-info-edit-form>
       } @else {
         <!-- Preview Mode -->

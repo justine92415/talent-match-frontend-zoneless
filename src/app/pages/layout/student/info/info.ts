@@ -166,7 +166,24 @@ export default class Info {
     }
   }
 
-  onAvatarUpload(): void {
-    // TODO: 實作頭像上傳功能
+  onAvatarUploadSuccess(newAvatarUrl: string): void {
+    console.log('Avatar upload success, new URL:', newAvatarUrl);
+    
+    // 更新本地用戶資料
+    if (this.user()) {
+      const updatedUser = { ...this.user()!, avatar_image: newAvatarUrl };
+      this.user.update(() => updatedUser);
+      
+      // 同步更新 AuthService 中的用戶資料，讓 header 也能同步
+      this.authService.updateUserProfile({ avatar_image: newAvatarUrl });
+      
+      // 清除錯誤訊息
+      this.errorMessage.set(null);
+    }
+  }
+  
+  onAvatarUploadError(errorMessage: string): void {
+    console.error('Avatar upload error:', errorMessage);
+    this.errorMessage.set(errorMessage);
   }
 }

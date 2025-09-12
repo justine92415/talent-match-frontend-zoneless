@@ -86,7 +86,9 @@
               <div
                 class="w-11 h-11 rounded-full bg-primary-95 flex items-center justify-center"
               >
-                @if (user()?.avatar_image) {
+                @if (isLoading() || !user()) {
+                  <tmf-skeleton width="40px" height="40px" class="rounded-full"></tmf-skeleton>
+                } @else if (user()?.avatar_image) {
                   <img
                     [src]="user()?.avatar_image"
                     alt="User Avatar"
@@ -100,11 +102,15 @@
                   />
                 }
               </div>
-              <p
-                class="font-inter hidden text-lg font-medium leading-7 snap-normal lg:block"
-              >
-                {{ userName() || "用戶" }}
-              </p>
+              @if (isLoading() || !user()) {
+                <tmf-skeleton width="60px" height="20px" class="hidden lg:block rounded"></tmf-skeleton>
+              } @else {
+                <p
+                  class="font-inter hidden text-lg font-medium leading-7 snap-normal lg:block"
+                >
+                  {{ userName() || "用戶" }}
+                </p>
+              }
             </div>
           </div>
         </div>

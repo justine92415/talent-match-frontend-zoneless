@@ -109,7 +109,7 @@ export class AuthService {
           user: undefined, // 用戶資訊稍後從 API 獲取
           roles,
           tokens,
-          loading: false,
+          loading: true, // 設定為載入狀態，直到使用者資料載入完成
           error: null
         });
       } catch (error) {
@@ -277,13 +277,19 @@ export class AuthService {
           console.log('User profile loaded successfully');
           this.updateAuthState({
             ...this.authState(),
-            user: response.data.user
+            user: response.data.user,
+            loading: false // 載入完成，設定 loading 為 false
           });
         }
       }),
       map((response: GetProfileResponse) => response.status === 'success' && !!response.data?.user),
       catchError((error) => {
         console.error('Failed to load user profile:', error);
+        // 設定 loading 為 false
+        this.updateAuthState({
+          ...this.authState(),
+          loading: false
+        });
         // 如果是認證相關錯誤 (401, 403) 或伺服器錯誤，清空登入狀態
         if (error.status === 401 || error.status === 403 || error.status >= 500) {
           console.warn(`Authentication failed or server error (${error.status}), logging out user`);

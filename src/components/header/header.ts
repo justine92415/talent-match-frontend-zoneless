@@ -16,6 +16,7 @@ import { RouterLink, Router } from '@angular/router';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
 import { Button } from '@components/button/button';
+import { Skeleton } from '@components/skeleton/skeleton';
 import { AuthService } from '@app/services/auth.service';
 
 interface City {
@@ -72,7 +73,7 @@ const DROPDOWN_IDS = {
 
 @Component({
   selector: 'tmf-header',
-  imports: [MatIconModule, OverlayModule, Button, RouterLink],
+  imports: [MatIconModule, OverlayModule, Button, Skeleton, RouterLink],
   providers: [DropdownManagerService],
   templateUrl: './header.html',
   styleUrl: './header.css',
@@ -103,6 +104,7 @@ export class Header implements OnInit, AfterViewInit {
   // 認證相關的計算屬性
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
+  isLoading = this.authService.isLoading;
   userName = computed(() => this.user()?.nick_name || this.user()?.name || '用戶');
   userRole = computed(() => this.user()?.account_status);
 

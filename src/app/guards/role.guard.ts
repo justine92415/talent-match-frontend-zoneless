@@ -19,7 +19,8 @@ export function createRoleGuard(requiredRole: string): CanActivateFn {
     
     if (user) {
       // 已有用戶資訊，直接檢查角色
-      if (user.role === requiredRole) {
+      const userRoles = authService.roles();
+      if (userRoles.includes(requiredRole)) {
         return true;
       } else {
         // 角色不符，重定向到首頁
@@ -31,8 +32,8 @@ export function createRoleGuard(requiredRole: string): CanActivateFn {
       return authService.loadUserProfile().pipe(
         map((success) => {
           if (success) {
-            const currentUser = authService.user();
-            if (currentUser?.role === requiredRole) {
+            const userRoles = authService.roles();
+            if (userRoles.includes(requiredRole)) {
               return true;
             } else {
               // 角色不符，重定向到首頁

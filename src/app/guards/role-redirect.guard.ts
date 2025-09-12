@@ -12,14 +12,16 @@ export const dashboardRedirectGuard: CanActivateFn = (_route, _state) => {
   
   if (user) {
     // 已有用戶資訊，根據角色重定向
-    if (user.role === 'student') {
-      router.navigate(['/dashboard/student']);
-      return false;
-    } else if (user.role === 'teacher') {
+    const userRoles = authService.roles();
+    
+    if (userRoles.includes('teacher')) {
       router.navigate(['/dashboard/teacher']);
       return false;
+    } else if (userRoles.includes('student')) {
+      router.navigate(['/dashboard/student']);
+      return false;
     } else {
-      // 其他角色或未知角色，重定向到首頁
+      // 沒有已知角色，重定向到首頁
       router.navigate(['/']);
       return false;
     }
@@ -29,14 +31,17 @@ export const dashboardRedirectGuard: CanActivateFn = (_route, _state) => {
       map((success) => {
         if (success) {
           const currentUser = authService.user();
-          if (currentUser?.role === 'student') {
-            router.navigate(['/dashboard/student']);
-            return false;
-          } else if (currentUser?.role === 'teacher') {
+          const userRoles = authService.roles();
+          
+          // 根據角色重定向到適當的 dashboard
+          if (userRoles.includes('teacher')) {
             router.navigate(['/dashboard/teacher']);
             return false;
+          } else if (userRoles.includes('student')) {
+            router.navigate(['/dashboard/student']);
+            return false;
           } else {
-            // 其他角色或未知角色，重定向到首頁
+            // 沒有已知角色，重定向到首頁
             router.navigate(['/']);
             return false;
           }

@@ -1,7 +1,9 @@
-import { Component, computed, inject, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { AuthService } from '@app/services/auth.service';
+
+type Role = 'student' | 'teacher';
 
 interface SidebarMenuItem {
   id: string;
@@ -18,29 +20,52 @@ interface SidebarMenuItem {
     :host {
       display: block;
     }
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  `
 })
-export class DashboardSidebar {
+export class DashboardSidebar implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
 
   user = this.authService.user;
-  userRole = computed(() => this.user()?.role);
+  roles = this.authService.roles;
+  
+  // 當前顯示的角色 (用於控制 sidebar 顯示內容)
+  currentRole = signal<Role>('student');
+
+  ngOnInit(): void {
+    // 根據當前路由設置默認角色
+    this.initializeCurrentRole();
+  }
+
+  private initializeCurrentRole(): void {
+    const url = this.router.url;
+    if (url.includes('/dashboard/teacher')) {
+      this.currentRole.set('teacher');
+    } else if (url.includes('/dashboard/student')) {
+      this.currentRole.set('student');
+    } else {
+      // 默認根據用戶角色設置
+      const userRoles = this.roles();
+      if (userRoles.includes('teacher')) {
+        this.currentRole.set('teacher');
+      } else if (userRoles.includes('student')) {
+        this.currentRole.set('student');
+      }
+    }
+  }
 
   // 角色顯示標籤
   roleLabel = computed(() => {
-    const role = this.userRole();
-    return role === 'student' ? '學生' : 
-           role === 'teacher' ? '教師' : 
-           role === 'admin' ? '管理員' : '用戶';
+    const current = this.currentRole();
+    return current === 'student' ? '學生' : 
+           current === 'teacher' ? '教師' : '用戶';
   });
 
-  // 根據角色生成導航選單
+  // 根據當前選擇的角色生成導航選單
   navigationItems = computed<SidebarMenuItem[]>(() => {
-    const role = this.userRole();
+    const current = this.currentRole();
     
-    if (role === 'student') {
+    if (current === 'student') {
       return [
         {
           id: 'info',
@@ -73,7 +98,7 @@ export class DashboardSidebar {
           route: '/dashboard/student/record'
         }
       ];
-    } else if (role === 'teacher') {
+    } else if (current === 'teacher') {
       return [
         {
           id: 'info',
@@ -111,27 +136,34 @@ export class DashboardSidebar {
     return [];
   });
 
-  // 角色切換功能
-  switchRole() {
-    const currentRole = this.userRole();
-    if (currentRole === 'student') {
-      this.router.navigate(['/dashboard/teacher']);
-    } else if (currentRole === 'teacher') {
-      this.router.navigate(['/dashboard/student']);
-    }
-  }
-
   // 檢查是否可以切換角色
   canSwitchRole = computed(() => {
-    const role = this.userRole();
-    // 這裡可以根據實際業務邏輯判斷用戶是否同時具有兩種角色
-    // 目前簡單假設所有用戶都可以切換
-    return role === 'student' || role === 'teacher';
+    const userRoles = this.roles();
+    return userRoles.includes('student') && userRoles.includes('teacher');
   });
 
   // 獲取切換目標角色的標籤
   switchTargetLabel = computed(() => {
-    const currentRole = this.userRole();
-    return currentRole === 'student' ? '切換為教師' : '切換為學生';
+    const current = this.currentRole();
+    return current === 'student' ? '切換為教師' : '切換為學生';
   });
+
+  // 切換角色功能
+  switchRole(): void {
+    const current = this.currentRole();
+    
+    // 檢查用戶是否擁有多重角色
+    if (!this.canSwitchRole()) {
+      console.warn('用戶沒有多重角色，無法切換');
+      return;
+    }
+    
+    if (current === 'student') {
+      this.currentRole.set('teacher');
+      this.router.navigate(['/dashboard/teacher']);
+    } else if (current === 'teacher') {
+      this.currentRole.set('student');
+      this.router.navigate(['/dashboard/student']);
+    }
+  }
 }

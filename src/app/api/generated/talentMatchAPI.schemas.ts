@@ -526,6 +526,99 @@ export interface DeleteProfileResponse {
   data?: DeleteProfileResponseData;
 }
 
+/**
+ * 回應狀態
+ */
+export type AvatarUploadSuccessResponseStatus =
+  (typeof AvatarUploadSuccessResponseStatus)[keyof typeof AvatarUploadSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AvatarUploadSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 更新後的使用者資訊
+ */
+export type AvatarUploadSuccessResponseDataUser = {
+  /** 使用者 ID */
+  id?: number;
+  /** 使用者暱稱 */
+  nick_name?: string;
+  /** 使用者頭像 URL */
+  avatar_image?: string;
+};
+
+/**
+ * 上傳結果資訊
+ */
+export type AvatarUploadSuccessResponseData = {
+  /** Firebase Storage 下載連結 */
+  avatarUrl?: string;
+  /** 更新後的使用者資訊 */
+  user?: AvatarUploadSuccessResponseDataUser;
+};
+
+export interface AvatarUploadSuccessResponse {
+  /** 回應狀態 */
+  status?: AvatarUploadSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 上傳結果資訊 */
+  data?: AvatarUploadSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type AvatarDeleteSuccessResponseStatus =
+  (typeof AvatarDeleteSuccessResponseStatus)[keyof typeof AvatarDeleteSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AvatarDeleteSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 回應資料（此 API 無回傳資料）
+ * @nullable
+ */
+export type AvatarDeleteSuccessResponseData = unknown | null;
+
+export interface AvatarDeleteSuccessResponse {
+  /** 回應狀態 */
+  status?: AvatarDeleteSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 回應資料（此 API 無回傳資料）
+   * @nullable
+   */
+  data?: AvatarDeleteSuccessResponseData;
+}
+
+export type AvatarValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type AvatarValidationErrorResponse = ValidationErrorResponse &
+  AvatarValidationErrorResponseAllOf;
+
+export type AvatarBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type AvatarBusinessErrorResponse = BusinessErrorResponse &
+  AvatarBusinessErrorResponseAllOf;
+
+export type AvatarNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type AvatarNotFoundErrorResponse = NotFoundErrorResponse &
+  AvatarNotFoundErrorResponseAllOf;
+
 export type PostApiAuthRegister400 =
   | RegisterValidationErrorResponse
   | RegisterBusinessErrorResponse;
@@ -545,6 +638,94 @@ export type PostApiAuthResetPassword400 =
 export type PutApiAuthProfile400 =
   | UpdateProfileValidationError
   | UpdateProfileBusinessError;
+
+export type PostApiFilesUploadBody = {
+  /** 要上傳的檔案列表 */
+  files: Blob[];
+  /** 檔案分類 (optional) */
+  category?: string;
+};
+
+export type PostApiFilesUpload201DataFilesItem = {
+  originalName?: string;
+  fileName?: string;
+  mimeType?: string;
+  size?: number;
+  downloadURL?: string;
+  firebaseUrl?: string;
+  uploadedAt?: string;
+};
+
+export type PostApiFilesUpload201Data = {
+  files?: PostApiFilesUpload201DataFilesItem[];
+};
+
+export type PostApiFilesUpload201 = {
+  success?: boolean;
+  message?: string;
+  data?: PostApiFilesUpload201Data;
+};
+
+export type DeleteApiFilesDeleteBody = {
+  /** Firebase Storage 檔案 URL */
+  fileUrl: string;
+};
+
+export type DeleteApiFilesDelete200 = {
+  success?: boolean;
+  message?: string;
+};
+
+/**
+ * Firebase 檔案 metadata
+ */
+export type GetApiFilesMetadataFileUrl200Data = { [key: string]: unknown };
+
+export type GetApiFilesMetadataFileUrl200 = {
+  success?: boolean;
+  message?: string;
+  /** Firebase 檔案 metadata */
+  data?: GetApiFilesMetadataFileUrl200Data;
+};
+
+export type PostApiFilesDownloadUrlBody = {
+  /** Firebase Storage 檔案 URL */
+  fileUrl: string;
+  /** 連結有效期限（分鐘） */
+  expiresInMinutes?: number;
+};
+
+export type PostApiFilesDownloadUrl200Data = {
+  downloadUrl?: string;
+  expiresAt?: string;
+};
+
+export type PostApiFilesDownloadUrl200 = {
+  success?: boolean;
+  message?: string;
+  data?: PostApiFilesDownloadUrl200Data;
+};
+
+export type GetApiFilesTestConnection200Data = {
+  bucketName?: string;
+  bucketExists?: boolean;
+  recommendation?: string;
+};
+
+export type GetApiFilesTestConnection200 = {
+  success?: boolean;
+  message?: string;
+  data?: GetApiFilesTestConnection200Data;
+};
+
+export type PostApiUploadAvatarBody = {
+  /** 頭像檔案（支援 JPEG, JPG, PNG, WebP，最大 5MB） */
+  avatar: Blob;
+};
+
+export type PostApiUploadAvatar400 =
+  | AvatarValidationErrorResponse
+  | AvatarBusinessErrorResponse;
 
 export type GetApiPing200 = {
   message?: string;

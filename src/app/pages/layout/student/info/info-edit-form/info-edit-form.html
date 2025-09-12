@@ -5,7 +5,7 @@
     <div class="relative mb-4">
       <div class="w-32 h-32 rounded-full bg-grey-e9 flex items-center justify-center overflow-hidden">
         <img
-          [src]="user()?.avatar_image || 'assets/images/orange-80-decorate.svg'"
+          [src]="currentAvatarUrl() || user()?.avatar_image || 'assets/images/orange-80-decorate.svg'"
           alt="用戶頭像"
           class="w-full h-full object-cover"
         />
@@ -13,13 +13,34 @@
       <button
         type="button"
         (click)="onAvatarUpload()"
-        class="absolute bottom-0 right-0 w-10 h-10 cursor-pointer bg-white text-primary rounded-full flex items-center justify-center hover:bg-orange-55 hover:text-white transition-colors duration-200 shadow-lg"
+        [disabled]="isUploading()"
+        class="absolute bottom-0 right-0 w-10 h-10 cursor-pointer bg-white text-primary rounded-full flex items-center justify-center hover:bg-orange-55 hover:text-white transition-colors duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <mat-icon class="!w-5 !h-5 !text-xl leading-5">camera_alt</mat-icon>
+        @if (isUploading()) {
+          <mat-icon class="!w-5 !h-5 !text-xl leading-5 animate-spin">refresh</mat-icon>
+        } @else {
+          <mat-icon class="!w-5 !h-5 !text-xl leading-5">camera_alt</mat-icon>
+        }
       </button>
     </div>
     <h3 class="text-lg font-medium text-grey-33 mb-1">更換大頭照</h3>
-    <p class="text-sm text-grey-9f">建議使用 JPG、PNG 格式，檔案大小不超過 2MB</p>
+    <p class="text-sm text-grey-9f">建議使用 JPG、PNG、WebP 格式，檔案大小不超過 5MB</p>
+    
+    <!-- 隱藏的檔案輸入元件 -->
+    <input
+      #fileInput
+      type="file"
+      accept="image/jpeg,image/jpg,image/png,image/webp"
+      (change)="onFileSelected($event)"
+      class="hidden"
+    >
+    
+    <!-- 上傳錯誤訊息 -->
+    @if (uploadError()) {
+      <div class="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-lg text-sm mt-2">
+        {{ uploadError() }}
+      </div>
+    }
   </div>
 
   <!-- Error Message -->

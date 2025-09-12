@@ -23,6 +23,11 @@ export const routes: Routes = [
     canActivate: [guestGuard],
   },
   {
+    path: 'teacher-apply',
+    loadComponent: () => import('./pages/teacher-apply/teacher-apply'),
+    // canActivate: [authGuard],
+  },
+  {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard-layout/dashboard-layout'),
     loadChildren: () => import('./pages/dashboard-layout/dashboard-layout.routes'),

@@ -21,6 +21,36 @@
 
         <h3 class="text-lg font-medium text-grey-33">教學證照 {{ $index + 1 }}</h3>
 
+        <!-- 持有人姓名 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">持有人姓名</label>
+          <tmf-input-text
+            placeholder="請輸入持有人姓名"
+            formControlName="holder_name"
+          ></tmf-input-text>
+          @if (
+            certificate.get("holder_name")?.invalid &&
+            certificate.get("holder_name")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入持有人姓名</div>
+          }
+        </div>
+
+        <!-- 證書號碼 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">證書號碼</label>
+          <tmf-input-text
+            placeholder="請輸入證書號碼"
+            formControlName="license_number"
+          ></tmf-input-text>
+          @if (
+            certificate.get("license_number")?.invalid &&
+            certificate.get("license_number")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入證書號碼</div>
+          }
+        </div>
+
         <!-- 證照名稱 -->
         <div class="space-y-2">
           <label class="block text-base font-medium text-grey-33">證照名稱</label>
@@ -33,6 +63,22 @@
             certificate.get("certificate_name")?.touched
           ) {
             <div class="text-red-500 text-sm">請輸入證照名稱</div>
+          }
+        </div>
+
+        <!-- 證書主題 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">證書主題</label>
+          <tmf-input-select
+            [placeholder]="'請選擇證書主題'"
+            [options]="subjectOptions()"
+            formControlName="subject"
+          ></tmf-input-select>
+          @if (
+            certificate.get("subject")?.invalid &&
+            certificate.get("subject")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請選擇證書主題</div>
           }
         </div>
 

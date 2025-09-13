@@ -1,10 +1,11 @@
-import { Component, input, OnInit, inject } from '@angular/core';
+import { Component, input, OnInit, inject, signal } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
+import { TagsService } from '../../../api/generated/tags/tags.service';
 
 @Component({
   selector: 'tmf-certificates-form',
@@ -20,9 +21,14 @@ import { TmfIconEnum } from '@share/icon.enum';
 })
 export class CertificatesForm implements OnInit {
   private fb = inject(FormBuilder);
+  private tagsService = inject(TagsService);
   
   // 輸入屬性 - 接收來自父元件的FormGroup
   formGroup = input.required<FormGroup>();
+
+  // 主題選項
+  subjectOptions = signal<SelectOption[]>([]);
+  allTags = signal<any[]>([]);
 
   get TmfIcon() {
     return TmfIconEnum;
@@ -46,7 +52,33 @@ export class CertificatesForm implements OnInit {
   });
 
   ngOnInit() {
-    // FormGroup 已經由父元件創建和管理，這裡不需要額外的初始化
+    // 載入主題資料
+    this.loadTags();
+  }
+
+  // 載入分類資料
+  private loadTags() {
+    this.tagsService.getApiTags().subscribe({
+      next: (response: any) => {
+        if (response.data && Array.isArray(response.data)) {
+          this.allTags.set(response.data);
+          this.buildSubjectOptions();
+        }
+      },
+      error: (error) => {
+        console.error('載入分類資料失敗:', error);
+      }
+    });
+  }
+
+  // 建構主題選項
+  private buildSubjectOptions() {
+    const tags = this.allTags();
+    const options: SelectOption[] = tags.map(tag => ({
+      value: tag.id,  // 使用數字而不是字串
+      label: tag.main_category
+    }));
+    this.subjectOptions.set(options);
   }
 
   // 新增證照
@@ -65,7 +97,11 @@ export class CertificatesForm implements OnInit {
   // 建立證照 FormGroup
   private createCertificate(): FormGroup {
     return this.fb.group({
+      id: [null], // 用於更新現有證照時的 ID
+      holder_name: ['', Validators.required], // 持有人姓名
+      license_number: ['', Validators.required], // 證書號碼
       certificate_name: ['', Validators.required],
+      subject: ['', Validators.required], // 證書主題 (下拉選單)
       issuer: ['', Validators.required],
       year: ['', Validators.required],
       month: ['', Validators.required],

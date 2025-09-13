@@ -282,7 +282,10 @@ export default class TeacherApply implements OnInit {
       data.certificates.forEach((cert: any) => {
         const certificateForm = this.fb.group({
           id: [cert.id || null], // 包含 id 欄位
+          holder_name: [cert.holder_name || '', Validators.required],  // 持有人姓名
+          license_number: [cert.license_number || '', Validators.required],  // 證書號碼
           certificate_name: [cert.license_name || '', Validators.required],  // API 使用 license_name
+          subject: [cert.subject?.toString() || '', Validators.required],  // 確保為字串格式
           issuer: [cert.verifying_institution || '', Validators.required],  // API 使用 verifying_institution
           year: [cert.year?.toString() || '', Validators.required],
           month: [cert.month?.toString() || '', Validators.required],
@@ -415,8 +418,11 @@ export default class TeacherApply implements OnInit {
   addCertificate() {
     const certificateForm = this.fb.group({
       id: [null], // 新增 id 欄位
-      certificate_name: ['', Validators.required],
-      issuer: ['', Validators.required],
+      holder_name: ['', Validators.required], // 持有人姓名
+      license_number: ['', Validators.required], // 證書號碼
+      certificate_name: ['', Validators.required], // 證照名稱
+      subject: ['', Validators.required], // 證書主題
+      issuer: ['', Validators.required], // 核發機構
       year: ['', Validators.required],
       month: ['', Validators.required],
       certificate_file: [null]
@@ -480,8 +486,7 @@ export default class TeacherApply implements OnInit {
       this.submitLearningExperiences();
     } else if (currentStepValue === 4 && this.step4Valid) {
       // 第四步：提交證照資料
-      // TODO: 實作證照提交，完成所有步驟
-      this.submitForm();
+      this.submitCertificates();
     }
   }
 
@@ -740,6 +745,143 @@ export default class TeacherApply implements OnInit {
         console.log(`更新後的表單值:`, formArray.at(index).value);
       } else {
         console.log(`找不到索引 ${index} 的表單控制項`);
+      }
+    });
+  }
+
+  // 提交證照資料 (第四步)
+  private submitCertificates() {
+    if (!this.step4Valid) {
+      this.certificatesFormGroup.markAllAsTouched();
+      return;
+    }
+
+    const formData = this.certificatesFormGroup.value;
+    
+    // 準備 API 資料格式
+    const certificates = formData.certificates?.map((cert: any) => ({
+      ...(cert.id && { id: cert.id }), // 如果有 id 就包含
+      holder_name: cert.holder_name,    // 持有人姓名
+      license_number: cert.license_number, // 證書號碼
+      license_name: cert.certificate_name,  // 表單使用 certificate_name，API 使用 license_name
+      subject: cert.subject?.toString() || '', // 確保 subject 為字串格式
+      verifying_institution: cert.issuer,   // 表單使用 issuer，API 使用 verifying_institution
+      year: parseInt(cert.year),
+      month: parseInt(cert.month),
+      certificate_file: '', // 暫時寫死為空字串
+      category_id: cert.subject?.toString() || ''
+    })) || [];
+
+    const apiData = {
+      certificates
+    };
+
+    // 調試資訊：檢查當前狀態
+    console.log('當前證照狀態:', this.hasCertificates());
+    
+    // 額外檢查：如果表單中有任何一個證照包含 id，就表示已有資料
+    const hasExistingCertificate = this.certificatesFormArray.controls.some(control => control.get('id')?.value);
+    console.log('表單中是否有現有證照 ID:', hasExistingCertificate);
+    
+    // 調試：檢查每個證照的 ID
+    console.log('表單中的證照資料:', formData.certificates);
+    console.log('準備送到 API 的證照資料:', certificates);
+    
+    // 合併檢查：signal 狀態或表單中有 ID
+    const shouldUseUpdate = this.hasCertificates() || hasExistingCertificate;
+    
+    // 根據證照狀態決定使用 POST 或 PUT
+    if (shouldUseUpdate) {
+      // 已有證照資料，使用 PUT 更新
+      console.log('使用 PUT 邏輯更新證照:', apiData);
+      this.teachersService.putApiTeachersCertificates(apiData).subscribe({
+        next: (response: any) => {
+          console.log('證照更新成功 (PUT邏輯):', response);
+          // 完成所有步驟，進行最終提交
+          this.submitFinalApplication();
+        },
+        error: (error: any) => {
+          console.error('證照更新失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
+    } else {
+      // 尚無證照資料，使用 POST 建立
+      console.log('使用 POST 邏輯建立證照:', apiData);
+      this.teachersService.postApiTeachersCertificates(apiData).subscribe({
+        next: (response: any) => {
+          console.log('證照建立成功 (POST邏輯):', response);
+          console.log('POST 回應的 data 結構:', response.data);
+          
+          // 從回應中取得 certificates 陣列及其 id
+          if (response.data && response.data.certificates) {
+            console.log('使用 response.data.certificates 更新 ID:', response.data.certificates);
+            this.updateCertificatesWithIds(response.data.certificates);
+          } else if (response.certificates) {
+            console.log('使用 response.certificates 更新 ID:', response.certificates);
+            this.updateCertificatesWithIds(response.certificates);
+          } else {
+            console.log('無法找到證照資料來更新 ID');
+          }
+          
+          // 成功後更新狀態
+          this.hasCertificates.set(true);
+          // 完成所有步驟，進行最終提交
+          this.submitFinalApplication();
+        },
+        error: (error: any) => {
+          console.error('證照建立失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
+    }
+  }
+
+  // 更新證照表單中的 ID
+  private updateCertificatesWithIds(responseData: any[]) {
+    console.log('updateCertificatesWithIds 被呼叫，資料:', responseData);
+    const formArray = this.certificatesFormArray;
+    console.log('當前證照表單陣列長度:', formArray.length);
+    
+    responseData.forEach((item, index) => {
+      console.log(`處理第 ${index} 個證照項目:`, item);
+      if (formArray.at(index)) {
+        const currentFormValue = formArray.at(index).value;
+        console.log(`更新前的表單值:`, currentFormValue);
+        formArray.at(index).patchValue({ id: item.id });
+        console.log(`更新後的表單值:`, formArray.at(index).value);
+      } else {
+        console.log(`找不到索引 ${index} 的表單控制項`);
+      }
+    });
+  }
+
+  // 最終申請提交
+  private submitFinalApplication() {
+    console.log('開始最終申請提交...');
+    
+    // 檢查所有步驟是否都已完成
+    if (!this.hasBasicInfo() || !this.hasWorkExperiences() || 
+        !this.hasLearningExperiences() || !this.hasCertificates()) {
+      console.error('申請提交失敗：尚有步驟未完成');
+      return;
+    }
+
+    console.log('所有步驟已完成，正在提交申請...');
+    
+    // 呼叫最終提交 API
+    this.teachersService.postApiTeachersSubmit().subscribe({
+      next: (response: any) => {
+        console.log('申請提交成功:', response);
+        alert('申請已成功提交！感謝您的申請，我們會盡快進行審核。');
+        
+        // 可以導航到成功頁面或其他頁面
+        // this.router.navigate(['/application-success']);
+      },
+      error: (error: any) => {
+        console.error('申請提交失敗:', error);
+        alert('申請提交失敗，請稍後再試。');
+        // TODO: 顯示錯誤訊息給使用者
       }
     });
   }

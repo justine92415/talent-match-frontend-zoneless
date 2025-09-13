@@ -33,696 +33,81 @@
 
       <!-- Step 1: 基本資料 -->
       @if (currentStep() === 1) {
-        <form
-          [formGroup]="basicInfoForm"
-          (ngSubmit)="onSubmitBasicInfo()"
-          class="space-y-6"
-        >
-          <!-- 縣市地區欄位 -->
-          <div class="flex flex-col md:flex-row gap-4">
-            <div class="space-y-2">
-              <label class="block text-base font-medium text-grey-33"
-                >縣市</label
-              >
-              <tmf-input-select
-                [placeholder]="'請選擇縣市'"
-                [options]="cityOptions"
-                formControlName="city"
-              ></tmf-input-select>
-              @if (
-                basicInfoForm.get("city")?.invalid &&
-                basicInfoForm.get("city")?.touched
-              ) {
-                <div class="text-red-500 text-sm">請選擇縣市</div>
-              }
-            </div>
-
-            <div class="space-y-2">
-              <label class="block text-base font-medium text-grey-33"
-                >地區</label
-              >
-              <tmf-input-select
-                [placeholder]="'請選擇地區'"
-                [options]="districtOptions()"
-                formControlName="district"
-              ></tmf-input-select>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <label class="block text-base font-medium text-grey-33"
-              >詳細地址</label
-            >
-            <tmf-input-text
-              placeholder="請輸入詳細地址"
-              formControlName="address"
-            ></tmf-input-text>
-          </div>
-
-          <div class="flex items-center">
-            <div class="space-y-2">
-              <label class="block text-base font-medium text-grey-33"
-                >教授科目（主分類）</label
-              >
-              <tmf-input-select
-                class="w-full"
-                [placeholder]="'請選擇教授科目'"
-                [options]="subjectOptions"
-                formControlName="subject"
-              ></tmf-input-select>
-            </div>
-
-            <!-- 教學專長（多選） -->
-            <div class="space-y-2">
-              <label class="block text-base font-medium text-grey-33"
-                >教學專長（次分類）</label
-              >
-              <tmf-input-multi-select
-                [placeholder]="'請選擇教學專長'"
-                [options]="specialtyOptions()"
-                formControlName="specialties"
-              ></tmf-input-multi-select>
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <label class="block text-base font-medium text-grey-33"
-              >自我介紹</label
-            >
-            <textarea
-              class="w-full px-3 py-2 border border-grey-d4 rounded-xl resize-vertical min-h-32 focus:outline-none focus:border-primary transition-colors"
-              placeholder="請簡述您的教學經驗、專長及教學理念..."
-              formControlName="introduction"
-              rows="6"
-            ></textarea>
-          </div>
-
-          <!-- 提交按鈕 -->
-          <div class="pt-6">
-            <tmf-button
-              type="submit"
-              class="w-full h-12"
-              [disabled]="basicInfoForm.invalid"
-            >
-              下一步：工作經驗
-            </tmf-button>
-          </div>
-        </form>
+        <tmf-basic-info-form
+          #basicInfoForm
+          [initialData]="formData.basicInfo"
+          (formValid)="onStep1ValidChange($event)"
+          (formSubmit)="onStep1Submit($event)"
+        ></tmf-basic-info-form>
       }
 
       <!-- Step 2: 工作經驗 -->
       @if (currentStep() === 2) {
-        <form
-          [formGroup]="workExperienceForm"
-          (ngSubmit)="onSubmitWorkExperience()"
-          class="space-y-8"
-        >
-          <div formArrayName="experiences">
-            @for (experience of experiencesArray.controls; track experience; let i = $index) {
-              <div 
-                [formGroupName]="i"
-                class="border border-grey-d4 rounded-xl p-6 space-y-6 relative"
-              >
-                <!-- 刪除按鈕 -->
-                @if (experiencesArray.length > 1) {
-                  <button
-                    type="button"
-                    class="absolute top-4 right-4 text-grey-66 hover:text-red-500 transition-colors"
-                    (click)="removeExperience(i)"
-                  >
-                    <mat-icon class="!w-6 !h-6">close</mat-icon>
-                  </button>
-                }
-
-                <!-- 標題 -->
-                <h3 class="text-lg-bold text-grey-33">工作經驗 {{ i + 1 }}</h3>
-
-                <!-- 公司名稱 -->
-                <div class="space-y-2">
-                  <label class="block text-base font-medium text-grey-33">公司名稱</label>
-                  <tmf-input-text
-                    placeholder="請輸入公司名稱"
-                    formControlName="company_name"
-                  ></tmf-input-text>
-                  @if (
-                    experience.get('company_name')?.invalid &&
-                    experience.get('company_name')?.touched
-                  ) {
-                    <div class="text-red-500 text-sm">請輸入公司名稱</div>
-                  }
-                </div>
-
-                <!-- 工作地點 -->
-                <div class="space-y-4">
-                  <label class="block text-base font-medium text-grey-33">工作地點</label>
-                  <div class="flex flex-col md:flex-row gap-4">
-                    <div class="space-y-2">
-                      <tmf-input-select
-                        [placeholder]="'請選擇縣市'"
-                        [options]="cityOptions"
-                        formControlName="workplace_city"
-                      ></tmf-input-select>
-                      @if (
-                        experience.get('workplace_city')?.invalid &&
-                        experience.get('workplace_city')?.touched
-                      ) {
-                        <div class="text-red-500 text-sm">請選擇縣市</div>
-                      }
-                    </div>
-                    <div class="space-y-2">
-                      <tmf-input-select
-                        [placeholder]="'請選擇地區'"
-                        [options]="updateWorkplaceDistrictOptions(experience.get('workplace_city')?.value, i)"
-                        formControlName="workplace_district"
-                      ></tmf-input-select>
-                      @if (
-                        experience.get('workplace_district')?.invalid &&
-                        experience.get('workplace_district')?.touched
-                      ) {
-                        <div class="text-red-500 text-sm">請選擇地區</div>
-                      }
-                    </div>
-                  </div>
-                  <div class="space-y-2">
-                    <tmf-input-text
-                      placeholder="請輸入詳細地址"
-                      formControlName="workplace_address"
-                    ></tmf-input-text>
-                    @if (
-                      experience.get('workplace_address')?.invalid &&
-                      experience.get('workplace_address')?.touched
-                    ) {
-                      <div class="text-red-500 text-sm">請輸入詳細地址</div>
-                    }
-                  </div>
-                </div>
-
-                <!-- 工作類別與職稱 -->
-                <div class="flex flex-col md:flex-row gap-4">
-                  <div class="flex-1 space-y-2">
-                    <label class="block text-base font-medium text-grey-33">工作類別</label>
-                    <tmf-input-select
-                      [placeholder]="'請選擇工作類別'"
-                      [options]="jobCategoryOptions"
-                      formControlName="job_category"
-                    ></tmf-input-select>
-                    @if (
-                      experience.get('job_category')?.invalid &&
-                      experience.get('job_category')?.touched
-                    ) {
-                      <div class="text-red-500 text-sm">請選擇工作類別</div>
-                    }
-                  </div>
-                  <div class="flex-1 space-y-2">
-                    <label class="block text-base font-medium text-grey-33">職稱</label>
-                    <tmf-input-text
-                      placeholder="請輸入職稱"
-                      formControlName="job_title"
-                    ></tmf-input-text>
-                    @if (
-                      experience.get('job_title')?.invalid &&
-                      experience.get('job_title')?.touched
-                    ) {
-                      <div class="text-red-500 text-sm">請輸入職稱</div>
-                    }
-                  </div>
-                </div>
-
-                <!-- 目前在職 -->
-                <div class="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="is_working_{{ i }}"
-                    formControlName="is_working"
-                    class="h-5 w-5 rounded border border-grey-d4 bg-white text-primary focus:ring-primary focus:ring-2"
-                  />
-                  <label 
-                    [for]="'is_working_' + i"
-                    class="text-base font-medium text-grey-33 cursor-pointer"
-                  >
-                    目前仍在職
-                  </label>
-                </div>
-
-                <!-- 工作期間 -->
-                <div class="space-y-4">
-                  <label class="block text-base font-medium text-grey-33">工作期間</label>
-                  
-                  <!-- 開始日期 -->
-                  <div class="space-y-2">
-                    <span class="text-sm text-grey-66">開始日期</span>
-                    <div class="flex gap-4">
-                      <div class="flex-1">
-                        <tmf-input-select
-                          [placeholder]="'年份'"
-                          [options]="yearOptions"
-                          formControlName="start_year"
-                        ></tmf-input-select>
-                        @if (
-                          experience.get('start_year')?.invalid &&
-                          experience.get('start_year')?.touched
-                        ) {
-                          <div class="text-red-500 text-sm mt-1">請選擇年份</div>
-                        }
-                      </div>
-                      <div class="flex-1">
-                        <tmf-input-select
-                          [placeholder]="'月份'"
-                          [options]="monthOptions"
-                          formControlName="start_month"
-                        ></tmf-input-select>
-                        @if (
-                          experience.get('start_month')?.invalid &&
-                          experience.get('start_month')?.touched
-                        ) {
-                          <div class="text-red-500 text-sm mt-1">請選擇月份</div>
-                        }
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 結束日期 -->
-                  @if (!experience.get('is_working')?.value) {
-                    <div class="space-y-2">
-                      <span class="text-sm text-grey-66">結束日期</span>
-                      <div class="flex gap-4">
-                        <div class="flex-1">
-                          <tmf-input-select
-                            [placeholder]="'年份'"
-                            [options]="yearOptions"
-                            formControlName="end_year"
-                          ></tmf-input-select>
-                          @if (
-                            experience.get('end_year')?.invalid &&
-                            experience.get('end_year')?.touched
-                          ) {
-                            <div class="text-red-500 text-sm mt-1">請選擇年份</div>
-                          }
-                        </div>
-                        <div class="flex-1">
-                          <tmf-input-select
-                            [placeholder]="'月份'"
-                            [options]="monthOptions"
-                            formControlName="end_month"
-                          ></tmf-input-select>
-                          @if (
-                            experience.get('end_month')?.invalid &&
-                            experience.get('end_month')?.touched
-                          ) {
-                            <div class="text-red-500 text-sm mt-1">請選擇月份</div>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-
-          <!-- 新增工作經驗按鈕 -->
-          <div class="flex justify-center">
-            <button
-              type="button"
-              class="flex items-center gap-2 px-6 py-3 border border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
-              (click)="addExperience()"
-            >
-              <mat-icon class="!w-5 !h-5">add</mat-icon>
-              新增工作經驗
-            </button>
-          </div>
-
-          <!-- 按鈕區 -->
-          <div class="flex gap-4 pt-6">
-            <tmf-button
-              type="button"
-              variant="secondary"
-              class="flex-1 h-12"
-              (click)="currentStep.set(1)"
-            >
-              上一步
-            </tmf-button>
-            <tmf-button
-              type="submit"
-              class="flex-1 h-12"
-              [disabled]="workExperienceForm.invalid"
-            >
-              下一步：學歷背景
-            </tmf-button>
-          </div>
-        </form>
+        <tmf-work-experiences-form
+          #workExperiencesForm
+          [initialData]="formData.workExperiences"
+          (formValid)="onStep2ValidChange($event)"
+          (formSubmit)="onStep2Submit($event)"
+        ></tmf-work-experiences-form>
       }
 
       <!-- Step 3: 學歷背景 -->
       @if (currentStep() === 3) {
-        <form
-          [formGroup]="educationForm"
-          (ngSubmit)="onSubmitEducation()"
-          class="space-y-8"
-        >
-          <div formArrayName="educations">
-            @for (education of educationsArray.controls; track education; let i = $index) {
-              <div 
-                [formGroupName]="i"
-                class="border border-grey-d4 rounded-xl p-6 space-y-6 relative"
-              >
-                <!-- 刪除按鈕 -->
-                @if (educationsArray.length > 1) {
-                  <button
-                    type="button"
-                    class="absolute top-4 right-4 text-grey-66 hover:text-red-500 transition-colors"
-                    (click)="removeEducation(i)"
-                  >
-                    <mat-icon class="!w-6 !h-6">close</mat-icon>
-                  </button>
-                }
-
-                <!-- 標題 -->
-                <h3 class="text-lg-bold text-grey-33">學歷背景 {{ i + 1 }}</h3>
-
-                <!-- 學校名稱與科系 -->
-                <div class="flex flex-col md:flex-row gap-4">
-                  <div class="flex-1 space-y-2">
-                    <label class="block text-base font-medium text-grey-33">學校名稱</label>
-                    <tmf-input-text
-                      placeholder="請輸入學校名稱"
-                      formControlName="school_name"
-                    ></tmf-input-text>
-                    @if (
-                      education.get('school_name')?.invalid &&
-                      education.get('school_name')?.touched
-                    ) {
-                      <div class="text-red-500 text-sm">請輸入學校名稱</div>
-                    }
-                  </div>
-                  <div class="flex-1 space-y-2">
-                    <label class="block text-base font-medium text-grey-33">科系</label>
-                    <tmf-input-text
-                      placeholder="請輸入科系名稱"
-                      formControlName="major"
-                    ></tmf-input-text>
-                    @if (
-                      education.get('major')?.invalid &&
-                      education.get('major')?.touched
-                    ) {
-                      <div class="text-red-500 text-sm">請輸入科系名稱</div>
-                    }
-                  </div>
-                </div>
-
-                <!-- 學位 -->
-                <div class="space-y-2">
-                  <label class="block text-base font-medium text-grey-33">學位</label>
-                  <tmf-input-select
-                    [placeholder]="'請選擇學位'"
-                    [options]="degreeOptions"
-                    formControlName="degree"
-                  ></tmf-input-select>
-                  @if (
-                    education.get('degree')?.invalid &&
-                    education.get('degree')?.touched
-                  ) {
-                    <div class="text-red-500 text-sm">請選擇學位</div>
-                  }
-                </div>
-
-                <!-- 目前就學中 -->
-                <div class="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="is_studying_{{ i }}"
-                    formControlName="is_studying"
-                    class="h-5 w-5 rounded border border-grey-d4 bg-white text-primary focus:ring-primary focus:ring-2"
-                  />
-                  <label 
-                    [for]="'is_studying_' + i"
-                    class="text-base font-medium text-grey-33 cursor-pointer"
-                  >
-                    目前就學中
-                  </label>
-                </div>
-
-                <!-- 就學期間 -->
-                <div class="space-y-4">
-                  <label class="block text-base font-medium text-grey-33">就學期間</label>
-                  
-                  <!-- 開始日期 -->
-                  <div class="space-y-2">
-                    <span class="text-sm text-grey-66">入學日期</span>
-                    <div class="flex gap-4">
-                      <div class="flex-1">
-                        <tmf-input-select
-                          [placeholder]="'年份'"
-                          [options]="yearOptions"
-                          formControlName="start_year"
-                        ></tmf-input-select>
-                        @if (
-                          education.get('start_year')?.invalid &&
-                          education.get('start_year')?.touched
-                        ) {
-                          <div class="text-red-500 text-sm mt-1">請選擇年份</div>
-                        }
-                      </div>
-                      <div class="flex-1">
-                        <tmf-input-select
-                          [placeholder]="'月份'"
-                          [options]="monthOptions"
-                          formControlName="start_month"
-                        ></tmf-input-select>
-                        @if (
-                          education.get('start_month')?.invalid &&
-                          education.get('start_month')?.touched
-                        ) {
-                          <div class="text-red-500 text-sm mt-1">請選擇月份</div>
-                        }
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 結束日期 -->
-                  @if (!education.get('is_studying')?.value) {
-                    <div class="space-y-2">
-                      <span class="text-sm text-grey-66">畢業日期</span>
-                      <div class="flex gap-4">
-                        <div class="flex-1">
-                          <tmf-input-select
-                            [placeholder]="'年份'"
-                            [options]="yearOptions"
-                            formControlName="end_year"
-                          ></tmf-input-select>
-                          @if (
-                            education.get('end_year')?.invalid &&
-                            education.get('end_year')?.touched
-                          ) {
-                            <div class="text-red-500 text-sm mt-1">請選擇年份</div>
-                          }
-                        </div>
-                        <div class="flex-1">
-                          <tmf-input-select
-                            [placeholder]="'月份'"
-                            [options]="monthOptions"
-                            formControlName="end_month"
-                          ></tmf-input-select>
-                          @if (
-                            education.get('end_month')?.invalid &&
-                            education.get('end_month')?.touched
-                          ) {
-                            <div class="text-red-500 text-sm mt-1">請選擇月份</div>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-            }
-          </div>
-
-          <!-- 新增學歷按鈕 -->
-          <div class="flex justify-center">
-            <button
-              type="button"
-              class="flex items-center gap-2 px-6 py-3 border border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
-              (click)="addEducation()"
-            >
-              <mat-icon class="!w-5 !h-5">add</mat-icon>
-              新增學歷背景
-            </button>
-          </div>
-
-          <!-- 按鈕區 -->
-          <div class="flex gap-4 pt-6">
-            <tmf-button
-              type="button"
-              variant="secondary"
-              class="flex-1 h-12"
-              (click)="currentStep.set(2)"
-            >
-              上一步
-            </tmf-button>
-            <tmf-button
-              type="submit"
-              class="flex-1 h-12"
-              [disabled]="educationForm.invalid"
-            >
-              下一步：教學證照
-            </tmf-button>
-          </div>
-        </form>
+        <tmf-learning-experiences-form
+          #learningExperiencesForm
+          [initialData]="formData.learningExperiences"
+          (formValid)="onStep3ValidChange($event)"
+          (formSubmit)="onStep3Submit($event)"
+        ></tmf-learning-experiences-form>
       }
 
       <!-- Step 4: 教學證照 -->
       @if (currentStep() === 4) {
-        <form
-          [formGroup]="certificateForm"
-          (ngSubmit)="onSubmitCertificate()"
-          class="space-y-8"
-        >
-          <div formArrayName="certificates">
-            @for (certificate of certificatesArray.controls; track certificate; let i = $index) {
-              <div 
-                [formGroupName]="i"
-                class="border border-grey-d4 rounded-xl p-6 space-y-6 relative"
-              >
-                <!-- 刪除按鈕 -->
-                @if (certificatesArray.length > 1) {
-                  <button
-                    type="button"
-                    class="absolute top-4 right-4 text-grey-66 hover:text-red-500 transition-colors"
-                    (click)="removeCertificate(i)"
-                  >
-                    <mat-icon class="!w-6 !h-6">close</mat-icon>
-                  </button>
-                }
-
-                <!-- 標題 -->
-                <h3 class="text-lg-bold text-grey-33">教學證照 {{ i + 1 }}</h3>
-
-                <!-- 證照名稱與核發機構 -->
-                <div class="flex flex-col md:flex-row gap-4">
-                  <div class="flex-1 space-y-2">
-                    <label class="block text-base font-medium text-grey-33">證照名稱</label>
-                    <tmf-input-text
-                      placeholder="請輸入證照名稱"
-                      formControlName="certificate_name"
-                    ></tmf-input-text>
-                    @if (
-                      certificate.get('certificate_name')?.invalid &&
-                      certificate.get('certificate_name')?.touched
-                    ) {
-                      <div class="text-red-500 text-sm">請輸入證照名稱</div>
-                    }
-                  </div>
-                  <div class="flex-1 space-y-2">
-                    <label class="block text-base font-medium text-grey-33">核發機構</label>
-                    <tmf-input-text
-                      placeholder="請輸入核發機構"
-                      formControlName="issuer"
-                    ></tmf-input-text>
-                    @if (
-                      certificate.get('issuer')?.invalid &&
-                      certificate.get('issuer')?.touched
-                    ) {
-                      <div class="text-red-500 text-sm">請輸入核發機構</div>
-                    }
-                  </div>
-                </div>
-
-                <!-- 取得日期 -->
-                <div class="space-y-4">
-                  <label class="block text-base font-medium text-grey-33">取得日期</label>
-                  <div class="flex gap-4">
-                    <div class="flex-1">
-                      <tmf-input-select
-                        [placeholder]="'年份'"
-                        [options]="yearOptions"
-                        formControlName="year"
-                      ></tmf-input-select>
-                      @if (
-                        certificate.get('year')?.invalid &&
-                        certificate.get('year')?.touched
-                      ) {
-                        <div class="text-red-500 text-sm mt-1">請選擇年份</div>
-                      }
-                    </div>
-                    <div class="flex-1">
-                      <tmf-input-select
-                        [placeholder]="'月份'"
-                        [options]="monthOptions"
-                        formControlName="month"
-                      ></tmf-input-select>
-                      @if (
-                        certificate.get('month')?.invalid &&
-                        certificate.get('month')?.touched
-                      ) {
-                        <div class="text-red-500 text-sm mt-1">請選擇月份</div>
-                      }
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 證照檔案上傳 -->
-                <div class="space-y-2">
-                  <label class="block text-base font-medium text-grey-33">證照檔案</label>
-                  <div class="relative">
-                    <input
-                      type="file"
-                      id="certificate_file_{{ i }}"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      (change)="onCertificateFileChange($event, i)"
-                      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div class="flex items-center justify-between w-full px-3 py-2 border border-grey-d4 rounded-xl bg-white hover:border-primary transition-colors cursor-pointer">
-                      <span class="text-base text-grey-9f">
-                        @if (certificate.get('certificate_file')?.value) {
-                          已選擇檔案：{{ certificate.get('certificate_file')?.value?.name }}
-                        } @else {
-                          請選擇證照檔案（PDF, JPG, PNG）
-                        }
-                      </span>
-                      <mat-icon class="text-grey-9f">upload_file</mat-icon>
-                    </div>
-                  </div>
-                  <div class="text-sm text-grey-66">
-                    支援格式：PDF、JPG、PNG，檔案大小不超過 5MB
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-
-          <!-- 新增證照按鈕 -->
-          <div class="flex justify-center">
-            <button
-              type="button"
-              class="flex items-center gap-2 px-6 py-3 border border-primary text-primary rounded-xl hover:bg-primary hover:text-white transition-colors duration-200"
-              (click)="addCertificate()"
-            >
-              <mat-icon class="!w-5 !h-5">add</mat-icon>
-              新增教學證照
-            </button>
-          </div>
-
-          <!-- 按鈕區 -->
-          <div class="flex gap-4 pt-6">
-            <tmf-button
-              type="button"
-              variant="secondary"
-              class="flex-1 h-12"
-              (click)="currentStep.set(3)"
-            >
-              上一步
-            </tmf-button>
-            <tmf-button
-              type="submit"
-              class="flex-1 h-12"
-              [disabled]="certificateForm.invalid"
-            >
-              提交申請
-            </tmf-button>
-          </div>
-        </form>
+        <tmf-certificates-form
+          #certificatesForm
+          [initialData]="formData.certificates"
+          (formValid)="onStep4ValidChange($event)"
+          (formSubmit)="onStep4Submit($event)"
+        ></tmf-certificates-form>
       }
+
+      <!-- Navigation Buttons -->
+      <div class="flex gap-4 pt-6 mt-8">
+        @if (currentStep() > 1) {
+          <tmf-button
+            type="button"
+            variant="secondary"
+            class="flex-1 h-12"
+            (click)="goToPrevStep()"
+          >
+            上一步
+          </tmf-button>
+        }
+        
+        @if (currentStep() < 4) {
+          <tmf-button
+            type="button"
+            class="flex-1 h-12"
+            [disabled]="!canGoToStep(currentStep() + 1)"
+            (click)="goToNextStep()"
+          >
+            @switch (currentStep()) {
+              @case (1) { 下一步：工作經驗 }
+              @case (2) { 下一步：學歷背景 }
+              @case (3) { 下一步：教學證照 }
+            }
+          </tmf-button>
+        } @else {
+          <tmf-button
+            type="button"
+            class="flex-1 h-12"
+            [disabled]="!step4Valid()"
+            (click)="goToNextStep()"
+          >
+            提交申請
+          </tmf-button>
+        }
+      </div>
     </div>
   </div>
 </tmf-layout-1-wapper>

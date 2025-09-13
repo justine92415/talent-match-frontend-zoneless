@@ -1,1 +1,140 @@
-<p>certificates-form works!</p>
+<form
+  [formGroup]="certificateForm"
+  (ngSubmit)="onSubmit()"
+  class="space-y-6"
+>
+  <div formArrayName="certificates">
+    @for (certificate of certificatesArray.controls; track $index) {
+      <div
+        [formGroupName]="$index"
+        class="border border-grey-d4 rounded-xl p-6 space-y-4 relative"
+      >
+        <!-- 刪除按鈕 -->
+        @if (certificatesArray.length > 1) {
+          <button
+            type="button"
+            (click)="removeCertificate($index)"
+            class="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors"
+          >
+            <mat-icon [fontIcon]="TmfIcon.Delete"></mat-icon>
+          </button>
+        }
+
+        <h3 class="text-lg font-medium text-grey-33">教學證照 {{ $index + 1 }}</h3>
+
+        <!-- 證照名稱 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">證照名稱</label>
+          <tmf-input-text
+            placeholder="請輸入證照名稱"
+            formControlName="certificate_name"
+          ></tmf-input-text>
+          @if (
+            certificate.get("certificate_name")?.invalid &&
+            certificate.get("certificate_name")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入證照名稱</div>
+          }
+        </div>
+
+        <!-- 核發機構 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">核發機構</label>
+          <tmf-input-text
+            placeholder="請輸入核發機構名稱"
+            formControlName="issuer"
+          ></tmf-input-text>
+          @if (
+            certificate.get("issuer")?.invalid &&
+            certificate.get("issuer")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入核發機構名稱</div>
+          }
+        </div>
+
+        <!-- 取得年月 -->
+        <div class="space-y-4">
+          <label class="block text-base font-medium text-grey-33">取得年月</label>
+          <div class="flex gap-4">
+            <tmf-input-select
+              [placeholder]="'年'"
+              [options]="yearOptions"
+              formControlName="year"
+              class="flex-1"
+            ></tmf-input-select>
+            <tmf-input-select
+              [placeholder]="'月'"
+              [options]="monthOptions"
+              formControlName="month"
+              class="flex-1"
+            ></tmf-input-select>
+          </div>
+          @if (
+            (certificate.get("year")?.invalid && certificate.get("year")?.touched) ||
+            (certificate.get("month")?.invalid && certificate.get("month")?.touched)
+          ) {
+            <div class="text-red-500 text-sm">請選擇取得年月</div>
+          }
+        </div>
+
+        <!-- 檔案上傳 -->
+        <div class="space-y-4">
+          <label class="block text-base font-medium text-grey-33">證照檔案</label>
+          
+          @if (!getFileName($index)) {
+            <!-- 檔案上傳按鈕 -->
+            <div class="border-2 border-dashed border-grey-d4 rounded-xl p-6 text-center hover:border-primary transition-colors">
+              <input
+                type="file"
+                #fileInput
+                (change)="onCertificateFileChange($event, $index)"
+                accept=".pdf,.jpg,.jpeg,.png"
+                class="hidden"
+              />
+              <button
+                type="button"
+                (click)="fileInput.click()"
+                class="flex flex-col items-center gap-2 w-full text-grey-66 hover:text-primary transition-colors"
+              >
+                <mat-icon [fontIcon]="TmfIcon.Add" class="text-2xl"></mat-icon>
+                <span class="text-sm">點擊上傳檔案</span>
+                <span class="text-xs text-grey-99">支援 PDF、JPG、PNG 格式，檔案大小限制 5MB</span>
+              </button>
+            </div>
+          } @else {
+            <!-- 已上傳檔案顯示 -->
+            <div class="border border-grey-d4 rounded-xl p-4 flex items-center justify-between bg-grey-f8">
+              <div class="flex items-center gap-3">
+                <mat-icon [fontIcon]="TmfIcon.Beenhere" class="text-primary"></mat-icon>
+                <div>
+                  <div class="text-sm font-medium text-grey-33">{{ getFileName($index) }}</div>
+                  <div class="text-xs text-grey-66">已上傳</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="removeFile($index)"
+                class="text-red-500 hover:text-red-700 transition-colors"
+              >
+                <mat-icon [fontIcon]="TmfIcon.Delete" class="text-lg"></mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- 新增證照按鈕 -->
+  <div class="flex justify-center">
+    <tmf-button
+      type="button"
+      variant="secondary"
+      (click)="addCertificate()"
+      class="flex items-center gap-2"
+    >
+      <mat-icon [fontIcon]="TmfIcon.Add"></mat-icon>
+      新增教學證照
+    </tmf-button>
+  </div>
+</form>

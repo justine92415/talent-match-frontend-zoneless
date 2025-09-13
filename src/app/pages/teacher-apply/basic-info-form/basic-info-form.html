@@ -1,1 +1,72 @@
-<p>basic-info-form works!</p>
+<form
+  [formGroup]="basicInfoForm"
+  (ngSubmit)="onSubmit()"
+  class="space-y-6"
+>
+  <!-- 縣市地區欄位 -->
+  <div class="flex flex-col md:flex-row gap-4">
+    <div class="space-y-2">
+      <label class="block text-base font-medium text-grey-33">縣市</label>
+      <tmf-input-select
+        [placeholder]="'請選擇縣市'"
+        [options]="cityOptions"
+        formControlName="city"
+      ></tmf-input-select>
+      @if (
+        basicInfoForm.get("city")?.invalid &&
+        basicInfoForm.get("city")?.touched
+      ) {
+        <div class="text-red-500 text-sm">請選擇縣市</div>
+      }
+    </div>
+
+    <div class="space-y-2">
+      <label class="block text-base font-medium text-grey-33">地區</label>
+      <tmf-input-select
+        [placeholder]="'請選擇地區'"
+        [options]="districtOptions()"
+        formControlName="district"
+      ></tmf-input-select>
+    </div>
+  </div>
+
+  <div class="space-y-2">
+    <label class="block text-base font-medium text-grey-33">詳細地址</label>
+    <tmf-input-text
+      placeholder="請輸入詳細地址"
+      formControlName="address"
+    ></tmf-input-text>
+  </div>
+
+  <div class="flex items-center">
+    <div class="space-y-2">
+      <label class="block text-base font-medium text-grey-33">教授科目（主分類）</label>
+      <tmf-input-select
+        class="w-full"
+        [placeholder]="'請選擇教授科目'"
+        [options]="subjectOptions"
+        formControlName="subject"
+      ></tmf-input-select>
+    </div>
+
+    <!-- 教學專長（多選） -->
+    <div class="space-y-2">
+      <label class="block text-base font-medium text-grey-33">教學專長（次分類）</label>
+      <tmf-input-multi-select
+        [placeholder]="'請選擇教學專長'"
+        [options]="specialtyOptions()"
+        formControlName="specialties"
+      ></tmf-input-multi-select>
+    </div>
+  </div>
+
+  <div class="space-y-2">
+    <label class="block text-base font-medium text-grey-33">自我介紹</label>
+    <textarea
+      class="w-full px-3 py-2 border border-grey-d4 rounded-xl resize-vertical min-h-32 focus:outline-none focus:border-primary transition-colors"
+      placeholder="請簡述您的教學經驗、專長及教學理念..."
+      formControlName="introduction"
+      rows="6"
+    ></textarea>
+  </div>
+</form>

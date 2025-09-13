@@ -8,7 +8,7 @@ import { TmfIconEnum } from '@share/icon.enum';
 import { Location } from '@angular/common';
 import { BasicInfoForm } from './basic-info-form/basic-info-form';
 import { WorkExperiencesForm } from './work-experiences-form/work-experiences-form';
-import { InputText } from '@components/form/input-text/input-text';
+import { LearningExperiencesForm } from "./learning-experiences-form/learning-experiences-form";
 
 @Component({
   selector: 'tmf-teacher-apply',
@@ -20,7 +20,8 @@ import { InputText } from '@components/form/input-text/input-text';
     BasicInfoForm,
     WorkExperiencesForm,
     ReactiveFormsModule,
-  ],
+    LearningExperiencesForm
+],
   templateUrl: './teacher-apply.html',
   styles: ``
 })
@@ -49,6 +50,9 @@ export default class TeacherApply {
     }),
     workExperiences: this.fb.group({
       experiences: this.fb.array([])
+    }),
+    learningExperiences: this.fb.group({
+      educations: this.fb.array([])
     })
   });
 
@@ -67,8 +71,16 @@ export default class TeacherApply {
     return this.teacherApplyForm.get('workExperiences') as FormGroup;
   }
 
+  get learningExperiencesFormGroup() {
+    return this.teacherApplyForm.get('learningExperiences') as FormGroup;
+  }
+
   get experiencesFormArray() {
     return this.workExperiencesFormGroup.get('experiences') as FormArray;
+  }
+
+  get educationsFormArray() {
+    return this.learningExperiencesFormGroup.get('educations') as FormArray;
   }
 
   // 檢查各步驟表單的有效性
@@ -80,15 +92,22 @@ export default class TeacherApply {
     return this.workExperiencesFormGroup.valid;
   }
 
-  // 步驟配置 (目前只保留前兩步)
+  get step3Valid() {
+    return this.learningExperiencesFormGroup.valid;
+  }
+
+  // 步驟配置 (目前支援前三步)
   steps: StepItem[] = [
     { id: 1, label: '基本資料' },
-    { id: 2, label: '工作經驗' }
+    { id: 2, label: '工作經驗' },
+    { id: 3, label: '學歷背景' }
   ];
 
   constructor() {
     // 預設新增一個工作經驗表單
     this.addWorkExperience();
+    // 預設新增一個學歷表單
+    this.addEducation();
   }
 
   // 新增工作經驗表單項目
@@ -141,6 +160,48 @@ export default class TeacherApply {
     }
   }
 
+  // 新增學歷表單項目
+  addEducation() {
+    const educationForm = this.fb.group({
+      school_name: ['', Validators.required],
+      major: ['', Validators.required],
+      degree: ['', Validators.required],
+      is_studying: [false],
+      start_year: ['', Validators.required],
+      start_month: ['', Validators.required],
+      end_year: [''],
+      end_month: ['']
+    });
+
+    // 監聽目前就學狀態，控制結束日期的必填驗證
+    educationForm.get('is_studying')?.valueChanges.subscribe(isStudying => {
+      const endYearControl = educationForm.get('end_year');
+      const endMonthControl = educationForm.get('end_month');
+      
+      if (isStudying) {
+        endYearControl?.clearValidators();
+        endMonthControl?.clearValidators();
+        endYearControl?.setValue('');
+        endMonthControl?.setValue('');
+      } else {
+        endYearControl?.setValidators([Validators.required]);
+        endMonthControl?.setValidators([Validators.required]);
+      }
+      
+      endYearControl?.updateValueAndValidity();
+      endMonthControl?.updateValueAndValidity();
+    });
+
+    this.educationsFormArray.push(educationForm);
+  }
+
+  // 移除學歷表單項目
+  removeEducation(index: number) {
+    if (this.educationsFormArray.length > 1) {
+      this.educationsFormArray.removeAt(index);
+    }
+  }
+
   goBack() {
     this.location.back();
   }
@@ -152,13 +213,15 @@ export default class TeacherApply {
     }
   }
 
-  // 上一步/下一步按鈕控制 (目前只支援前兩步)
+  // 上一步/下一步按鈕控制 (目前支援前三步)
   canGoToStep(stepNumber: number): boolean {
     switch (stepNumber) {
       case 1:
         return true;
       case 2:
         return this.step1Valid;
+      case 3:
+        return this.step1Valid && this.step2Valid;
       default:
         return false;
     }
@@ -173,9 +236,9 @@ export default class TeacherApply {
 
   goToNextStep() {
     const currentStepValue = this.currentStep();
-    if (currentStepValue < 2 && this.canGoToStep(currentStepValue + 1)) {
+    if (currentStepValue < 3 && this.canGoToStep(currentStepValue + 1)) {
       this.currentStep.set(currentStepValue + 1);
-    } else if (currentStepValue === 2 && this.step2Valid) {
+    } else if (currentStepValue === 3 && this.step3Valid) {
       // 完成所有步驟
       this.submitForm();
     }

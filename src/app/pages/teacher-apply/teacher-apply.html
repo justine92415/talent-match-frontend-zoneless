@@ -46,14 +46,11 @@
       }
 
       <!-- Step 3: 學歷背景 -->
-      <!-- @if (currentStep() === 3) {
-        <tmf-learning-experiences-form
-          #learningExperiencesForm
-          [initialData]="formData.learningExperiences"
-          (formValid)="onStep3ValidChange($event)"
-          (formSubmit)="onStep3Submit($event)"
+      @if (currentStep() === 3) {
+        <tmf-learning-experiences-form 
+          [formGroup]="learningExperiencesFormGroup"
         ></tmf-learning-experiences-form>
-      } -->
+      }
 
       <!-- Step 4: 教學證照 -->
       @if (currentStep() === 4) {
@@ -78,7 +75,7 @@
           </tmf-button>
         }
         
-        @if (currentStep() < 2) {
+        @if (currentStep() < 3) {
           <tmf-button
             type="button"
             class="flex-1 h-12"
@@ -87,16 +84,17 @@
           >
             @switch (currentStep()) {
               @case (1) { 下一步：工作經驗 }
+              @case (2) { 下一步：學歷背景 }
             }
           </tmf-button>
         } @else {
           <tmf-button
             type="button"
             class="flex-1 h-12"
-            [disabled]="!step2Valid"
+            [disabled]="!step3Valid"
             (click)="goToNextStep()"
           >
-            完成前兩步驟
+            完成前三步驟
           </tmf-button>
         }
       </div>

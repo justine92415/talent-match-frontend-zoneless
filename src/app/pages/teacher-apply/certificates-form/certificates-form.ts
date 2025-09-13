@@ -1,5 +1,5 @@
-import { Component, inject, signal, input, output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, FormArray, FormGroup } from '@angular/forms';
+import { Component, input, OnInit, inject } from '@angular/core';
+import { FormGroup, FormArray, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { Button } from '@components/button/button';
@@ -18,18 +18,19 @@ import { TmfIconEnum } from '@share/icon.enum';
   templateUrl: './certificates-form.html',
   styles: ``
 })
-export class CertificatesForm {
+export class CertificatesForm implements OnInit {
   private fb = inject(FormBuilder);
-
-  // 輸入屬性
-  initialData = input<any>(null);
-
-  // 輸出事件
-  formSubmit = output<any>();
-  formValid = output<boolean>();
+  
+  // 輸入屬性 - 接收來自父元件的FormGroup
+  formGroup = input.required<FormGroup>();
 
   get TmfIcon() {
     return TmfIconEnum;
+  }
+
+  // 取得 FormArray
+  get certificatesArray(): FormArray {
+    return this.formGroup().get('certificates') as FormArray;
   }
 
   // 年份選項 (1980-2024)
@@ -44,51 +45,25 @@ export class CertificatesForm {
     return { value: month.toString(), label: `${month}月` };
   });
 
-  // 教學證照表單
-  certificateForm = this.fb.group({
-    certificates: this.fb.array([])
-  });
-
-  get certificatesArray(): FormArray {
-    return this.certificateForm.get('certificates') as FormArray;
+  ngOnInit() {
+    // FormGroup 已經由父元件創建和管理，這裡不需要額外的初始化
   }
 
-  constructor() {
-    // 監聽表單狀態變化
-    this.certificateForm.statusChanges.subscribe(status => {
-      this.formValid.emit(status === 'VALID');
-    });
-
-    // 如果有初始資料，填入表單
-    if (this.initialData()) {
-      this.loadInitialData();
-    } else {
-      // 預設新增一個證照
-      this.addCertificate();
-    }
+  // 新增證照
+  addCertificate(): void {
+    const certificateGroup = this.createCertificate();
+    this.certificatesArray.push(certificateGroup);
   }
 
-  private loadInitialData() {
-    const data = this.initialData();
-    if (data?.certificates && Array.isArray(data.certificates)) {
-      // 清空現有的證照
-      while (this.certificatesArray.length !== 0) {
-        this.certificatesArray.removeAt(0);
-      }
-      
-      // 加載初始資料
-      data.certificates.forEach((cert: any) => {
-        const certificateGroup = this.createCertificate();
-        certificateGroup.patchValue(cert);
-        this.certificatesArray.push(certificateGroup);
-      });
-    } else {
-      this.addCertificate();
+  // 移除證照
+  removeCertificate(index: number): void {
+    if (this.certificatesArray.length > 1) {
+      this.certificatesArray.removeAt(index);
     }
   }
 
   // 建立證照 FormGroup
-  createCertificate(): FormGroup {
+  private createCertificate(): FormGroup {
     return this.fb.group({
       certificate_name: ['', Validators.required],
       issuer: ['', Validators.required],
@@ -98,16 +73,7 @@ export class CertificatesForm {
     });
   }
 
-  addCertificate(): void {
-    this.certificatesArray.push(this.createCertificate());
-  }
-
-  removeCertificate(index: number): void {
-    if (this.certificatesArray.length > 1) {
-      this.certificatesArray.removeAt(index);
-    }
-  }
-
+  // 檔案上傳處理
   onCertificateFileChange(event: any, certificateIndex: number): void {
     const file = event.target.files[0];
     if (file) {
@@ -127,29 +93,6 @@ export class CertificatesForm {
       const certificateControl = this.certificatesArray.at(certificateIndex);
       certificateControl.patchValue({ certificate_file: file });
     }
-  }
-
-  onSubmit() {
-    if (this.certificateForm.valid) {
-      this.formSubmit.emit(this.certificateForm.value);
-    } else {
-      this.certificateForm.markAllAsTouched();
-    }
-  }
-
-  // 取得表單資料
-  getFormData() {
-    return this.certificateForm.value;
-  }
-
-  // 檢查表單是否有效
-  isFormValid() {
-    return this.certificateForm.valid;
-  }
-
-  // 檢查表單是否有變更
-  isFormDirty() {
-    return this.certificateForm.dirty;
   }
 
   // 取得檔案名稱

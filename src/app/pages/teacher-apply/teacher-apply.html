@@ -47,19 +47,16 @@
 
       <!-- Step 3: 學歷背景 -->
       @if (currentStep() === 3) {
-        <tmf-learning-experiences-form 
+        <tmf-learning-experiences-form
           [formGroup]="learningExperiencesFormGroup"
         ></tmf-learning-experiences-form>
       }
 
       <!-- Step 4: 教學證照 -->
       @if (currentStep() === 4) {
-        <!-- <tmf-certificates-form
-          #certificatesForm
-          [initialData]="formData.certificates"
-          (formValid)="onStep4ValidChange($event)"
-          (formSubmit)="onStep4Submit($event)"
-        ></tmf-certificates-form> -->
+        <tmf-certificates-form
+          [formGroup]="certificatesFormGroup"
+        ></tmf-certificates-form>
       }
 
       <!-- Navigation Buttons -->
@@ -74,8 +71,8 @@
             上一步
           </tmf-button>
         }
-        
-        @if (currentStep() < 3) {
+
+        @if (currentStep() < 4) {
           <tmf-button
             type="button"
             class="flex-1 h-12"
@@ -83,18 +80,25 @@
             (click)="goToNextStep()"
           >
             @switch (currentStep()) {
-              @case (1) { 下一步：工作經驗 }
-              @case (2) { 下一步：學歷背景 }
+              @case (1) {
+                下一步：工作經驗
+              }
+              @case (2) {
+                下一步：學歷背景
+              }
+              @case (3) {
+                下一步：教學證照
+              }
             }
           </tmf-button>
         } @else {
           <tmf-button
             type="button"
             class="flex-1 h-12"
-            [disabled]="!step3Valid"
+            [disabled]="!step4Valid"
             (click)="goToNextStep()"
           >
-            完成前三步驟
+            完成申請
           </tmf-button>
         }
       </div>

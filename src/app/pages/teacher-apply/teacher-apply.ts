@@ -9,6 +9,7 @@ import { Location } from '@angular/common';
 import { BasicInfoForm } from './basic-info-form/basic-info-form';
 import { WorkExperiencesForm } from './work-experiences-form/work-experiences-form';
 import { LearningExperiencesForm } from "./learning-experiences-form/learning-experiences-form";
+import { CertificatesForm } from './certificates-form/certificates-form';
 
 @Component({
   selector: 'tmf-teacher-apply',
@@ -20,7 +21,8 @@ import { LearningExperiencesForm } from "./learning-experiences-form/learning-ex
     BasicInfoForm,
     WorkExperiencesForm,
     ReactiveFormsModule,
-    LearningExperiencesForm
+    LearningExperiencesForm,
+    CertificatesForm
 ],
   templateUrl: './teacher-apply.html',
   styles: ``
@@ -53,6 +55,9 @@ export default class TeacherApply {
     }),
     learningExperiences: this.fb.group({
       educations: this.fb.array([])
+    }),
+    certificates: this.fb.group({
+      certificates: this.fb.array([])
     })
   });
 
@@ -75,12 +80,20 @@ export default class TeacherApply {
     return this.teacherApplyForm.get('learningExperiences') as FormGroup;
   }
 
+  get certificatesFormGroup() {
+    return this.teacherApplyForm.get('certificates') as FormGroup;
+  }
+
   get experiencesFormArray() {
     return this.workExperiencesFormGroup.get('experiences') as FormArray;
   }
 
   get educationsFormArray() {
     return this.learningExperiencesFormGroup.get('educations') as FormArray;
+  }
+
+  get certificatesFormArray() {
+    return this.certificatesFormGroup.get('certificates') as FormArray;
   }
 
   // 檢查各步驟表單的有效性
@@ -96,11 +109,16 @@ export default class TeacherApply {
     return this.learningExperiencesFormGroup.valid;
   }
 
-  // 步驟配置 (目前支援前三步)
+  get step4Valid() {
+    return this.certificatesFormGroup.valid;
+  }
+
+  // 步驟配置 (目前支援前四步)
   steps: StepItem[] = [
     { id: 1, label: '基本資料' },
     { id: 2, label: '工作經驗' },
-    { id: 3, label: '學歷背景' }
+    { id: 3, label: '學歷背景' },
+    { id: 4, label: '教學證照' }
   ];
 
   constructor() {
@@ -108,6 +126,8 @@ export default class TeacherApply {
     this.addWorkExperience();
     // 預設新增一個學歷表單
     this.addEducation();
+    // 預設新增一個證照表單
+    this.addCertificate();
   }
 
   // 新增工作經驗表單項目
@@ -202,6 +222,26 @@ export default class TeacherApply {
     }
   }
 
+  // 新增證照表單項目
+  addCertificate() {
+    const certificateForm = this.fb.group({
+      certificate_name: ['', Validators.required],
+      issuer: ['', Validators.required],
+      year: ['', Validators.required],
+      month: ['', Validators.required],
+      certificate_file: [null]
+    });
+
+    this.certificatesFormArray.push(certificateForm);
+  }
+
+  // 移除證照表單項目
+  removeCertificate(index: number) {
+    if (this.certificatesFormArray.length > 1) {
+      this.certificatesFormArray.removeAt(index);
+    }
+  }
+
   goBack() {
     this.location.back();
   }
@@ -213,7 +253,7 @@ export default class TeacherApply {
     }
   }
 
-  // 上一步/下一步按鈕控制 (目前支援前三步)
+  // 上一步/下一步按鈕控制 (目前支援前四步)
   canGoToStep(stepNumber: number): boolean {
     switch (stepNumber) {
       case 1:
@@ -222,6 +262,8 @@ export default class TeacherApply {
         return this.step1Valid;
       case 3:
         return this.step1Valid && this.step2Valid;
+      case 4:
+        return this.step1Valid && this.step2Valid && this.step3Valid;
       default:
         return false;
     }
@@ -236,9 +278,9 @@ export default class TeacherApply {
 
   goToNextStep() {
     const currentStepValue = this.currentStep();
-    if (currentStepValue < 3 && this.canGoToStep(currentStepValue + 1)) {
+    if (currentStepValue < 4 && this.canGoToStep(currentStepValue + 1)) {
       this.currentStep.set(currentStepValue + 1);
-    } else if (currentStepValue === 3 && this.step3Valid) {
+    } else if (currentStepValue === 4 && this.step4Valid) {
       // 完成所有步驟
       this.submitForm();
     }

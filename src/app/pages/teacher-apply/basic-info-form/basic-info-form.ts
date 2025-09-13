@@ -1,5 +1,5 @@
-import { Component, inject, signal, input, output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, FormGroup } from '@angular/forms';
+import { Component, inject, signal, input, OnInit } from '@angular/core';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { InputMultiSelect, MultiSelectOption } from '@components/form/input-multi-select/input-multi-select';
@@ -15,15 +15,9 @@ import { InputMultiSelect, MultiSelectOption } from '@components/form/input-mult
   templateUrl: './basic-info-form.html',
   styles: ``
 })
-export class BasicInfoForm {
-  private fb = inject(FormBuilder);
-
-  // 輸入屬性
-  initialData = input<any>(null);
-
-  // 輸出事件
-  formSubmit = output<any>();
-  formValid = output<boolean>();
+export class BasicInfoForm implements OnInit {
+  // 輸入屬性 - 接收來自父元件的FormGroup
+  formGroup = input.required<FormGroup>();
 
   // 縣市選項
   cityOptions: SelectOption[] = [
@@ -53,49 +47,27 @@ export class BasicInfoForm {
   // 教學專長選項 (次分類) - 根據主分類動態載入
   specialtyOptions = signal<MultiSelectOption[]>([]);
 
-  // 自訂陣列長度驗證器
-  private arrayRequiredValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    if (!Array.isArray(value) || value.length === 0) {
-      return { required: true };
-    }
-    return null;
-  }
-
-  // 基本資料表單
-  basicInfoForm = this.fb.group({
-    city: ['', Validators.required],
-    district: ['', Validators.required],
-    address: ['', Validators.required],
-    subject: ['', Validators.required],
-    specialties: [[] as string[], this.arrayRequiredValidator],
-    introduction: ['', [Validators.required, Validators.minLength(10)]]
-  });
-
-  constructor() {
+  ngOnInit() {
+    // 在 ngOnInit 中設置表單監聽，這時 input 已經初始化
+    const form = this.formGroup();
+    
     // 監聽縣市變化，更新地區選項
-    this.basicInfoForm.get('city')?.valueChanges.subscribe(city => {
+    form.get('city')?.valueChanges.subscribe((city: string | null) => {
       this.updateDistrictOptions(city);
       // 清空已選的地區
-      this.basicInfoForm.patchValue({ district: '' });
+      form.patchValue({ district: '' });
     });
 
     // 監聽主分類變化，更新專長選項
-    this.basicInfoForm.get('subject')?.valueChanges.subscribe(subject => {
+    form.get('subject')?.valueChanges.subscribe((subject: string | null) => {
       this.updateSpecialtyOptions(subject);
       // 清空已選的專長
-      this.basicInfoForm.patchValue({ specialties: [] });
+      form.patchValue({ specialties: [] });
     });
+  }
 
-    // 監聽表單狀態變化
-    this.basicInfoForm.statusChanges.subscribe(status => {
-      this.formValid.emit(status === 'VALID');
-    });
-
-    // 如果有初始資料，填入表單
-    if (this.initialData()) {
-      this.basicInfoForm.patchValue(this.initialData());
-    }
+  constructor() {
+    // constructor 保持空白，或只做不依賴 input 的初始化
   }
 
   updateDistrictOptions(city: string | null) {
@@ -206,28 +178,5 @@ export class BasicInfoForm {
     };
 
     this.specialtyOptions.set(subject ? specialtyMap[subject] || [] : []);
-  }
-
-  onSubmit() {
-    if (this.basicInfoForm.valid) {
-      this.formSubmit.emit(this.basicInfoForm.value);
-    } else {
-      this.basicInfoForm.markAllAsTouched();
-    }
-  }
-
-  // 取得表單資料
-  getFormData() {
-    return this.basicInfoForm.value;
-  }
-
-  // 檢查表單是否有效
-  isFormValid() {
-    return this.basicInfoForm.valid;
-  }
-
-  // 檢查表單是否有變更
-  isFormDirty() {
-    return this.basicInfoForm.dirty;
   }
 }

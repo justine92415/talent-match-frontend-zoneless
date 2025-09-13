@@ -34,41 +34,35 @@
       <!-- Step 1: 基本資料 -->
       @if (currentStep() === 1) {
         <tmf-basic-info-form
-          #basicInfoForm
-          [initialData]="formData.basicInfo"
-          (formValid)="onStep1ValidChange($event)"
-          (formSubmit)="onStep1Submit($event)"
+          [formGroup]="basicInfoFormGroup"
         ></tmf-basic-info-form>
       }
 
       <!-- Step 2: 工作經驗 -->
       @if (currentStep() === 2) {
         <tmf-work-experiences-form
-          #workExperiencesForm
-          [initialData]="formData.workExperiences"
-          (formValid)="onStep2ValidChange($event)"
-          (formSubmit)="onStep2Submit($event)"
+          [formGroup]="workExperiencesFormGroup"
         ></tmf-work-experiences-form>
       }
 
       <!-- Step 3: 學歷背景 -->
-      @if (currentStep() === 3) {
+      <!-- @if (currentStep() === 3) {
         <tmf-learning-experiences-form
           #learningExperiencesForm
           [initialData]="formData.learningExperiences"
           (formValid)="onStep3ValidChange($event)"
           (formSubmit)="onStep3Submit($event)"
         ></tmf-learning-experiences-form>
-      }
+      } -->
 
       <!-- Step 4: 教學證照 -->
       @if (currentStep() === 4) {
-        <tmf-certificates-form
+        <!-- <tmf-certificates-form
           #certificatesForm
           [initialData]="formData.certificates"
           (formValid)="onStep4ValidChange($event)"
           (formSubmit)="onStep4Submit($event)"
-        ></tmf-certificates-form>
+        ></tmf-certificates-form> -->
       }
 
       <!-- Navigation Buttons -->
@@ -84,7 +78,7 @@
           </tmf-button>
         }
         
-        @if (currentStep() < 4) {
+        @if (currentStep() < 2) {
           <tmf-button
             type="button"
             class="flex-1 h-12"
@@ -93,18 +87,16 @@
           >
             @switch (currentStep()) {
               @case (1) { 下一步：工作經驗 }
-              @case (2) { 下一步：學歷背景 }
-              @case (3) { 下一步：教學證照 }
             }
           </tmf-button>
         } @else {
           <tmf-button
             type="button"
             class="flex-1 h-12"
-            [disabled]="!step4Valid()"
+            [disabled]="!step2Valid"
             (click)="goToNextStep()"
           >
-            提交申請
+            完成前兩步驟
           </tmf-button>
         }
       </div>

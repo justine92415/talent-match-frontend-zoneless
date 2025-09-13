@@ -1,5 +1,5 @@
-import { Component, inject, signal, input, output } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, FormArray, FormGroup } from '@angular/forms';
+import { Component, input, OnInit, inject } from '@angular/core';
+import { FormGroup, FormArray, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { Button } from '@components/button/button';
@@ -18,18 +18,19 @@ import { TmfIconEnum } from '@share/icon.enum';
   templateUrl: './work-experiences-form.html',
   styles: ``
 })
-export class WorkExperiencesForm {
+export class WorkExperiencesForm implements OnInit {
   private fb = inject(FormBuilder);
-
-  // 輸入屬性
-  initialData = input<any>(null);
-
-  // 輸出事件
-  formSubmit = output<any>();
-  formValid = output<boolean>();
+  
+  // 輸入屬性 - 接收來自父元件的FormGroup
+  formGroup = input.required<FormGroup>();
 
   get TmfIcon() {
     return TmfIconEnum;
+  }
+
+  // 取得 FormArray
+  get experiencesArray(): FormArray {
+    return this.formGroup().get('experiences') as FormArray;
   }
 
   // 縣市選項
@@ -68,51 +69,27 @@ export class WorkExperiencesForm {
     return { value: month.toString(), label: `${month}月` };
   });
 
-  // 工作經驗表單
-  workExperienceForm = this.fb.group({
-    experiences: this.fb.array([])
-  });
-
-  get experiencesArray(): FormArray {
-    return this.workExperienceForm.get('experiences') as FormArray;
+  ngOnInit() {
+    // FormGroup 已經由父元件創建和管理，這裡不需要額外的初始化
   }
 
-  constructor() {
-    // 監聽表單狀態變化
-    this.workExperienceForm.statusChanges.subscribe(status => {
-      this.formValid.emit(status === 'VALID');
-    });
-
-    // 如果有初始資料，填入表單
-    if (this.initialData()) {
-      this.loadInitialData();
-    } else {
-      // 預設新增一個工作經驗
-      this.addExperience();
-    }
+  // 新增工作經驗
+  addExperience(): void {
+    // 由於 FormArray 是由父元件管理，這裡需要透過父元件的方法來新增
+    // 但為了保持元件的獨立性，我們可以直接操作 FormArray
+    const experienceGroup = this.createExperience();
+    this.experiencesArray.push(experienceGroup);
   }
 
-  private loadInitialData() {
-    const data = this.initialData();
-    if (data?.experiences && Array.isArray(data.experiences)) {
-      // 清空現有的工作經驗
-      while (this.experiencesArray.length !== 0) {
-        this.experiencesArray.removeAt(0);
-      }
-      
-      // 加載初始資料
-      data.experiences.forEach((exp: any) => {
-        const experienceGroup = this.createExperience();
-        experienceGroup.patchValue(exp);
-        this.experiencesArray.push(experienceGroup);
-      });
-    } else {
-      this.addExperience();
+  // 移除工作經驗
+  removeExperience(index: number): void {
+    if (this.experiencesArray.length > 1) {
+      this.experiencesArray.removeAt(index);
     }
   }
 
   // 建立工作經驗 FormGroup
-  createExperience(): FormGroup {
+  private createExperience(): FormGroup {
     const experienceGroup = this.fb.group({
       company_name: ['', Validators.required],
       workplace_city: ['', Validators.required],
@@ -127,7 +104,7 @@ export class WorkExperiencesForm {
       end_month: ['']
     });
 
-    // 監聽目前在職狀態，控制結束日期的必填驗證
+    // 監聽目前在職狀態
     experienceGroup.get('is_working')?.valueChanges.subscribe(isWorking => {
       const endYearControl = experienceGroup.get('end_year');
       const endMonthControl = experienceGroup.get('end_month');
@@ -146,22 +123,12 @@ export class WorkExperiencesForm {
       endMonthControl?.updateValueAndValidity();
     });
 
-    // 監聽縣市變化，重置地區選項
+    // 監聽縣市變化
     experienceGroup.get('workplace_city')?.valueChanges.subscribe(() => {
       experienceGroup.patchValue({ workplace_district: '' });
     });
 
     return experienceGroup;
-  }
-
-  addExperience(): void {
-    this.experiencesArray.push(this.createExperience());
-  }
-
-  removeExperience(index: number): void {
-    if (this.experiencesArray.length > 1) {
-      this.experiencesArray.removeAt(index);
-    }
   }
 
   // 取得地區選項
@@ -241,28 +208,5 @@ export class WorkExperiencesForm {
     };
 
     return city ? districtMap[city] || [] : [];
-  }
-
-  onSubmit() {
-    if (this.workExperienceForm.valid) {
-      this.formSubmit.emit(this.workExperienceForm.value);
-    } else {
-      this.workExperienceForm.markAllAsTouched();
-    }
-  }
-
-  // 取得表單資料
-  getFormData() {
-    return this.workExperienceForm.value;
-  }
-
-  // 檢查表單是否有效
-  isFormValid() {
-    return this.workExperienceForm.valid;
-  }
-
-  // 檢查表單是否有變更
-  isFormDirty() {
-    return this.workExperienceForm.dirty;
   }
 }

@@ -74,6 +74,7 @@ export class LearningExperiencesForm implements OnInit {
   // 建立學歷 FormGroup
   private createEducation(): FormGroup {
     const educationGroup = this.fb.group({
+      id: [null], // 用於更新現有學歷時的 ID
       school_name: ['', Validators.required],
       major: ['', Validators.required],
       degree: ['', Validators.required],

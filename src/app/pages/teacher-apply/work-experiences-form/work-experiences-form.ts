@@ -5,6 +5,7 @@ import { InputSelect, SelectOption } from '@components/form/input-select/input-s
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
+import { Cities } from '@share/cities';
 
 @Component({
   selector: 'tmf-work-experiences-form',
@@ -33,15 +34,11 @@ export class WorkExperiencesForm implements OnInit {
     return this.formGroup().get('experiences') as FormArray;
   }
 
-  // 縣市選項
-  cityOptions: SelectOption[] = [
-    { value: 'taipei', label: '台北市' },
-    { value: 'new-taipei', label: '新北市' },
-    { value: 'taoyuan', label: '桃園市' },
-    { value: 'taichung', label: '台中市' },
-    { value: 'tainan', label: '台南市' },
-    { value: 'kaohsiung', label: '高雄市' }
-  ];
+  // 縣市選項 - 從 Cities 資料生成
+  cityOptions: SelectOption[] = Cities.map(city => ({
+    value: city.name,
+    label: city.name
+  }));
 
   // 工作類別選項
   jobCategoryOptions: SelectOption[] = [
@@ -91,6 +88,7 @@ export class WorkExperiencesForm implements OnInit {
   // 建立工作經驗 FormGroup
   private createExperience(): FormGroup {
     const experienceGroup = this.fb.group({
+      id: [null], // 新增 id 欄位
       company_name: ['', Validators.required],
       workplace_city: ['', Validators.required],
       workplace_district: ['', Validators.required],
@@ -131,82 +129,23 @@ export class WorkExperiencesForm implements OnInit {
     return experienceGroup;
   }
 
-  // 取得地區選項
-  getDistrictOptions(city: string | null): SelectOption[] {
-    const districtMap: { [key: string]: SelectOption[] } = {
-      'taipei': [
-        { value: 'zhongzheng', label: '中正區' },
-        { value: 'datong', label: '大同區' },
-        { value: 'zhongshan', label: '中山區' },
-        { value: 'songshan', label: '松山區' },
-        { value: 'daan', label: '大安區' },
-        { value: 'wanhua', label: '萬華區' },
-        { value: 'xinyi', label: '信義區' },
-        { value: 'shilin', label: '士林區' },
-        { value: 'beitou', label: '北投區' },
-        { value: 'neihu', label: '內湖區' },
-        { value: 'nangang', label: '南港區' },
-        { value: 'wenshan', label: '文山區' }
-      ],
-      'new-taipei': [
-        { value: 'banqiao', label: '板橋區' },
-        { value: 'sanchong', label: '三重區' },
-        { value: 'zhonghe', label: '中和區' },
-        { value: 'yonghe', label: '永和區' },
-        { value: 'xinzhuang', label: '新莊區' },
-        { value: 'xindian', label: '新店區' },
-        { value: 'tucheng', label: '土城區' },
-        { value: 'luzhou', label: '蘆洲區' },
-        { value: 'shulin', label: '樹林區' },
-        { value: 'yingge', label: '鶯歌區' },
-        { value: 'sanxia', label: '三峽區' },
-        { value: 'tamsui', label: '淡水區' }
-      ],
-      'taoyuan': [
-        { value: 'taoyuan', label: '桃園區' },
-        { value: 'zhongli', label: '中壢區' },
-        { value: 'dayuan', label: '大園區' },
-        { value: 'yangmei', label: '楊梅區' },
-        { value: 'luzhu', label: '蘆竹區' },
-        { value: 'daxi', label: '大溪區' },
-        { value: 'pingzhen', label: '平鎮區' },
-        { value: 'bade', label: '八德區' },
-        { value: 'longtan', label: '龍潭區' },
-        { value: 'guishan', label: '龜山區' },
-        { value: 'guanyin', label: '觀音區' },
-        { value: 'xinwu', label: '新屋區' }
-      ],
-      'taichung': [
-        { value: 'central', label: '中區' },
-        { value: 'east', label: '東區' },
-        { value: 'south', label: '南區' },
-        { value: 'west', label: '西區' },
-        { value: 'north', label: '北區' },
-        { value: 'beitun', label: '北屯區' },
-        { value: 'xitun', label: '西屯區' },
-        { value: 'nantun', label: '南屯區' }
-      ],
-      'tainan': [
-        { value: 'central-west', label: '中西區' },
-        { value: 'east', label: '東區' },
-        { value: 'south', label: '南區' },
-        { value: 'north', label: '北區' },
-        { value: 'anping', label: '安平區' },
-        { value: 'annan', label: '安南區' }
-      ],
-      'kaohsiung': [
-        { value: 'xinxing', label: '新興區' },
-        { value: 'qianjin', label: '前金區' },
-        { value: 'lingya', label: '苓雅區' },
-        { value: 'yancheng', label: '鹽埕區' },
-        { value: 'gushan', label: '鼓山區' },
-        { value: 'qijin', label: '旗津區' },
-        { value: 'qianzhen', label: '前鎮區' },
-        { value: 'sanmin', label: '三民區' },
-        { value: 'zuoying', label: '左營區' }
-      ]
-    };
+  // 取得地區選項 - 根據選擇的縣市從 Cities 資料動態生成
+  getDistrictOptions(cityValue: string | null): SelectOption[] {
+    if (!cityValue) {
+      return [];
+    }
 
-    return city ? districtMap[city] || [] : [];
+    // 找到對應的城市資料
+    const selectedCity = Cities.find(city => city.name === cityValue);
+    
+    if (selectedCity) {
+      // 將鄉鎮區轉換為選項格式
+      return selectedCity.districts.map(district => ({
+        value: district.name,
+        label: district.name
+      }));
+    }
+
+    return [];
   }
 }

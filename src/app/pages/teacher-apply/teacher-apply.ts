@@ -213,10 +213,11 @@ export default class TeacherApply implements OnInit {
       // 重新建立工作經驗表單
       data.work_experiences.forEach((exp: any) => {
         const experienceForm = this.fb.group({
+          id: [exp.id || null], // 包含 id 欄位
           company_name: [exp.company_name || '', Validators.required],
-          workplace_city: [exp.workplace_city || '', Validators.required],
-          workplace_district: [exp.workplace_district || '', Validators.required],
-          workplace_address: [exp.workplace_address || '', Validators.required],
+          workplace_city: ['', Validators.required], // 從 workplace 解析
+          workplace_district: ['', Validators.required],
+          workplace_address: ['', Validators.required],
           job_category: [exp.job_category || '', Validators.required],
           job_title: [exp.job_title || '', Validators.required],
           is_working: [exp.is_working || false],
@@ -225,6 +226,13 @@ export default class TeacherApply implements OnInit {
           end_year: [exp.end_year?.toString() || ''],
           end_month: [exp.end_month?.toString() || '']
         });
+
+        // 如果有 workplace 欄位，暫時放到 workplace_address，讓使用者可以看到完整地址
+        if (exp.workplace) {
+          experienceForm.patchValue({
+            workplace_address: exp.workplace
+          });
+        }
 
         // 重新設定監聽器
         this.setupWorkExperienceListeners(experienceForm);
@@ -244,6 +252,7 @@ export default class TeacherApply implements OnInit {
       // 重新建立學歷表單
       data.learning_experiences.forEach((edu: any) => {
         const educationForm = this.fb.group({
+          id: [edu.id || null], // 包含 id 欄位
           school_name: [edu.school_name || '', Validators.required],
           major: [edu.department || '', Validators.required],  // API 使用 department，表單使用 major
           degree: [edu.degree || '', Validators.required],
@@ -272,6 +281,7 @@ export default class TeacherApply implements OnInit {
       // 重新建立證照表單
       data.certificates.forEach((cert: any) => {
         const certificateForm = this.fb.group({
+          id: [cert.id || null], // 包含 id 欄位
           certificate_name: [cert.license_name || '', Validators.required],  // API 使用 license_name
           issuer: [cert.verifying_institution || '', Validators.required],  // API 使用 verifying_institution
           year: [cert.year?.toString() || '', Validators.required],
@@ -347,6 +357,7 @@ export default class TeacherApply implements OnInit {
   // 新增工作經驗表單項目
   addWorkExperience() {
     const experienceForm = this.fb.group({
+      id: [null], // 新增 id 欄位
       company_name: ['', Validators.required],
       workplace_city: ['', Validators.required],
       workplace_district: ['', Validators.required],
@@ -376,6 +387,7 @@ export default class TeacherApply implements OnInit {
   // 新增學歷表單項目
   addEducation() {
     const educationForm = this.fb.group({
+      id: [null], // 新增 id 欄位
       school_name: ['', Validators.required],
       major: ['', Validators.required],
       degree: ['', Validators.required],
@@ -402,6 +414,7 @@ export default class TeacherApply implements OnInit {
   // 新增證照表單項目
   addCertificate() {
     const certificateForm = this.fb.group({
+      id: [null], // 新增 id 欄位
       certificate_name: ['', Validators.required],
       issuer: ['', Validators.required],
       year: ['', Validators.required],
@@ -461,12 +474,10 @@ export default class TeacherApply implements OnInit {
       this.submitBasicInfo();
     } else if (currentStepValue === 2 && this.step2Valid) {
       // 第二步：提交工作經驗
-      // TODO: 實作工作經驗提交
-      this.currentStep.set(currentStepValue + 1);
+      this.submitWorkExperiences();
     } else if (currentStepValue === 3 && this.step3Valid) {
       // 第三步：提交學歷背景
-      // TODO: 實作學歷背景提交
-      this.currentStep.set(currentStepValue + 1);
+      this.submitLearningExperiences();
     } else if (currentStepValue === 4 && this.step4Valid) {
       // 第四步：提交證照資料
       // TODO: 實作證照提交，完成所有步驟
@@ -522,6 +533,215 @@ export default class TeacherApply implements OnInit {
         }
       });
     }
+  }
+
+  // 用 API 回應的 ID 更新表單
+  private updateWorkExperiencesWithIds(responseData: any[]) {
+    console.log('updateWorkExperiencesWithIds 被呼叫，資料:', responseData);
+    const formArray = this.experiencesFormArray;
+    console.log('當前表單陣列長度:', formArray.length);
+    
+    responseData.forEach((item, index) => {
+      console.log(`處理第 ${index} 個項目:`, item);
+      if (formArray.at(index)) {
+        const currentFormValue = formArray.at(index).value;
+        console.log(`更新前的表單值:`, currentFormValue);
+        formArray.at(index).patchValue({ id: item.id });
+        console.log(`更新後的表單值:`, formArray.at(index).value);
+      } else {
+        console.log(`找不到索引 ${index} 的表單控制項`);
+      }
+    });
+  }
+
+  // 提交工作經驗 (第二步)
+  private submitWorkExperiences() {
+    if (!this.step2Valid) {
+      this.workExperiencesFormGroup.markAllAsTouched();
+      return;
+    }
+
+    const formData = this.workExperiencesFormGroup.value;
+    
+    // 準備 API 資料格式
+    const workExperiences = formData.experiences?.map((exp: any) => ({
+      ...(exp.id && { id: exp.id }), // 如果有 id 就包含
+      company_name: exp.company_name,
+      workplace: `${exp.workplace_city}${exp.workplace_district}${exp.workplace_address}`, // 合併地址欄位
+      job_category: exp.job_category,
+      job_title: exp.job_title,
+      is_working: exp.is_working,
+      start_year: parseInt(exp.start_year),
+      start_month: parseInt(exp.start_month),
+      end_year: exp.end_year ? parseInt(exp.end_year) : null,
+      end_month: exp.end_month ? parseInt(exp.end_month) : null
+    })) || [];
+
+    const apiData = {
+      work_experiences: workExperiences
+    };
+
+    // 調試資訊：檢查當前狀態
+    console.log('當前工作經驗狀態:', this.hasWorkExperiences());
+    
+    // 額外檢查：如果表單中有任何一個工作經驗包含 id，就表示已有資料
+    const hasExistingExperience = this.experiencesFormArray.controls.some(control => control.get('id')?.value);
+    console.log('表單中是否有現有工作經驗 ID:', hasExistingExperience);
+    
+    // 調試：檢查每個工作經驗的 ID
+    console.log('表單中的工作經驗資料:', formData.experiences);
+    console.log('準備送到 API 的工作經驗資料:', workExperiences);
+    
+    // 合併檢查：signal 狀態或表單中有 ID
+    const shouldUseUpdate = this.hasWorkExperiences() || hasExistingExperience;
+    
+    // 根據工作經驗狀態決定使用 POST 或 PUT
+    if (shouldUseUpdate) {
+      // 已有工作經驗資料，使用 PUT 更新
+      console.log('使用 PUT 邏輯更新工作經驗:', apiData);
+      this.teachersService.putApiTeachersWorkExperiences(apiData).subscribe({
+        next: (response: any) => {
+          console.log('工作經驗更新成功 (PUT邏輯):', response);
+          this.currentStep.set(3);
+        },
+        error: (error: any) => {
+          console.error('工作經驗更新失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
+    } else {
+      // 尚無工作經驗資料，使用 POST 建立
+      console.log('使用 POST 邏輯建立工作經驗:', apiData);
+      this.teachersService.postApiTeachersWorkExperiences(apiData).subscribe({
+        next: (response: any) => {
+          console.log('工作經驗建立成功 (POST邏輯):', response);
+          console.log('POST 回應的 data 結構:', response.data);
+          
+          // 從回應中取得 work_experiences 陣列及其 id
+          if (response.data && response.data.work_experiences) {
+            console.log('使用 response.data.work_experiences 更新 ID:', response.data.work_experiences);
+            this.updateWorkExperiencesWithIds(response.data.work_experiences);
+          } else if (response.work_experiences) {
+            console.log('使用 response.work_experiences 更新 ID:', response.work_experiences);
+            this.updateWorkExperiencesWithIds(response.work_experiences);
+          } else {
+            console.log('無法找到工作經驗資料來更新 ID');
+          }
+          
+          // 成功後更新狀態
+          this.hasWorkExperiences.set(true);
+          this.currentStep.set(3);
+        },
+        error: (error: any) => {
+          console.error('工作經驗建立失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
+    }
+  }
+
+  // 提交學歷背景 (第三步)
+  private submitLearningExperiences() {
+    if (!this.step3Valid) {
+      this.learningExperiencesFormGroup.markAllAsTouched();
+      return;
+    }
+
+    const formData = this.learningExperiencesFormGroup.value;
+    
+    // 準備 API 資料格式
+    const learningExperiences = formData.educations?.map((edu: any) => ({
+      ...(edu.id && { id: edu.id }), // 如果有 id 就包含
+      school_name: edu.school_name,
+      department: edu.major,  // 表單使用 major，API 使用 department
+      degree: edu.degree,
+      is_in_school: edu.is_studying,  // 表單使用 is_studying，API 使用 is_in_school
+      start_year: parseInt(edu.start_year),
+      start_month: parseInt(edu.start_month),
+      end_year: edu.end_year ? parseInt(edu.end_year) : null,
+      end_month: edu.end_month ? parseInt(edu.end_month) : null
+    })) || [];
+
+    const apiData = {
+      learning_experiences: learningExperiences
+    };
+
+    // 調試資訊：檢查當前狀態
+    console.log('當前學歷背景狀態:', this.hasLearningExperiences());
+    
+    // 額外檢查：如果表單中有任何一個學歷包含 id，就表示已有資料
+    const hasExistingEducation = this.educationsFormArray.controls.some(control => control.get('id')?.value);
+    console.log('表單中是否有現有學歷背景 ID:', hasExistingEducation);
+    
+    // 調試：檢查每個學歷背景的 ID
+    console.log('表單中的學歷背景資料:', formData.educations);
+    console.log('準備送到 API 的學歷背景資料:', learningExperiences);
+    
+    // 合併檢查：signal 狀態或表單中有 ID
+    const shouldUseUpdate = this.hasLearningExperiences() || hasExistingEducation;
+    
+    // 根據學歷背景狀態決定使用 POST 或 PUT
+    if (shouldUseUpdate) {
+      // 已有學歷背景資料，使用 PUT 更新
+      console.log('使用 PUT 邏輯更新學歷背景:', apiData);
+      this.teachersService.putApiTeachersLearningExperiences(apiData).subscribe({
+        next: (response: any) => {
+          console.log('學歷背景更新成功 (PUT邏輯):', response);
+          this.currentStep.set(4);
+        },
+        error: (error: any) => {
+          console.error('學歷背景更新失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
+    } else {
+      // 尚無學歷背景資料，使用 POST 建立
+      console.log('使用 POST 邏輯建立學歷背景:', apiData);
+      this.teachersService.postApiTeachersLearningExperiences(apiData).subscribe({
+        next: (response: any) => {
+          console.log('學歷背景建立成功 (POST邏輯):', response);
+          console.log('POST 回應的 data 結構:', response.data);
+          
+          // 從回應中取得 learning_experiences 陣列及其 id
+          if (response.data && response.data.learning_experiences) {
+            console.log('使用 response.data.learning_experiences 更新 ID:', response.data.learning_experiences);
+            this.updateLearningExperiencesWithIds(response.data.learning_experiences);
+          } else if (response.learning_experiences) {
+            console.log('使用 response.learning_experiences 更新 ID:', response.learning_experiences);
+            this.updateLearningExperiencesWithIds(response.learning_experiences);
+          } else {
+            console.log('無法找到學歷背景資料來更新 ID');
+          }
+          
+          // 成功後更新狀態
+          this.hasLearningExperiences.set(true);
+          this.currentStep.set(4);
+        },
+        error: (error: any) => {
+          console.error('學歷背景建立失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
+    }
+  }
+
+  // 更新學歷背景表單中的 ID
+  private updateLearningExperiencesWithIds(responseData: any[]) {
+    console.log('updateLearningExperiencesWithIds 被呼叫，資料:', responseData);
+    const formArray = this.educationsFormArray;
+    console.log('當前學歷背景表單陣列長度:', formArray.length);
+    
+    responseData.forEach((item, index) => {
+      console.log(`處理第 ${index} 個學歷背景項目:`, item);
+      if (formArray.at(index)) {
+        const currentFormValue = formArray.at(index).value;
+        console.log(`更新前的表單值:`, currentFormValue);
+        formArray.at(index).patchValue({ id: item.id });
+        console.log(`更新後的表單值:`, formArray.at(index).value);
+      } else {
+        console.log(`找不到索引 ${index} 的表單控制項`);
+      }
+    });
   }
 
   // 提交完整表單

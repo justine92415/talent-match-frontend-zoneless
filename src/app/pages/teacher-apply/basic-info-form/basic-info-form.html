@@ -40,8 +40,8 @@
       <tmf-input-select
         class="w-full"
         [placeholder]="'請選擇教授科目'"
-        [options]="subjectOptions"
-        formControlName="subject"
+        [options]="subjectOptions()"
+        formControlName="main_category_id"
       ></tmf-input-select>
     </div>
 
@@ -51,7 +51,7 @@
       <tmf-input-multi-select
         [placeholder]="'請選擇教學專長'"
         [options]="specialtyOptions()"
-        formControlName="specialties"
+        formControlName="sub_category_ids"
       ></tmf-input-multi-select>
     </div>
   </div>

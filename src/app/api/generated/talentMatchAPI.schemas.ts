@@ -2386,6 +2386,36 @@ export type TeacherApplicationBusinessErrorResponseAllOf = {
 export type TeacherApplicationBusinessErrorResponse = BusinessErrorResponse &
   TeacherApplicationBusinessErrorResponseAllOf;
 
+export interface SubCategoryItem {
+  /** 次分類 ID */
+  id: number;
+  /** 次分類名稱 */
+  name: string;
+}
+
+export interface TagItem {
+  /** 主分類 ID */
+  id: number;
+  /** 主分類名稱 */
+  main_category: string;
+  /** 次分類清單 */
+  sub_category: SubCategoryItem[];
+  /**
+   * 主分類圖示 URL（可為 null）
+   * @nullable
+   */
+  icon_url: string | null;
+}
+
+export interface GetTagsSuccessResponse {
+  /** 回應狀態 (成功時為 true) */
+  status: boolean;
+  /** 回應訊息 */
+  message: string;
+  /** 標籤清單資料 */
+  data: TagItem[];
+}
+
 export type PostApiAuthRegister400 =
   | RegisterValidationErrorResponse
   | RegisterBusinessErrorResponse;

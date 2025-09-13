@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
 import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
 import { Stepper, StepItem } from '@components/stepper/stepper';
@@ -10,6 +10,8 @@ import { BasicInfoForm } from './basic-info-form/basic-info-form';
 import { WorkExperiencesForm } from './work-experiences-form/work-experiences-form';
 import { LearningExperiencesForm } from "./learning-experiences-form/learning-experiences-form";
 import { CertificatesForm } from './certificates-form/certificates-form';
+import { TeachersService } from '../../api/generated/teachers/teachers.service';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'tmf-teacher-apply',
@@ -27,9 +29,20 @@ import { CertificatesForm } from './certificates-form/certificates-form';
   templateUrl: './teacher-apply.html',
   styles: ``
 })
-export default class TeacherApply {
+export default class TeacherApply implements OnInit {
   private location = inject(Location);
   private fb = inject(FormBuilder);
+  private teachersService = inject(TeachersService);
+
+  // 申請狀態相關
+  isFirstTimeApply = signal(true);  // 是否為初次申請
+  isLoading = signal(true);         // 載入中狀態
+
+  // 各步驟資料存在狀態
+  hasBasicInfo = signal(false);           // 是否已有基本資料
+  hasWorkExperiences = signal(false);     // 是否已有工作經驗資料
+  hasLearningExperiences = signal(false); // 是否已有學歷背景資料
+  hasCertificates = signal(false);        // 是否已有證照資料
 
   // 自訂陣列長度驗證器
   private arrayRequiredValidator(control: any): any {
@@ -46,9 +59,9 @@ export default class TeacherApply {
       city: ['', Validators.required],
       district: ['', Validators.required],
       address: ['', Validators.required],
-      subject: ['', Validators.required],
-      specialties: [[] as string[], this.arrayRequiredValidator],
-      introduction: ['', [Validators.required, Validators.minLength(10)]]
+      main_category_id: [null, Validators.required],
+      sub_category_ids: [[] as number[], this.arrayRequiredValidator],
+      introduction: ['', [Validators.required, Validators.minLength(100)]]
     }),
     workExperiences: this.fb.group({
       experiences: this.fb.array([])
@@ -130,22 +143,160 @@ export default class TeacherApply {
     this.addCertificate();
   }
 
-  // 新增工作經驗表單項目
-  addWorkExperience() {
-    const experienceForm = this.fb.group({
-      company_name: ['', Validators.required],
-      workplace_city: ['', Validators.required],
-      workplace_district: ['', Validators.required],
-      workplace_address: ['', Validators.required],
-      job_category: ['', Validators.required],
-      job_title: ['', Validators.required],
-      is_working: [false],
-      start_year: ['', Validators.required],
-      start_month: ['', Validators.required],
-      end_year: [''],
-      end_month: ['']
-    });
+  ngOnInit() {
+    this.checkApplyStatus();
+  }
 
+  // 檢查申請狀態
+  private checkApplyStatus() {
+    this.isLoading.set(true);
+    
+    this.teachersService.getApiTeachersApplyStatus().pipe(
+      catchError(error => {
+        if (error.status === 404) {
+          // 404 表示初次申請
+          console.log('初次申請');
+          this.isFirstTimeApply.set(true);
+          return of(null);
+        }
+        // 其他錯誤
+        console.error('檢查申請狀態失敗:', error);
+        return of(null);
+      })
+    ).subscribe(response => {
+      this.isLoading.set(false);
+      
+      if (response) {
+        // 有申請記錄，表示已申請過
+        console.log('已申請過，申請資料:', response);
+        this.isFirstTimeApply.set(false);
+        // TODO: 用回應資料初始化表單
+        this.initializeFormWithData(response.data);
+      }
+    });
+  }
+
+  // 用申請資料初始化表單
+  private initializeFormWithData(data: any) {
+    console.log('初始化表單資料:', data);
+    
+    // 初始化基本資料
+    if (data.basic_info) {
+      const basicInfo = data.basic_info;
+      // 檢查基本資料是否完整
+      const isBasicInfoComplete = basicInfo.city && basicInfo.district && 
+        basicInfo.address && basicInfo.main_category_id && 
+        basicInfo.sub_category_ids?.length > 0 && basicInfo.introduction;
+      
+      if (isBasicInfoComplete) {
+        this.hasBasicInfo.set(true);
+        this.basicInfoFormGroup.patchValue({
+          city: basicInfo.city || '',
+          district: basicInfo.district || '',
+          address: basicInfo.address || '',
+          main_category_id: basicInfo.main_category_id || null,
+          sub_category_ids: basicInfo.sub_category_ids || [],
+          introduction: basicInfo.introduction || ''
+        });
+      }
+    }
+
+    // 初始化工作經驗
+    if (data.work_experiences && data.work_experiences.length > 0) {
+      this.hasWorkExperiences.set(true);
+      
+      // 清空現有的工作經驗表單
+      while (this.experiencesFormArray.length > 0) {
+        this.experiencesFormArray.removeAt(0);
+      }
+      
+      // 重新建立工作經驗表單
+      data.work_experiences.forEach((exp: any) => {
+        const experienceForm = this.fb.group({
+          company_name: [exp.company_name || '', Validators.required],
+          workplace_city: [exp.workplace_city || '', Validators.required],
+          workplace_district: [exp.workplace_district || '', Validators.required],
+          workplace_address: [exp.workplace_address || '', Validators.required],
+          job_category: [exp.job_category || '', Validators.required],
+          job_title: [exp.job_title || '', Validators.required],
+          is_working: [exp.is_working || false],
+          start_year: [exp.start_year?.toString() || '', Validators.required],
+          start_month: [exp.start_month?.toString() || '', Validators.required],
+          end_year: [exp.end_year?.toString() || ''],
+          end_month: [exp.end_month?.toString() || '']
+        });
+
+        // 重新設定監聽器
+        this.setupWorkExperienceListeners(experienceForm);
+        this.experiencesFormArray.push(experienceForm);
+      });
+    }
+
+    // 初始化學歷背景
+    if (data.learning_experiences && data.learning_experiences.length > 0) {
+      this.hasLearningExperiences.set(true);
+      
+      // 清空現有的學歷表單
+      while (this.educationsFormArray.length > 0) {
+        this.educationsFormArray.removeAt(0);
+      }
+      
+      // 重新建立學歷表單
+      data.learning_experiences.forEach((edu: any) => {
+        const educationForm = this.fb.group({
+          school_name: [edu.school_name || '', Validators.required],
+          major: [edu.department || '', Validators.required],  // API 使用 department，表單使用 major
+          degree: [edu.degree || '', Validators.required],
+          is_studying: [edu.is_in_school || false],  // API 使用 is_in_school，表單使用 is_studying
+          start_year: [edu.start_year?.toString() || '', Validators.required],
+          start_month: [edu.start_month?.toString() || '', Validators.required],
+          end_year: [edu.end_year?.toString() || ''],
+          end_month: [edu.end_month?.toString() || '']
+        });
+
+        // 重新設定監聽器
+        this.setupEducationListeners(educationForm);
+        this.educationsFormArray.push(educationForm);
+      });
+    }
+
+    // 初始化證照資料
+    if (data.certificates && data.certificates.length > 0) {
+      this.hasCertificates.set(true);
+      
+      // 清空現有的證照表單
+      while (this.certificatesFormArray.length > 0) {
+        this.certificatesFormArray.removeAt(0);
+      }
+      
+      // 重新建立證照表單
+      data.certificates.forEach((cert: any) => {
+        const certificateForm = this.fb.group({
+          certificate_name: [cert.license_name || '', Validators.required],  // API 使用 license_name
+          issuer: [cert.verifying_institution || '', Validators.required],  // API 使用 verifying_institution
+          year: [cert.year?.toString() || '', Validators.required],
+          month: [cert.month?.toString() || '', Validators.required],
+          certificate_file: [null]
+        });
+
+        this.certificatesFormArray.push(certificateForm);
+      });
+    }
+
+    // 確保每個步驟至少有一個表單項目
+    if (this.experiencesFormArray.length === 0) {
+      this.addWorkExperience();
+    }
+    if (this.educationsFormArray.length === 0) {
+      this.addEducation();
+    }
+    if (this.certificatesFormArray.length === 0) {
+      this.addCertificate();
+    }
+  }
+
+  // 設定工作經驗表單監聽器
+  private setupWorkExperienceListeners(experienceForm: FormGroup) {
     // 監聽目前在職狀態，控制結束日期的必填驗證
     experienceForm.get('is_working')?.valueChanges.subscribe(isWorking => {
       const endYearControl = experienceForm.get('end_year');
@@ -169,6 +320,48 @@ export default class TeacherApply {
     experienceForm.get('workplace_city')?.valueChanges.subscribe(() => {
       experienceForm.patchValue({ workplace_district: '' });
     });
+  }
+
+  // 設定學歷表單監聽器
+  private setupEducationListeners(educationForm: FormGroup) {
+    // 監聽目前就學狀態，控制結束日期的必填驗證
+    educationForm.get('is_studying')?.valueChanges.subscribe(isStudying => {
+      const endYearControl = educationForm.get('end_year');
+      const endMonthControl = educationForm.get('end_month');
+      
+      if (isStudying) {
+        endYearControl?.clearValidators();
+        endMonthControl?.clearValidators();
+        endYearControl?.setValue('');
+        endMonthControl?.setValue('');
+      } else {
+        endYearControl?.setValidators([Validators.required]);
+        endMonthControl?.setValidators([Validators.required]);
+      }
+      
+      endYearControl?.updateValueAndValidity();
+      endMonthControl?.updateValueAndValidity();
+    });
+  }
+
+  // 新增工作經驗表單項目
+  addWorkExperience() {
+    const experienceForm = this.fb.group({
+      company_name: ['', Validators.required],
+      workplace_city: ['', Validators.required],
+      workplace_district: ['', Validators.required],
+      workplace_address: ['', Validators.required],
+      job_category: ['', Validators.required],
+      job_title: ['', Validators.required],
+      is_working: [false],
+      start_year: ['', Validators.required],
+      start_month: ['', Validators.required],
+      end_year: [''],
+      end_month: ['']
+    });
+
+    // 設定監聽器
+    this.setupWorkExperienceListeners(experienceForm);
 
     this.experiencesFormArray.push(experienceForm);
   }
@@ -193,24 +386,8 @@ export default class TeacherApply {
       end_month: ['']
     });
 
-    // 監聽目前就學狀態，控制結束日期的必填驗證
-    educationForm.get('is_studying')?.valueChanges.subscribe(isStudying => {
-      const endYearControl = educationForm.get('end_year');
-      const endMonthControl = educationForm.get('end_month');
-      
-      if (isStudying) {
-        endYearControl?.clearValidators();
-        endMonthControl?.clearValidators();
-        endYearControl?.setValue('');
-        endMonthControl?.setValue('');
-      } else {
-        endYearControl?.setValidators([Validators.required]);
-        endMonthControl?.setValidators([Validators.required]);
-      }
-      
-      endYearControl?.updateValueAndValidity();
-      endMonthControl?.updateValueAndValidity();
-    });
+    // 設定監聽器
+    this.setupEducationListeners(educationForm);
 
     this.educationsFormArray.push(educationForm);
   }
@@ -278,11 +455,72 @@ export default class TeacherApply {
 
   goToNextStep() {
     const currentStepValue = this.currentStep();
-    if (currentStepValue < 4 && this.canGoToStep(currentStepValue + 1)) {
+    
+    if (currentStepValue === 1 && this.step1Valid) {
+      // 第一步：提交基本資料
+      this.submitBasicInfo();
+    } else if (currentStepValue === 2 && this.step2Valid) {
+      // 第二步：提交工作經驗
+      // TODO: 實作工作經驗提交
+      this.currentStep.set(currentStepValue + 1);
+    } else if (currentStepValue === 3 && this.step3Valid) {
+      // 第三步：提交學歷背景
+      // TODO: 實作學歷背景提交
       this.currentStep.set(currentStepValue + 1);
     } else if (currentStepValue === 4 && this.step4Valid) {
-      // 完成所有步驟
+      // 第四步：提交證照資料
+      // TODO: 實作證照提交，完成所有步驟
       this.submitForm();
+    }
+  }
+
+  // 提交基本資料 (第一步)
+  private submitBasicInfo() {
+    if (!this.step1Valid) {
+      this.basicInfoFormGroup.markAllAsTouched();
+      return;
+    }
+
+    const formData = this.basicInfoFormGroup.value;
+    
+    // 確保資料格式符合 API 需求
+    const apiData = {
+      city: formData.city,
+      district: formData.district,
+      address: formData.address,
+      main_category_id: formData.main_category_id,
+      sub_category_ids: formData.sub_category_ids,
+      introduction: formData.introduction
+    };
+
+    // 根據基本資料狀態決定使用 POST 或 PUT
+    if (this.hasBasicInfo()) {
+      // 已有基本資料，使用 PUT 更新
+      this.teachersService.putApiTeachersBasicInfo(apiData).subscribe({
+        next: (response: any) => {
+          console.log('基本資料更新成功:', response);
+          this.currentStep.set(2);
+        },
+        error: (error: any) => {
+          console.error('基本資料更新失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
+    } else {
+      // 尚無基本資料，使用 POST 建立
+      this.teachersService.postApiTeachersApply(apiData).subscribe({
+        next: (response: any) => {
+          console.log('基本資料建立成功:', response);
+          // 成功後更新狀態
+          this.isFirstTimeApply.set(false);
+          this.hasBasicInfo.set(true);
+          this.currentStep.set(2);
+        },
+        error: (error: any) => {
+          console.error('基本資料建立失敗:', error);
+          // TODO: 顯示錯誤訊息給使用者
+        }
+      });
     }
   }
 

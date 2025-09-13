@@ -59,6 +59,74 @@
         ></tmf-certificates-form>
       }
 
+      <!-- Step 5: 確認資料 -->
+      @if (currentStep() === 5) {
+        <div class="space-y-8">
+          <h2 class="text-2xl font-bold text-grey-33 text-center">確認申請資料</h2>
+          
+          <!-- 基本資料確認 -->
+          <div class="border border-grey-d4 rounded-xl p-6">
+            <h3 class="text-lg font-medium text-grey-33 mb-4">基本資料</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div><span class="text-grey-66">居住地：</span>{{ basicInfoFormGroup.get('city')?.value }}{{ basicInfoFormGroup.get('district')?.value }}{{ basicInfoFormGroup.get('address')?.value }}</div>
+              <div><span class="text-grey-66">主要教學類別：</span>{{ getMainCategoryLabel(basicInfoFormGroup.get('main_category_id')?.value) }}</div>
+              <div class="md:col-span-2"><span class="text-grey-66">專長領域：</span>{{ getSubCategoryLabels(basicInfoFormGroup.get('sub_category_ids')?.value) }}</div>
+              <div class="md:col-span-2 break-words overflow-wrap-anywhere">
+                <span class="text-grey-66">自我介紹：</span>
+                <div class="mt-1 whitespace-pre-wrap break-words">{{ basicInfoFormGroup.get('introduction')?.value }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 工作經驗確認 -->
+          <div class="border border-grey-d4 rounded-xl p-6">
+            <h3 class="text-lg font-medium text-grey-33 mb-4">工作經驗</h3>
+            @for (exp of experiencesFormArray.controls; track $index) {
+              <div class="bg-grey-f8 rounded-lg p-4 mb-3 text-sm">
+                <div class="font-medium mb-2">{{ exp.get('company_name')?.value }}</div>
+                <div class="grid grid-cols-2 gap-2 text-grey-66">
+                  <div>職位：{{ exp.get('job_title')?.value }}</div>
+                  <div>類別：{{ exp.get('job_category')?.value }}</div>
+                  <div>地點：{{ exp.get('workplace_city')?.value }}{{ exp.get('workplace_district')?.value }}{{ exp.get('workplace_address')?.value }}</div>
+                  <div>期間：{{ exp.get('start_year')?.value }}/{{ exp.get('start_month')?.value }} - {{ exp.get('is_working')?.value ? '至今' : exp.get('end_year')?.value + '/' + exp.get('end_month')?.value }}</div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- 學歷背景確認 -->
+          <div class="border border-grey-d4 rounded-xl p-6">
+            <h3 class="text-lg font-medium text-grey-33 mb-4">學歷背景</h3>
+            @for (edu of educationsFormArray.controls; track $index) {
+              <div class="bg-grey-f8 rounded-lg p-4 mb-3 text-sm">
+                <div class="font-medium mb-2">{{ edu.get('school_name')?.value }}</div>
+                <div class="grid grid-cols-2 gap-2 text-grey-66">
+                  <div>科系：{{ edu.get('major')?.value }}</div>
+                  <div>學位：{{ getDegreeLabel(edu.get('degree')?.value) }}</div>
+                  <div class="col-span-2">期間：{{ edu.get('start_year')?.value }}/{{ edu.get('start_month')?.value }} - {{ edu.get('is_studying')?.value ? '就學中' : edu.get('end_year')?.value + '/' + edu.get('end_month')?.value }}</div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- 教學證照確認 -->
+          <div class="border border-grey-d4 rounded-xl p-6">
+            <h3 class="text-lg font-medium text-grey-33 mb-4">教學證照</h3>
+            @for (cert of certificatesFormArray.controls; track $index) {
+              <div class="bg-grey-f8 rounded-lg p-4 mb-3 text-sm">
+                <div class="font-medium mb-2">{{ cert.get('certificate_name')?.value }}</div>
+                <div class="grid grid-cols-2 gap-2 text-grey-66">
+                  <div>持有人：{{ cert.get('holder_name')?.value }}</div>
+                  <div>證書號碼：{{ cert.get('license_number')?.value }}</div>
+                  <div>核發機構：{{ cert.get('issuer')?.value }}</div>
+                  <div>取得時間：{{ cert.get('year')?.value }}/{{ cert.get('month')?.value }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
       <!-- Navigation Buttons -->
       <div class="flex gap-4 pt-6 mt-8">
         @if (currentStep() > 1) {
@@ -72,7 +140,7 @@
           </tmf-button>
         }
 
-        @if (currentStep() < 4) {
+        @if (currentStep() < 5) {
           <tmf-button
             type="button"
             class="flex-1 h-12"
@@ -89,16 +157,18 @@
               @case (3) {
                 下一步：教學證照
               }
+              @case (4) {
+                下一步：確認資料
+              }
             }
           </tmf-button>
         } @else {
           <tmf-button
             type="button"
             class="flex-1 h-12"
-            [disabled]="!step4Valid"
             (click)="goToNextStep()"
           >
-            完成申請
+            提交申請
           </tmf-button>
         }
       </div>

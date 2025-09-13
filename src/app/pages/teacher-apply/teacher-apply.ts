@@ -131,7 +131,8 @@ export default class TeacherApply implements OnInit {
     { id: 1, label: '基本資料' },
     { id: 2, label: '工作經驗' },
     { id: 3, label: '學歷背景' },
-    { id: 4, label: '教學證照' }
+    { id: 4, label: '教學證照' },
+    { id: 5, label: '確認資料' }
   ];
 
   constructor() {
@@ -460,6 +461,8 @@ export default class TeacherApply implements OnInit {
         return this.step1Valid && this.step2Valid;
       case 4:
         return this.step1Valid && this.step2Valid && this.step3Valid;
+      case 5:
+        return this.step1Valid && this.step2Valid && this.step3Valid && this.step4Valid;
       default:
         return false;
     }
@@ -487,6 +490,9 @@ export default class TeacherApply implements OnInit {
     } else if (currentStepValue === 4 && this.step4Valid) {
       // 第四步：提交證照資料
       this.submitCertificates();
+    } else if (currentStepValue === 5) {
+      // 第五步：確認資料後提交申請
+      this.submitFinalApplication();
     }
   }
 
@@ -797,8 +803,8 @@ export default class TeacherApply implements OnInit {
       this.teachersService.putApiTeachersCertificates(apiData).subscribe({
         next: (response: any) => {
           console.log('證照更新成功 (PUT邏輯):', response);
-          // 完成所有步驟，進行最終提交
-          this.submitFinalApplication();
+          // 跳到第五步確認資料
+          this.currentStep.set(5);
         },
         error: (error: any) => {
           console.error('證照更新失敗:', error);
@@ -826,8 +832,8 @@ export default class TeacherApply implements OnInit {
           
           // 成功後更新狀態
           this.hasCertificates.set(true);
-          // 完成所有步驟，進行最終提交
-          this.submitFinalApplication();
+          // 跳到第五步確認資料
+          this.currentStep.set(5);
         },
         error: (error: any) => {
           console.error('證照建立失敗:', error);
@@ -896,6 +902,30 @@ export default class TeacherApply implements OnInit {
       console.error('表單驗證失敗');
       this.teacherApplyForm.markAllAsTouched();
     }
+  }
+
+  // 確認頁面輔助方法
+  getMainCategoryLabel(categoryId: number): string {
+    // 這裡應該從 TagsService 中獲取標籤，暫時返回 ID
+    // TODO: 實作從標籤服務獲取主分類名稱
+    return categoryId ? `分類 ${categoryId}` : '';
+  }
+
+  getSubCategoryLabels(categoryIds: number[]): string {
+    // 這裡應該從 TagsService 中獲取標籤，暫時返回 ID 列表
+    // TODO: 實作從標籤服務獲取子分類名稱
+    return categoryIds && categoryIds.length > 0 ? categoryIds.map(id => `專長 ${id}`).join(', ') : '';
+  }
+
+  getDegreeLabel(degree: string): string {
+    const degreeLabels: { [key: string]: string } = {
+      'high_school': '高中職',
+      'associate': '專科',
+      'bachelor': '學士',
+      'master': '碩士',
+      'phd': '博士'
+    };
+    return degreeLabels[degree] || degree;
   }
 
 }

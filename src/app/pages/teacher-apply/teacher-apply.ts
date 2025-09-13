@@ -216,9 +216,8 @@ export default class TeacherApply implements OnInit {
         const experienceForm = this.fb.group({
           id: [exp.id || null], // 包含 id 欄位
           company_name: [exp.company_name || '', Validators.required],
-          workplace_city: ['', Validators.required], // 從 workplace 解析
-          workplace_district: ['', Validators.required],
-          workplace_address: ['', Validators.required],
+          city: [exp.city || '', Validators.required],
+          district: [exp.district || '', Validators.required],
           job_category: [exp.job_category || '', Validators.required],
           job_title: [exp.job_title || '', Validators.required],
           is_working: [exp.is_working || false],
@@ -227,13 +226,6 @@ export default class TeacherApply implements OnInit {
           end_year: [exp.end_year?.toString() || ''],
           end_month: [exp.end_month?.toString() || '']
         });
-
-        // 如果有 workplace 欄位，暫時放到 workplace_address，讓使用者可以看到完整地址
-        if (exp.workplace) {
-          experienceForm.patchValue({
-            workplace_address: exp.workplace
-          });
-        }
 
         // 重新設定監聽器
         this.setupWorkExperienceListeners(experienceForm);
@@ -331,8 +323,8 @@ export default class TeacherApply implements OnInit {
     });
 
     // 監聽縣市變化，重置地區選項
-    experienceForm.get('workplace_city')?.valueChanges.subscribe(() => {
-      experienceForm.patchValue({ workplace_district: '' });
+    experienceForm.get('city')?.valueChanges.subscribe(() => {
+      experienceForm.patchValue({ district: '' });
     });
   }
 
@@ -363,9 +355,8 @@ export default class TeacherApply implements OnInit {
     const experienceForm = this.fb.group({
       id: [null], // 新增 id 欄位
       company_name: ['', Validators.required],
-      workplace_city: ['', Validators.required],
-      workplace_district: ['', Validators.required],
-      workplace_address: ['', Validators.required],
+      city: ['', Validators.required],
+      district: ['', Validators.required],
       job_category: ['', Validators.required],
       job_title: ['', Validators.required],
       is_working: [false],
@@ -578,7 +569,8 @@ export default class TeacherApply implements OnInit {
     const workExperiences = formData.experiences?.map((exp: any) => ({
       ...(exp.id && { id: exp.id }), // 如果有 id 就包含
       company_name: exp.company_name,
-      workplace: `${exp.workplace_city}${exp.workplace_district}${exp.workplace_address}`, // 合併地址欄位
+      city: exp.city,
+      district: exp.district,
       job_category: exp.job_category,
       job_title: exp.job_title,
       is_working: exp.is_working,

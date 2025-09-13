@@ -42,51 +42,36 @@
           
           <div class="flex flex-col md:flex-row gap-4">
             <!-- 縣市 -->
-            <div class="space-y-2">
+            <div class="space-y-2 flex-1">
               <label class="block text-sm text-grey-66">縣市</label>
               <tmf-input-select
                 [placeholder]="'請選擇縣市'"
                 [options]="cityOptions"
-                formControlName="workplace_city"
+                formControlName="city"
               ></tmf-input-select>
               @if (
-                experience.get("workplace_city")?.invalid &&
-                experience.get("workplace_city")?.touched
+                experience.get("city")?.invalid &&
+                experience.get("city")?.touched
               ) {
                 <div class="text-red-500 text-sm">請選擇縣市</div>
               }
             </div>
 
             <!-- 地區 -->
-            <div class="space-y-2">
+            <div class="space-y-2 flex-1">
               <label class="block text-sm text-grey-66">地區</label>
               <tmf-input-select
                 [placeholder]="'請選擇地區'"
-                [options]="getDistrictOptions(experience.get('workplace_city')?.value)"
-                formControlName="workplace_district"
+                [options]="districtOptionsMap().get($index) || []"
+                formControlName="district"
               ></tmf-input-select>
               @if (
-                experience.get("workplace_district")?.invalid &&
-                experience.get("workplace_district")?.touched
+                experience.get("district")?.invalid &&
+                experience.get("district")?.touched
               ) {
                 <div class="text-red-500 text-sm">請選擇地區</div>
               }
             </div>
-          </div>
-
-          <!-- 詳細地址 -->
-          <div class="space-y-2">
-            <label class="block text-sm text-grey-66">詳細地址</label>
-            <tmf-input-text
-              placeholder="請輸入詳細地址"
-              formControlName="workplace_address"
-            ></tmf-input-text>
-            @if (
-              experience.get("workplace_address")?.invalid &&
-              experience.get("workplace_address")?.touched
-            ) {
-              <div class="text-red-500 text-sm">請輸入詳細地址</div>
-            }
           </div>
         </div>
 
@@ -197,10 +182,11 @@
     <tmf-button
       type="button"
       variant="secondary"
+      iconPosition="left"
+      iconName="add"
       (click)="addExperience()"
-      class="flex items-center gap-2"
+      class="h-10"
     >
-      <mat-icon [fontIcon]="TmfIcon.Add"></mat-icon>
       新增工作經驗
     </tmf-button>
   </div>

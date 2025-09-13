@@ -1,4 +1,4 @@
-import { Component, input, OnInit, inject } from '@angular/core';
+import { Component, input, OnInit, inject, signal, computed } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
@@ -66,16 +66,77 @@ export class WorkExperiencesForm implements OnInit {
     return { value: month.toString(), label: `${month}月` };
   });
 
+  // 每個工作經驗的地區選項 - 使用 Map 來管理多個下拉選單
+  districtOptionsMap = signal<Map<number, SelectOption[]>>(new Map());
+
   ngOnInit() {
-    // FormGroup 已經由父元件創建和管理，這裡不需要額外的初始化
+    // 初始化現有工作經驗項目的選項和監聽器
+    this.setupExistingExperiences();
+  }
+
+  private setupExistingExperiences() {
+    this.experiencesArray.controls.forEach((control, index) => {
+      const formGroup = control as FormGroup;
+      this.setupExperienceListeners(formGroup, index);
+
+      // 如果已有縣市值，初始化地區選項
+      const currentCity = formGroup.get('city')?.value;
+      if (currentCity) {
+        this.updateDistrictOptions(index, currentCity);
+      }
+    });
+  }
+
+  private setupExperienceListeners(experienceForm: FormGroup, index: number) {
+    // 追蹤之前的縣市值，避免初始化時誤清空
+    let previousCity = experienceForm.get('city')?.value;
+
+    // 監聽縣市變化，更新地區選項
+    experienceForm.get('city')?.valueChanges.subscribe((city: string | null) => {
+      this.updateDistrictOptions(index, city);
+      // 只有在實際改變時才清空地區
+      if (previousCity !== null && previousCity !== city) {
+        experienceForm.patchValue({ district: '' });
+      }
+      previousCity = city;
+    });
+  }
+
+  private updateDistrictOptions(index: number, city: string | null) {
+    const currentMap = this.districtOptionsMap();
+    const newMap = new Map(currentMap);
+
+    if (!city) {
+      newMap.set(index, []);
+      this.districtOptionsMap.set(newMap);
+      return;
+    }
+
+    const selectedCity = Cities.find(cityData => cityData.name === city);
+    if (selectedCity) {
+      const districts: SelectOption[] = selectedCity.districts.map(district => ({
+        value: district.name,
+        label: district.name
+      }));
+      newMap.set(index, districts);
+    } else {
+      newMap.set(index, []);
+    }
+
+    this.districtOptionsMap.set(newMap);
   }
 
   // 新增工作經驗
   addExperience(): void {
-    // 由於 FormArray 是由父元件管理，這裡需要透過父元件的方法來新增
-    // 但為了保持元件的獨立性，我們可以直接操作 FormArray
+    const newIndex = this.experiencesArray.length;
     const experienceGroup = this.createExperience();
     this.experiencesArray.push(experienceGroup);
+
+    // 為新項目設定監聽器
+    this.setupExperienceListeners(experienceGroup, newIndex);
+
+    // 初始化新項目的地區選項為空
+    this.updateDistrictOptions(newIndex, null);
   }
 
   // 移除工作經驗
@@ -90,9 +151,8 @@ export class WorkExperiencesForm implements OnInit {
     const experienceGroup = this.fb.group({
       id: [null], // 新增 id 欄位
       company_name: ['', Validators.required],
-      workplace_city: ['', Validators.required],
-      workplace_district: ['', Validators.required],
-      workplace_address: ['', Validators.required],
+      city: ['', Validators.required],
+      district: ['', Validators.required],
       job_category: ['', Validators.required],
       job_title: ['', Validators.required],
       is_working: [false],
@@ -121,31 +181,6 @@ export class WorkExperiencesForm implements OnInit {
       endMonthControl?.updateValueAndValidity();
     });
 
-    // 監聽縣市變化
-    experienceGroup.get('workplace_city')?.valueChanges.subscribe(() => {
-      experienceGroup.patchValue({ workplace_district: '' });
-    });
-
     return experienceGroup;
-  }
-
-  // 取得地區選項 - 根據選擇的縣市從 Cities 資料動態生成
-  getDistrictOptions(cityValue: string | null): SelectOption[] {
-    if (!cityValue) {
-      return [];
-    }
-
-    // 找到對應的城市資料
-    const selectedCity = Cities.find(city => city.name === cityValue);
-    
-    if (selectedCity) {
-      // 將鄉鎮區轉換為選項格式
-      return selectedCity.districts.map(district => ({
-        value: district.name,
-        label: district.name
-      }));
-    }
-
-    return [];
   }
 }

@@ -1306,8 +1306,10 @@ export interface WorkExperience {
   is_working: boolean;
   /** 公司名稱 */
   company_name: string;
-  /** 工作地點 */
-  workplace: string;
+  /** 工作縣市 */
+  city: string;
+  /** 工作地區 */
+  district: string;
   /** 工作類別 */
   job_category: string;
   /** 職位名稱 */
@@ -1340,11 +1342,17 @@ export interface WorkExperienceCreateRequest {
    */
   company_name: string;
   /**
-   * 工作地點（必填，1-200字元）
+   * 工作縣市（必填，1-50字元）
    * @minLength 1
-   * @maxLength 200
+   * @maxLength 50
    */
-  workplace: string;
+  city: string;
+  /**
+   * 工作地區（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  district: string;
   /**
    * 工作類別（必填，1-100字元）
    * @minLength 1

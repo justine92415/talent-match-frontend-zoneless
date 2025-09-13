@@ -87,7 +87,7 @@
                 <div class="grid grid-cols-2 gap-2 text-grey-66">
                   <div>職位：{{ exp.get('job_title')?.value }}</div>
                   <div>類別：{{ exp.get('job_category')?.value }}</div>
-                  <div>地點：{{ exp.get('workplace_city')?.value }}{{ exp.get('workplace_district')?.value }}{{ exp.get('workplace_address')?.value }}</div>
+                  <div>地點：{{ exp.get('city')?.value }}{{ exp.get('district')?.value }}</div>
                   <div>期間：{{ exp.get('start_year')?.value }}/{{ exp.get('start_month')?.value }} - {{ exp.get('is_working')?.value ? '至今' : exp.get('end_year')?.value + '/' + exp.get('end_month')?.value }}</div>
                 </div>
               </div>

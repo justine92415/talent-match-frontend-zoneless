@@ -443,11 +443,6 @@ export interface GetProfileResponse {
 }
 
 /**
- * 生日 - 可為有效日期、空字串(清空)或 null
- */
-export type UpdateProfileRequestBirthday = string | '' | null;
-
-/**
  * 所有欄位皆為選填，支援部分更新
  */
 export interface UpdateProfileRequest {
@@ -463,8 +458,11 @@ export interface UpdateProfileRequest {
    * @nullable
    */
   name?: string | null;
-  /** 生日 - 可為有效日期、空字串(清空)或 null */
-  birthday?: UpdateProfileRequestBirthday;
+  /**
+   * 生日 - 可為有效日期、空字串(清空)或 null
+   * @nullable
+   */
+  birthday?: string | null;
   /**
    * 聯絡電話 (最大20字元，支援數字、+、-、空格、括號)
    * @maxLength 20
@@ -1712,18 +1710,22 @@ export interface Certificate {
   /** 教師 ID */
   teacher_id: number;
   /** 證照名稱 */
-  certificate_name: string;
+  license_name: string;
   /** 發證機構 */
-  issuer: string;
-  /** 取得年份 */
-  year: number;
-  /** 取得月份 */
-  month: number;
+  verifying_institution: string;
+  /** 持有人姓名 */
+  holder_name: string;
+  /** 證照編號 */
+  license_number: string;
+  /** 證照類別 */
+  category_id: string;
+  /** 證照科目 */
+  subject: string;
   /**
-   * 證照檔案 URL
+   * 證照檔案路徑
    * @nullable
    */
-  certificate_url?: string | null;
+  file_path?: string | null;
   /** 建立時間 */
   created_at: string;
   /** 更新時間 */
@@ -1762,30 +1764,43 @@ export interface CertificateCreateRequest {
    * @minLength 1
    * @maxLength 200
    */
-  certificate_name: string;
+  license_name: string;
   /**
    * 發證機構（必填，1-200字元）
    * @minLength 1
    * @maxLength 200
    */
-  issuer: string;
+  verifying_institution: string;
   /**
-   * 取得年份（必填，1900-2100）
-   * @minimum 1900
-   * @maximum 2100
+   * 持有人姓名（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
    */
-  year: number;
+  holder_name: string;
   /**
-   * 取得月份（必填，1-12）
-   * @minimum 1
-   * @maximum 12
+   * 證照編號（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
    */
-  month: number;
+  license_number: string;
   /**
-   * 證照檔案 URL（選填）
+   * 證照類別（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  category_id: string;
+  /**
+   * 證照科目（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
+   */
+  subject: string;
+  /**
+   * 證照檔案路徑（選填，最多500字元）
+   * @maxLength 500
    * @nullable
    */
-  certificate_url?: string | null;
+  file_path?: string | null;
 }
 
 /**
@@ -1863,6 +1878,167 @@ export interface CertificateDeleteSuccessResponse {
    * @nullable
    */
   data?: CertificateDeleteSuccessResponseData;
+}
+
+export type WorkExperienceUpsertRequestWorkExperiencesItemAllOf = {
+  /** 工作經驗 ID（用於更新，新增時不提供） */
+  id?: number;
+};
+
+export type WorkExperienceUpsertRequestWorkExperiencesItem =
+  WorkExperienceCreateRequest &
+    WorkExperienceUpsertRequestWorkExperiencesItemAllOf;
+
+export interface WorkExperienceUpsertRequest {
+  /**
+   * 工作經驗陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  work_experiences: WorkExperienceUpsertRequestWorkExperiencesItem[];
+}
+
+export type WorkExperienceUpsertResponseStatus =
+  (typeof WorkExperienceUpsertResponseStatus)[keyof typeof WorkExperienceUpsertResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WorkExperienceUpsertResponseStatus = {
+  success: 'success',
+} as const;
+
+export type WorkExperienceUpsertResponseData = {
+  work_experiences?: WorkExperience[];
+};
+
+export interface WorkExperienceUpsertResponse {
+  status?: WorkExperienceUpsertResponseStatus;
+  message?: string;
+  data?: WorkExperienceUpsertResponseData;
+}
+
+export interface LearningExperienceBatchCreateRequest {
+  /**
+   * 學習經驗陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  learning_experiences: LearningExperienceCreateRequest[];
+}
+
+export type LearningExperienceBatchCreateSuccessResponseStatus =
+  (typeof LearningExperienceBatchCreateSuccessResponseStatus)[keyof typeof LearningExperienceBatchCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceBatchCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type LearningExperienceBatchCreateSuccessResponseData = {
+  learning_experiences?: LearningExperience[];
+};
+
+export interface LearningExperienceBatchCreateSuccessResponse {
+  status?: LearningExperienceBatchCreateSuccessResponseStatus;
+  message?: string;
+  data?: LearningExperienceBatchCreateSuccessResponseData;
+}
+
+export type LearningExperienceUpsertRequestLearningExperiencesItemAllOf = {
+  /** 學習經驗 ID（用於更新，新增時不提供） */
+  id?: number;
+};
+
+export type LearningExperienceUpsertRequestLearningExperiencesItem =
+  LearningExperienceCreateRequest &
+    LearningExperienceUpsertRequestLearningExperiencesItemAllOf;
+
+export interface LearningExperienceUpsertRequest {
+  /**
+   * 學習經驗陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  learning_experiences: LearningExperienceUpsertRequestLearningExperiencesItem[];
+}
+
+export type LearningExperienceUpsertResponseStatus =
+  (typeof LearningExperienceUpsertResponseStatus)[keyof typeof LearningExperienceUpsertResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceUpsertResponseStatus = {
+  success: 'success',
+} as const;
+
+export type LearningExperienceUpsertResponseData = {
+  learning_experiences?: LearningExperience[];
+};
+
+export interface LearningExperienceUpsertResponse {
+  status?: LearningExperienceUpsertResponseStatus;
+  message?: string;
+  data?: LearningExperienceUpsertResponseData;
+}
+
+export interface CertificateBatchCreateRequest {
+  /**
+   * 證書陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  certificates: CertificateCreateRequest[];
+}
+
+export type CertificateBatchCreateSuccessResponseStatus =
+  (typeof CertificateBatchCreateSuccessResponseStatus)[keyof typeof CertificateBatchCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateBatchCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type CertificateBatchCreateSuccessResponseData = {
+  certificates?: Certificate[];
+};
+
+export interface CertificateBatchCreateSuccessResponse {
+  status?: CertificateBatchCreateSuccessResponseStatus;
+  message?: string;
+  data?: CertificateBatchCreateSuccessResponseData;
+}
+
+export type CertificateUpsertRequestCertificatesItemAllOf = {
+  /** 證書 ID（用於更新，新增時不提供） */
+  id?: number;
+};
+
+export type CertificateUpsertRequestCertificatesItem =
+  CertificateCreateRequest & CertificateUpsertRequestCertificatesItemAllOf;
+
+export interface CertificateUpsertRequest {
+  /**
+   * 證書陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  certificates: CertificateUpsertRequestCertificatesItem[];
+}
+
+export type CertificateUpsertResponseStatus =
+  (typeof CertificateUpsertResponseStatus)[keyof typeof CertificateUpsertResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateUpsertResponseStatus = {
+  success: 'success',
+} as const;
+
+export type CertificateUpsertResponseData = {
+  certificates?: Certificate[];
+};
+
+export interface CertificateUpsertResponse {
+  status?: CertificateUpsertResponseStatus;
+  message?: string;
+  data?: CertificateUpsertResponseData;
 }
 
 /**

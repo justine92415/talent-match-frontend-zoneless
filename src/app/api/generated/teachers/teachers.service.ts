@@ -36,17 +36,23 @@ type _DeepNonNullableObject<T> = {
 import { Observable } from 'rxjs';
 
 import type {
+  CertificateBatchCreateRequest,
+  CertificateBatchCreateSuccessResponse,
   CertificateCreateRequest,
-  CertificateCreateSuccessResponse,
   CertificateDeleteSuccessResponse,
   CertificateListSuccessResponse,
   CertificateUpdateSuccessResponse,
+  CertificateUpsertRequest,
+  CertificateUpsertResponse,
   GetApiTeachersScheduleConflictsParams,
+  LearningExperienceBatchCreateRequest,
+  LearningExperienceBatchCreateSuccessResponse,
   LearningExperienceCreateRequest,
-  LearningExperienceCreateSuccessResponse,
   LearningExperienceDeleteSuccessResponse,
   LearningExperienceListSuccessResponse,
   LearningExperienceUpdateSuccessResponse,
+  LearningExperienceUpsertRequest,
+  LearningExperienceUpsertResponse,
   ScheduleConflictCheckSuccessResponse,
   ScheduleGetSuccessResponse,
   ScheduleUpdateRequest,
@@ -68,6 +74,8 @@ import type {
   WorkExperienceDeleteSuccessResponse,
   WorkExperienceListSuccessResponse,
   WorkExperienceUpdateSuccessResponse,
+  WorkExperienceUpsertRequest,
+  WorkExperienceUpsertResponse,
 } from '../talentMatchAPI.schemas';
 
 interface HttpClientOptions {
@@ -417,6 +425,57 @@ if (!data.application_submitted_at) {
     );
   }
   /**
+ * 批次處理工作經驗記錄，支援同時新增和更新操作。
+
+**UPSERT 邏輯**：
+- 有 `id` 的記錄：執行更新操作
+- 沒有 `id` 的記錄：執行新增操作
+- 支援在同一個請求中混合處理新增和更新
+- 所有操作在單一交易中執行，確保資料一致性
+
+**使用場景**：
+- 使用者中途離開申請頁面後重新填寫
+- 需要同時修改現有資料並新增新的工作經驗
+- 前端不需要複雜的邏輯判斷應該呼叫 POST 還是 PUT
+
+**請求格式**：
+- 統一使用 `{ work_experiences: [工作經驗陣列] }` 格式
+- 每個工作經驗物件可選擇性包含 `id` 欄位
+
+**業務邏輯**：
+- 驗證使用者為有效的教師或教師申請者
+- 對於有 `id` 的記錄，驗證使用者擁有權
+- 驗證所有工作經驗資料的完整性和邏輯性
+- 檢查開始和結束時間的合理性
+- 一次最多支援 20 筆工作經驗
+- 在資料庫交易中執行所有操作
+- 回傳處理結果統計和更新後的資料
+
+ * @summary 批次新增或更新工作經驗
+ */
+  putApiTeachersWorkExperiences<TData = WorkExperienceUpsertResponse>(
+    workExperienceUpsertRequest: WorkExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  putApiTeachersWorkExperiences<TData = WorkExperienceUpsertResponse>(
+    workExperienceUpsertRequest: WorkExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  putApiTeachersWorkExperiences<TData = WorkExperienceUpsertResponse>(
+    workExperienceUpsertRequest: WorkExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  putApiTeachersWorkExperiences<TData = WorkExperienceUpsertResponse>(
+    workExperienceUpsertRequest: WorkExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.put<TData>(
+      `/api/teachers/work-experiences`,
+      workExperienceUpsertRequest,
+      options,
+    );
+  }
+  /**
  * 更新指定的工作經驗記錄。
 
 **業務邏輯**：
@@ -536,32 +595,82 @@ if (!data.application_submitted_at) {
  * @summary 新增學習經歷
  */
   postApiTeachersLearningExperiences<
-    TData = LearningExperienceCreateSuccessResponse,
+    TData = LearningExperienceBatchCreateSuccessResponse,
   >(
-    learningExperienceCreateRequest: LearningExperienceCreateRequest,
+    learningExperienceBatchCreateRequest: LearningExperienceBatchCreateRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
   postApiTeachersLearningExperiences<
-    TData = LearningExperienceCreateSuccessResponse,
+    TData = LearningExperienceBatchCreateSuccessResponse,
   >(
-    learningExperienceCreateRequest: LearningExperienceCreateRequest,
+    learningExperienceBatchCreateRequest: LearningExperienceBatchCreateRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
   postApiTeachersLearningExperiences<
-    TData = LearningExperienceCreateSuccessResponse,
+    TData = LearningExperienceBatchCreateSuccessResponse,
   >(
-    learningExperienceCreateRequest: LearningExperienceCreateRequest,
+    learningExperienceBatchCreateRequest: LearningExperienceBatchCreateRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
   postApiTeachersLearningExperiences<
-    TData = LearningExperienceCreateSuccessResponse,
+    TData = LearningExperienceBatchCreateSuccessResponse,
   >(
-    learningExperienceCreateRequest: LearningExperienceCreateRequest,
+    learningExperienceBatchCreateRequest: LearningExperienceBatchCreateRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.post<TData>(
       `/api/teachers/learning-experiences`,
-      learningExperienceCreateRequest,
+      learningExperienceBatchCreateRequest,
+      options,
+    );
+  }
+  /**
+ * 批次處理學習經驗記錄，支援同時新增和更新操作。
+
+**UPSERT 邏輯**：
+- 有 `id` 的記錄：執行更新操作
+- 沒有 `id` 的記錄：執行新增操作
+- 支援在同一個請求中混合處理新增和更新
+- 所有操作在單一交易中執行，確保資料一致性
+
+**使用場景**：
+- 使用者中途離開申請頁面後重新填寫
+- 需要同時修改現有資料並新增新的學習經驗
+- 前端不需要複雜的邏輯判斷應該呼叫 POST 還是 PUT
+
+**請求格式**：
+- 統一使用 `{ learning_experiences: [學習經驗陣列] }` 格式
+- 每個學習經驗物件可選擇性包含 `id` 欄位
+
+**業務邏輯**：
+- 驗證使用者為有效的教師或教師申請者
+- 對於有 `id` 的記錄，驗證使用者擁有權
+- 驗證所有學習經驗資料的完整性和邏輯性
+- 檢查開始和結束時間的合理性
+- 一次最多支援 20 筆學習經驗
+- 在資料庫交易中執行所有操作
+
+ * @summary 批次新增或更新學習經驗
+ */
+  putApiTeachersLearningExperiences<TData = LearningExperienceUpsertResponse>(
+    learningExperienceUpsertRequest: LearningExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  putApiTeachersLearningExperiences<TData = LearningExperienceUpsertResponse>(
+    learningExperienceUpsertRequest: LearningExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  putApiTeachersLearningExperiences<TData = LearningExperienceUpsertResponse>(
+    learningExperienceUpsertRequest: LearningExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  putApiTeachersLearningExperiences<TData = LearningExperienceUpsertResponse>(
+    learningExperienceUpsertRequest: LearningExperienceUpsertRequest,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.put<TData>(
+      `/api/teachers/learning-experiences`,
+      learningExperienceUpsertRequest,
       options,
     );
   }
@@ -689,25 +798,75 @@ if (!data.application_submitted_at) {
 
  * @summary 新增證書
  */
-  postApiTeachersCertificates<TData = CertificateCreateSuccessResponse>(
-    certificateCreateRequest: CertificateCreateRequest,
+  postApiTeachersCertificates<TData = CertificateBatchCreateSuccessResponse>(
+    certificateBatchCreateRequest: CertificateBatchCreateRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  postApiTeachersCertificates<TData = CertificateCreateSuccessResponse>(
-    certificateCreateRequest: CertificateCreateRequest,
+  postApiTeachersCertificates<TData = CertificateBatchCreateSuccessResponse>(
+    certificateBatchCreateRequest: CertificateBatchCreateRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  postApiTeachersCertificates<TData = CertificateCreateSuccessResponse>(
-    certificateCreateRequest: CertificateCreateRequest,
+  postApiTeachersCertificates<TData = CertificateBatchCreateSuccessResponse>(
+    certificateBatchCreateRequest: CertificateBatchCreateRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  postApiTeachersCertificates<TData = CertificateCreateSuccessResponse>(
-    certificateCreateRequest: CertificateCreateRequest,
+  postApiTeachersCertificates<TData = CertificateBatchCreateSuccessResponse>(
+    certificateBatchCreateRequest: CertificateBatchCreateRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.post<TData>(
       `/api/teachers/certificates`,
-      certificateCreateRequest,
+      certificateBatchCreateRequest,
+      options,
+    );
+  }
+  /**
+ * 批次處理證書記錄，支援同時新增和更新操作。
+
+**UPSERT 邏輯**：
+- 有 `id` 的記錄：執行更新操作
+- 沒有 `id` 的記錄：執行新增操作
+- 支援在同一個請求中混合處理新增和更新
+- 所有操作在單一交易中執行，確保資料一致性
+
+**使用場景**：
+- 使用者中途離開申請頁面後重新填寫
+- 需要同時修改現有資料並新增新的證書
+- 前端不需要複雜的邏輯判斷應該呼叫 POST 還是 PUT
+
+**請求格式**：
+- 統一使用 `{ certificates: [證書陣列] }` 格式
+- 每個證書物件可選擇性包含 `id` 欄位
+
+**業務邏輯**：
+- 驗證使用者為有效的教師或教師申請者
+- 對於有 `id` 的記錄，驗證使用者擁有權
+- 驗證所有證書資料的完整性和邏輯性
+- 檢查證書名稱和發證機構的合理性
+- 一次最多支援 20 筆證書
+- 在資料庫交易中執行所有操作
+
+ * @summary 批次新增或更新證書
+ */
+  putApiTeachersCertificates<TData = CertificateUpsertResponse>(
+    certificateUpsertRequest: CertificateUpsertRequest,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  putApiTeachersCertificates<TData = CertificateUpsertResponse>(
+    certificateUpsertRequest: CertificateUpsertRequest,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  putApiTeachersCertificates<TData = CertificateUpsertResponse>(
+    certificateUpsertRequest: CertificateUpsertRequest,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  putApiTeachersCertificates<TData = CertificateUpsertResponse>(
+    certificateUpsertRequest: CertificateUpsertRequest,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.put<TData>(
+      `/api/teachers/certificates`,
+      certificateUpsertRequest,
       options,
     );
   }
@@ -892,6 +1051,8 @@ export type GetApiTeachersWorkExperiencesClientResult =
   NonNullable<WorkExperienceListSuccessResponse>;
 export type PostApiTeachersWorkExperiencesClientResult =
   NonNullable<WorkExperienceBatchCreateSuccessResponse>;
+export type PutApiTeachersWorkExperiencesClientResult =
+  NonNullable<WorkExperienceUpsertResponse>;
 export type PutApiTeachersWorkExperiencesIdClientResult =
   NonNullable<WorkExperienceUpdateSuccessResponse>;
 export type DeleteApiTeachersWorkExperiencesIdClientResult =
@@ -899,7 +1060,9 @@ export type DeleteApiTeachersWorkExperiencesIdClientResult =
 export type GetApiTeachersLearningExperiencesClientResult =
   NonNullable<LearningExperienceListSuccessResponse>;
 export type PostApiTeachersLearningExperiencesClientResult =
-  NonNullable<LearningExperienceCreateSuccessResponse>;
+  NonNullable<LearningExperienceBatchCreateSuccessResponse>;
+export type PutApiTeachersLearningExperiencesClientResult =
+  NonNullable<LearningExperienceUpsertResponse>;
 export type PutApiTeachersLearningExperiencesIdClientResult =
   NonNullable<LearningExperienceUpdateSuccessResponse>;
 export type DeleteApiTeachersLearningExperiencesIdClientResult =
@@ -907,7 +1070,9 @@ export type DeleteApiTeachersLearningExperiencesIdClientResult =
 export type GetApiTeachersCertificatesClientResult =
   NonNullable<CertificateListSuccessResponse>;
 export type PostApiTeachersCertificatesClientResult =
-  NonNullable<CertificateCreateSuccessResponse>;
+  NonNullable<CertificateBatchCreateSuccessResponse>;
+export type PutApiTeachersCertificatesClientResult =
+  NonNullable<CertificateUpsertResponse>;
 export type PutApiTeachersCertificatesIdClientResult =
   NonNullable<CertificateUpdateSuccessResponse>;
 export type DeleteApiTeachersCertificatesIdClientResult =

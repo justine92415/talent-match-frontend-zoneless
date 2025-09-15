@@ -12,7 +12,8 @@ import { WorkExperiencesForm } from './work-experiences-form/work-experiences-fo
 import { LearningExperiencesForm } from "./learning-experiences-form/learning-experiences-form";
 import { CertificatesForm } from './certificates-form/certificates-form';
 import { TeachersService } from '../../api/generated/teachers/teachers.service';
-import { catchError, of } from 'rxjs';
+import { AuthService } from '../../services/auth.service';
+import { catchError, of, switchMap, tap } from 'rxjs';
 import { CategoryPipe, SubcategoryPipe, DegreePipe, JobCategoryPipe } from '../../../shared/pipes';
 
 @Component({
@@ -40,6 +41,7 @@ export default class TeacherApply implements OnInit {
   private fb = inject(FormBuilder);
   private teachersService = inject(TeachersService);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   // 申請狀態相關
   isFirstTimeApply = signal(true);  // 是否為初次申請
@@ -819,27 +821,37 @@ export default class TeacherApply implements OnInit {
 
     
     // 呼叫最終提交 API
-    this.teachersService.postApiTeachersSubmit().subscribe({
-      next: (response: any) => {
+    this.teachersService.postApiTeachersSubmit().pipe(
+      tap((response: any) => {
         console.log('申請提交成功:', response);
         this.isSubmitted.set(true); // 設定為已提交狀態
-      },
-      error: (error: any) => {
+      }),
+      switchMap(() => {
+        // 提交成功後，刷新 token 以取得 teacher_pending 角色
+        return this.authService.refreshToken();
+      }),
+      catchError((error) => {
         console.error('申請提交失敗:', error);
         alert('申請提交失敗，請稍後再試。');
+        return of(false); // 回傳 false 表示失敗
+      })
+    ).subscribe({
+      next: (success) => {
+        if (success) {
+          console.log('角色更新成功，已獲得 teacher_pending 角色');
+          // 重定向到適當頁面，例如待審核狀態頁面
+          this.router.navigate(['/dashboard']);
+        } else {
+          // 角色更新失敗的情況
+          console.error('角色更新失敗');
+          alert('申請已成功提交！請重新登入以更新權限。');
+        }
+      },
+      error: (error) => {
+        console.error('角色更新失敗:', error);
+        // 即使角色更新失敗，申請仍然成功提交
+        alert('申請已成功提交！請重新登入以更新權限。');
       }
     });
   }
-
-  // 提交完整表單
-  private submitForm() {
-    if (this.teacherApplyForm.valid) {
-      // TODO: 提交到後端API
-      alert('前兩步驟完成！');
-    } else {
-      console.error('表單驗證失敗');
-      this.teacherApplyForm.markAllAsTouched();
-    }
-  }
-
 }

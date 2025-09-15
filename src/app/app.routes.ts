@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { guestGuard, authGuard } from './guards/auth.guard';
+import { teacherApplyGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -25,7 +26,7 @@ export const routes: Routes = [
   {
     path: 'teacher-apply',
     loadComponent: () => import('./pages/teacher-apply/teacher-apply'),
-    // canActivate: [authGuard],
+    canActivate: [teacherApplyGuard],
   },
   {
     path: 'dashboard',

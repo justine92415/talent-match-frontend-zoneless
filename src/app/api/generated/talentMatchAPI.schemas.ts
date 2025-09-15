@@ -704,9 +704,17 @@ export type TeacherApplyStatusSuccessResponseDataCertificatesItem = {
   id?: number;
   license_name?: string;
   verifying_institution?: string;
+  holder_name?: string;
   license_number?: string;
-  category_id?: string;
-  subject?: string;
+  category_id?: number;
+  issue_year?: number;
+  issue_month?: number;
+  /** @nullable */
+  expiry_year?: number | null;
+  /** @nullable */
+  expiry_month?: number | null;
+  /** @nullable */
+  file_path?: string | null;
 };
 
 export type TeacherApplyStatusSuccessResponseData = {
@@ -1725,10 +1733,22 @@ export interface Certificate {
   holder_name: string;
   /** 證照編號 */
   license_number: string;
-  /** 證照類別 */
-  category_id: string;
-  /** 證照科目 */
-  subject: string;
+  /** 證照分類 ID */
+  category_id: number;
+  /** 發證年份 */
+  issue_year: number;
+  /** 發證月份 */
+  issue_month: number;
+  /**
+   * 到期年份
+   * @nullable
+   */
+  expiry_year?: number | null;
+  /**
+   * 到期月份
+   * @nullable
+   */
+  expiry_month?: number | null;
   /**
    * 證照檔案路徑
    * @nullable
@@ -1792,17 +1812,36 @@ export interface CertificateCreateRequest {
    */
   license_number: string;
   /**
-   * 證照類別（必填，1-50字元）
-   * @minLength 1
-   * @maxLength 50
+   * 證照分類 ID（必填，正整數）
+   * @minimum 1
    */
-  category_id: string;
+  category_id: number;
   /**
-   * 證照科目（必填，1-100字元）
-   * @minLength 1
-   * @maxLength 100
+   * 發證年份（必填，1900-2100）
+   * @minimum 1900
+   * @maximum 2100
    */
-  subject: string;
+  issue_year: number;
+  /**
+   * 發證月份（必填，1-12）
+   * @minimum 1
+   * @maximum 12
+   */
+  issue_month: number;
+  /**
+   * 到期年份（選填，1900-2150）
+   * @minimum 1900
+   * @maximum 2150
+   * @nullable
+   */
+  expiry_year?: number | null;
+  /**
+   * 到期月份（選填，1-12）
+   * @minimum 1
+   * @maximum 12
+   * @nullable
+   */
+  expiry_month?: number | null;
   /**
    * 證照檔案路徑（選填，最多500字元）
    * @maxLength 500

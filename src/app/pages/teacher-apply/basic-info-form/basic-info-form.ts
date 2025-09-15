@@ -44,7 +44,6 @@ export class BasicInfoForm implements OnInit {
   specialtyOptions = signal<MultiSelectOption[]>([]);
 
   ngOnInit() {
-    console.log('BasicInfoForm initialized with formGroup:', this.formGroup());
     // 載入分類資料
     this.loadTags();
 

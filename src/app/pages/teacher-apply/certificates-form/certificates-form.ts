@@ -63,6 +63,9 @@ export class CertificatesForm implements OnInit {
         if (response.data && Array.isArray(response.data)) {
           this.allTags.set(response.data);
           this.buildSubjectOptions();
+          
+          // API 資料載入完成後，檢查並修復表單值的顯示
+          this.refreshFormDisplayValues();
         }
       },
       error: (error) => {
@@ -71,11 +74,23 @@ export class CertificatesForm implements OnInit {
     });
   }
 
+  // 重新整理表單顯示值 - 確保選項載入後表單值正確顯示
+  private refreshFormDisplayValues() {
+    // 觸發表單重新檢測值的變化，確保下拉選單正確顯示
+    this.certificatesArray.controls.forEach((control, index) => {
+      const categoryId = control.get('category_id')?.value;
+      if (categoryId) {
+        // 重新設置相同的值來觸發更新
+        control.get('category_id')?.setValue(categoryId);
+      }
+    });
+  }
+
   // 建構主題選項
   private buildSubjectOptions() {
     const tags = this.allTags();
     const options: SelectOption[] = tags.map(tag => ({
-      value: tag.id,  // 使用數字而不是字串
+      value: tag.id.toString(),  // 轉換為字串以匹配表單值
       label: tag.main_category
     }));
     this.subjectOptions.set(options);
@@ -100,12 +115,13 @@ export class CertificatesForm implements OnInit {
       id: [null], // 用於更新現有證照時的 ID
       holder_name: ['', Validators.required], // 持有人姓名
       license_number: ['', Validators.required], // 證書號碼
-      certificate_name: ['', Validators.required],
-      subject: ['', Validators.required], // 證書主題 (下拉選單)
-      issuer: ['', Validators.required],
-      year: ['', Validators.required],
-      month: ['', Validators.required],
-      certificate_file: [null]
+      license_name: ['', Validators.required], // 證照名稱
+      category_id: ['', Validators.required], // 證書主題分類 ID
+      verifying_institution: ['', Validators.required], // 核發機構
+      issue_year: ['', Validators.required], // 核發年份
+      issue_month: ['', Validators.required], // 核發月份
+      file_path: [null], // 證照檔案路徑
+      file_name: [''] // 檔案名稱，供模板顯示使用
     });
   }
 
@@ -127,20 +143,19 @@ export class CertificatesForm implements OnInit {
       }
 
       const certificateControl = this.certificatesArray.at(certificateIndex);
-      certificateControl.patchValue({ certificate_file: file });
+      certificateControl.patchValue({ 
+        file_path: file,
+        file_name: file.name
+      });
     }
-  }
-
-  // 取得檔案名稱
-  getFileName(certificateIndex: number): string {
-    const certificateControl = this.certificatesArray.at(certificateIndex);
-    const file = certificateControl.get('certificate_file')?.value;
-    return file ? file.name : '';
   }
 
   // 移除檔案
   removeFile(certificateIndex: number): void {
     const certificateControl = this.certificatesArray.at(certificateIndex);
-    certificateControl.patchValue({ certificate_file: null });
+    certificateControl.patchValue({ 
+      file_path: null,
+      file_name: ''
+    });
   }
 }

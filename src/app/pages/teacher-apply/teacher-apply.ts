@@ -12,6 +12,7 @@ import { LearningExperiencesForm } from "./learning-experiences-form/learning-ex
 import { CertificatesForm } from './certificates-form/certificates-form';
 import { TeachersService } from '../../api/generated/teachers/teachers.service';
 import { catchError, of } from 'rxjs';
+import { CategoryPipe, SubcategoryPipe, DegreePipe, JobCategoryPipe } from '../../../shared/pipes';
 
 @Component({
   selector: 'tmf-teacher-apply',
@@ -24,7 +25,11 @@ import { catchError, of } from 'rxjs';
     WorkExperiencesForm,
     ReactiveFormsModule,
     LearningExperiencesForm,
-    CertificatesForm
+    CertificatesForm,
+    CategoryPipe,
+    SubcategoryPipe,
+    DegreePipe,
+    JobCategoryPipe
 ],
   templateUrl: './teacher-apply.html',
   styles: ``
@@ -156,7 +161,6 @@ export default class TeacherApply implements OnInit {
       catchError(error => {
         if (error.status === 404) {
           // 404 表示初次申請
-          console.log('初次申請');
           this.isFirstTimeApply.set(true);
           return of(null);
         }
@@ -169,7 +173,6 @@ export default class TeacherApply implements OnInit {
       
       if (response) {
         // 有申請記錄，表示已申請過
-        console.log('已申請過，申請資料:', response);
         this.isFirstTimeApply.set(false);
         // TODO: 用回應資料初始化表單
         this.initializeFormWithData(response.data);
@@ -179,7 +182,6 @@ export default class TeacherApply implements OnInit {
 
   // 用申請資料初始化表單
   private initializeFormWithData(data: any) {
-    console.log('初始化表單資料:', data);
     
     // 初始化基本資料
     if (data.basic_info) {
@@ -277,12 +279,13 @@ export default class TeacherApply implements OnInit {
           id: [cert.id || null], // 包含 id 欄位
           holder_name: [cert.holder_name || '', Validators.required],  // 持有人姓名
           license_number: [cert.license_number || '', Validators.required],  // 證書號碼
-          certificate_name: [cert.license_name || '', Validators.required],  // API 使用 license_name
-          subject: [cert.subject?.toString() || '', Validators.required],  // 確保為字串格式
-          issuer: [cert.verifying_institution || '', Validators.required],  // API 使用 verifying_institution
-          year: [cert.year?.toString() || '', Validators.required],
-          month: [cert.month?.toString() || '', Validators.required],
-          certificate_file: [null]
+          license_name: [cert.license_name || '', Validators.required],  // 證照名稱
+          category_id: [cert.category_id?.toString() || '', Validators.required],  // 分類 ID
+          verifying_institution: [cert.verifying_institution || '', Validators.required],  // 核發機構
+          issue_year: [cert.issue_year?.toString() || '', Validators.required],    // 核發年份
+          issue_month: [cert.issue_month?.toString() || '', Validators.required],  // 核發月份
+          file_path: [null], // 檔案路徑
+          file_name: [''] // 檔案名稱
         });
 
         this.certificatesFormArray.push(certificateForm);
@@ -412,12 +415,13 @@ export default class TeacherApply implements OnInit {
       id: [null], // 新增 id 欄位
       holder_name: ['', Validators.required], // 持有人姓名
       license_number: ['', Validators.required], // 證書號碼
-      certificate_name: ['', Validators.required], // 證照名稱
-      subject: ['', Validators.required], // 證書主題
-      issuer: ['', Validators.required], // 核發機構
-      year: ['', Validators.required],
-      month: ['', Validators.required],
-      certificate_file: [null]
+      license_name: ['', Validators.required], // 證照名稱
+      category_id: ['', Validators.required], // 證書主題分類 ID
+      verifying_institution: ['', Validators.required], // 核發機構
+      issue_year: ['', Validators.required], // 核發年份
+      issue_month: ['', Validators.required], // 核發月份
+      file_path: [null], // 證照檔案路徑
+      file_name: [''] // 檔案名稱
     });
 
     this.certificatesFormArray.push(certificateForm);
@@ -511,7 +515,6 @@ export default class TeacherApply implements OnInit {
       // 已有基本資料，使用 PUT 更新
       this.teachersService.putApiTeachersBasicInfo(apiData).subscribe({
         next: (response: any) => {
-          console.log('基本資料更新成功:', response);
           this.currentStep.set(2);
         },
         error: (error: any) => {
@@ -523,7 +526,6 @@ export default class TeacherApply implements OnInit {
       // 尚無基本資料，使用 POST 建立
       this.teachersService.postApiTeachersApply(apiData).subscribe({
         next: (response: any) => {
-          console.log('基本資料建立成功:', response);
           // 成功後更新狀態
           this.isFirstTimeApply.set(false);
           this.hasBasicInfo.set(true);
@@ -539,19 +541,12 @@ export default class TeacherApply implements OnInit {
 
   // 用 API 回應的 ID 更新表單
   private updateWorkExperiencesWithIds(responseData: any[]) {
-    console.log('updateWorkExperiencesWithIds 被呼叫，資料:', responseData);
     const formArray = this.experiencesFormArray;
-    console.log('當前表單陣列長度:', formArray.length);
     
     responseData.forEach((item, index) => {
-      console.log(`處理第 ${index} 個項目:`, item);
       if (formArray.at(index)) {
         const currentFormValue = formArray.at(index).value;
-        console.log(`更新前的表單值:`, currentFormValue);
         formArray.at(index).patchValue({ id: item.id });
-        console.log(`更新後的表單值:`, formArray.at(index).value);
-      } else {
-        console.log(`找不到索引 ${index} 的表單控制項`);
       }
     });
   }
@@ -585,15 +580,11 @@ export default class TeacherApply implements OnInit {
     };
 
     // 調試資訊：檢查當前狀態
-    console.log('當前工作經驗狀態:', this.hasWorkExperiences());
     
     // 額外檢查：如果表單中有任何一個工作經驗包含 id，就表示已有資料
     const hasExistingExperience = this.experiencesFormArray.controls.some(control => control.get('id')?.value);
-    console.log('表單中是否有現有工作經驗 ID:', hasExistingExperience);
     
     // 調試：檢查每個工作經驗的 ID
-    console.log('表單中的工作經驗資料:', formData.experiences);
-    console.log('準備送到 API 的工作經驗資料:', workExperiences);
     
     // 合併檢查：signal 狀態或表單中有 ID
     const shouldUseUpdate = this.hasWorkExperiences() || hasExistingExperience;
@@ -601,10 +592,8 @@ export default class TeacherApply implements OnInit {
     // 根據工作經驗狀態決定使用 POST 或 PUT
     if (shouldUseUpdate) {
       // 已有工作經驗資料，使用 PUT 更新
-      console.log('使用 PUT 邏輯更新工作經驗:', apiData);
       this.teachersService.putApiTeachersWorkExperiences(apiData).subscribe({
         next: (response: any) => {
-          console.log('工作經驗更新成功 (PUT邏輯):', response);
           this.currentStep.set(3);
         },
         error: (error: any) => {
@@ -614,21 +603,14 @@ export default class TeacherApply implements OnInit {
       });
     } else {
       // 尚無工作經驗資料，使用 POST 建立
-      console.log('使用 POST 邏輯建立工作經驗:', apiData);
       this.teachersService.postApiTeachersWorkExperiences(apiData).subscribe({
         next: (response: any) => {
-          console.log('工作經驗建立成功 (POST邏輯):', response);
-          console.log('POST 回應的 data 結構:', response.data);
           
           // 從回應中取得 work_experiences 陣列及其 id
           if (response.data && response.data.work_experiences) {
-            console.log('使用 response.data.work_experiences 更新 ID:', response.data.work_experiences);
             this.updateWorkExperiencesWithIds(response.data.work_experiences);
           } else if (response.work_experiences) {
-            console.log('使用 response.work_experiences 更新 ID:', response.work_experiences);
             this.updateWorkExperiencesWithIds(response.work_experiences);
-          } else {
-            console.log('無法找到工作經驗資料來更新 ID');
           }
           
           // 成功後更新狀態
@@ -670,15 +652,11 @@ export default class TeacherApply implements OnInit {
     };
 
     // 調試資訊：檢查當前狀態
-    console.log('當前學歷背景狀態:', this.hasLearningExperiences());
     
     // 額外檢查：如果表單中有任何一個學歷包含 id，就表示已有資料
     const hasExistingEducation = this.educationsFormArray.controls.some(control => control.get('id')?.value);
-    console.log('表單中是否有現有學歷背景 ID:', hasExistingEducation);
     
     // 調試：檢查每個學歷背景的 ID
-    console.log('表單中的學歷背景資料:', formData.educations);
-    console.log('準備送到 API 的學歷背景資料:', learningExperiences);
     
     // 合併檢查：signal 狀態或表單中有 ID
     const shouldUseUpdate = this.hasLearningExperiences() || hasExistingEducation;
@@ -686,10 +664,8 @@ export default class TeacherApply implements OnInit {
     // 根據學歷背景狀態決定使用 POST 或 PUT
     if (shouldUseUpdate) {
       // 已有學歷背景資料，使用 PUT 更新
-      console.log('使用 PUT 邏輯更新學歷背景:', apiData);
       this.teachersService.putApiTeachersLearningExperiences(apiData).subscribe({
         next: (response: any) => {
-          console.log('學歷背景更新成功 (PUT邏輯):', response);
           this.currentStep.set(4);
         },
         error: (error: any) => {
@@ -699,21 +675,15 @@ export default class TeacherApply implements OnInit {
       });
     } else {
       // 尚無學歷背景資料，使用 POST 建立
-      console.log('使用 POST 邏輯建立學歷背景:', apiData);
       this.teachersService.postApiTeachersLearningExperiences(apiData).subscribe({
         next: (response: any) => {
-          console.log('學歷背景建立成功 (POST邏輯):', response);
-          console.log('POST 回應的 data 結構:', response.data);
           
           // 從回應中取得 learning_experiences 陣列及其 id
           if (response.data && response.data.learning_experiences) {
-            console.log('使用 response.data.learning_experiences 更新 ID:', response.data.learning_experiences);
             this.updateLearningExperiencesWithIds(response.data.learning_experiences);
           } else if (response.learning_experiences) {
-            console.log('使用 response.learning_experiences 更新 ID:', response.learning_experiences);
             this.updateLearningExperiencesWithIds(response.learning_experiences);
           } else {
-            console.log('無法找到學歷背景資料來更新 ID');
           }
           
           // 成功後更新狀態
@@ -730,19 +700,13 @@ export default class TeacherApply implements OnInit {
 
   // 更新學歷背景表單中的 ID
   private updateLearningExperiencesWithIds(responseData: any[]) {
-    console.log('updateLearningExperiencesWithIds 被呼叫，資料:', responseData);
     const formArray = this.educationsFormArray;
-    console.log('當前學歷背景表單陣列長度:', formArray.length);
     
     responseData.forEach((item, index) => {
-      console.log(`處理第 ${index} 個學歷背景項目:`, item);
       if (formArray.at(index)) {
         const currentFormValue = formArray.at(index).value;
-        console.log(`更新前的表單值:`, currentFormValue);
         formArray.at(index).patchValue({ id: item.id });
-        console.log(`更新後的表單值:`, formArray.at(index).value);
       } else {
-        console.log(`找不到索引 ${index} 的表單控制項`);
       }
     });
   }
@@ -759,15 +723,14 @@ export default class TeacherApply implements OnInit {
     // 準備 API 資料格式
     const certificates = formData.certificates?.map((cert: any) => ({
       ...(cert.id && { id: cert.id }), // 如果有 id 就包含
-      holder_name: cert.holder_name,    // 持有人姓名
-      license_number: cert.license_number, // 證書號碼
-      license_name: cert.certificate_name,  // 表單使用 certificate_name，API 使用 license_name
-      subject: cert.subject?.toString() || '', // 確保 subject 為字串格式
-      verifying_institution: cert.issuer,   // 表單使用 issuer，API 使用 verifying_institution
-      year: parseInt(cert.year),
-      month: parseInt(cert.month),
-      certificate_file: '', // 暫時寫死為空字串
-      category_id: cert.subject?.toString() || ''
+      verifying_institution: cert.verifying_institution,
+      license_name: cert.license_name,
+      holder_name: cert.holder_name,
+      license_number: cert.license_number,
+      file_path: cert.file_path || '',  // 檔案路徑，如果沒有則為空字串
+      category_id: parseInt(cert.category_id) || 1,
+      issue_year: parseInt(cert.issue_year),
+      issue_month: parseInt(cert.issue_month)
     })) || [];
 
     const apiData = {
@@ -775,15 +738,11 @@ export default class TeacherApply implements OnInit {
     };
 
     // 調試資訊：檢查當前狀態
-    console.log('當前證照狀態:', this.hasCertificates());
     
     // 額外檢查：如果表單中有任何一個證照包含 id，就表示已有資料
     const hasExistingCertificate = this.certificatesFormArray.controls.some(control => control.get('id')?.value);
-    console.log('表單中是否有現有證照 ID:', hasExistingCertificate);
     
     // 調試：檢查每個證照的 ID
-    console.log('表單中的證照資料:', formData.certificates);
-    console.log('準備送到 API 的證照資料:', certificates);
     
     // 合併檢查：signal 狀態或表單中有 ID
     const shouldUseUpdate = this.hasCertificates() || hasExistingCertificate;
@@ -791,10 +750,8 @@ export default class TeacherApply implements OnInit {
     // 根據證照狀態決定使用 POST 或 PUT
     if (shouldUseUpdate) {
       // 已有證照資料，使用 PUT 更新
-      console.log('使用 PUT 邏輯更新證照:', apiData);
       this.teachersService.putApiTeachersCertificates(apiData).subscribe({
         next: (response: any) => {
-          console.log('證照更新成功 (PUT邏輯):', response);
           // 跳到第五步確認資料
           this.currentStep.set(5);
         },
@@ -805,21 +762,15 @@ export default class TeacherApply implements OnInit {
       });
     } else {
       // 尚無證照資料，使用 POST 建立
-      console.log('使用 POST 邏輯建立證照:', apiData);
       this.teachersService.postApiTeachersCertificates(apiData).subscribe({
         next: (response: any) => {
-          console.log('證照建立成功 (POST邏輯):', response);
-          console.log('POST 回應的 data 結構:', response.data);
           
           // 從回應中取得 certificates 陣列及其 id
           if (response.data && response.data.certificates) {
-            console.log('使用 response.data.certificates 更新 ID:', response.data.certificates);
             this.updateCertificatesWithIds(response.data.certificates);
           } else if (response.certificates) {
-            console.log('使用 response.certificates 更新 ID:', response.certificates);
             this.updateCertificatesWithIds(response.certificates);
           } else {
-            console.log('無法找到證照資料來更新 ID');
           }
           
           // 成功後更新狀態
@@ -837,26 +788,19 @@ export default class TeacherApply implements OnInit {
 
   // 更新證照表單中的 ID
   private updateCertificatesWithIds(responseData: any[]) {
-    console.log('updateCertificatesWithIds 被呼叫，資料:', responseData);
     const formArray = this.certificatesFormArray;
-    console.log('當前證照表單陣列長度:', formArray.length);
     
     responseData.forEach((item, index) => {
-      console.log(`處理第 ${index} 個證照項目:`, item);
       if (formArray.at(index)) {
         const currentFormValue = formArray.at(index).value;
-        console.log(`更新前的表單值:`, currentFormValue);
         formArray.at(index).patchValue({ id: item.id });
-        console.log(`更新後的表單值:`, formArray.at(index).value);
       } else {
-        console.log(`找不到索引 ${index} 的表單控制項`);
       }
     });
   }
 
   // 最終申請提交
   private submitFinalApplication() {
-    console.log('開始最終申請提交...');
     
     // 檢查所有步驟是否都已完成
     if (!this.hasBasicInfo() || !this.hasWorkExperiences() || 
@@ -865,12 +809,10 @@ export default class TeacherApply implements OnInit {
       return;
     }
 
-    console.log('所有步驟已完成，正在提交申請...');
     
     // 呼叫最終提交 API
     this.teachersService.postApiTeachersSubmit().subscribe({
       next: (response: any) => {
-        console.log('申請提交成功:', response);
         alert('申請已成功提交！感謝您的申請，我們會盡快進行審核。');
         
         // 可以導航到成功頁面或其他頁面
@@ -887,37 +829,12 @@ export default class TeacherApply implements OnInit {
   // 提交完整表單
   private submitForm() {
     if (this.teacherApplyForm.valid) {
-      console.log('完整申請資料:', this.teacherApplyForm.value);
       // TODO: 提交到後端API
       alert('前兩步驟完成！');
     } else {
       console.error('表單驗證失敗');
       this.teacherApplyForm.markAllAsTouched();
     }
-  }
-
-  // 確認頁面輔助方法
-  getMainCategoryLabel(categoryId: number): string {
-    // 這裡應該從 TagsService 中獲取標籤，暫時返回 ID
-    // TODO: 實作從標籤服務獲取主分類名稱
-    return categoryId ? `分類 ${categoryId}` : '';
-  }
-
-  getSubCategoryLabels(categoryIds: number[]): string {
-    // 這裡應該從 TagsService 中獲取標籤，暫時返回 ID 列表
-    // TODO: 實作從標籤服務獲取子分類名稱
-    return categoryIds && categoryIds.length > 0 ? categoryIds.map(id => `專長 ${id}`).join(', ') : '';
-  }
-
-  getDegreeLabel(degree: string): string {
-    const degreeLabels: { [key: string]: string } = {
-      'high_school': '高中職',
-      'associate': '專科',
-      'bachelor': '學士',
-      'master': '碩士',
-      'phd': '博士'
-    };
-    return degreeLabels[degree] || degree;
   }
 
 }

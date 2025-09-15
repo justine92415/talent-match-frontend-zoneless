@@ -69,8 +69,8 @@
             <h3 class="text-lg font-medium text-grey-33 mb-4">基本資料</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div><span class="text-grey-66">居住地：</span>{{ basicInfoFormGroup.get('city')?.value }}{{ basicInfoFormGroup.get('district')?.value }}{{ basicInfoFormGroup.get('address')?.value }}</div>
-              <div><span class="text-grey-66">主要教學類別：</span>{{ getMainCategoryLabel(basicInfoFormGroup.get('main_category_id')?.value) }}</div>
-              <div class="md:col-span-2"><span class="text-grey-66">專長領域：</span>{{ getSubCategoryLabels(basicInfoFormGroup.get('sub_category_ids')?.value) }}</div>
+              <div><span class="text-grey-66">主要教學類別：</span>{{ basicInfoFormGroup.get('main_category_id')?.value | category }}</div>
+              <div class="md:col-span-2"><span class="text-grey-66">專長領域：</span>{{ basicInfoFormGroup.get('sub_category_ids')?.value | subcategory }}</div>
               <div class="md:col-span-2 break-words overflow-wrap-anywhere">
                 <span class="text-grey-66">自我介紹：</span>
                 <div class="mt-1 whitespace-pre-wrap break-words">{{ basicInfoFormGroup.get('introduction')?.value }}</div>
@@ -86,7 +86,7 @@
                 <div class="font-medium mb-2">{{ exp.get('company_name')?.value }}</div>
                 <div class="grid grid-cols-2 gap-2 text-grey-66">
                   <div>職位：{{ exp.get('job_title')?.value }}</div>
-                  <div>類別：{{ exp.get('job_category')?.value }}</div>
+                  <div>類別：{{ exp.get('job_category')?.value | jobCategory }}</div>
                   <div>地點：{{ exp.get('city')?.value }}{{ exp.get('district')?.value }}</div>
                   <div>期間：{{ exp.get('start_year')?.value }}/{{ exp.get('start_month')?.value }} - {{ exp.get('is_working')?.value ? '至今' : exp.get('end_year')?.value + '/' + exp.get('end_month')?.value }}</div>
                 </div>
@@ -102,7 +102,7 @@
                 <div class="font-medium mb-2">{{ edu.get('school_name')?.value }}</div>
                 <div class="grid grid-cols-2 gap-2 text-grey-66">
                   <div>科系：{{ edu.get('major')?.value }}</div>
-                  <div>學位：{{ getDegreeLabel(edu.get('degree')?.value) }}</div>
+                  <div>學位：{{ edu.get('degree')?.value | degree }}</div>
                   <div class="col-span-2">期間：{{ edu.get('start_year')?.value }}/{{ edu.get('start_month')?.value }} - {{ edu.get('is_studying')?.value ? '就學中' : edu.get('end_year')?.value + '/' + edu.get('end_month')?.value }}</div>
                 </div>
               </div>
@@ -114,12 +114,12 @@
             <h3 class="text-lg font-medium text-grey-33 mb-4">教學證照</h3>
             @for (cert of certificatesFormArray.controls; track $index) {
               <div class="bg-grey-f8 rounded-lg p-4 mb-3 text-sm">
-                <div class="font-medium mb-2">{{ cert.get('certificate_name')?.value }}</div>
+                <div class="font-medium mb-2">{{ cert.get('license_name')?.value }}</div>
                 <div class="grid grid-cols-2 gap-2 text-grey-66">
                   <div>持有人：{{ cert.get('holder_name')?.value }}</div>
                   <div>證書號碼：{{ cert.get('license_number')?.value }}</div>
-                  <div>核發機構：{{ cert.get('issuer')?.value }}</div>
-                  <div>取得時間：{{ cert.get('year')?.value }}/{{ cert.get('month')?.value }}</div>
+                  <div>核發機構：{{ cert.get('verifying_institution')?.value }}</div>
+                  <div>取得時間：{{ cert.get('issue_year')?.value }}/{{ cert.get('issue_month')?.value }}</div>
                 </div>
               </div>
             }

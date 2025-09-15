@@ -56,11 +56,11 @@
           <label class="block text-base font-medium text-grey-33">證照名稱</label>
           <tmf-input-text
             placeholder="請輸入證照名稱"
-            formControlName="certificate_name"
+            formControlName="license_name"
           ></tmf-input-text>
           @if (
-            certificate.get("certificate_name")?.invalid &&
-            certificate.get("certificate_name")?.touched
+            certificate.get("license_name")?.invalid &&
+            certificate.get("license_name")?.touched
           ) {
             <div class="text-red-500 text-sm">請輸入證照名稱</div>
           }
@@ -72,11 +72,11 @@
           <tmf-input-select
             [placeholder]="'請選擇證書主題'"
             [options]="subjectOptions()"
-            formControlName="subject"
+            formControlName="category_id"
           ></tmf-input-select>
           @if (
-            certificate.get("subject")?.invalid &&
-            certificate.get("subject")?.touched
+            certificate.get("category_id")?.invalid &&
+            certificate.get("category_id")?.touched
           ) {
             <div class="text-red-500 text-sm">請選擇證書主題</div>
           }
@@ -87,11 +87,11 @@
           <label class="block text-base font-medium text-grey-33">核發機構</label>
           <tmf-input-text
             placeholder="請輸入核發機構名稱"
-            formControlName="issuer"
+            formControlName="verifying_institution"
           ></tmf-input-text>
           @if (
-            certificate.get("issuer")?.invalid &&
-            certificate.get("issuer")?.touched
+            certificate.get("verifying_institution")?.invalid &&
+            certificate.get("verifying_institution")?.touched
           ) {
             <div class="text-red-500 text-sm">請輸入核發機構名稱</div>
           }
@@ -104,19 +104,19 @@
             <tmf-input-select
               [placeholder]="'年'"
               [options]="yearOptions"
-              formControlName="year"
+              formControlName="issue_year"
               class="flex-1"
             ></tmf-input-select>
             <tmf-input-select
               [placeholder]="'月'"
               [options]="monthOptions"
-              formControlName="month"
+              formControlName="issue_month"
               class="flex-1"
             ></tmf-input-select>
           </div>
           @if (
-            (certificate.get("year")?.invalid && certificate.get("year")?.touched) ||
-            (certificate.get("month")?.invalid && certificate.get("month")?.touched)
+            (certificate.get("issue_year")?.invalid && certificate.get("issue_year")?.touched) ||
+            (certificate.get("issue_month")?.invalid && certificate.get("issue_month")?.touched)
           ) {
             <div class="text-red-500 text-sm">請選擇取得年月</div>
           }
@@ -126,7 +126,7 @@
         <div class="space-y-4">
           <label class="block text-base font-medium text-grey-33">證照檔案</label>
           
-          @if (!getFileName($index)) {
+          @if (!certificate.get('file_name')?.value) {
             <!-- 檔案上傳按鈕 -->
             <div class="border-2 border-dashed border-grey-d4 rounded-xl p-6 text-center hover:border-primary transition-colors">
               <input
@@ -141,7 +141,7 @@
                 (click)="fileInput.click()"
                 class="flex flex-col items-center gap-2 w-full text-grey-66 hover:text-primary transition-colors"
               >
-                <mat-icon [fontIcon]="TmfIcon.Add" class="text-2xl"></mat-icon>
+                <mat-icon>upload</mat-icon>
                 <span class="text-sm">點擊上傳檔案</span>
                 <span class="text-xs text-grey-99">支援 PDF、JPG、PNG 格式，檔案大小限制 5MB</span>
               </button>
@@ -152,7 +152,7 @@
               <div class="flex items-center gap-3">
                 <mat-icon [fontIcon]="TmfIcon.Beenhere" class="text-primary"></mat-icon>
                 <div>
-                  <div class="text-sm font-medium text-grey-33">{{ getFileName($index) }}</div>
+                  <div class="text-sm font-medium text-grey-33">{{ certificate.get('file_name')?.value }}</div>
                   <div class="text-xs text-grey-66">已上傳</div>
                 </div>
               </div>
@@ -175,10 +175,11 @@
     <tmf-button
       type="button"
       variant="secondary"
+      iconPosition="left"
+      iconName="add"
       (click)="addCertificate()"
-      class="flex items-center gap-2"
+      class="h-10"
     >
-      <mat-icon [fontIcon]="TmfIcon.Add"></mat-icon>
       新增教學證照
     </tmf-button>
   </div>

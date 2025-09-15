@@ -60,7 +60,7 @@
       }
 
       <!-- Step 5: 確認資料 -->
-      @if (currentStep() === 5) {
+      @if (currentStep() === 5 && !isSubmitted()) {
         <div class="space-y-8">
           <h2 class="text-2xl font-bold text-grey-33 text-center">確認申請資料</h2>
           
@@ -127,8 +127,36 @@
         </div>
       }
 
+      <!-- 提交成功畫面 -->
+      @if (isSubmitted()) {
+        <div class="text-center space-y-8 py-16">
+          <div class="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+            <mat-icon class="!text-green-600">check_circle</mat-icon>
+          </div>
+          
+          <div class="space-y-4">
+            <h2 class="text-3xl font-bold text-grey-33">申請提交成功！</h2>
+            <p class="text-lg text-grey-66 max-w-2xl mx-auto">
+              感謝您提交教師申請，我們已收到您的申請資料。<br>
+              審核團隊將在 3-5 個工作天內完成審核，審核結果將以電子郵件通知您。
+            </p>
+          </div>
+
+          <div class="pt-8">
+            <tmf-button
+              type="button"
+              class="h-10"
+              (click)="goToTeacherDashboard()"
+            >
+              前往教師後台
+            </tmf-button>
+          </div>
+        </div>
+      }
+
       <!-- Navigation Buttons -->
-      <div class="flex gap-4 pt-6 mt-8">
+      @if (!isSubmitted()) {
+        <div class="flex gap-4 pt-6 mt-8">
         @if (currentStep() > 1) {
           <tmf-button
             type="button"
@@ -171,7 +199,8 @@
             提交申請
           </tmf-button>
         }
-      </div>
+        </div>
+      }
     </div>
   </div>
 </tmf-layout-1-wapper>

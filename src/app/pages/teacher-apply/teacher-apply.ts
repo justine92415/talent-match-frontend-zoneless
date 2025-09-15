@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
 import { Stepper, StepItem } from '@components/stepper/stepper';
 import { Button } from '@components/button/button';
@@ -38,10 +39,12 @@ export default class TeacherApply implements OnInit {
   private location = inject(Location);
   private fb = inject(FormBuilder);
   private teachersService = inject(TeachersService);
+  private router = inject(Router);
 
   // 申請狀態相關
   isFirstTimeApply = signal(true);  // 是否為初次申請
   isLoading = signal(true);         // 載入中狀態
+  isSubmitted = signal(false);      // 是否已提交申請
 
   // 各步驟資料存在狀態
   hasBasicInfo = signal(false);           // 是否已有基本資料
@@ -438,6 +441,11 @@ export default class TeacherApply implements OnInit {
     this.location.back();
   }
 
+  // 導航到教師後台
+  goToTeacherDashboard(): void {
+    this.router.navigate(['/dashboard/teacher']);
+  }
+
   onStepChange(step: number) {
     // 只允許回到已完成的步驟
     if (step <= this.currentStep()) {
@@ -813,15 +821,12 @@ export default class TeacherApply implements OnInit {
     // 呼叫最終提交 API
     this.teachersService.postApiTeachersSubmit().subscribe({
       next: (response: any) => {
-        alert('申請已成功提交！感謝您的申請，我們會盡快進行審核。');
-        
-        // 可以導航到成功頁面或其他頁面
-        // this.router.navigate(['/application-success']);
+        console.log('申請提交成功:', response);
+        this.isSubmitted.set(true); // 設定為已提交狀態
       },
       error: (error: any) => {
         console.error('申請提交失敗:', error);
         alert('申請提交失敗，請稍後再試。');
-        // TODO: 顯示錯誤訊息給使用者
       }
     });
   }

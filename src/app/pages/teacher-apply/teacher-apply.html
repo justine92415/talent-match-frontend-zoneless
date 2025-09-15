@@ -101,9 +101,9 @@
               <div class="bg-grey-f8 rounded-lg p-4 mb-3 text-sm">
                 <div class="font-medium mb-2">{{ edu.get('school_name')?.value }}</div>
                 <div class="grid grid-cols-2 gap-2 text-grey-66">
-                  <div>科系：{{ edu.get('major')?.value }}</div>
+                  <div>科系：{{ edu.get('department')?.value }}</div>
                   <div>學位：{{ edu.get('degree')?.value | degree }}</div>
-                  <div class="col-span-2">期間：{{ edu.get('start_year')?.value }}/{{ edu.get('start_month')?.value }} - {{ edu.get('is_studying')?.value ? '就學中' : edu.get('end_year')?.value + '/' + edu.get('end_month')?.value }}</div>
+                  <div class="col-span-2">期間：{{ edu.get('start_year')?.value }}/{{ edu.get('start_month')?.value }} - {{ edu.get('is_in_school')?.value ? '就學中' : edu.get('end_year')?.value + '/' + edu.get('end_month')?.value }}</div>
                 </div>
               </div>
             }
@@ -172,7 +172,7 @@
           <tmf-button
             type="button"
             class="flex-1 h-12"
-            [disabled]="!canGoToStep(currentStep() + 1)"
+            [disabled]="!canGoToNextStep()"
             (click)="goToNextStep()"
           >
             @switch (currentStep()) {

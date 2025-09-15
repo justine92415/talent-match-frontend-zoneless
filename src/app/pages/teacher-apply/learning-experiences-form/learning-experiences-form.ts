@@ -76,9 +76,9 @@ export class LearningExperiencesForm implements OnInit {
     const educationGroup = this.fb.group({
       id: [null], // 用於更新現有學歷時的 ID
       school_name: ['', Validators.required],
-      major: ['', Validators.required],
+      department: ['', Validators.required],
       degree: ['', Validators.required],
-      is_studying: [false],
+      is_in_school: [false],
       start_year: ['', Validators.required],
       start_month: ['', Validators.required],
       end_year: [''],
@@ -86,7 +86,7 @@ export class LearningExperiencesForm implements OnInit {
     });
 
     // 監聽目前就學狀態
-    educationGroup.get('is_studying')?.valueChanges.subscribe(isStudying => {
+    educationGroup.get('is_in_school')?.valueChanges.subscribe(isStudying => {
       const endYearControl = educationGroup.get('end_year');
       const endMonthControl = educationGroup.get('end_month');
       

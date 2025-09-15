@@ -42,11 +42,11 @@
             <label class="block text-base font-medium text-grey-33">科系</label>
             <tmf-input-text
               placeholder="請輸入科系名稱"
-              formControlName="major"
+              formControlName="department"
             ></tmf-input-text>
             @if (
-              education.get("major")?.invalid &&
-              education.get("major")?.touched
+              education.get("department")?.invalid &&
+              education.get("department")?.touched
             ) {
               <div class="text-red-500 text-sm">請輸入科系名稱</div>
             }
@@ -72,7 +72,7 @@
         <div class="flex items-center space-x-2">
           <input
             type="checkbox"
-            formControlName="is_studying"
+            formControlName="is_in_school"
             class="w-4 h-4 text-primary border-grey-d4 rounded focus:ring-primary"
           />
           <label class="text-base text-grey-33">目前就學中</label>
@@ -108,7 +108,7 @@
           </div>
 
           <!-- 畢業時間 -->
-          @if (!education.get("is_studying")?.value) {
+          @if (!education.get("is_in_school")?.value) {
             <div class="space-y-2">
               <label class="block text-sm text-grey-66">畢業時間</label>
               <div class="flex gap-4">

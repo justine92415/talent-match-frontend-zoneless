@@ -50,6 +50,7 @@ export enum TmfIconEnum {
   StarHalf = 'star_half',
   StarOutline = 'star_outline',
   ArrowForward = 'arrow_forward',
+  Refresh = 'refresh',
 }
 
 export type TmfIconType = `${TmfIconEnum}` | null;

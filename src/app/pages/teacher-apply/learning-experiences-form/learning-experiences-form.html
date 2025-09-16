@@ -1,0 +1,154 @@
+<form
+  [formGroup]="formGroup()"
+  class="space-y-6"
+>
+  <div formArrayName="educations">
+    @for (education of educationsArray.controls; track $index) {
+      <div
+        [formGroupName]="$index"
+        class="border border-grey-d4 rounded-xl p-6 space-y-4 relative"
+      >
+        <!-- 刪除按鈕 -->
+        @if (educationsArray.length > 1) {
+          <button
+            type="button"
+            (click)="removeEducation($index)"
+            class="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors"
+          >
+            <mat-icon [fontIcon]="TmfIcon.Delete"></mat-icon>
+          </button>
+        }
+
+        <h3 class="text-lg font-medium text-grey-33">學歷背景 {{ $index + 1 }}</h3>
+
+        <!-- 學校名稱 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">學校名稱</label>
+          <tmf-input-text
+            placeholder="請輸入學校名稱"
+            formControlName="school_name"
+          ></tmf-input-text>
+          @if (
+            education.get("school_name")?.invalid &&
+            education.get("school_name")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入學校名稱</div>
+          }
+        </div>
+
+        <!-- 科系與學位 -->
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="space-y-2 flex-1">
+            <label class="block text-base font-medium text-grey-33">科系</label>
+            <tmf-input-text
+              placeholder="請輸入科系名稱"
+              formControlName="department"
+            ></tmf-input-text>
+            @if (
+              education.get("department")?.invalid &&
+              education.get("department")?.touched
+            ) {
+              <div class="text-red-500 text-sm">請輸入科系名稱</div>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-base font-medium text-grey-33">學位</label>
+            <tmf-input-select
+              [placeholder]="'請選擇學位'"
+              [options]="degreeOptions"
+              formControlName="degree"
+            ></tmf-input-select>
+            @if (
+              education.get("degree")?.invalid &&
+              education.get("degree")?.touched
+            ) {
+              <div class="text-red-500 text-sm">請選擇學位</div>
+            }
+          </div>
+        </div>
+
+        <!-- 目前就學中 checkbox -->
+        <div class="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            formControlName="is_in_school"
+            class="w-4 h-4 text-primary border-grey-d4 rounded focus:ring-primary"
+          />
+          <label class="text-base text-grey-33">目前就學中</label>
+        </div>
+
+        <!-- 就學期間 -->
+        <div class="space-y-4">
+          <label class="block text-base font-medium text-grey-33">就學期間</label>
+          
+          <!-- 入學時間 -->
+          <div class="space-y-2">
+            <label class="block text-sm text-grey-66">入學時間</label>
+            <div class="flex gap-4">
+              <tmf-input-select
+                [placeholder]="'年'"
+                [options]="yearOptions"
+                formControlName="start_year"
+                class="flex-1"
+              ></tmf-input-select>
+              <tmf-input-select
+                [placeholder]="'月'"
+                [options]="monthOptions"
+                formControlName="start_month"
+                class="flex-1"
+              ></tmf-input-select>
+            </div>
+            @if (
+              (education.get("start_year")?.invalid && education.get("start_year")?.touched) ||
+              (education.get("start_month")?.invalid && education.get("start_month")?.touched)
+            ) {
+              <div class="text-red-500 text-sm">請選擇入學時間</div>
+            }
+          </div>
+
+          <!-- 畢業時間 -->
+          @if (!education.get("is_in_school")?.value) {
+            <div class="space-y-2">
+              <label class="block text-sm text-grey-66">畢業時間</label>
+              <div class="flex gap-4">
+                <tmf-input-select
+                  [placeholder]="'年'"
+                  [options]="yearOptions"
+                  formControlName="end_year"
+                  class="flex-1"
+                ></tmf-input-select>
+                <tmf-input-select
+                  [placeholder]="'月'"
+                  [options]="monthOptions"
+                  formControlName="end_month"
+                  class="flex-1"
+                ></tmf-input-select>
+              </div>
+              @if (
+                (education.get("end_year")?.invalid && education.get("end_year")?.touched) ||
+                (education.get("end_month")?.invalid && education.get("end_month")?.touched)
+              ) {
+                <div class="text-red-500 text-sm">請選擇畢業時間</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- 新增學歷按鈕 -->
+  <div class="flex justify-center">
+    <tmf-button
+      type="button"
+      variant="secondary"
+      (click)="addEducation()"
+      iconPosition="left"
+      iconName="add"
+      class="h-10"
+    >
+      新增學歷背景
+    </tmf-button>
+  </div>
+</form>

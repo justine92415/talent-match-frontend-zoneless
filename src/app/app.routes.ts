@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { guestGuard, authGuard } from './guards/auth.guard';
+import { teacherApplyGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -21,6 +22,11 @@ export const routes: Routes = [
     path: 'reset-password',
     loadComponent: () => import('./pages/reset-password/reset-password'),
     canActivate: [guestGuard],
+  },
+  {
+    path: 'teacher-apply',
+    loadComponent: () => import('./pages/teacher-apply/teacher-apply'),
+    canActivate: [teacherApplyGuard],
   },
   {
     path: 'dashboard',

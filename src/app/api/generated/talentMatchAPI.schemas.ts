@@ -459,7 +459,7 @@ export interface UpdateProfileRequest {
    */
   name?: string | null;
   /**
-   * 生日 (YYYY-MM-DD格式)
+   * 生日 - 可為有效日期、空字串(清空)或 null
    * @nullable
    */
   birthday?: string | null;
@@ -619,6 +619,1850 @@ export type AvatarNotFoundErrorResponseAllOf = {
 export type AvatarNotFoundErrorResponse = NotFoundErrorResponse &
   AvatarNotFoundErrorResponseAllOf;
 
+export type TeacherApplyStatusSuccessResponseStatus =
+  (typeof TeacherApplyStatusSuccessResponseStatus)[keyof typeof TeacherApplyStatusSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherApplyStatusSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 申請狀態
+ */
+export type TeacherApplyStatusSuccessResponseDataApplicationStatus =
+  (typeof TeacherApplyStatusSuccessResponseDataApplicationStatus)[keyof typeof TeacherApplyStatusSuccessResponseDataApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherApplyStatusSuccessResponseDataApplicationStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type TeacherApplyStatusSuccessResponseDataBasicInfo = {
+  /**
+   * 縣市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 詳細地址
+   * @nullable
+   */
+  address?: string | null;
+  /**
+   * 教授科目（主分類ID）
+   * @nullable
+   */
+  main_category_id?: number | null;
+  /**
+   * 專長（子分類ID陣列）
+   * @nullable
+   */
+  sub_category_ids?: number[] | null;
+  /**
+   * 自我介紹
+   * @nullable
+   */
+  introduction?: string | null;
+};
+
+export type TeacherApplyStatusSuccessResponseDataWorkExperiencesItem = {
+  id?: number;
+  company_name?: string;
+  job_title?: string;
+  is_working?: boolean;
+  start_year?: number;
+  start_month?: number;
+  /** @nullable */
+  end_year?: number | null;
+  /** @nullable */
+  end_month?: number | null;
+};
+
+export type TeacherApplyStatusSuccessResponseDataLearningExperiencesItem = {
+  id?: number;
+  degree?: string;
+  school_name?: string;
+  department?: string;
+  is_in_school?: boolean;
+  start_year?: number;
+  start_month?: number;
+  /** @nullable */
+  end_year?: number | null;
+  /** @nullable */
+  end_month?: number | null;
+};
+
+export type TeacherApplyStatusSuccessResponseDataCertificatesItem = {
+  id?: number;
+  license_name?: string;
+  verifying_institution?: string;
+  holder_name?: string;
+  license_number?: string;
+  category_id?: number;
+  issue_year?: number;
+  issue_month?: number;
+  /** @nullable */
+  expiry_year?: number | null;
+  /** @nullable */
+  expiry_month?: number | null;
+  /** @nullable */
+  file_path?: string | null;
+};
+
+export type TeacherApplyStatusSuccessResponseData = {
+  /** 申請狀態 */
+  application_status?: TeacherApplyStatusSuccessResponseDataApplicationStatus;
+  /**
+   * 申請提交時間
+   * @nullable
+   */
+  application_submitted_at?: string | null;
+  /**
+   * 審核完成時間
+   * @nullable
+   */
+  application_reviewed_at?: string | null;
+  /**
+   * 審核者ID
+   * @nullable
+   */
+  reviewer_id?: number | null;
+  /**
+   * 審核備註或拒絕原因
+   * @nullable
+   */
+  review_notes?: string | null;
+  basic_info?: TeacherApplyStatusSuccessResponseDataBasicInfo;
+  /** 工作經驗列表 */
+  work_experiences?: TeacherApplyStatusSuccessResponseDataWorkExperiencesItem[];
+  /** 學歷背景列表 */
+  learning_experiences?: TeacherApplyStatusSuccessResponseDataLearningExperiencesItem[];
+  /** 教學證照列表 */
+  certificates?: TeacherApplyStatusSuccessResponseDataCertificatesItem[];
+  id?: number;
+  uuid?: string;
+  user_id?: number;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export interface TeacherApplyStatusSuccessResponse {
+  status?: TeacherApplyStatusSuccessResponseStatus;
+  message?: string;
+  data?: TeacherApplyStatusSuccessResponseData;
+}
+
+export type TeacherBasicInfoSuccessResponseStatus =
+  (typeof TeacherBasicInfoSuccessResponseStatus)[keyof typeof TeacherBasicInfoSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherBasicInfoSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type TeacherBasicInfoSuccessResponseDataBasicInfo = {
+  id?: number;
+  uuid?: string;
+  user_id?: number;
+  city?: string;
+  district?: string;
+  address?: string;
+  main_category_id?: number;
+  sub_category_ids?: number[];
+  introduction?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type TeacherBasicInfoSuccessResponseData = {
+  basic_info?: TeacherBasicInfoSuccessResponseDataBasicInfo;
+};
+
+export interface TeacherBasicInfoSuccessResponse {
+  status?: TeacherBasicInfoSuccessResponseStatus;
+  message?: string;
+  data?: TeacherBasicInfoSuccessResponseData;
+}
+
+export interface TeacherBasicInfoUpdateRequest {
+  /**
+   * 縣市（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  city: string;
+  /**
+   * 區域（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  district: string;
+  /**
+   * 詳細地址（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  address: string;
+  /**
+   * 教授科目（主分類ID，必填）
+   * @minimum 1
+   */
+  main_category_id: number;
+  /**
+   * 專長（子分類ID陣列，必填，最少1個最多3個）
+   * @minItems 1
+   * @maxItems 3
+   */
+  sub_category_ids: number[];
+  /**
+   * 自我介紹（必填，100-1000字元）
+   * @minLength 100
+   * @maxLength 1000
+   */
+  introduction: string;
+}
+
+export type TeacherBasicInfoUpdateSuccessResponseStatus =
+  (typeof TeacherBasicInfoUpdateSuccessResponseStatus)[keyof typeof TeacherBasicInfoUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherBasicInfoUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type TeacherBasicInfoUpdateSuccessResponseDataBasicInfo = {
+  id?: number;
+  city?: string;
+  district?: string;
+  address?: string;
+  main_category_id?: number;
+  sub_category_ids?: number[];
+  introduction?: string;
+  updated_at?: string;
+};
+
+export type TeacherBasicInfoUpdateSuccessResponseData = {
+  basic_info?: TeacherBasicInfoUpdateSuccessResponseDataBasicInfo;
+  notice?: string;
+};
+
+export interface TeacherBasicInfoUpdateSuccessResponse {
+  status?: TeacherBasicInfoUpdateSuccessResponseStatus;
+  message?: string;
+  data?: TeacherBasicInfoUpdateSuccessResponseData;
+}
+
+export interface TeacherApplicationUpdateRequest {
+  /**
+   * 縣市（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  city: string;
+  /**
+   * 區域（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  district: string;
+  /**
+   * 詳細地址（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  address: string;
+  /**
+   * 教授科目（主分類ID，必填）
+   * @minimum 1
+   */
+  main_category_id: number;
+  /**
+   * 專長（子分類ID陣列，必填，最少1個最多3個）
+   * @minItems 1
+   * @maxItems 3
+   */
+  sub_category_ids: number[];
+  /**
+   * 自我介紹（必填，100-1000字元）
+   * @minLength 100
+   * @maxLength 1000
+   */
+  introduction: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type TeacherApplicationUpdateSuccessResponseStatus =
+  (typeof TeacherApplicationUpdateSuccessResponseStatus)[keyof typeof TeacherApplicationUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherApplicationUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 申請狀態
+ */
+export type TeacherApplicationUpdateSuccessResponseDataTeacherApplicationStatus =
+  (typeof TeacherApplicationUpdateSuccessResponseDataTeacherApplicationStatus)[keyof typeof TeacherApplicationUpdateSuccessResponseDataTeacherApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherApplicationUpdateSuccessResponseDataTeacherApplicationStatus =
+  {
+    pending: 'pending',
+    approved: 'approved',
+    rejected: 'rejected',
+  } as const;
+
+export type TeacherApplicationUpdateSuccessResponseDataTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師唯一識別碼 */
+  uuid?: string;
+  /** 使用者 ID */
+  user_id?: number;
+  /** 縣市 */
+  city?: string;
+  /** 區域 */
+  district?: string;
+  /** 詳細地址 */
+  address?: string;
+  /** 教授科目（主分類ID） */
+  main_category_id?: number;
+  /** 專長（子分類ID陣列） */
+  sub_category_ids?: number[];
+  /** 自我介紹 */
+  introduction?: string;
+  /** 申請狀態 */
+  application_status?: TeacherApplicationUpdateSuccessResponseDataTeacherApplicationStatus;
+  /**
+   * 申請提交時間
+   * @nullable
+   */
+  application_submitted_at?: string | null;
+  /**
+   * 審核完成時間
+   * @nullable
+   */
+  application_reviewed_at?: string | null;
+  /**
+   * 審核者ID
+   * @nullable
+   */
+  reviewer_id?: number | null;
+  /**
+   * 審核備註或拒絕原因
+   * @nullable
+   */
+  review_notes?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+};
+
+export type TeacherApplicationUpdateSuccessResponseData = {
+  teacher?: TeacherApplicationUpdateSuccessResponseDataTeacher;
+};
+
+export interface TeacherApplicationUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: TeacherApplicationUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: TeacherApplicationUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type TeacherResubmitSuccessResponseStatus =
+  (typeof TeacherResubmitSuccessResponseStatus)[keyof typeof TeacherResubmitSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherResubmitSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 申請狀態
+ */
+export type TeacherResubmitSuccessResponseDataTeacherApplicationStatus =
+  (typeof TeacherResubmitSuccessResponseDataTeacherApplicationStatus)[keyof typeof TeacherResubmitSuccessResponseDataTeacherApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherResubmitSuccessResponseDataTeacherApplicationStatus = {
+  pending: 'pending',
+} as const;
+
+export type TeacherResubmitSuccessResponseDataTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師唯一識別碼 */
+  uuid?: string;
+  /** 申請狀態 */
+  application_status?: TeacherResubmitSuccessResponseDataTeacherApplicationStatus;
+  /** 申請提交時間 */
+  application_submitted_at?: string;
+  /**
+   * 審核完成時間（已清除）
+   * @nullable
+   */
+  application_reviewed_at?: string | null;
+  /**
+   * 審核者ID（已清除）
+   * @nullable
+   */
+  reviewer_id?: number | null;
+  /**
+   * 審核備註（已清除）
+   * @nullable
+   */
+  review_notes?: string | null;
+  /** 更新時間 */
+  updated_at?: string;
+};
+
+export type TeacherResubmitSuccessResponseData = {
+  teacher?: TeacherResubmitSuccessResponseDataTeacher;
+};
+
+export interface TeacherResubmitSuccessResponse {
+  /** 回應狀態 */
+  status?: TeacherResubmitSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: TeacherResubmitSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type TeacherSubmitSuccessResponseStatus =
+  (typeof TeacherSubmitSuccessResponseStatus)[keyof typeof TeacherSubmitSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherSubmitSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 申請狀態
+ */
+export type TeacherSubmitSuccessResponseDataTeacherApplicationStatus =
+  (typeof TeacherSubmitSuccessResponseDataTeacherApplicationStatus)[keyof typeof TeacherSubmitSuccessResponseDataTeacherApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherSubmitSuccessResponseDataTeacherApplicationStatus = {
+  pending: 'pending',
+} as const;
+
+export type TeacherSubmitSuccessResponseDataTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師唯一識別碼 */
+  uuid?: string;
+  /** 申請狀態 */
+  application_status?: TeacherSubmitSuccessResponseDataTeacherApplicationStatus;
+  /** 申請提交時間 */
+  application_submitted_at?: string;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+};
+
+export type TeacherSubmitSuccessResponseData = {
+  teacher?: TeacherSubmitSuccessResponseDataTeacher;
+};
+
+export interface TeacherSubmitSuccessResponse {
+  /** 回應狀態 */
+  status?: TeacherSubmitSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: TeacherSubmitSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type TeacherProfileSuccessResponseStatus =
+  (typeof TeacherProfileSuccessResponseStatus)[keyof typeof TeacherProfileSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherProfileSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 申請狀態
+ */
+export type TeacherProfileSuccessResponseDataTeacherApplicationStatus =
+  (typeof TeacherProfileSuccessResponseDataTeacherApplicationStatus)[keyof typeof TeacherProfileSuccessResponseDataTeacherApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherProfileSuccessResponseDataTeacherApplicationStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type TeacherProfileSuccessResponseDataTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師唯一識別碼 */
+  uuid?: string;
+  /** 使用者 ID */
+  user_id?: number;
+  /** 縣市 */
+  city?: string;
+  /** 區域 */
+  district?: string;
+  /** 詳細地址 */
+  address?: string;
+  /** 教授科目（主分類ID） */
+  main_category_id?: number;
+  /** 專長（子分類ID陣列） */
+  sub_category_ids?: number[];
+  /** 自我介紹 */
+  introduction?: string;
+  /** 申請狀態 */
+  application_status?: TeacherProfileSuccessResponseDataTeacherApplicationStatus;
+  /**
+   * 申請提交時間
+   * @nullable
+   */
+  application_submitted_at?: string | null;
+  /**
+   * 審核完成時間
+   * @nullable
+   */
+  application_reviewed_at?: string | null;
+  /**
+   * 審核者ID
+   * @nullable
+   */
+  reviewer_id?: number | null;
+  /**
+   * 審核備註
+   * @nullable
+   */
+  review_notes?: string | null;
+  /** 總學生數 */
+  total_students?: number;
+  /** 總課程數 */
+  total_courses?: number;
+  /** 平均評分 */
+  average_rating?: number;
+  /** 總收入 */
+  total_earnings?: number;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+};
+
+export type TeacherProfileSuccessResponseData = {
+  teacher?: TeacherProfileSuccessResponseDataTeacher;
+};
+
+export interface TeacherProfileSuccessResponse {
+  /** 回應狀態 */
+  status?: TeacherProfileSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: TeacherProfileSuccessResponseData;
+}
+
+export interface TeacherProfileUpdateRequest {
+  /**
+   * 縣市（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  city: string;
+  /**
+   * 區域（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  district: string;
+  /**
+   * 詳細地址（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  address: string;
+  /**
+   * 教授科目（主分類ID，必填）
+   * @minimum 1
+   */
+  main_category_id: number;
+  /**
+   * 專長（子分類ID陣列，必填，最少1個最多3個）
+   * @minItems 1
+   * @maxItems 3
+   */
+  sub_category_ids: number[];
+  /**
+   * 自我介紹（必填，100-1000字元）
+   * @minLength 100
+   * @maxLength 1000
+   */
+  introduction: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type TeacherProfileUpdateSuccessResponseStatus =
+  (typeof TeacherProfileUpdateSuccessResponseStatus)[keyof typeof TeacherProfileUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherProfileUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 申請狀態
+ */
+export type TeacherProfileUpdateSuccessResponseDataTeacherApplicationStatus =
+  (typeof TeacherProfileUpdateSuccessResponseDataTeacherApplicationStatus)[keyof typeof TeacherProfileUpdateSuccessResponseDataTeacherApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherProfileUpdateSuccessResponseDataTeacherApplicationStatus = {
+  approved: 'approved',
+} as const;
+
+export type TeacherProfileUpdateSuccessResponseDataTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 縣市 */
+  city?: string;
+  /** 區域 */
+  district?: string;
+  /** 詳細地址 */
+  address?: string;
+  /** 教授科目（主分類ID） */
+  main_category_id?: number;
+  /** 專長（子分類ID陣列） */
+  sub_category_ids?: number[];
+  /** 自我介紹 */
+  introduction?: string;
+  /** 申請狀態 */
+  application_status?: TeacherProfileUpdateSuccessResponseDataTeacherApplicationStatus;
+  /** 更新時間 */
+  updated_at?: string;
+};
+
+export type TeacherProfileUpdateSuccessResponseData = {
+  teacher?: TeacherProfileUpdateSuccessResponseDataTeacher;
+  /** 更新提醒訊息 */
+  notice?: string;
+};
+
+export interface TeacherProfileUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: TeacherProfileUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: TeacherProfileUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type WorkExperienceListSuccessResponseStatus =
+  (typeof WorkExperienceListSuccessResponseStatus)[keyof typeof WorkExperienceListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WorkExperienceListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type WorkExperienceListSuccessResponseData = {
+  /** 工作經驗列表 */
+  work_experiences?: WorkExperience[];
+  /** 總數量 */
+  total?: number;
+};
+
+export interface WorkExperienceListSuccessResponse {
+  /** 回應狀態 */
+  status?: WorkExperienceListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: WorkExperienceListSuccessResponseData;
+}
+
+export interface WorkExperience {
+  /** 工作經驗 ID */
+  id: number;
+  /** 教師 ID */
+  teacher_id: number;
+  /** 是否仍在職 */
+  is_working: boolean;
+  /** 公司名稱 */
+  company_name: string;
+  /** 工作縣市 */
+  city: string;
+  /** 工作地區 */
+  district: string;
+  /** 工作類別 */
+  job_category: string;
+  /** 職位名稱 */
+  job_title: string;
+  /** 開始年份 */
+  start_year: number;
+  /** 開始月份 */
+  start_month: number;
+  /**
+   * 結束年份
+   * @nullable
+   */
+  end_year?: number | null;
+  /**
+   * 結束月份
+   * @nullable
+   */
+  end_month?: number | null;
+  /** 建立時間 */
+  created_at: string;
+  /** 更新時間 */
+  updated_at: string;
+}
+
+export interface WorkExperienceCreateRequest {
+  /**
+   * 公司名稱（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  company_name: string;
+  /**
+   * 工作縣市（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  city: string;
+  /**
+   * 工作地區（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  district: string;
+  /**
+   * 工作類別（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
+   */
+  job_category: string;
+  /**
+   * 職位名稱（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
+   */
+  job_title: string;
+  /** 是否仍在職（必填） */
+  is_working: boolean;
+  /**
+   * 開始年份（必填，1900-2100）
+   * @minimum 1900
+   * @maximum 2100
+   */
+  start_year: number;
+  /**
+   * 開始月份（必填，1-12）
+   * @minimum 1
+   * @maximum 12
+   */
+  start_month: number;
+  /**
+   * 結束年份（選填，如仍在職可為空，1900-2100）
+   * @minimum 1900
+   * @maximum 2100
+   * @nullable
+   */
+  end_year?: number | null;
+  /**
+   * 結束月份（選填，如仍在職可為空，1-12）
+   * @minimum 1
+   * @maximum 12
+   * @nullable
+   */
+  end_month?: number | null;
+}
+
+export interface WorkExperienceBatchCreateRequest {
+  /**
+   * 工作經驗陣列（必填，1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  work_experiences: WorkExperienceCreateRequest[];
+}
+
+export type WorkExperienceBatchCreateSuccessResponseStatus =
+  (typeof WorkExperienceBatchCreateSuccessResponseStatus)[keyof typeof WorkExperienceBatchCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WorkExperienceBatchCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type WorkExperienceBatchCreateSuccessResponseData = {
+  /** 建立的工作經驗記錄陣列 */
+  work_experiences: WorkExperience[];
+};
+
+export interface WorkExperienceBatchCreateSuccessResponse {
+  status: WorkExperienceBatchCreateSuccessResponseStatus;
+  /** 成功訊息 */
+  message: string;
+  data: WorkExperienceBatchCreateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type WorkExperienceCreateSuccessResponseStatus =
+  (typeof WorkExperienceCreateSuccessResponseStatus)[keyof typeof WorkExperienceCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WorkExperienceCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type WorkExperienceCreateSuccessResponseData = {
+  work_experience?: WorkExperience;
+};
+
+export interface WorkExperienceCreateSuccessResponse {
+  /** 回應狀態 */
+  status?: WorkExperienceCreateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: WorkExperienceCreateSuccessResponseData;
+}
+
+export type WorkExperienceUpdateRequest = WorkExperienceCreateRequest;
+
+/**
+ * 回應狀態
+ */
+export type WorkExperienceUpdateSuccessResponseStatus =
+  (typeof WorkExperienceUpdateSuccessResponseStatus)[keyof typeof WorkExperienceUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WorkExperienceUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type WorkExperienceUpdateSuccessResponseData = {
+  work_experience?: WorkExperience;
+};
+
+export interface WorkExperienceUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: WorkExperienceUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: WorkExperienceUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type WorkExperienceDeleteSuccessResponseStatus =
+  (typeof WorkExperienceDeleteSuccessResponseStatus)[keyof typeof WorkExperienceDeleteSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WorkExperienceDeleteSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 此 API 無回傳資料
+ * @nullable
+ */
+export type WorkExperienceDeleteSuccessResponseData = unknown | null;
+
+export interface WorkExperienceDeleteSuccessResponse {
+  /** 回應狀態 */
+  status?: WorkExperienceDeleteSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 此 API 無回傳資料
+   * @nullable
+   */
+  data?: WorkExperienceDeleteSuccessResponseData;
+}
+
+/**
+ * 學位
+ */
+export type LearningExperienceDegree =
+  (typeof LearningExperienceDegree)[keyof typeof LearningExperienceDegree];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceDegree = {
+  高中: '高中',
+  專科: '專科',
+  學士: '學士',
+  碩士: '碩士',
+  博士: '博士',
+} as const;
+
+export interface LearningExperience {
+  /** 學習經驗 ID */
+  id: number;
+  /** 教師 ID */
+  teacher_id: number;
+  /** 學校名稱 */
+  school_name: string;
+  /** 主修科目 */
+  major: string;
+  /** 學位 */
+  degree: LearningExperienceDegree;
+  /** 是否仍在就讀 */
+  is_studying: boolean;
+  /** 開始年份 */
+  start_year: number;
+  /** 開始月份 */
+  start_month: number;
+  /**
+   * 結束年份
+   * @nullable
+   */
+  end_year?: number | null;
+  /**
+   * 結束月份
+   * @nullable
+   */
+  end_month?: number | null;
+  /** 建立時間 */
+  created_at: string;
+  /** 更新時間 */
+  updated_at: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type LearningExperienceListSuccessResponseStatus =
+  (typeof LearningExperienceListSuccessResponseStatus)[keyof typeof LearningExperienceListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type LearningExperienceListSuccessResponseData = {
+  /** 學習經驗列表 */
+  learning_experiences?: LearningExperience[];
+  /** 總數量 */
+  total?: number;
+};
+
+export interface LearningExperienceListSuccessResponse {
+  /** 回應狀態 */
+  status?: LearningExperienceListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: LearningExperienceListSuccessResponseData;
+}
+
+/**
+ * 學位（必填）
+ */
+export type LearningExperienceCreateRequestDegree =
+  (typeof LearningExperienceCreateRequestDegree)[keyof typeof LearningExperienceCreateRequestDegree];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceCreateRequestDegree = {
+  高中: '高中',
+  專科: '專科',
+  學士: '學士',
+  碩士: '碩士',
+  博士: '博士',
+} as const;
+
+export interface LearningExperienceCreateRequest {
+  /**
+   * 學校名稱（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  school_name: string;
+  /**
+   * 主修科目（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
+   */
+  major: string;
+  /** 學位（必填） */
+  degree: LearningExperienceCreateRequestDegree;
+  /** 是否仍在就讀（必填） */
+  is_studying: boolean;
+  /**
+   * 開始年份（必填，1900-2100）
+   * @minimum 1900
+   * @maximum 2100
+   */
+  start_year: number;
+  /**
+   * 開始月份（必填，1-12）
+   * @minimum 1
+   * @maximum 12
+   */
+  start_month: number;
+  /**
+   * 結束年份（選填，如仍在學可為空，1900-2100）
+   * @minimum 1900
+   * @maximum 2100
+   * @nullable
+   */
+  end_year?: number | null;
+  /**
+   * 結束月份（選填，如仍在學可為空，1-12）
+   * @minimum 1
+   * @maximum 12
+   * @nullable
+   */
+  end_month?: number | null;
+}
+
+/**
+ * 回應狀態
+ */
+export type LearningExperienceCreateSuccessResponseStatus =
+  (typeof LearningExperienceCreateSuccessResponseStatus)[keyof typeof LearningExperienceCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type LearningExperienceCreateSuccessResponseData = {
+  learning_experience?: LearningExperience;
+};
+
+export interface LearningExperienceCreateSuccessResponse {
+  /** 回應狀態 */
+  status?: LearningExperienceCreateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: LearningExperienceCreateSuccessResponseData;
+}
+
+export type LearningExperienceUpdateRequest = LearningExperienceCreateRequest;
+
+/**
+ * 回應狀態
+ */
+export type LearningExperienceUpdateSuccessResponseStatus =
+  (typeof LearningExperienceUpdateSuccessResponseStatus)[keyof typeof LearningExperienceUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type LearningExperienceUpdateSuccessResponseData = {
+  learning_experience?: LearningExperience;
+};
+
+export interface LearningExperienceUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: LearningExperienceUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: LearningExperienceUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type LearningExperienceDeleteSuccessResponseStatus =
+  (typeof LearningExperienceDeleteSuccessResponseStatus)[keyof typeof LearningExperienceDeleteSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceDeleteSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 此 API 無回傳資料
+ * @nullable
+ */
+export type LearningExperienceDeleteSuccessResponseData = unknown | null;
+
+export interface LearningExperienceDeleteSuccessResponse {
+  /** 回應狀態 */
+  status?: LearningExperienceDeleteSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 此 API 無回傳資料
+   * @nullable
+   */
+  data?: LearningExperienceDeleteSuccessResponseData;
+}
+
+export interface Certificate {
+  /** 證照 ID */
+  id: number;
+  /** 教師 ID */
+  teacher_id: number;
+  /** 證照名稱 */
+  license_name: string;
+  /** 發證機構 */
+  verifying_institution: string;
+  /** 持有人姓名 */
+  holder_name: string;
+  /** 證照編號 */
+  license_number: string;
+  /** 證照分類 ID */
+  category_id: number;
+  /** 發證年份 */
+  issue_year: number;
+  /** 發證月份 */
+  issue_month: number;
+  /**
+   * 到期年份
+   * @nullable
+   */
+  expiry_year?: number | null;
+  /**
+   * 到期月份
+   * @nullable
+   */
+  expiry_month?: number | null;
+  /**
+   * 證照檔案路徑
+   * @nullable
+   */
+  file_path?: string | null;
+  /** 建立時間 */
+  created_at: string;
+  /** 更新時間 */
+  updated_at: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type CertificateListSuccessResponseStatus =
+  (typeof CertificateListSuccessResponseStatus)[keyof typeof CertificateListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type CertificateListSuccessResponseData = {
+  /** 證照列表 */
+  certificates?: Certificate[];
+  /** 總數量 */
+  total?: number;
+};
+
+export interface CertificateListSuccessResponse {
+  /** 回應狀態 */
+  status?: CertificateListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: CertificateListSuccessResponseData;
+}
+
+export interface CertificateCreateRequest {
+  /**
+   * 證照名稱（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  license_name: string;
+  /**
+   * 發證機構（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  verifying_institution: string;
+  /**
+   * 持有人姓名（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
+   */
+  holder_name: string;
+  /**
+   * 證照編號（必填，1-100字元）
+   * @minLength 1
+   * @maxLength 100
+   */
+  license_number: string;
+  /**
+   * 證照分類 ID（必填，正整數）
+   * @minimum 1
+   */
+  category_id: number;
+  /**
+   * 發證年份（必填，1900-2100）
+   * @minimum 1900
+   * @maximum 2100
+   */
+  issue_year: number;
+  /**
+   * 發證月份（必填，1-12）
+   * @minimum 1
+   * @maximum 12
+   */
+  issue_month: number;
+  /**
+   * 到期年份（選填，1900-2150）
+   * @minimum 1900
+   * @maximum 2150
+   * @nullable
+   */
+  expiry_year?: number | null;
+  /**
+   * 到期月份（選填，1-12）
+   * @minimum 1
+   * @maximum 12
+   * @nullable
+   */
+  expiry_month?: number | null;
+  /**
+   * 證照檔案路徑（選填，最多500字元）
+   * @maxLength 500
+   * @nullable
+   */
+  file_path?: string | null;
+}
+
+/**
+ * 回應狀態
+ */
+export type CertificateCreateSuccessResponseStatus =
+  (typeof CertificateCreateSuccessResponseStatus)[keyof typeof CertificateCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type CertificateCreateSuccessResponseData = {
+  certificate?: Certificate;
+};
+
+export interface CertificateCreateSuccessResponse {
+  /** 回應狀態 */
+  status?: CertificateCreateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: CertificateCreateSuccessResponseData;
+}
+
+export type CertificateUpdateRequest = CertificateCreateRequest;
+
+/**
+ * 回應狀態
+ */
+export type CertificateUpdateSuccessResponseStatus =
+  (typeof CertificateUpdateSuccessResponseStatus)[keyof typeof CertificateUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type CertificateUpdateSuccessResponseData = {
+  certificate?: Certificate;
+};
+
+export interface CertificateUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: CertificateUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: CertificateUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type CertificateDeleteSuccessResponseStatus =
+  (typeof CertificateDeleteSuccessResponseStatus)[keyof typeof CertificateDeleteSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateDeleteSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 此 API 無回傳資料
+ * @nullable
+ */
+export type CertificateDeleteSuccessResponseData = unknown | null;
+
+export interface CertificateDeleteSuccessResponse {
+  /** 回應狀態 */
+  status?: CertificateDeleteSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 此 API 無回傳資料
+   * @nullable
+   */
+  data?: CertificateDeleteSuccessResponseData;
+}
+
+export type WorkExperienceUpsertRequestWorkExperiencesItemAllOf = {
+  /** 工作經驗 ID（用於更新，新增時不提供） */
+  id?: number;
+};
+
+export type WorkExperienceUpsertRequestWorkExperiencesItem =
+  WorkExperienceCreateRequest &
+    WorkExperienceUpsertRequestWorkExperiencesItemAllOf;
+
+export interface WorkExperienceUpsertRequest {
+  /**
+   * 工作經驗陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  work_experiences: WorkExperienceUpsertRequestWorkExperiencesItem[];
+}
+
+export type WorkExperienceUpsertResponseStatus =
+  (typeof WorkExperienceUpsertResponseStatus)[keyof typeof WorkExperienceUpsertResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WorkExperienceUpsertResponseStatus = {
+  success: 'success',
+} as const;
+
+export type WorkExperienceUpsertResponseData = {
+  work_experiences?: WorkExperience[];
+};
+
+export interface WorkExperienceUpsertResponse {
+  status?: WorkExperienceUpsertResponseStatus;
+  message?: string;
+  data?: WorkExperienceUpsertResponseData;
+}
+
+export interface LearningExperienceBatchCreateRequest {
+  /**
+   * 學習經驗陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  learning_experiences: LearningExperienceCreateRequest[];
+}
+
+export type LearningExperienceBatchCreateSuccessResponseStatus =
+  (typeof LearningExperienceBatchCreateSuccessResponseStatus)[keyof typeof LearningExperienceBatchCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceBatchCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type LearningExperienceBatchCreateSuccessResponseData = {
+  learning_experiences?: LearningExperience[];
+};
+
+export interface LearningExperienceBatchCreateSuccessResponse {
+  status?: LearningExperienceBatchCreateSuccessResponseStatus;
+  message?: string;
+  data?: LearningExperienceBatchCreateSuccessResponseData;
+}
+
+export type LearningExperienceUpsertRequestLearningExperiencesItemAllOf = {
+  /** 學習經驗 ID（用於更新，新增時不提供） */
+  id?: number;
+};
+
+export type LearningExperienceUpsertRequestLearningExperiencesItem =
+  LearningExperienceCreateRequest &
+    LearningExperienceUpsertRequestLearningExperiencesItemAllOf;
+
+export interface LearningExperienceUpsertRequest {
+  /**
+   * 學習經驗陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  learning_experiences: LearningExperienceUpsertRequestLearningExperiencesItem[];
+}
+
+export type LearningExperienceUpsertResponseStatus =
+  (typeof LearningExperienceUpsertResponseStatus)[keyof typeof LearningExperienceUpsertResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const LearningExperienceUpsertResponseStatus = {
+  success: 'success',
+} as const;
+
+export type LearningExperienceUpsertResponseData = {
+  learning_experiences?: LearningExperience[];
+};
+
+export interface LearningExperienceUpsertResponse {
+  status?: LearningExperienceUpsertResponseStatus;
+  message?: string;
+  data?: LearningExperienceUpsertResponseData;
+}
+
+export interface CertificateBatchCreateRequest {
+  /**
+   * 證書陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  certificates: CertificateCreateRequest[];
+}
+
+export type CertificateBatchCreateSuccessResponseStatus =
+  (typeof CertificateBatchCreateSuccessResponseStatus)[keyof typeof CertificateBatchCreateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateBatchCreateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type CertificateBatchCreateSuccessResponseData = {
+  certificates?: Certificate[];
+};
+
+export interface CertificateBatchCreateSuccessResponse {
+  status?: CertificateBatchCreateSuccessResponseStatus;
+  message?: string;
+  data?: CertificateBatchCreateSuccessResponseData;
+}
+
+export type CertificateUpsertRequestCertificatesItemAllOf = {
+  /** 證書 ID（用於更新，新增時不提供） */
+  id?: number;
+};
+
+export type CertificateUpsertRequestCertificatesItem =
+  CertificateCreateRequest & CertificateUpsertRequestCertificatesItemAllOf;
+
+export interface CertificateUpsertRequest {
+  /**
+   * 證書陣列（1-20筆）
+   * @minItems 1
+   * @maxItems 20
+   */
+  certificates: CertificateUpsertRequestCertificatesItem[];
+}
+
+export type CertificateUpsertResponseStatus =
+  (typeof CertificateUpsertResponseStatus)[keyof typeof CertificateUpsertResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CertificateUpsertResponseStatus = {
+  success: 'success',
+} as const;
+
+export type CertificateUpsertResponseData = {
+  certificates?: Certificate[];
+};
+
+export interface CertificateUpsertResponse {
+  status?: CertificateUpsertResponseStatus;
+  message?: string;
+  data?: CertificateUpsertResponseData;
+}
+
+/**
+ * 星期（0=星期日, 1=星期一, ..., 6=星期六）
+ */
+export type ScheduleDayOfWeek =
+  (typeof ScheduleDayOfWeek)[keyof typeof ScheduleDayOfWeek];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ScheduleDayOfWeek = {
+  NUMBER_0: 0,
+  NUMBER_1: 1,
+  NUMBER_2: 2,
+  NUMBER_3: 3,
+  NUMBER_4: 4,
+  NUMBER_5: 5,
+  NUMBER_6: 6,
+} as const;
+
+export interface Schedule {
+  /** 排程 ID */
+  id: number;
+  /** 教師 ID */
+  teacher_id: number;
+  /** 星期（0=星期日, 1=星期一, ..., 6=星期六） */
+  day_of_week: ScheduleDayOfWeek;
+  /**
+   * 開始時間（HH:mm 格式）
+   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+   */
+  start_time: string;
+  /**
+   * 結束時間（HH:mm 格式）
+   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+   */
+  end_time: string;
+  /** 建立時間 */
+  created_at: string;
+  /** 更新時間 */
+  updated_at: string;
+}
+
+/**
+ * 格式化的排程資料
+ */
+export interface FormattedSchedules {
+  /** 星期一排程 */
+  monday?: string[];
+  /** 星期二排程 */
+  tuesday?: string[];
+  /** 星期三排程 */
+  wednesday?: string[];
+  /** 星期四排程 */
+  thursday?: string[];
+  /** 星期五排程 */
+  friday?: string[];
+  /** 星期六排程 */
+  saturday?: string[];
+  /** 星期日排程 */
+  sunday?: string[];
+}
+
+/**
+ * 回應狀態
+ */
+export type ScheduleGetSuccessResponseStatus =
+  (typeof ScheduleGetSuccessResponseStatus)[keyof typeof ScheduleGetSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ScheduleGetSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type ScheduleGetSuccessResponseData = {
+  /** 排程列表 */
+  schedules?: Schedule[];
+  formatted_schedules?: FormattedSchedules;
+};
+
+export interface ScheduleGetSuccessResponse {
+  /** 回應狀態 */
+  status?: ScheduleGetSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: ScheduleGetSuccessResponseData;
+}
+
+/**
+ * 星期（0=星期日, 1=星期一, ..., 6=星期六，必填）
+ */
+export type ScheduleUpdateRequestSchedulesItemDayOfWeek =
+  (typeof ScheduleUpdateRequestSchedulesItemDayOfWeek)[keyof typeof ScheduleUpdateRequestSchedulesItemDayOfWeek];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ScheduleUpdateRequestSchedulesItemDayOfWeek = {
+  NUMBER_0: 0,
+  NUMBER_1: 1,
+  NUMBER_2: 2,
+  NUMBER_3: 3,
+  NUMBER_4: 4,
+  NUMBER_5: 5,
+  NUMBER_6: 6,
+} as const;
+
+export type ScheduleUpdateRequestSchedulesItem = {
+  /** 星期（0=星期日, 1=星期一, ..., 6=星期六，必填） */
+  day_of_week: ScheduleUpdateRequestSchedulesItemDayOfWeek;
+  /**
+   * 開始時間（HH:mm 格式，必填）
+   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+   */
+  start_time: string;
+  /**
+   * 結束時間（HH:mm 格式，必填）
+   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+   */
+  end_time: string;
+};
+
+export interface ScheduleUpdateRequest {
+  /**
+   * 排程列表（必填，1-50個排程）
+   * @minItems 1
+   * @maxItems 50
+   */
+  schedules: ScheduleUpdateRequestSchedulesItem[];
+}
+
+/**
+ * 回應狀態
+ */
+export type ScheduleUpdateSuccessResponseStatus =
+  (typeof ScheduleUpdateSuccessResponseStatus)[keyof typeof ScheduleUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ScheduleUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type ScheduleUpdateSuccessResponseData = {
+  schedules?: Schedule[];
+  formatted_schedules?: FormattedSchedules;
+  /** 更新的排程數量 */
+  updated_count?: number;
+  /** 刪除的舊排程數量 */
+  deleted_count?: number;
+};
+
+export interface ScheduleUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: ScheduleUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: ScheduleUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type ScheduleConflictCheckSuccessResponseStatus =
+  (typeof ScheduleConflictCheckSuccessResponseStatus)[keyof typeof ScheduleConflictCheckSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ScheduleConflictCheckSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export type ScheduleConflictCheckSuccessResponseDataConflictsItem = {
+  /** 衝突日期 */
+  date?: string;
+  /**
+   * 衝突時間
+   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
+   */
+  time?: string;
+  /** 衝突原因 */
+  reason?: string;
+  /**
+   * 衝突課程 ID
+   * @nullable
+   */
+  course_id?: number | null;
+  /**
+   * 衝突預約 ID
+   * @nullable
+   */
+  reservation_id?: number | null;
+};
+
+export type ScheduleConflictCheckSuccessResponseData = {
+  /** 是否有衝突 */
+  has_conflicts?: boolean;
+  /** 衝突詳細列表 */
+  conflicts?: ScheduleConflictCheckSuccessResponseDataConflictsItem[];
+  /** 衝突總數 */
+  total_conflicts?: number;
+};
+
+export interface ScheduleConflictCheckSuccessResponse {
+  /** 回應狀態 */
+  status?: ScheduleConflictCheckSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: ScheduleConflictCheckSuccessResponseData;
+}
+
+export interface TeacherApplicationRequest {
+  /**
+   * 縣市（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  city: string;
+  /**
+   * 區域（必填，1-50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  district: string;
+  /**
+   * 詳細地址（必填，1-200字元）
+   * @minLength 1
+   * @maxLength 200
+   */
+  address: string;
+  /**
+   * 教授科目（主分類ID，必填，只能選擇一個）
+   * @minimum 1
+   */
+  main_category_id: number;
+  /**
+   * 專長（子分類ID陣列，必填，最少1個最多3個不重複的專長）
+   * @minItems 1
+   * @maxItems 3
+   */
+  sub_category_ids: number[];
+  /**
+   * 自我介紹（必填，100-1000字元，用於審核評估）
+   * @minLength 100
+   * @maxLength 1000
+   */
+  introduction: string;
+}
+
+/**
+ * 申請狀態：pending(待審核)、approved(已通過)、rejected(已拒絕)
+ */
+export type TeacherDataApplicationStatus =
+  (typeof TeacherDataApplicationStatus)[keyof typeof TeacherDataApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherDataApplicationStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface TeacherData {
+  /** 教師記錄 ID */
+  id?: number;
+  /** 教師 UUID */
+  uuid?: string;
+  /** 關聯的使用者 ID */
+  user_id?: number;
+  /** 縣市 */
+  city?: string;
+  /** 區域 */
+  district?: string;
+  /** 詳細地址 */
+  address?: string;
+  /** 教授科目（主分類ID） */
+  main_category_id?: number;
+  /** 專長（子分類ID陣列） */
+  sub_category_ids?: number[];
+  /** 自我介紹 */
+  introduction?: string;
+  /** 申請狀態：pending(待審核)、approved(已通過)、rejected(已拒絕) */
+  application_status?: TeacherDataApplicationStatus;
+  /**
+   * 申請提交時間
+   * @nullable
+   */
+  application_submitted_at?: string | null;
+  /**
+   * 申請審核時間
+   * @nullable
+   */
+  application_reviewed_at?: string | null;
+  /**
+   * 審核者 ID
+   * @nullable
+   */
+  reviewer_id?: number | null;
+  /**
+   * 審核備註
+   * @nullable
+   */
+  review_notes?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type TeacherApplicationSuccessResponseStatus =
+  (typeof TeacherApplicationSuccessResponseStatus)[keyof typeof TeacherApplicationSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherApplicationSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 回應資料
+ */
+export type TeacherApplicationSuccessResponseData = {
+  /** 新建立的教師申請資料 */
+  teacher?: TeacherData;
+};
+
+export interface TeacherApplicationSuccessResponse {
+  /** 回應狀態 */
+  status?: TeacherApplicationSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 回應資料 */
+  data?: TeacherApplicationSuccessResponseData;
+}
+
+export type TeacherApplicationValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type TeacherApplicationValidationErrorResponse =
+  ValidationErrorResponse & TeacherApplicationValidationErrorResponseAllOf;
+
+export type TeacherApplicationBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type TeacherApplicationBusinessErrorResponse = BusinessErrorResponse &
+  TeacherApplicationBusinessErrorResponseAllOf;
+
+export interface SubCategoryItem {
+  /** 次分類 ID */
+  id: number;
+  /** 次分類名稱 */
+  name: string;
+}
+
+export interface TagItem {
+  /** 主分類 ID */
+  id: number;
+  /** 主分類名稱 */
+  main_category: string;
+  /** 次分類清單 */
+  sub_category: SubCategoryItem[];
+  /**
+   * 主分類圖示 URL（可為 null）
+   * @nullable
+   */
+  icon_url: string | null;
+}
+
+export interface GetTagsSuccessResponse {
+  /** 回應狀態 (成功時為 true) */
+  status: boolean;
+  /** 回應訊息 */
+  message: string;
+  /** 標籤清單資料 */
+  data: TagItem[];
+}
+
 export type PostApiAuthRegister400 =
   | RegisterValidationErrorResponse
   | RegisterBusinessErrorResponse;
@@ -716,6 +2560,21 @@ export type GetApiFilesTestConnection200 = {
   success?: boolean;
   message?: string;
   data?: GetApiFilesTestConnection200Data;
+};
+
+export type PostApiTeachersApply400 =
+  | TeacherApplicationValidationErrorResponse
+  | TeacherApplicationBusinessErrorResponse;
+
+export type GetApiTeachersScheduleConflictsParams = {
+  /**
+   * 開始時間 (ISO 8601 格式)
+   */
+  start_time: string;
+  /**
+   * 結束時間 (ISO 8601 格式)
+   */
+  end_time: string;
 };
 
 export type PostApiUploadAvatarBody = {

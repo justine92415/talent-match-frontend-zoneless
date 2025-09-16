@@ -1,0 +1,186 @@
+<form
+  [formGroup]="formGroup()"
+  class="space-y-6"
+>
+  <div formArrayName="certificates">
+    @for (certificate of certificatesArray.controls; track $index) {
+      <div
+        [formGroupName]="$index"
+        class="border border-grey-d4 rounded-xl p-6 space-y-4 relative"
+      >
+        <!-- 刪除按鈕 -->
+        @if (certificatesArray.length > 1) {
+          <button
+            type="button"
+            (click)="removeCertificate($index)"
+            class="absolute top-4 right-4 text-red-500 hover:text-red-700 transition-colors"
+          >
+            <mat-icon [fontIcon]="TmfIcon.Delete"></mat-icon>
+          </button>
+        }
+
+        <h3 class="text-lg font-medium text-grey-33">教學證照 {{ $index + 1 }}</h3>
+
+        <!-- 持有人姓名 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">持有人姓名</label>
+          <tmf-input-text
+            placeholder="請輸入持有人姓名"
+            formControlName="holder_name"
+          ></tmf-input-text>
+          @if (
+            certificate.get("holder_name")?.invalid &&
+            certificate.get("holder_name")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入持有人姓名</div>
+          }
+        </div>
+
+        <!-- 證書號碼 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">證書號碼</label>
+          <tmf-input-text
+            placeholder="請輸入證書號碼"
+            formControlName="license_number"
+          ></tmf-input-text>
+          @if (
+            certificate.get("license_number")?.invalid &&
+            certificate.get("license_number")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入證書號碼</div>
+          }
+        </div>
+
+        <!-- 證照名稱 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">證照名稱</label>
+          <tmf-input-text
+            placeholder="請輸入證照名稱"
+            formControlName="license_name"
+          ></tmf-input-text>
+          @if (
+            certificate.get("license_name")?.invalid &&
+            certificate.get("license_name")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入證照名稱</div>
+          }
+        </div>
+
+        <!-- 證書主題 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">證書主題</label>
+          <tmf-input-select
+            [placeholder]="'請選擇證書主題'"
+            [options]="subjectOptions()"
+            formControlName="category_id"
+          ></tmf-input-select>
+          @if (
+            certificate.get("category_id")?.invalid &&
+            certificate.get("category_id")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請選擇證書主題</div>
+          }
+        </div>
+
+        <!-- 核發機構 -->
+        <div class="space-y-2">
+          <label class="block text-base font-medium text-grey-33">核發機構</label>
+          <tmf-input-text
+            placeholder="請輸入核發機構名稱"
+            formControlName="verifying_institution"
+          ></tmf-input-text>
+          @if (
+            certificate.get("verifying_institution")?.invalid &&
+            certificate.get("verifying_institution")?.touched
+          ) {
+            <div class="text-red-500 text-sm">請輸入核發機構名稱</div>
+          }
+        </div>
+
+        <!-- 取得年月 -->
+        <div class="space-y-4">
+          <label class="block text-base font-medium text-grey-33">取得年月</label>
+          <div class="flex gap-4">
+            <tmf-input-select
+              [placeholder]="'年'"
+              [options]="yearOptions"
+              formControlName="issue_year"
+              class="flex-1"
+            ></tmf-input-select>
+            <tmf-input-select
+              [placeholder]="'月'"
+              [options]="monthOptions"
+              formControlName="issue_month"
+              class="flex-1"
+            ></tmf-input-select>
+          </div>
+          @if (
+            (certificate.get("issue_year")?.invalid && certificate.get("issue_year")?.touched) ||
+            (certificate.get("issue_month")?.invalid && certificate.get("issue_month")?.touched)
+          ) {
+            <div class="text-red-500 text-sm">請選擇取得年月</div>
+          }
+        </div>
+
+        <!-- 檔案上傳 -->
+        <div class="space-y-4">
+          <label class="block text-base font-medium text-grey-33">證照檔案</label>
+          
+          @if (!certificate.get('file_name')?.value) {
+            <!-- 檔案上傳按鈕 -->
+            <div class="border-2 border-dashed border-grey-d4 rounded-xl p-6 text-center hover:border-primary transition-colors">
+              <input
+                type="file"
+                #fileInput
+                (change)="onCertificateFileChange($event, $index)"
+                accept=".pdf,.jpg,.jpeg,.png"
+                class="hidden"
+              />
+              <button
+                type="button"
+                (click)="fileInput.click()"
+                class="flex flex-col items-center gap-2 w-full text-grey-66 hover:text-primary transition-colors"
+              >
+                <mat-icon>upload</mat-icon>
+                <span class="text-sm">點擊上傳檔案</span>
+                <span class="text-xs text-grey-99">支援 PDF、JPG、PNG 格式，檔案大小限制 5MB</span>
+              </button>
+            </div>
+          } @else {
+            <!-- 已上傳檔案顯示 -->
+            <div class="border border-grey-d4 rounded-xl p-4 flex items-center justify-between bg-grey-f8">
+              <div class="flex items-center gap-3">
+                <mat-icon [fontIcon]="TmfIcon.Beenhere" class="text-primary"></mat-icon>
+                <div>
+                  <div class="text-sm font-medium text-grey-33">{{ certificate.get('file_name')?.value }}</div>
+                  <div class="text-xs text-grey-66">已上傳</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                (click)="removeFile($index)"
+                class="text-red-500 hover:text-red-700 transition-colors"
+              >
+                <mat-icon [fontIcon]="TmfIcon.Delete" class="text-lg"></mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- 新增證照按鈕 -->
+  <div class="flex justify-center">
+    <tmf-button
+      type="button"
+      variant="secondary"
+      iconPosition="left"
+      iconName="add"
+      (click)="addCertificate()"
+      class="h-10"
+    >
+      新增教學證照
+    </tmf-button>
+  </div>
+</form>

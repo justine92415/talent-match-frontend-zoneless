@@ -1,1 +1,135 @@
-<p>courses works!</p>
+<div>
+  <!-- 頁面標題和新增按鈕 -->
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl-bold text-grey-33">課程管理</h1>
+    <tmf-button class="h-10" iconPosition="left" iconName="add"
+      >新增課程</tmf-button
+    >
+  </div>
+
+  <!-- 課程表格容器 -->
+  <div class="bg-white">
+    <!-- 桌面版表格 -->
+    <div class="hidden lg:block">
+      <tmf-table>
+        <!-- 表格標題 -->
+        <div thead class="flex w-full h-10">
+          <div class="flex-1 px-4 flex items-center">
+            <span class="text-white">課程圖</span>
+          </div>
+          <div class="flex-1 px-4 flex items-center gap-1">
+            <span class="text-white">名稱</span>
+            <span class="material-symbols-outlined text-base text-white"
+              >swap_vert</span
+            >
+          </div>
+          <div class="w-40 px-4 flex items-center">
+            <span class="text-white">類別</span>
+          </div>
+          <div class="w-32 px-4 flex items-center justify-center gap-1">
+            <span class="text-white">上/下架</span>
+            <span class="material-symbols-outlined text-base text-white"
+              >swap_vert</span
+            >
+          </div>
+          <div class="w-40 px-4 flex items-center justify-center">
+            <span class="text-white">操作</span>
+          </div>
+        </div>
+
+        <!-- 表格內容 -->
+        @for (course of courses(); track course.id) {
+          <div tbody class="h-36">
+            <!-- 課程圖片 -->
+            <div class="flex-1 px-4 flex items-center">
+              @if (course.image) {
+                <img
+                  [src]="course.image"
+                  [alt]="course.name"
+                  class="w-50 h-full object-cover rounded-lg"
+                />
+              } @else {
+                <div
+                  class="w-20 h-20 bg-grey-e9 rounded-lg flex items-center justify-center"
+                >
+                  <span class="material-symbols-outlined text-grey-9f text-2xl"
+                    >music_note</span
+                  >
+                </div>
+              }
+            </div>
+
+            <!-- 課程名稱 -->
+            <div class="flex-1 px-4 flex items-center">
+              <h3 class="text-base text-grey-33 line-clamp-2">
+                {{ course.name }}
+              </h3>
+            </div>
+
+            <!-- 類別標籤 -->
+            <div class="w-40 px-4 flex items-center">
+              <div class="flex flex-col gap-1">
+                @for (tag of course.tags; track tag) {
+                  <span
+                    class="px-2 py-1 rounded-sm text-sm text-grey-33 bg-grey-d4 text-center"
+                  >
+                    {{ tag }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <!-- 上下架開關 -->
+            <div class="w-32 px-4 flex items-center justify-center">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="sr-only peer"
+                  [checked]="course.isPublished"
+                />
+                <div
+                  class="relative w-11 h-6 bg-grey-d4 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
+                ></div>
+              </label>
+            </div>
+
+            <!-- 操作按鈕 -->
+            <div
+              class="w-40 px-4 flex flex-col items-center justify-center gap-2"
+            >
+              <button
+                class="px-2 flex items-center w-12 h-7 box-border border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
+              >
+                檢視
+              </button>
+              @if (course.actions.includes("edit")) {
+                <button
+                  class="px-2 flex items-center w-12 h-7 box-border border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
+                >
+                  編輯
+                </button>
+              }
+              @if (course.actions.includes("delete")) {
+                <button
+                  class="px-2 flex items-center w-12 h-7 box-border border border-red-500 text-red-500 hover:text-white hover:bg-red-500 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
+                >
+                  編輯
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </tmf-table>
+    </div>
+  </div>
+
+  <!-- 分頁組件 -->
+  <div class="mt-6 md:mt-8">
+    <tmf-pagination
+      [currentPage]="currentPage()"
+      [totalResults]="totalResults()"
+      [itemsPerPage]="itemsPerPage()"
+      (pageChange)="onPageChange($event)"
+    ></tmf-pagination>
+  </div>
+</div>

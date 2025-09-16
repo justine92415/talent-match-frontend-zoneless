@@ -74,6 +74,20 @@ const routes: Routes = [
     data: { state: 'teacher' },
   },
   {
+    // 課程檢視頁
+    path: 'courses/view/:id',
+    loadComponent: () => import('./courses/view/view'),
+    canActivate: [teacherOnlyGuard],
+    data: { state: 'teacher' },
+  },
+  {
+    // 課程編輯頁
+    path: 'courses/edit/:id',
+    loadComponent: () => import('./courses/edit/edit'),
+    canActivate: [teacherOnlyGuard],
+    data: { state: 'teacher' },
+  },
+  {
     // 老師交易紀錄頁
     path: 'record',
     loadComponent: () => import('./record/record'),

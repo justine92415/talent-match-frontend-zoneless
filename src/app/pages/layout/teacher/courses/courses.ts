@@ -58,4 +58,26 @@ export default class Courses {
   goToCreateCourse(): void {
     this.router.navigate(['/dashboard/teacher/courses/create']);
   }
+
+  // 前往課程檢視頁面
+  viewCourse(courseId: number): void {
+    this.router.navigate(['/dashboard/teacher/courses/view', courseId]);
+  }
+
+  // 前往課程編輯頁面
+  editCourse(courseId: number): void {
+    this.router.navigate(['/dashboard/teacher/courses/edit', courseId]);
+  }
+
+  // 刪除課程
+  deleteCourse(courseId: number): void {
+    if (confirm('確定要刪除這個課程嗎？刪除後無法恢復。')) {
+      // TODO: 呼叫 API 刪除課程
+      console.log('刪除課程:', courseId);
+      alert('課程刪除成功！(開發中)');
+
+      // 重新載入課程列表
+      // this.loadCourses();
+    }
+  }
 }

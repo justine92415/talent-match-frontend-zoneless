@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { InputText } from '@components/form/input-text/input-text';
+import { InputNumber } from '@components/form/input-number/input-number';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { InputMultiSelect, MultiSelectOption } from '@components/form/input-multi-select/input-multi-select';
 
@@ -14,6 +15,7 @@ import { InputMultiSelect, MultiSelectOption } from '@components/form/input-mult
     MatIcon,
     Button,
     InputText,
+    InputNumber,
     InputSelect,
     InputMultiSelect
   ],

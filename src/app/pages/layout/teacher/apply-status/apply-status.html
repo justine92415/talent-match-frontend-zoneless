@@ -1,0 +1,217 @@
+<div>
+  <!-- 頁面標題 -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">教師申請狀態</h1>
+    <p class="text-gray-600">查看您的教師申請審核進度和相關資訊</p>
+  </div>
+
+  <!-- 載入中狀態 -->
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <span class="ml-3 text-gray-600">載入中...</span>
+    </div>
+  }
+
+  <!-- 錯誤狀態 -->
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+      <div class="flex">
+        <mat-icon class="text-red-500 mr-3">error</mat-icon>
+        <div>
+          <h3 class="text-red-800 font-medium">載入失敗</h3>
+          <p class="text-red-700 mt-1">{{ error() }}</p>
+          <tmf-button
+            type="button"
+            variant="secondary"
+            class="mt-3"
+            (click)="refresh()">
+            重新載入
+          </tmf-button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 申請狀態顯示 -->
+  @if (!isLoading() && !error() && applyStatus()) {
+    <div class="space-y-6">
+      <!-- 狀態卡片 -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">申請狀態</h2>
+          <span class="px-3 py-1 rounded-full text-sm font-medium {{ getStatusClass() }}">
+            {{ getStatusText() }}
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <span class="text-gray-500">申請提交時間：</span>
+            <span class="text-gray-900">
+              {{ applyStatus()?.application_submitted_at ? (applyStatus()?.application_submitted_at | date: 'yyyy/MM/dd HH:mm') : '尚未提交' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 狀態說明 -->
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+          @switch (applyStatus()?.status) {
+            @case ('pending') {
+              <div class="flex items-start">
+                <mat-icon class="text-yellow-500 mr-2 mt-0.5">schedule</mat-icon>
+                <div>
+                  <p class="text-gray-700 font-medium">您的申請正在審核中</p>
+                  <p class="text-gray-600 text-sm mt-1">我們會在 3-5 個工作天內完成審核，請耐心等候。</p>
+                </div>
+              </div>
+            }
+            @case ('approved') {
+              <div class="flex items-start">
+                <mat-icon class="text-green-500 mr-2 mt-0.5">check_circle</mat-icon>
+                <div>
+                  <p class="text-gray-700 font-medium">恭喜！您的申請已通過審核</p>
+                  <p class="text-gray-600 text-sm mt-1">您現在可以開始提供教學服務。</p>
+                </div>
+              </div>
+            }
+            @case ('rejected') {
+              <div class="flex items-start">
+                <mat-icon class="text-red-500 mr-2 mt-0.5">cancel</mat-icon>
+                <div>
+                  <p class="text-gray-700 font-medium">很抱歉，您的申請未通過審核</p>
+                  <p class="text-gray-600 text-sm mt-1">您可以修改申請資料後重新提交。</p>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- 申請資料摘要 -->
+      <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">申請資料摘要</h2>
+
+        @if (applyStatus()?.basic_info) {
+          <div class="space-y-6">
+            <!-- 基本資料 -->
+            <div>
+              <h3 class="font-medium text-gray-900 mb-3">基本資料</h3>
+              <div class="bg-gray-50 rounded-lg p-4 text-sm space-y-2">
+                <div><span class="text-gray-500">居住地：</span>{{ applyStatus()?.basic_info?.city }}{{ applyStatus()?.basic_info?.district }}</div>
+                <div><span class="text-gray-500">地址：</span>{{ applyStatus()?.basic_info?.address }}</div>
+                <div>
+                  <span class="text-gray-500">自我介紹：</span>
+                  <div class="mt-1" style="word-wrap: break-word; word-break: break-word;">{{ applyStatus()?.basic_info?.introduction }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 工作經驗 -->
+            <div>
+              <h3 class="font-medium text-gray-900 mb-3">工作經驗</h3>
+              @if (applyStatus()?.work_experiences && applyStatus()?.work_experiences!.length > 0) {
+                <div class="space-y-3">
+                  @for (exp of applyStatus()?.work_experiences; track $index) {
+                    <div class="bg-gray-50 rounded-lg p-4 text-sm">
+                      <div class="font-medium text-gray-900 mb-2">{{ exp.company_name }}</div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-600">
+                        <div><span class="text-gray-500">職位：</span>{{ exp.job_title }}</div>
+                        <div><span class="text-gray-500">類別：</span>{{ exp.job_category | jobCategory }}</div>
+                        <div><span class="text-gray-500">地點：</span>{{ exp.city }}{{ exp.district }}</div>
+                        <div><span class="text-gray-500">期間：</span>{{ exp.start_year }}/{{ exp.start_month }} - {{ exp.is_working ? '至今' : exp.end_year + '/' + exp.end_month }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="text-sm text-gray-500">尚未提交工作經驗</div>
+              }
+            </div>
+
+            <!-- 學歷背景 -->
+            <div>
+              <h3 class="font-medium text-gray-900 mb-3">學歷背景</h3>
+              @if (applyStatus()?.learning_experiences && applyStatus()?.learning_experiences!.length > 0) {
+                <div class="space-y-3">
+                  @for (edu of applyStatus()?.learning_experiences; track $index) {
+                    <div class="bg-gray-50 rounded-lg p-4 text-sm">
+                      <div class="font-medium text-gray-900 mb-2">{{ edu.school_name }}</div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-600">
+                        <div><span class="text-gray-500">科系：</span>{{ edu.department }}</div>
+                        <div><span class="text-gray-500">學位：</span>{{ edu.degree | degree }}</div>
+                        <div class="md:col-span-2"><span class="text-gray-500">期間：</span>{{ edu.start_year }}/{{ edu.start_month }} - {{ edu.is_in_school ? '就學中' : edu.end_year + '/' + edu.end_month }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="text-sm text-gray-500">尚未提交學歷背景</div>
+              }
+            </div>
+
+            <!-- 教學證照 -->
+            <div>
+              <h3 class="font-medium text-gray-900 mb-3">教學證照</h3>
+              @if (applyStatus()?.certificates && applyStatus()?.certificates!.length > 0) {
+                <div class="space-y-3">
+                  @for (cert of applyStatus()?.certificates; track $index) {
+                    <div class="bg-gray-50 rounded-lg p-4 text-sm">
+                      <div class="font-medium text-gray-900 mb-2">{{ cert.license_name }}</div>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-600">
+                        <div><span class="text-gray-500">持有人：</span>{{ cert.holder_name }}</div>
+                        <div><span class="text-gray-500">證書號碼：</span>{{ cert.license_number }}</div>
+                        <div><span class="text-gray-500">核發機構：</span>{{ cert.verifying_institution }}</div>
+                        <div><span class="text-gray-500">取得時間：</span>{{ cert.issue_year }}/{{ cert.issue_month }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="text-sm text-gray-500">尚未提交教學證照</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- 操作按鈕 -->
+      <div class="flex gap-4">
+        <tmf-button
+          type="button"
+          (click)="goToApplyPage()"
+          class="flex-1 h-10">
+          @if (applyStatus()?.status === 'rejected') {
+            重新申請
+          } @else {
+            修改申請資料
+          }
+        </tmf-button>
+
+        <tmf-button
+          type="button"
+          variant="secondary"
+          iconPosition="left"
+          iconName="refresh"
+          class="h-10"
+          (click)="refresh()">
+          重新載入
+        </tmf-button>
+      </div>
+    </div>
+  }
+
+  <!-- 無申請資料狀態 -->
+  @if (!isLoading() && !error() && !applyStatus()) {
+    <div class="text-center py-12">
+      <mat-icon class="text-gray-400 mb-4" style="font-size: 4rem; width: 4rem; height: 4rem;">assignment</mat-icon>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">尚未找到申請資料</h3>
+      <p class="text-gray-600 mb-6">您可能尚未提交教師申請，或申請資料已被移除。</p>
+      <tmf-button
+        type="button"
+        (click)="goToApplyPage()">
+        前往申請頁面
+      </tmf-button>
+    </div>
+  }
+</div>

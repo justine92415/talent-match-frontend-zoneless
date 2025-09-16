@@ -142,17 +142,13 @@ export default class TeacherApply implements OnInit {
 
     this.apiService.checkApplyStatus().subscribe({
       next: (data) => {
-        console.log('收到申請狀態資料:', data);
         if (data) {
           // 已申請過，初始化狀態和表單
-          console.log('初始化申請資料...');
           this.stateService.initializeFromApplyData(data);
           this.formService.populateFormWithData(this.teacherApplyForm, data);
           this.formService.ensureMinimumFormItems(this.teacherApplyForm);
-          console.log('表單初始化完成，基本資料:', this.basicInfoFormGroup.value);
         } else {
           // 未申請過，保持預設狀態
-          console.log('未申請過，保持預設狀態');
           this.stateService.setFirstTimeApply(true);
         }
         this.stateService.setLoading(false);

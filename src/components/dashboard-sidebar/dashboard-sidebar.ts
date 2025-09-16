@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { AuthService } from '@app/services/auth.service';
 
-type Role = 'student' | 'teacher';
+type Role = 'student' | 'teacher' | 'teacher_pending';
 
 interface SidebarMenuItem {
   id: string;
@@ -39,15 +39,27 @@ export class DashboardSidebar implements OnInit {
 
   private initializeCurrentRole(): void {
     const url = this.router.url;
+    const userRoles = this.roles();
+
     if (url.includes('/dashboard/teacher')) {
-      this.currentRole.set('teacher');
+      // 根據具體路由和用戶角色決定顯示方式
+      if (url.includes('/apply-status') && userRoles.includes('teacher_pending')) {
+        this.currentRole.set('teacher_pending');
+      } else if (userRoles.includes('teacher')) {
+        this.currentRole.set('teacher');
+      } else if (userRoles.includes('teacher_pending')) {
+        this.currentRole.set('teacher_pending');
+      } else {
+        this.currentRole.set('teacher'); // 預設
+      }
     } else if (url.includes('/dashboard/student')) {
       this.currentRole.set('student');
     } else {
       // 默認根據用戶角色設置
-      const userRoles = this.roles();
       if (userRoles.includes('teacher')) {
         this.currentRole.set('teacher');
+      } else if (userRoles.includes('teacher_pending')) {
+        this.currentRole.set('teacher_pending');
       } else if (userRoles.includes('student')) {
         this.currentRole.set('student');
       }
@@ -57,8 +69,9 @@ export class DashboardSidebar implements OnInit {
   // 角色顯示標籤
   roleLabel = computed(() => {
     const current = this.currentRole();
-    return current === 'student' ? '學生' : 
-           current === 'teacher' ? '教師' : '用戶';
+    return current === 'student' ? '學生' :
+           current === 'teacher' ? '教師' :
+           current === 'teacher_pending' ? '教師 (待審核)' : '用戶';
   });
 
   // 根據當前選擇的角色生成導航選單
@@ -131,6 +144,15 @@ export class DashboardSidebar implements OnInit {
           route: '/dashboard/teacher/record'
         }
       ];
+    } else if (current === 'teacher_pending') {
+      return [
+        {
+          id: 'apply-status',
+          label: '申請狀態',
+          icon: 'assignment',
+          route: '/dashboard/teacher/apply-status'
+        }
+      ];
     }
     
     return [];
@@ -139,7 +161,7 @@ export class DashboardSidebar implements OnInit {
   // 檢查是否可以切換角色
   canSwitchRole = computed(() => {
     const userRoles = this.roles();
-    return userRoles.includes('student') && userRoles.includes('teacher');
+    return userRoles.includes('student') && (userRoles.includes('teacher') || userRoles.includes('teacher_pending'));
   });
 
   // 獲取切換目標角色的標籤
@@ -151,17 +173,25 @@ export class DashboardSidebar implements OnInit {
   // 切換角色功能
   switchRole(): void {
     const current = this.currentRole();
-    
+
     // 檢查用戶是否擁有多重角色
     if (!this.canSwitchRole()) {
       console.warn('用戶沒有多重角色，無法切換');
       return;
     }
-    
+
+    const userRoles = this.roles();
+
     if (current === 'student') {
-      this.currentRole.set('teacher');
-      this.router.navigate(['/dashboard/teacher']);
-    } else if (current === 'teacher') {
+      // 從學生切換為教師，優先選擇完整的教師角色
+      if (userRoles.includes('teacher')) {
+        this.currentRole.set('teacher');
+        this.router.navigate(['/dashboard/teacher/info']);
+      } else if (userRoles.includes('teacher_pending')) {
+        this.currentRole.set('teacher_pending');
+        this.router.navigate(['/dashboard/teacher/apply-status']);
+      }
+    } else if (current === 'teacher' || current === 'teacher_pending') {
       this.currentRole.set('student');
       this.router.navigate(['/dashboard/student']);
     }

@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import Pagination from '../../../../../components/pagination/pagination';
 import { Button } from "@components/button/button";
 import { Table } from '../../../../../components/table/table';
@@ -11,6 +12,8 @@ import { Table } from '../../../../../components/table/table';
   styles: ``
 })
 export default class Courses {
+  private router = inject(Router);
+
   // 分頁相關的信號
   currentPage = signal(1);
   totalResults = signal(3); // 目前有 3 個課程項目
@@ -49,5 +52,10 @@ export default class Courses {
     this.currentPage.set(page);
     // 這裡可以加入 API 呼叫來載入新的課程資料
     console.log('切換到頁面:', page);
+  }
+
+  // 前往新增課程頁面
+  goToCreateCourse(): void {
+    this.router.navigate(['/dashboard/teacher/courses/create']);
   }
 }

@@ -67,6 +67,13 @@ const routes: Routes = [
     data: { state: 'teacher' },
   },
   {
+    // 新增課程頁
+    path: 'courses/create',
+    loadComponent: () => import('./courses/create/create'),
+    canActivate: [teacherOnlyGuard],
+    data: { state: 'teacher' },
+  },
+  {
     // 老師交易紀錄頁
     path: 'record',
     loadComponent: () => import('./record/record'),

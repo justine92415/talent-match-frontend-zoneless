@@ -129,6 +129,13 @@ export class TeacherApplyApiService {
   }
 
   /**
+   * 重新提交申請
+   */
+  resubmitApplication(): Observable<any> {
+    return this.teachersService.postApiTeachersResubmit();
+  }
+
+  /**
    * 轉換表單資料為 API 格式 - 工作經驗
    */
   transformWorkExperienceForApi(formData: any): WorkExperienceData {

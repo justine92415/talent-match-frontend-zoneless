@@ -119,11 +119,11 @@
 
             <div>
               <label class="block text-sm font-medium text-grey-33 mb-2">次類別 <span class="text-red-500">*</span></label>
-              <tmf-input-multi-select
-                formControlName="sub_category_ids"
+              <tmf-input-select
+                formControlName="sub_category_id"
                 placeholder="請選擇次類別"
                 [options]="getAvailableSubCategories()">
-              </tmf-input-multi-select>
+              </tmf-input-select>
             </div>
           </div>
 
@@ -131,7 +131,7 @@
           <div class="w-full md:w-1/2">
             <label class="block text-sm font-medium text-grey-33 mb-2">城市 <span class="text-red-500">*</span></label>
             <tmf-input-select
-              formControlName="city"
+              formControlName="city_id"
               placeholder="請選擇城市"
               [options]="cities()">
             </tmf-input-select>
@@ -233,6 +233,15 @@
           (click)="saveCourse()"
           [disabled]="!courseForm.valid">
           儲存課程
+        </tmf-button>
+
+        <tmf-button
+          type="button"
+          class="flex-1 h-10"
+          variant="primary"
+          (click)="submitForReview()"
+          [disabled]="!courseForm.valid">
+          提交審核
         </tmf-button>
 
         <tmf-button

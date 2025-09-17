@@ -3154,6 +3154,14 @@ export interface CourseBasicInfo {
   updated_at?: string;
 }
 
+export type CourseWithPriceOptionsAllOf = {
+  /** 課程價格方案列表 */
+  price_options?: PriceOption[];
+};
+
+export type CourseWithPriceOptions = CourseBasicInfo &
+  CourseWithPriceOptionsAllOf;
+
 /**
  * 回應狀態 (建立成功固定為 success)
  */
@@ -3236,6 +3244,36 @@ export interface GetCourseSuccessResponse {
   message?: string | null;
   /** 課程詳細資料 */
   data?: GetCourseSuccessResponseData;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type GetCourseForEditSuccessResponseStatus =
+  (typeof GetCourseForEditSuccessResponseStatus)[keyof typeof GetCourseForEditSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetCourseForEditSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 包含價格方案的完整課程資料
+ */
+export type GetCourseForEditSuccessResponseData = {
+  course?: CourseWithPriceOptions;
+};
+
+export interface GetCourseForEditSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: GetCourseForEditSuccessResponseStatus;
+  /**
+   * 回應訊息 (可能為空)
+   * @nullable
+   */
+  message?: string | null;
+  /** 包含價格方案的完整課程資料 */
+  data?: GetCourseForEditSuccessResponseData;
 }
 
 export interface CourseListQueryParams {
@@ -3658,6 +3696,20 @@ export type UpdateCourseNotFoundErrorResponseAllOf = {
 export type UpdateCourseNotFoundErrorResponse = NotFoundErrorResponse &
   UpdateCourseNotFoundErrorResponseAllOf;
 
+export type GetCourseEditPermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetCourseEditPermissionErrorResponse = ForbiddenErrorResponse &
+  GetCourseEditPermissionErrorResponseAllOf;
+
+export type GetCourseEditNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetCourseEditNotFoundErrorResponse = NotFoundErrorResponse &
+  GetCourseEditNotFoundErrorResponseAllOf;
+
 /**
  * 影片類型 (local: 本地上傳, youtube: YouTube連結)
  */
@@ -3783,6 +3835,33 @@ export type VideoDetailInfoAllOf = {
 export type VideoDetailInfo = VideoBasicInfo & VideoDetailInfoAllOf;
 
 export type VideoInfo = VideoDetailInfo;
+
+export interface PriceOption {
+  /** 價格方案 ID */
+  id: number;
+  /** 價格方案唯一識別碼 */
+  uuid: string;
+  /** 所屬課程 ID */
+  course_id: number;
+  /**
+   * 方案價格（新台幣）
+   * @minimum 1
+   * @maximum 999999.99
+   */
+  price: number;
+  /**
+   * 方案堂數
+   * @minimum 1
+   * @maximum 999
+   */
+  quantity: number;
+  /** 是否啟用 */
+  is_active: boolean;
+  /** 建立時間 */
+  created_at: string;
+  /** 更新時間 */
+  updated_at: string;
+}
 
 /**
  * 伺服器內部錯誤

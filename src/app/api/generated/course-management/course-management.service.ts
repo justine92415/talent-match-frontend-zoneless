@@ -41,6 +41,7 @@ import type {
   CreateCourseSuccessResponse,
   DeleteCourseSuccessResponse,
   GetApiCoursesParams,
+  GetCourseForEditSuccessResponse,
   GetCourseListSuccessResponse,
   GetCourseSuccessResponse,
   PostApiCoursesBody,
@@ -259,6 +260,46 @@ export class CourseManagementService {
   ): Observable<any> {
     return this.http.delete<TData>(`/api/courses/${id}`, options);
   }
+  /**
+ * 取得課程的完整編輯資料，包含基本資訊和價格方案。專門供編輯頁面使用。
+
+**權限限制**：
+- 只有課程擁有者可以存取
+- 需要教師身份認證
+- 不限課程狀態（可編輯任何狀態的自有課程）
+
+**回應資料**：
+- 完整的課程基本資訊
+- 所有價格方案列表（按價格排序）
+- 供前端編輯表單初始化使用
+
+**業務邏輯**：
+- 驗證使用者具有教師權限
+- 驗證課程所有權
+- 查詢完整課程資料
+- 查詢關聯的價格方案
+- 回傳整合資料
+
+ * @summary 取得課程編輯資料
+ */
+  getApiCoursesIdEdit<TData = GetCourseForEditSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  getApiCoursesIdEdit<TData = GetCourseForEditSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  getApiCoursesIdEdit<TData = GetCourseForEditSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  getApiCoursesIdEdit<TData = GetCourseForEditSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.get<TData>(`/api/courses/${id}/edit`, options);
+  }
 }
 
 export type PostApiCoursesClientResult =
@@ -270,3 +311,5 @@ export type PutApiCoursesIdClientResult =
 export type GetApiCoursesIdClientResult = NonNullable<GetCourseSuccessResponse>;
 export type DeleteApiCoursesIdClientResult =
   NonNullable<DeleteCourseSuccessResponse>;
+export type GetApiCoursesIdEditClientResult =
+  NonNullable<GetCourseForEditSuccessResponse>;

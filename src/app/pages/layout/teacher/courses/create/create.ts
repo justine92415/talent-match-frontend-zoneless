@@ -6,7 +6,9 @@ import { Button } from '@components/button/button';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputNumber } from '@components/form/input-number/input-number';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
-import { InputMultiSelect, MultiSelectOption } from '@components/form/input-multi-select/input-multi-select';
+import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
+import { TagsService } from '@app/api/generated/tags/tags.service';
+import { TagItem } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-course-create',
@@ -16,8 +18,7 @@ import { InputMultiSelect, MultiSelectOption } from '@components/form/input-mult
     Button,
     InputText,
     InputNumber,
-    InputSelect,
-    InputMultiSelect
+    InputSelect
   ],
   templateUrl: './create.html',
   styles: ``
@@ -25,6 +26,8 @@ import { InputMultiSelect, MultiSelectOption } from '@components/form/input-mult
 export default class CourseCreate implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private courseService = inject(CourseManagementService);
+  private tagsService = inject(TagsService);
 
   // 表單
   courseForm: FormGroup;
@@ -33,65 +36,48 @@ export default class CourseCreate implements OnInit {
   imagePreview = signal<string | null>(null);
   imageFile = signal<File | null>(null);
 
-  // 城市選項
+  // 城市選項 (使用 ID 對應 API 需求)
   cities = signal<SelectOption[]>([
-    { value: '台北市', label: '台北市' },
-    { value: '新北市', label: '新北市' },
-    { value: '桃園市', label: '桃園市' },
-    { value: '台中市', label: '台中市' },
-    { value: '台南市', label: '台南市' },
-    { value: '高雄市', label: '高雄市' },
-    { value: '基隆市', label: '基隆市' },
-    { value: '新竹市', label: '新竹市' },
-    { value: '新竹縣', label: '新竹縣' },
-    { value: '苗栗縣', label: '苗栗縣' },
-    { value: '彰化縣', label: '彰化縣' },
-    { value: '南投縣', label: '南投縣' },
-    { value: '雲林縣', label: '雲林縣' },
-    { value: '嘉義市', label: '嘉義市' },
-    { value: '嘉義縣', label: '嘉義縣' },
-    { value: '屏東縣', label: '屏東縣' },
-    { value: '宜蘭縣', label: '宜蘭縣' },
-    { value: '花蓮縣', label: '花蓮縣' },
-    { value: '台東縣', label: '台東縣' },
-    { value: '澎湖縣', label: '澎湖縣' },
-    { value: '金門縣', label: '金門縣' },
-    { value: '連江縣', label: '連江縣' }
+    { value: 1, label: '臺北市' },
+    { value: 2, label: '基隆市' },
+    { value: 3, label: '新北市' },
+    { value: 4, label: '連江縣' },
+    { value: 5, label: '宜蘭縣' },
+    { value: 6, label: '新竹市' },
+    { value: 7, label: '新竹縣' },
+    { value: 8, label: '桃園市' },
+    { value: 9, label: '苗栗縣' },
+    { value: 10, label: '臺中市' },
+    { value: 11, label: '彰化縣' },
+    { value: 12, label: '南投縣' },
+    { value: 13, label: '嘉義市' },
+    { value: 14, label: '嘉義縣' },
+    { value: 15, label: '雲林縣' },
+    { value: 16, label: '臺南市' },
+    { value: 17, label: '高雄市' },
+    { value: 18, label: '澎湖縣' },
+    { value: 19, label: '金門縣' },
+    { value: 20, label: '屏東縣' },
+    { value: 21, label: '臺東縣' },
+    { value: 22, label: '花蓮縣' }
   ]);
 
-  // 主類別選項 (參考 teacher-apply)
-  mainCategories = signal<SelectOption[]>([
-    { value: 1, label: '學科輔導' },
-    { value: 2, label: '語言學習' },
-    { value: 3, label: '藝術才藝' },
-    { value: 4, label: '運動健身' },
-    { value: 5, label: '生活技能' }
-  ]);
+  // 標籤資料
+  tagsData = signal<TagItem[]>([]);
 
-  // 次類別選項
-  subCategories = signal([
-    { id: 1, name: '數學', main_id: 1 },
-    { id: 2, name: '物理', main_id: 1 },
-    { id: 3, name: '化學', main_id: 1 },
-    { id: 4, name: '英文', main_id: 2 },
-    { id: 5, name: '日文', main_id: 2 },
-    { id: 6, name: '韓文', main_id: 2 },
-    { id: 7, name: '音樂', main_id: 3 },
-    { id: 8, name: '繪畫', main_id: 3 },
-    { id: 9, name: '舞蹈', main_id: 3 },
-    { id: 10, name: '游泳', main_id: 4 },
-    { id: 11, name: '健身', main_id: 4 },
-    { id: 12, name: '烹飪', main_id: 5 },
-    { id: 13, name: '手工藝', main_id: 5 }
-  ]);
+  // 主類別選項 (從 API 動態載入)
+  mainCategories = signal<SelectOption[]>([]);
+
+  // 當前選中的主類別 ID
+  selectedMainCategoryId = signal<number | null>(null);
 
   constructor() {
     this.courseForm = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(100)]],
       content: ['', [Validators.required, Validators.maxLength(2000)]],
       main_category_id: [null, Validators.required],
-      sub_category_ids: [[], Validators.required],
-      city: ['', Validators.required],
+      sub_category_id: [null, Validators.required],
+      city_id: [null, Validators.required],
       survey_url: [''],
       purchase_message: ['', Validators.maxLength(500)],
       course_plans: this.fb.array([this.createCoursePlanGroup(true)])
@@ -99,9 +85,13 @@ export default class CourseCreate implements OnInit {
   }
 
   ngOnInit() {
+    // 載入標籤資料
+    this.loadTags();
+
     // 監聽主類別變更，清空次類別選擇
-    this.courseForm.get('main_category_id')?.valueChanges.subscribe(mainCategoryId => {
-      this.courseForm.get('sub_category_ids')?.setValue([]);
+    this.courseForm.get('main_category_id')?.valueChanges.subscribe((mainCategoryId) => {
+      this.selectedMainCategoryId.set(mainCategoryId);
+      this.courseForm.get('sub_category_id')?.setValue(null);
     });
   }
 
@@ -142,13 +132,37 @@ export default class CourseCreate implements OnInit {
     return index === 0;
   }
 
+  // 載入標籤資料
+  private loadTags(): void {
+    this.tagsService.getApiTags().subscribe({
+      next: (response) => {
+        this.tagsData.set(response.data);
+
+        // 更新主類別選項
+        const mainCategoryOptions = response.data.map(tag => ({
+          value: tag.id,
+          label: tag.main_category
+        }));
+        this.mainCategories.set(mainCategoryOptions);
+      },
+      error: (error) => {
+        console.error('載入標籤資料失敗:', error);
+      }
+    });
+  }
+
   // 取得可選擇的次類別
-  getAvailableSubCategories(): MultiSelectOption[] {
-    const mainCategoryId = this.courseForm.get('main_category_id')?.value;
+  getAvailableSubCategories(): SelectOption[] {
+    const mainCategoryId = this.selectedMainCategoryId();
     if (!mainCategoryId) return [];
-    return this.subCategories()
-      .filter(sub => sub.main_id === mainCategoryId)
-      .map(sub => ({ value: sub.id, label: sub.name }));
+
+    const selectedMainCategory = this.tagsData().find(tag => tag.id === mainCategoryId);
+    if (!selectedMainCategory) return [];
+
+    return selectedMainCategory.sub_category.map(sub => ({
+      value: sub.id,
+      label: sub.name
+    }));
   }
 
   // 處理圖片上傳
@@ -192,13 +206,62 @@ export default class CourseCreate implements OnInit {
   // 儲存課程
   saveCourse(): void {
     if (this.courseForm.valid) {
-      const formData = this.courseForm.value;
-      console.log('儲存課程資料:', formData);
-      console.log('圖片檔案:', this.imageFile());
+      const formData = this.courseForm.getRawValue();
 
-      // TODO: 呼叫 API 儲存課程
-      alert('課程儲存成功！(開發中)');
-      this.goBack();
+      // 準備課程基本資料
+      const courseData = {
+        name: formData.name,
+        content: formData.content,
+        main_category_id: formData.main_category_id,
+        sub_category_id: formData.sub_category_id,
+        city_id: formData.city_id,
+        survey_url: formData.survey_url || null,
+        purchase_message: formData.purchase_message || null
+      };
+
+      // 準備價格方案資料
+      const priceOptions = formData.course_plans.map((plan: any) => ({
+        price: plan.price,
+        quantity: plan.quantity
+      }));
+
+      // 準備 API 請求資料
+      const requestData = {
+        courseData: JSON.stringify(courseData),
+        priceOptions: JSON.stringify(priceOptions),
+        courseImage: this.imageFile() || undefined
+      };
+
+      console.log('準備發送資料:', requestData);
+
+      // 呼叫 API 建立課程
+      this.courseService.postApiCourses(requestData).subscribe({
+        next: (response) => {
+          console.log('課程建立成功:', response);
+          alert('課程建立成功！');
+          this.goBack();
+        },
+        error: (error) => {
+          console.error('課程建立失敗:', error);
+
+          // 處理不同類型的錯誤
+          let errorMessage = '課程建立失敗，請稍後再試。';
+
+          if (error.status === 400) {
+            errorMessage = '請檢查輸入的資料是否正確。';
+          } else if (error.status === 401) {
+            errorMessage = '請先登入後再建立課程。';
+          } else if (error.status === 403) {
+            errorMessage = '您沒有權限建立課程。';
+          } else if (error.status === 413) {
+            errorMessage = '圖片檔案過大，請選擇小於 10MB 的圖片。';
+          } else if (error.status >= 500) {
+            errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
+          }
+
+          alert(errorMessage);
+        }
+      });
     } else {
       alert('請填寫所有必填欄位');
     }

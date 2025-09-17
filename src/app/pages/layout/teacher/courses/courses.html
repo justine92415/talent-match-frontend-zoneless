@@ -7,6 +7,7 @@
     >
   </div>
 
+
   <!-- 課程表格容器 -->
   <div class="bg-white">
     <!-- 桌面版表格 -->
@@ -24,7 +25,7 @@
             >
           </div>
           <div class="w-40 px-4 flex items-center">
-            <span class="text-white">類別</span>
+            <span class="text-white">狀態</span>
           </div>
           <div class="w-32 px-4 flex items-center justify-center gap-1">
             <span class="text-white">上/下架</span>
@@ -37,14 +38,41 @@
           </div>
         </div>
 
-        <!-- 表格內容 -->
-        @for (course of courses(); track course.id) {
-          <div tbody class="h-36">
+        <!-- 載入狀態 -->
+        @if (isLoading()) {
+          <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+            <div class="flex items-center justify-center w-full h-full">
+              <span class="text-grey-66">載入中...</span>
+            </div>
+          </div>
+        }
+
+        <!-- 錯誤狀態 -->
+        @if (loadError()) {
+          <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+            <div class="flex items-center justify-center w-full h-full">
+              <span class="text-red-500">{{ loadError() }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- 空狀態 -->
+        @if (!isLoading() && !loadError() && courses().length === 0) {
+          <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+            <div class="flex items-center justify-center w-full h-full">
+              <span class="text-grey-66">目前沒有課程</span>
+            </div>
+          </div>
+        }
+
+        <!-- 課程列表 -->
+        @for (course of courses(); track course.id; let i = $index) {
+          <div tbody class="h-36 flex border-b border-grey-d4 bg-white p-4 transition-colors hover:bg-grey-f7">
             <!-- 課程圖片 -->
             <div class="flex-1 px-4 flex items-center">
-              @if (course.image) {
+              @if (getCourseImage(course)) {
                 <img
-                  [src]="course.image"
+                  [src]="getCourseImage(course)"
                   [alt]="course.name"
                   class="w-50 h-full object-cover rounded-lg"
                 />
@@ -53,7 +81,7 @@
                   class="w-20 h-20 bg-grey-e9 rounded-lg flex items-center justify-center"
                 >
                   <span class="material-symbols-outlined text-grey-9f text-2xl"
-                    >music_note</span
+                    >school</span
                   >
                 </div>
               }
@@ -66,16 +94,22 @@
               </h3>
             </div>
 
-            <!-- 類別標籤 -->
+            <!-- 課程狀態 -->
             <div class="w-40 px-4 flex items-center">
               <div class="flex flex-col gap-1">
-                @for (tag of course.tags; track tag) {
-                  <span
-                    class="px-2 py-1 rounded-sm text-sm text-grey-33 bg-grey-d4 text-center"
-                  >
-                    {{ tag }}
-                  </span>
-                }
+                <span
+                  class="px-2 py-1 rounded-sm text-sm text-center"
+                  [class]="course.status === 'published' ? 'text-green-600 bg-green-100' :
+                           course.status === 'draft' ? 'text-grey-66 bg-grey-d4' :
+                           'text-orange-600 bg-orange-100'"
+                >
+                  @switch (course.status) {
+                    @case ('published') { 已發布 }
+                    @case ('draft') { 草稿 }
+                    @case ('archived') { 已封存 }
+                    @default { {{ course.status }} }
+                  }
+                </span>
               </div>
             </div>
 
@@ -85,7 +119,8 @@
                 <input
                   type="checkbox"
                   class="sr-only peer"
-                  [checked]="course.isPublished"
+                  [checked]="isPublished(course)"
+                  readonly
                 />
                 <div
                   class="relative w-11 h-6 bg-grey-d4 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
@@ -99,22 +134,22 @@
             >
               <button
                 class="px-2 flex items-center w-12 h-7 box-border border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
-                (click)="viewCourse(course.id)"
+                (click)="viewCourse(course.id!)"
               >
                 檢視
               </button>
-              @if (course.actions.includes("edit")) {
+              @if (hasAction(course, 'edit')) {
                 <button
                   class="px-2 flex items-center w-12 h-7 box-border border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
-                  (click)="editCourse(course.id)"
+                  (click)="editCourse(course.id!)"
                 >
                   編輯
                 </button>
               }
-              @if (course.actions.includes("delete")) {
+              @if (hasAction(course, 'delete')) {
                 <button
                   class="px-2 flex items-center w-12 h-7 box-border border border-red-500 text-red-500 hover:text-white hover:bg-red-500 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
-                  (click)="deleteCourse(course.id)"
+                  (click)="deleteCourse(course.id!)"
                 >
                   刪除
                 </button>

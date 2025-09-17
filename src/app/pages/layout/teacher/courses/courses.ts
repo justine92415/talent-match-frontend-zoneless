@@ -1,9 +1,11 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import Pagination from '../../../../../components/pagination/pagination';
 import { Button } from "@components/button/button";
 import { Table } from '../../../../../components/table/table';
+import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
+import { CourseBasicInfo } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-courses',
@@ -11,47 +13,86 @@ import { Table } from '../../../../../components/table/table';
   templateUrl: './courses.html',
   styles: ``
 })
-export default class Courses {
+export default class Courses implements OnInit {
   private router = inject(Router);
+  private courseService = inject(CourseManagementService);
 
   // 分頁相關的信號
   currentPage = signal(1);
-  totalResults = signal(3); // 目前有 3 個課程項目
-  itemsPerPage = signal(10); // 每頁顯示 10 個項目
+  totalResults = signal(0);
+  itemsPerPage = signal(10);
 
   // 課程資料
-  courses = signal([
-    {
-      id: 1,
-      name: '從零開始學吉他：初學者入門指南',
-      image: '/assets/images/guitar-course.png',
-      tags: ['新手班', '音樂', '吉他'],
-      isPublished: true,
-      actions: ['view']
-    },
-    {
-      id: 2,
-      name: '築夢廚藝：美食烹飪工作坊',
-      image: '/assets/images/reel_cooking_1.jpg',
-      tags: ['高手班', '烹飪料理'],
-      isPublished: false,
-      actions: ['view', 'edit', 'delete']
-    },
-    {
-      id: 3,
-      name: '琴韻魔法：鋼琴彈奏交響指南',
-      image: null,
-      tags: ['大師班', '音樂', '鋼琴'],
-      isPublished: false,
-      actions: ['view', 'edit', 'delete']
+  courses = signal<CourseBasicInfo[]>([]);
+
+  // 載入狀態
+  isLoading = signal(false);
+  loadError = signal<string | null>(null);
+
+  // 表格行內容 (預先計算好的 HTML 字串或結構化資料)
+  tableRows = signal<any[]>([]);
+
+  // 檢查課程是否已發布
+  isPublished(course: CourseBasicInfo): boolean {
+    return course.status === 'published';
+  }
+
+  // 取得課程圖片
+  getCourseImage(course: CourseBasicInfo): string | null {
+    return course.main_image || null;
+  }
+
+  // 取得課程可用操作
+  getCourseActions(course: CourseBasicInfo): string[] {
+    const actions = ['view'];
+    if (course.status !== 'published') {
+      actions.push('edit', 'delete');
     }
-  ]);
+    return actions;
+  }
+
+  // 檢查是否有特定操作權限
+  hasAction(course: CourseBasicInfo, action: string): boolean {
+    return this.getCourseActions(course).includes(action);
+  }
+
+  ngOnInit(): void {
+    this.loadCourses();
+  }
+
+  // 載入課程列表
+  private loadCourses(): void {
+    this.isLoading.set(true);
+    this.loadError.set(null);
+
+    const params = {
+      page: this.currentPage(),
+      limit: this.itemsPerPage()
+    };
+
+    this.courseService.getApiCourses(params).subscribe({
+      next: (response) => {
+        console.log('API 回應:', response);
+        if (response.data) {
+          console.log('課程資料:', response.data.courses);
+          this.courses.set(response.data.courses || []);
+          this.totalResults.set(response.data.total || 0);
+        }
+        this.isLoading.set(false);
+        console.log('載入完成，課程數量:', this.courses().length);
+      },
+      error: (error) => {
+        console.error('載入課程列表失敗:', error);
+        this.loadError.set('載入課程列表失敗，請稍後再試。');
+        this.isLoading.set(false);
+      }
+    });
+  }
 
   // 處理分頁變更事件
   onPageChange(page: number): void {
     this.currentPage.set(page);
-    // 這裡可以加入 API 呼叫來載入新的課程資料
-    console.log('切換到頁面:', page);
+    this.loadCourses();
   }
 
   // 前往新增課程頁面
@@ -72,12 +113,26 @@ export default class Courses {
   // 刪除課程
   deleteCourse(courseId: number): void {
     if (confirm('確定要刪除這個課程嗎？刪除後無法恢復。')) {
-      // TODO: 呼叫 API 刪除課程
-      console.log('刪除課程:', courseId);
-      alert('課程刪除成功！(開發中)');
+      this.courseService.deleteApiCoursesId(courseId).subscribe({
+        next: () => {
+          alert('課程刪除成功！');
+          this.loadCourses(); // 重新載入課程列表
+        },
+        error: (error) => {
+          console.error('刪除課程失敗:', error);
 
-      // 重新載入課程列表
-      // this.loadCourses();
+          let errorMessage = '刪除課程失敗，請稍後再試。';
+          if (error.status === 403) {
+            errorMessage = '您沒有權限刪除此課程。';
+          } else if (error.status === 404) {
+            errorMessage = '課程不存在或已被刪除。';
+          } else if (error.status === 400) {
+            errorMessage = '無法刪除已發布的課程，請先將課程設為草稿。';
+          }
+
+          alert(errorMessage);
+        }
+      });
     }
   }
 }

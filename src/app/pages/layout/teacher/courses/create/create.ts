@@ -7,6 +7,7 @@ import { InputText } from '@components/form/input-text/input-text';
 import { InputNumber } from '@components/form/input-number/input-number';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
+import { CourseStatusManagementService } from '@app/api/generated/course-status-management/course-status-management.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
 import { TagItem } from '@app/api/generated/talentMatchAPI.schemas';
 
@@ -27,6 +28,7 @@ export default class CourseCreate implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private courseService = inject(CourseManagementService);
+  private courseStatusService = inject(CourseStatusManagementService);
   private tagsService = inject(TagsService);
 
   // 表單
@@ -35,6 +37,9 @@ export default class CourseCreate implements OnInit {
   // 圖片預覽
   imagePreview = signal<string | null>(null);
   imageFile = signal<File | null>(null);
+
+  // 課程 ID (儲存後用於提交審核)
+  savedCourseId = signal<number | null>(null);
 
   // 城市選項 (使用 ID 對應 API 需求)
   cities = signal<SelectOption[]>([
@@ -203,6 +208,109 @@ export default class CourseCreate implements OnInit {
     if (input) input.value = '';
   }
 
+  // 提交審核
+  submitForReview(): void {
+    if (this.courseForm.valid) {
+      // 先儲存課程
+      this.saveCourseAndSubmit();
+    } else {
+      alert('請填寫所有必填欄位');
+    }
+  }
+
+  // 儲存課程並提交審核
+  private saveCourseAndSubmit(): void {
+    const formData = this.courseForm.getRawValue();
+
+    // 準備課程基本資料
+    const courseData = {
+      name: formData.name,
+      content: formData.content,
+      main_category_id: formData.main_category_id,
+      sub_category_id: formData.sub_category_id,
+      city_id: formData.city_id,
+      survey_url: formData.survey_url || null,
+      purchase_message: formData.purchase_message || null
+    };
+
+    // 準備價格方案資料
+    const priceOptions = formData.course_plans.map((plan: any) => ({
+      price: plan.price,
+      quantity: plan.quantity
+    }));
+
+    // 準備 API 請求資料
+    const requestData = {
+      courseData: JSON.stringify(courseData),
+      priceOptions: JSON.stringify(priceOptions),
+      courseImage: this.imageFile() || undefined
+    };
+
+    console.log('準備發送資料:', requestData);
+
+    // 呼叫 API 建立課程
+    this.courseService.postApiCourses(requestData).subscribe({
+      next: (response) => {
+        console.log('課程建立成功:', response);
+        // 建立成功後立即提交審核
+        if (response.data && response.data.course && response.data.course.id) {
+          this.submitCourseForReview(response.data.course.id);
+        } else {
+          alert('課程建立成功！');
+          this.goBack();
+        }
+      },
+      error: (error) => {
+        console.error('課程建立失敗:', error);
+        this.handleSaveError(error);
+      }
+    });
+  }
+
+  // 提交課程審核
+  private submitCourseForReview(courseId: number): void {
+    this.courseStatusService.postApiCoursesIdSubmit(courseId).subscribe({
+      next: () => {
+        alert('課程已提交審核，等待管理員審核！');
+        this.goBack();
+      },
+      error: (error) => {
+        console.error('提交審核失敗:', error);
+
+        let errorMessage = '提交審核失敗，但課程已建立成功。';
+        if (error.status === 400) {
+          errorMessage = '課程狀態不符合提交條件。';
+        } else if (error.status === 403) {
+          errorMessage = '您沒有權限提交此課程審核。';
+        } else if (error.status === 404) {
+          errorMessage = '課程不存在。';
+        }
+
+        alert(errorMessage);
+        this.goBack();
+      }
+    });
+  }
+
+  // 處理儲存錯誤
+  private handleSaveError(error: any): void {
+    let errorMessage = '課程建立失敗，請稍後再試。';
+
+    if (error.status === 400) {
+      errorMessage = '請檢查輸入的資料是否正確。';
+    } else if (error.status === 401) {
+      errorMessage = '請先登入後再建立課程。';
+    } else if (error.status === 403) {
+      errorMessage = '您沒有權限建立課程。';
+    } else if (error.status === 413) {
+      errorMessage = '圖片檔案過大，請選擇小於 10MB 的圖片。';
+    } else if (error.status >= 500) {
+      errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
+    }
+
+    alert(errorMessage);
+  }
+
   // 儲存課程
   saveCourse(): void {
     if (this.courseForm.valid) {
@@ -243,23 +351,7 @@ export default class CourseCreate implements OnInit {
         },
         error: (error) => {
           console.error('課程建立失敗:', error);
-
-          // 處理不同類型的錯誤
-          let errorMessage = '課程建立失敗，請稍後再試。';
-
-          if (error.status === 400) {
-            errorMessage = '請檢查輸入的資料是否正確。';
-          } else if (error.status === 401) {
-            errorMessage = '請先登入後再建立課程。';
-          } else if (error.status === 403) {
-            errorMessage = '您沒有權限建立課程。';
-          } else if (error.status === 413) {
-            errorMessage = '圖片檔案過大，請選擇小於 10MB 的圖片。';
-          } else if (error.status >= 500) {
-            errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
-          }
-
-          alert(errorMessage);
+          this.handleSaveError(error);
         }
       });
     } else {

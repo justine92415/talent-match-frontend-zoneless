@@ -97,6 +97,7 @@
             <!-- 課程狀態 -->
             <div class="w-40 px-4 flex items-center">
               <div class="flex flex-col gap-1">
+                <!-- 課程狀態 -->
                 <span
                   class="px-2 py-1 rounded-sm text-sm text-center"
                   [class]="courseItem.status === 'published' ? 'text-green-600 bg-green-100' :
@@ -110,26 +111,44 @@
                     @default { {{ courseItem.status }} }
                   }
                 </span>
+
+                <!-- 審核狀態 -->
+                @if (courseItem.application_status) {
+                  <span
+                    class="px-2 py-1 rounded-sm text-xs text-center"
+                    [class]="courseItem.application_status === 'approved' ? 'text-green-700 bg-green-50' :
+                             courseItem.application_status === 'pending' ? 'text-yellow-700 bg-yellow-50' :
+                             courseItem.application_status === 'rejected' ? 'text-red-700 bg-red-50' :
+                             'text-grey-66 bg-grey-d4'"
+                  >
+                    @switch (courseItem.application_status) {
+                      @case ('approved') { 已核准 }
+                      @case ('pending') { 審核中 }
+                      @case ('rejected') { 已拒絕 }
+                      @default { {{ courseItem.application_status }} }
+                    }
+                  </span>
+                }
               </div>
             </div>
 
             <!-- 上下架開關 -->
             <div class="w-32 px-4 flex items-center justify-center">
-              @if (courseItem.canToggle) {
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    class="sr-only peer"
-                    [checked]="courseItem.isPublished"
-                    (change)="toggleCourseStatus(courseItem)"
-                  />
-                  <div
-                    class="relative w-11 h-6 bg-grey-d4 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
-                  ></div>
-                </label>
-              } @else {
-                <span class="text-sm text-grey-66">無法操作</span>
-              }
+              <label class="relative inline-flex items-center" [class.cursor-pointer]="courseItem.canToggle" [class.cursor-not-allowed]="!courseItem.canToggle">
+                <input
+                  type="checkbox"
+                  class="sr-only peer"
+                  [checked]="courseItem.isPublished"
+                  [disabled]="!courseItem.canToggle"
+                  (change)="toggleCourseStatus(courseItem)"
+                />
+                <div
+                  class="relative w-11 h-6 rounded-full transition-all peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"
+                  [class]="courseItem.canToggle ?
+                           (courseItem.isPublished ? 'bg-primary peer-focus:outline-none peer-checked:bg-primary' : 'bg-grey-d4 peer-focus:outline-none peer-checked:bg-primary') :
+                           (courseItem.isPublished ? 'bg-grey-cc opacity-50' : 'bg-grey-e9 opacity-50')"
+                ></div>
+              </label>
             </div>
 
             <!-- 操作按鈕 -->

@@ -208,6 +208,15 @@
 
       <tmf-button
         type="button"
+        class="flex-1 h-10"
+        variant="primary"
+        (click)="submitForReview()"
+        [disabled]="!courseForm.valid">
+        提交審核
+      </tmf-button>
+
+      <tmf-button
+        type="button"
         class="h-10"
         variant="secondary"
         (click)="cancel()">

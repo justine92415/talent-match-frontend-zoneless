@@ -37,22 +37,30 @@ export default class Courses implements OnInit {
       ...course,
       imageUrl: course.main_image || null,
       isPublished: course.status === 'published',
-      canToggle: course.status === 'draft' || course.status === 'published',
+      canToggle: this.canToggleStatus(course),
       actions: this.calculateCourseActions(course)
     }));
   });
+
+  // 判斷是否可以切換狀態 (私有方法，只在 computed 中使用)
+  private canToggleStatus(course: CourseBasicInfo): boolean {
+    // 只有草稿且審核通過的課程可以發布
+    if (course.status === 'draft' && course.application_status === 'approved') {
+      return true;
+    }
+    // 已發布的課程可以下架
+    if (course.status === 'published') {
+      return true;
+    }
+    return false;
+  }
 
   // 計算課程可用操作 (私有方法，只在 computed 中使用)
   private calculateCourseActions(course: CourseBasicInfo): string[] {
     const actions = ['view'];
 
-    // 根據課程狀態決定可用操作
+    // 只有草稿狀態才可以編輯和刪除
     if (course.status === 'draft') {
-      actions.push('edit', 'delete');
-    } else if (course.status === 'published') {
-      // 已發布的課程不能編輯或刪除
-    } else {
-      // 其他狀態 (archived 等) 可以編輯和刪除
       actions.push('edit', 'delete');
     }
 
@@ -115,11 +123,16 @@ export default class Courses implements OnInit {
 
   // 切換課程發布狀態 (上/下架)
   toggleCourseStatus(course: CourseBasicInfo): void {
+    // 檢查是否可以切換狀態
+    if (!this.canToggleStatus(course)) {
+      return; // 如果不能切換，直接返回
+    }
+
     if (course.status === 'published') {
       // 已發布的課程 -> 封存
       this.archiveCourse(course.id!);
-    } else if (course.status === 'draft') {
-      // 草稿狀態 -> 發布
+    } else if (course.status === 'draft' && course.application_status === 'approved') {
+      // 草稿且已核准 -> 發布
       this.publishCourse(course.id!);
     }
   }

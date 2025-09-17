@@ -4065,8 +4065,8 @@ export type GetApiCoursesParams = {
 };
 
 export type PutApiCoursesId400 =
-  | UpdateCourseValidationErrorResponse
-  | UpdateCourseBusinessErrorResponse;
+  | CreateCourseValidationErrorResponse
+  | CreateCourseBusinessErrorResponse;
 
 export type PostApiFilesUploadBody = {
   /** 要上傳的檔案列表 */

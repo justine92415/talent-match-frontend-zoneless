@@ -318,8 +318,8 @@ export default class CourseEdit implements OnInit {
 
     const formData = this.courseForm.getRawValue();
 
-    // 準備課程更新資料
-    const updateData = {
+    // 準備課程基本資料
+    const courseData = {
       name: formData.name,
       content: formData.content,
       main_category_id: formData.main_category_id,
@@ -329,10 +329,23 @@ export default class CourseEdit implements OnInit {
       purchase_message: formData.purchase_message || null
     };
 
-    console.log('更新課程資料:', updateData);
+    // 準備價格方案資料
+    const priceOptions = formData.course_plans.map((plan: any) => ({
+      price: plan.price,
+      quantity: plan.quantity
+    }));
+
+    // 準備 API 請求資料
+    const requestData = {
+      courseData: JSON.stringify(courseData),
+      priceOptions: JSON.stringify(priceOptions),
+      courseImage: this.imageFile() || null
+    };
+
+    console.log('更新課程資料:', requestData);
 
     // 先更新課程
-    this.courseService.putApiCoursesId(courseId, updateData).subscribe({
+    this.courseService.putApiCoursesId(courseId, requestData).subscribe({
       next: (response) => {
         console.log('課程更新成功:', response);
         // 更新成功後提交審核
@@ -378,8 +391,8 @@ export default class CourseEdit implements OnInit {
 
       const formData = this.courseForm.getRawValue();
 
-      // 準備課程更新資料
-      const updateData = {
+      // 準備課程基本資料
+      const courseData = {
         name: formData.name,
         content: formData.content,
         main_category_id: formData.main_category_id,
@@ -389,9 +402,22 @@ export default class CourseEdit implements OnInit {
         purchase_message: formData.purchase_message || null
       };
 
-      console.log('更新課程資料:', updateData);
+      // 準備價格方案資料
+      const priceOptions = formData.course_plans.map((plan: any) => ({
+        price: plan.price,
+        quantity: plan.quantity
+      }));
 
-      this.courseService.putApiCoursesId(courseId, updateData).subscribe({
+      // 準備 API 請求資料
+      const requestData = {
+        courseData: JSON.stringify(courseData),
+        priceOptions: JSON.stringify(priceOptions),
+        courseImage: this.imageFile() || null
+      };
+
+      console.log('更新課程資料:', requestData);
+
+      this.courseService.putApiCoursesId(courseId, requestData).subscribe({
         next: (response) => {
           console.log('課程更新成功:', response);
           alert('課程更新成功！');

@@ -44,9 +44,8 @@ import type {
   GetCourseForEditSuccessResponse,
   GetCourseListSuccessResponse,
   GetCourseSuccessResponse,
+  IntegratedCourseCreateRequest,
   PostApiCoursesBody,
-  UpdateCourseRequest,
-  UpdateCourseSuccessResponse,
 } from '../talentMatchAPI.schemas';
 
 interface HttpClientOptions {
@@ -156,40 +155,53 @@ export class CourseManagementService {
   /**
  * 更新指定的課程資訊，需要教師身份認證。只能更新自己的課程。
 
+**功能特性**：
+- 支援課程基本資料更新
+- 支援課程圖片上傳和替換（自動清理舊圖片）
+- 支援價格方案的完整替換（新增、修改、刪除）
+- 使用 multipart/form-data 格式上傳
+
 **業務邏輯**：
-- 驗證使用者具有教師權限
+- 驗證使用者具有教師權限且已通過審核
 - 驗證課程存在且為使用者所擁有
-- 驗證請求參數 (所有參數皆為選填)
-- 更新課程資料並回傳完整課程資訊
+- 如有上傳新圖片，會自動替換並清理舊圖片
+- 價格方案會完全替換（不是增量更新）
+- 所有參數皆為選填，未提供的欄位保持原值
 - 自動更新 updated_at 時間戳
 
- * @summary 更新課程資訊
+ * @summary 更新課程資訊（支援圖片上傳和價格方案編輯）
  */
-  putApiCoursesId<TData = UpdateCourseSuccessResponse>(
+  putApiCoursesId<TData = CreateCourseSuccessResponse>(
     id: number,
-    updateCourseRequest: UpdateCourseRequest,
+    integratedCourseCreateRequest: IntegratedCourseCreateRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  putApiCoursesId<TData = UpdateCourseSuccessResponse>(
+  putApiCoursesId<TData = CreateCourseSuccessResponse>(
     id: number,
-    updateCourseRequest: UpdateCourseRequest,
+    integratedCourseCreateRequest: IntegratedCourseCreateRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  putApiCoursesId<TData = UpdateCourseSuccessResponse>(
+  putApiCoursesId<TData = CreateCourseSuccessResponse>(
     id: number,
-    updateCourseRequest: UpdateCourseRequest,
+    integratedCourseCreateRequest: IntegratedCourseCreateRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  putApiCoursesId<TData = UpdateCourseSuccessResponse>(
+  putApiCoursesId<TData = CreateCourseSuccessResponse>(
     id: number,
-    updateCourseRequest: UpdateCourseRequest,
+    integratedCourseCreateRequest: IntegratedCourseCreateRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.put<TData>(
-      `/api/courses/${id}`,
-      updateCourseRequest,
-      options,
-    );
+    const formData = new FormData();
+    formData.append(`courseData`, integratedCourseCreateRequest.courseData);
+    formData.append(`priceOptions`, integratedCourseCreateRequest.priceOptions);
+    if (
+      integratedCourseCreateRequest.courseImage !== undefined &&
+      integratedCourseCreateRequest.courseImage !== null
+    ) {
+      formData.append(`courseImage`, integratedCourseCreateRequest.courseImage);
+    }
+
+    return this.http.put<TData>(`/api/courses/${id}`, formData, options);
   }
   /**
  * 取得指定課程的詳細資訊。根據使用者身份和課程狀態決定存取權限。
@@ -307,7 +319,7 @@ export type PostApiCoursesClientResult =
 export type GetApiCoursesClientResult =
   NonNullable<GetCourseListSuccessResponse>;
 export type PutApiCoursesIdClientResult =
-  NonNullable<UpdateCourseSuccessResponse>;
+  NonNullable<CreateCourseSuccessResponse>;
 export type GetApiCoursesIdClientResult = NonNullable<GetCourseSuccessResponse>;
 export type DeleteApiCoursesIdClientResult =
   NonNullable<DeleteCourseSuccessResponse>;

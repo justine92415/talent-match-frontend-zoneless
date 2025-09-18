@@ -62,6 +62,11 @@ export default class Courses implements OnInit {
     // 只有草稿狀態才可以編輯和刪除
     if (course.status === 'draft') {
       actions.push('edit', 'delete');
+
+      // 草稿狀態且尚未審核或被拒絕時可以提交審核
+      if (!course.application_status || course.application_status === 'rejected') {
+        actions.push('submit');
+      }
     }
 
     return actions;
@@ -181,6 +186,34 @@ export default class Courses implements OnInit {
             errorMessage = '課程狀態不符合下架條件。';
           } else if (error.status === 403) {
             errorMessage = '您沒有權限下架此課程。';
+          } else if (error.status === 404) {
+            errorMessage = '課程不存在。';
+          } else if (error.status >= 500) {
+            errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
+          }
+
+          alert(errorMessage);
+        }
+      });
+    }
+  }
+
+  // 提交課程審核
+  submitCourse(courseId: number): void {
+    if (confirm('確定要提交此課程進行審核嗎？提交後將無法編輯課程內容，直到審核完成。')) {
+      this.courseStatusService.postApiCoursesIdSubmit(courseId).subscribe({
+        next: () => {
+          alert('課程已成功提交審核！');
+          this.loadCourses(); // 重新載入課程列表
+        },
+        error: (error) => {
+          console.error('提交審核失敗:', error);
+
+          let errorMessage = '提交審核失敗，請稍後再試。';
+          if (error.status === 400) {
+            errorMessage = '課程內容不符合審核條件，請檢查課程資訊是否完整。';
+          } else if (error.status === 403) {
+            errorMessage = '您沒有權限提交此課程審核。';
           } else if (error.status === 404) {
             errorMessage = '課程不存在。';
           } else if (error.status >= 500) {

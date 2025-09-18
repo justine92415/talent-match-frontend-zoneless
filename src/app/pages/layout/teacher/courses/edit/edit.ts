@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
@@ -7,9 +7,9 @@ import { InputText } from '@components/form/input-text/input-text';
 import { InputNumber } from '@components/form/input-number/input-number';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
-import { CourseStatusManagementService } from '@app/api/generated/course-status-management/course-status-management.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
 import { TagItem } from '@app/api/generated/talentMatchAPI.schemas';
+import { Cities } from '@share/cities';
 
 
 @Component({
@@ -30,7 +30,6 @@ export default class CourseEdit implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private courseService = inject(CourseManagementService);
-  private courseStatusService = inject(CourseStatusManagementService);
   private tagsService = inject(TagsService);
 
   // 表單
@@ -47,31 +46,34 @@ export default class CourseEdit implements OnInit {
   imagePreview = signal<string | null>(null);
   imageFile = signal<File | null>(null);
 
-  // 城市選項 (使用 ID 對應 API 需求)
+  // 城市選項 (值改為字串)
   cities = signal<SelectOption[]>([
-    { value: 1, label: '臺北市' },
-    { value: 2, label: '基隆市' },
-    { value: 3, label: '新北市' },
-    { value: 4, label: '連江縣' },
-    { value: 5, label: '宜蘭縣' },
-    { value: 6, label: '新竹市' },
-    { value: 7, label: '新竹縣' },
-    { value: 8, label: '桃園市' },
-    { value: 9, label: '苗栗縣' },
-    { value: 10, label: '臺中市' },
-    { value: 11, label: '彰化縣' },
-    { value: 12, label: '南投縣' },
-    { value: 13, label: '嘉義市' },
-    { value: 14, label: '嘉義縣' },
-    { value: 15, label: '雲林縣' },
-    { value: 16, label: '臺南市' },
-    { value: 17, label: '高雄市' },
-    { value: 18, label: '澎湖縣' },
-    { value: 19, label: '金門縣' },
-    { value: 20, label: '屏東縣' },
-    { value: 21, label: '臺東縣' },
-    { value: 22, label: '花蓮縣' }
+    { value: '臺北市', label: '臺北市' },
+    { value: '基隆市', label: '基隆市' },
+    { value: '新北市', label: '新北市' },
+    { value: '連江縣', label: '連江縣' },
+    { value: '宜蘭縣', label: '宜蘭縣' },
+    { value: '新竹市', label: '新竹市' },
+    { value: '新竹縣', label: '新竹縣' },
+    { value: '桃園市', label: '桃園市' },
+    { value: '苗栗縣', label: '苗栗縣' },
+    { value: '臺中市', label: '臺中市' },
+    { value: '彰化縣', label: '彰化縣' },
+    { value: '南投縣', label: '南投縣' },
+    { value: '嘉義市', label: '嘉義市' },
+    { value: '嘉義縣', label: '嘉義縣' },
+    { value: '雲林縣', label: '雲林縣' },
+    { value: '臺南市', label: '臺南市' },
+    { value: '高雄市', label: '高雄市' },
+    { value: '澎湖縣', label: '澎湖縣' },
+    { value: '金門縣', label: '金門縣' },
+    { value: '屏東縣', label: '屏東縣' },
+    { value: '臺東縣', label: '臺東縣' },
+    { value: '花蓮縣', label: '花蓮縣' }
   ]);
+
+  // 區域選項 (根據城市動態過濾)
+  districts = signal<SelectOption[]>([]);
 
   // 標籤資料
   tagsData = signal<TagItem[]>([]);
@@ -88,11 +90,44 @@ export default class CourseEdit implements OnInit {
       content: ['', [Validators.required, Validators.maxLength(2000)]],
       main_category_id: [null, Validators.required],
       sub_category_id: [null, Validators.required],
-      city_id: [null, Validators.required],
+      city: [null, Validators.required],
+      district: ['', Validators.maxLength(50)],
+      address: ['', Validators.maxLength(200)],
       survey_url: [''],
       purchase_message: ['', Validators.maxLength(500)],
       course_plans: this.fb.array([this.createCoursePlanGroup(true)])
     });
+
+    // 監聽城市變更，更新區域選項並清空區域選擇
+    this.courseForm.get('city')?.valueChanges.subscribe((city: string | null) => {
+      this.updateDistrictOptions(city);
+      this.courseForm.get('district')?.setValue('');
+    });
+  }
+
+  /**
+   * 更新區域選項 - 根據選擇的城市從 Cities 資料動態生成
+   * @param city 選擇的城市名稱
+   */
+  updateDistrictOptions(city: string | null) {
+    this.districts.set([]);
+
+    if (!city) {
+      return;
+    }
+
+    // 找到對應的城市資料
+    const selectedCity = Cities.find(cityData => cityData.name === city);
+
+    if (selectedCity) {
+      // 將鄉鎮區轉換為選項格式
+      const districtOptions: SelectOption[] = selectedCity.districts.map(district => ({
+        value: district.name,
+        label: district.name
+      }));
+
+      this.districts.set(districtOptions);
+    }
   }
 
   ngOnInit() {
@@ -183,10 +218,17 @@ export default class CourseEdit implements OnInit {
       content: courseData.content,
       main_category_id: courseData.main_category_id,
       sub_category_id: courseData.sub_category_id,
-      city_id: courseData.city_id,
+      city: courseData.city,
+      district: courseData.district,
+      address: courseData.address,
       survey_url: courseData.survey_url,
       purchase_message: courseData.purchase_message
     });
+
+    // 如果有城市資料，更新區域選項
+    if (courseData.city) {
+      this.updateDistrictOptions(courseData.city);
+    }
 
     // 設定主類別選中狀態
     this.selectedMainCategoryId.set(courseData.main_category_id);
@@ -301,87 +343,6 @@ export default class CourseEdit implements OnInit {
     if (input) input.value = '';
   }
 
-  // 提交審核
-  submitForReview(): void {
-    if (this.courseForm.valid) {
-      // 先儲存課程，然後提交審核
-      this.saveCourseAndSubmit();
-    } else {
-      alert('請填寫所有必填欄位');
-    }
-  }
-
-  // 儲存課程並提交審核
-  private saveCourseAndSubmit(): void {
-    const courseId = this.courseId();
-    if (!courseId) return;
-
-    const formData = this.courseForm.getRawValue();
-
-    // 準備課程基本資料
-    const courseData = {
-      name: formData.name,
-      content: formData.content,
-      main_category_id: formData.main_category_id,
-      sub_category_id: formData.sub_category_id,
-      city_id: formData.city_id,
-      survey_url: formData.survey_url || null,
-      purchase_message: formData.purchase_message || null
-    };
-
-    // 準備價格方案資料
-    const priceOptions = formData.course_plans.map((plan: any) => ({
-      price: plan.price,
-      quantity: plan.quantity
-    }));
-
-    // 準備 API 請求資料
-    const requestData = {
-      courseData: JSON.stringify(courseData),
-      priceOptions: JSON.stringify(priceOptions),
-      courseImage: this.imageFile() || null
-    };
-
-    console.log('更新課程資料:', requestData);
-
-    // 先更新課程
-    this.courseService.putApiCoursesId(courseId, requestData).subscribe({
-      next: (response) => {
-        console.log('課程更新成功:', response);
-        // 更新成功後提交審核
-        this.submitCourseForReview(courseId);
-      },
-      error: (error) => {
-        console.error('課程更新失敗:', error);
-        this.handleSaveError(error);
-      }
-    });
-  }
-
-  // 提交課程審核
-  private submitCourseForReview(courseId: number): void {
-    this.courseStatusService.postApiCoursesIdSubmit(courseId).subscribe({
-      next: () => {
-        alert('課程已提交審核，等待管理員審核！');
-        this.goBack();
-      },
-      error: (error) => {
-        console.error('提交審核失敗:', error);
-
-        let errorMessage = '提交審核失敗，但課程已更新成功。';
-        if (error.status === 400) {
-          errorMessage = '課程狀態不符合提交條件。';
-        } else if (error.status === 403) {
-          errorMessage = '您沒有權限提交此課程審核。';
-        } else if (error.status === 404) {
-          errorMessage = '課程不存在。';
-        }
-
-        alert(errorMessage);
-        this.goBack();
-      }
-    });
-  }
 
   // 儲存課程
   saveCourse(): void {
@@ -397,7 +358,9 @@ export default class CourseEdit implements OnInit {
         content: formData.content,
         main_category_id: formData.main_category_id,
         sub_category_id: formData.sub_category_id,
-        city_id: formData.city_id,
+        city: formData.city,
+        district: formData.district || null,
+        address: formData.address || null,
         survey_url: formData.survey_url || null,
         purchase_message: formData.purchase_message || null
       };

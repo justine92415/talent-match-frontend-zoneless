@@ -114,8 +114,22 @@
 
           <div>
             <label class="block text-sm font-medium text-grey-33 mb-2">城市</label>
-            <div class="text-grey-66">{{ (courseData()?.city_id || 0) | city }}</div>
+            <div class="text-grey-66">{{ courseData()?.city }}</div>
           </div>
+
+          @if (courseData()?.district) {
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">區域</label>
+              <div class="text-grey-66">{{ courseData()?.district }}</div>
+            </div>
+          }
+
+          @if (courseData()?.address) {
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">地址</label>
+              <div class="text-grey-66">{{ courseData()?.address }}</div>
+            </div>
+          }
 
           @if (courseData()?.survey_url) {
             <div>

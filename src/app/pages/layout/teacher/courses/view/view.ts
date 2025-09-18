@@ -6,7 +6,7 @@ import { Button } from '@components/button/button';
 import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
 import { CourseStatusPipe } from '@app/pipes/course-status.pipe';
 import { CourseStatusClassPipe } from '@app/pipes/course-status-class.pipe';
-import { CategoryPipe, SubcategoryPipe, CityPipe } from '../../../../../../shared/pipes';
+import { CategoryPipe, SubcategoryPipe } from '../../../../../../shared/pipes';
 
 // 課程資料介面
 interface CourseData {
@@ -15,7 +15,9 @@ interface CourseData {
   content: string;
   main_category_id: number;
   sub_category_id: number;
-  city_id: number;
+  city: string;
+  district?: string;
+  address?: string;
   survey_url?: string;
   purchase_message?: string;
   main_image?: string;
@@ -38,8 +40,7 @@ interface CourseData {
     CourseStatusPipe,
     CourseStatusClassPipe,
     CategoryPipe,
-    SubcategoryPipe,
-    CityPipe
+    SubcategoryPipe
   ],
   templateUrl: './view.html',
   styles: ``
@@ -110,7 +111,9 @@ export default class CourseView implements OnInit {
       content: courseData.content,
       main_category_id: courseData.main_category_id,
       sub_category_id: courseData.sub_category_id,
-      city_id: courseData.city_id,
+      city: courseData.city || '',
+      district: courseData.district,
+      address: courseData.address,
       survey_url: courseData.survey_url,
       purchase_message: courseData.purchase_message,
       main_image: courseData.main_image,

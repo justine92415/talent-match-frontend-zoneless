@@ -10,6 +10,7 @@ import { CourseManagementService } from '@app/api/generated/course-management/co
 import { CourseStatusManagementService } from '@app/api/generated/course-status-management/course-status-management.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
 import { TagItem } from '@app/api/generated/talentMatchAPI.schemas';
+import { Cities } from '@share/cities';
 
 @Component({
   selector: 'tmf-course-create',
@@ -42,30 +43,34 @@ export default class CourseCreate implements OnInit {
   savedCourseId = signal<number | null>(null);
 
   // 城市選項 (使用 ID 對應 API 需求)
+  // 城市選項 (值改為字串)
   cities = signal<SelectOption[]>([
-    { value: 1, label: '臺北市' },
-    { value: 2, label: '基隆市' },
-    { value: 3, label: '新北市' },
-    { value: 4, label: '連江縣' },
-    { value: 5, label: '宜蘭縣' },
-    { value: 6, label: '新竹市' },
-    { value: 7, label: '新竹縣' },
-    { value: 8, label: '桃園市' },
-    { value: 9, label: '苗栗縣' },
-    { value: 10, label: '臺中市' },
-    { value: 11, label: '彰化縣' },
-    { value: 12, label: '南投縣' },
-    { value: 13, label: '嘉義市' },
-    { value: 14, label: '嘉義縣' },
-    { value: 15, label: '雲林縣' },
-    { value: 16, label: '臺南市' },
-    { value: 17, label: '高雄市' },
-    { value: 18, label: '澎湖縣' },
-    { value: 19, label: '金門縣' },
-    { value: 20, label: '屏東縣' },
-    { value: 21, label: '臺東縣' },
-    { value: 22, label: '花蓮縣' }
+    { value: '臺北市', label: '臺北市' },
+    { value: '基隆市', label: '基隆市' },
+    { value: '新北市', label: '新北市' },
+    { value: '連江縣', label: '連江縣' },
+    { value: '宜蘭縣', label: '宜蘭縣' },
+    { value: '新竹市', label: '新竹市' },
+    { value: '新竹縣', label: '新竹縣' },
+    { value: '桃園市', label: '桃園市' },
+    { value: '苗栗縣', label: '苗栗縣' },
+    { value: '臺中市', label: '臺中市' },
+    { value: '彰化縣', label: '彰化縣' },
+    { value: '南投縣', label: '南投縣' },
+    { value: '嘉義市', label: '嘉義市' },
+    { value: '嘉義縣', label: '嘉義縣' },
+    { value: '雲林縣', label: '雲林縣' },
+    { value: '臺南市', label: '臺南市' },
+    { value: '高雄市', label: '高雄市' },
+    { value: '澎湖縣', label: '澎湖縣' },
+    { value: '金門縣', label: '金門縣' },
+    { value: '屏東縣', label: '屏東縣' },
+    { value: '臺東縣', label: '臺東縣' },
+    { value: '花蓮縣', label: '花蓮縣' }
   ]);
+
+  // 區域選項 (根據城市動態過濾)
+  districts = signal<SelectOption[]>([]);
 
   // 標籤資料
   tagsData = signal<TagItem[]>([]);
@@ -82,11 +87,44 @@ export default class CourseCreate implements OnInit {
       content: ['', [Validators.required, Validators.maxLength(2000)]],
       main_category_id: [null, Validators.required],
       sub_category_id: [null, Validators.required],
-      city_id: [null, Validators.required],
+      city: [null, Validators.required],
+      district: ['', Validators.maxLength(50)],
+      address: ['', Validators.maxLength(200)],
       survey_url: [''],
       purchase_message: ['', Validators.maxLength(500)],
       course_plans: this.fb.array([this.createCoursePlanGroup(true)])
     });
+
+    // 監聽城市變更，更新區域選項並清空區域選擇
+    this.courseForm.get('city')?.valueChanges.subscribe((city: string | null) => {
+      this.updateDistrictOptions(city);
+      this.courseForm.get('district')?.setValue('');
+    });
+  }
+
+  /**
+   * 更新區域選項 - 根據選擇的城市從 Cities 資料動態生成
+   * @param city 選擇的城市名稱
+   */
+  updateDistrictOptions(city: string | null) {
+    this.districts.set([]);
+
+    if (!city) {
+      return;
+    }
+
+    // 找到對應的城市資料
+    const selectedCity = Cities.find(cityData => cityData.name === city);
+
+    if (selectedCity) {
+      // 將鄉鎮區轉換為選項格式
+      const districtOptions: SelectOption[] = selectedCity.districts.map(district => ({
+        value: district.name,
+        label: district.name
+      }));
+
+      this.districts.set(districtOptions);
+    }
   }
 
   ngOnInit() {
@@ -208,109 +246,6 @@ export default class CourseCreate implements OnInit {
     if (input) input.value = '';
   }
 
-  // 提交審核
-  submitForReview(): void {
-    if (this.courseForm.valid) {
-      // 先儲存課程
-      this.saveCourseAndSubmit();
-    } else {
-      alert('請填寫所有必填欄位');
-    }
-  }
-
-  // 儲存課程並提交審核
-  private saveCourseAndSubmit(): void {
-    const formData = this.courseForm.getRawValue();
-
-    // 準備課程基本資料
-    const courseData = {
-      name: formData.name,
-      content: formData.content,
-      main_category_id: formData.main_category_id,
-      sub_category_id: formData.sub_category_id,
-      city_id: formData.city_id,
-      survey_url: formData.survey_url || null,
-      purchase_message: formData.purchase_message || null
-    };
-
-    // 準備價格方案資料
-    const priceOptions = formData.course_plans.map((plan: any) => ({
-      price: plan.price,
-      quantity: plan.quantity
-    }));
-
-    // 準備 API 請求資料
-    const requestData = {
-      courseData: JSON.stringify(courseData),
-      priceOptions: JSON.stringify(priceOptions),
-      courseImage: this.imageFile() || undefined
-    };
-
-    console.log('準備發送資料:', requestData);
-
-    // 呼叫 API 建立課程
-    this.courseService.postApiCourses(requestData).subscribe({
-      next: (response) => {
-        console.log('課程建立成功:', response);
-        // 建立成功後立即提交審核
-        if (response.data && response.data.course && response.data.course.id) {
-          this.submitCourseForReview(response.data.course.id);
-        } else {
-          alert('課程建立成功！');
-          this.goBack();
-        }
-      },
-      error: (error) => {
-        console.error('課程建立失敗:', error);
-        this.handleSaveError(error);
-      }
-    });
-  }
-
-  // 提交課程審核
-  private submitCourseForReview(courseId: number): void {
-    this.courseStatusService.postApiCoursesIdSubmit(courseId).subscribe({
-      next: () => {
-        alert('課程已提交審核，等待管理員審核！');
-        this.goBack();
-      },
-      error: (error) => {
-        console.error('提交審核失敗:', error);
-
-        let errorMessage = '提交審核失敗，但課程已建立成功。';
-        if (error.status === 400) {
-          errorMessage = '課程狀態不符合提交條件。';
-        } else if (error.status === 403) {
-          errorMessage = '您沒有權限提交此課程審核。';
-        } else if (error.status === 404) {
-          errorMessage = '課程不存在。';
-        }
-
-        alert(errorMessage);
-        this.goBack();
-      }
-    });
-  }
-
-  // 處理儲存錯誤
-  private handleSaveError(error: any): void {
-    let errorMessage = '課程建立失敗，請稍後再試。';
-
-    if (error.status === 400) {
-      errorMessage = '請檢查輸入的資料是否正確。';
-    } else if (error.status === 401) {
-      errorMessage = '請先登入後再建立課程。';
-    } else if (error.status === 403) {
-      errorMessage = '您沒有權限建立課程。';
-    } else if (error.status === 413) {
-      errorMessage = '圖片檔案過大，請選擇小於 10MB 的圖片。';
-    } else if (error.status >= 500) {
-      errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
-    }
-
-    alert(errorMessage);
-  }
-
   // 儲存課程
   saveCourse(): void {
     if (this.courseForm.valid) {
@@ -322,7 +257,9 @@ export default class CourseCreate implements OnInit {
         content: formData.content,
         main_category_id: formData.main_category_id,
         sub_category_id: formData.sub_category_id,
-        city_id: formData.city_id,
+        city: formData.city,
+        district: formData.district || null,
+        address: formData.address || null,
         survey_url: formData.survey_url || null,
         purchase_message: formData.purchase_message || null
       };
@@ -359,6 +296,26 @@ export default class CourseCreate implements OnInit {
     }
   }
 
+
+  // 處理儲存錯誤
+  private handleSaveError(error: any): void {
+    let errorMessage = '課程建立失敗，請稍後再試。';
+
+    if (error.status === 400) {
+      errorMessage = '請檢查輸入的資料是否正確。';
+    } else if (error.status === 401) {
+      errorMessage = '請先登入後再建立課程。';
+    } else if (error.status === 403) {
+      errorMessage = '您沒有權限建立課程。';
+    } else if (error.status === 413) {
+      errorMessage = '圖片檔案過大，請選擇小於 10MB 的圖片。';
+    } else if (error.status >= 500) {
+      errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
+    }
+
+    alert(errorMessage);
+  }
+
   // 取消並返回
   cancel(): void {
     if (confirm('確定要離開嗎？未儲存的變更將會遺失。')) {
@@ -367,7 +324,7 @@ export default class CourseCreate implements OnInit {
   }
 
   // 返回課程列表
-  private goBack(): void {
+  goBack(): void {
     this.router.navigate(['/dashboard/teacher/courses']);
   }
 }

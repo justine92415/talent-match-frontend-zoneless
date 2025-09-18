@@ -99,13 +99,33 @@
         </div>
 
         <!-- 城市 -->
-        <div class="w-full md:w-1/2">
+        <div class="w-full md:w-1/3">
           <label class="block text-sm font-medium text-grey-33 mb-2">城市 <span class="text-red-500">*</span></label>
           <tmf-input-select
-            formControlName="city_id"
+            formControlName="city"
             placeholder="請選擇城市"
             [options]="cities()">
           </tmf-input-select>
+        </div>
+
+        <!-- 區域 -->
+        <div class="w-full md:w-1/3">
+          <label class="block text-sm font-medium text-grey-33 mb-2">區域</label>
+          <tmf-input-select
+            formControlName="district"
+            placeholder="請選擇區域"
+            [options]="districts()"
+            [disabled]="!courseForm.get('city')?.value">
+          </tmf-input-select>
+        </div>
+
+        <!-- 地址 -->
+        <div class="w-full md:w-1/3">
+          <label class="block text-sm font-medium text-grey-33 mb-2">地址</label>
+          <tmf-input-text
+            formControlName="address"
+            placeholder="請輸入詳細地址 (選填)">
+          </tmf-input-text>
         </div>
 
         <!-- 問卷網址 -->
@@ -206,14 +226,6 @@
         儲存課程
       </tmf-button>
 
-      <tmf-button
-        type="button"
-        class="flex-1 h-10"
-        variant="primary"
-        (click)="submitForReview()"
-        [disabled]="!courseForm.valid">
-        提交審核
-      </tmf-button>
 
       <tmf-button
         type="button"

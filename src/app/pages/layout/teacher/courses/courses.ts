@@ -67,9 +67,9 @@ export default class Courses implements OnInit {
       actions.push('edit', 'delete', 'submit');
     }
 
-    // 被拒絕的課程可以重新編輯和提交審核
+    // 被拒絕的課程可以重新編輯、刪除和重新提交審核
     if (course.status === 'rejected') {
-      actions.push('edit', 'submit');
+      actions.push('edit', 'delete', 'submit');
     }
 
     return actions;
@@ -219,12 +219,25 @@ export default class Courses implements OnInit {
     });
   }
 
-  // 提交課程審核
+  // 提交課程審核（處理首次提交和重新提交）
   submitCourse(courseId: number): void {
-    if (confirm('確定要提交此課程進行審核嗎？提交後將無法編輯課程內容，直到審核完成。')) {
-      this.courseStatusService.postApiCoursesIdSubmit(courseId).subscribe({
+    // 找到對應的課程以判斷狀態
+    const course = this.courses().find(c => c.id === courseId);
+    const isResubmit = course?.status === 'rejected';
+
+    const confirmMessage = isResubmit
+      ? '確定要重新提交此課程進行審核嗎？提交後將無法編輯課程內容，直到審核完成。'
+      : '確定要提交此課程進行審核嗎？提交後將無法編輯課程內容，直到審核完成。';
+
+    if (confirm(confirmMessage)) {
+      const apiCall = isResubmit
+        ? this.courseStatusService.postApiCoursesIdResubmit(courseId)
+        : this.courseStatusService.postApiCoursesIdSubmit(courseId);
+
+      apiCall.subscribe({
         next: () => {
-          alert('課程已成功提交審核！');
+          const successMessage = isResubmit ? '課程已成功重新提交審核！' : '課程已成功提交審核！';
+          alert(successMessage);
           this.loadCourses(); // 重新載入課程列表
         },
         error: (error) => {

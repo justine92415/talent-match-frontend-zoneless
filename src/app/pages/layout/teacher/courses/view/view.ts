@@ -1,26 +1,30 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { Button } from '@components/button/button';
+import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
+import { CourseStatusPipe } from '@app/pipes/course-status.pipe';
+import { CourseStatusClassPipe } from '@app/pipes/course-status-class.pipe';
+import { CategoryPipe, SubcategoryPipe, CityPipe } from '../../../../../../shared/pipes';
 
-// 模擬課程資料介面
+// 課程資料介面
 interface CourseData {
   id: number;
   name: string;
   content: string;
-  main_category: string;
-  sub_categories: string[];
-  city: string;
+  main_category_id: number;
+  sub_category_id: number;
+  city_id: number;
   survey_url?: string;
   purchase_message?: string;
-  image_url?: string;
-  course_plans: {
-    id: number;
+  main_image?: string;
+  price_options: {
+    id?: number;
     quantity: number;
     price: number;
   }[];
-  status: 'published' | 'draft' | 'archived';
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -30,7 +34,12 @@ interface CourseData {
   imports: [
     DatePipe,
     MatIcon,
-    Button
+    Button,
+    CourseStatusPipe,
+    CourseStatusClassPipe,
+    CategoryPipe,
+    SubcategoryPipe,
+    CityPipe
   ],
   templateUrl: './view.html',
   styles: ``
@@ -38,82 +47,86 @@ interface CourseData {
 export default class CourseView implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private courseService = inject(CourseManagementService);
 
-  courseId = signal<string>('');
+  courseId = signal<number | null>(null);
   courseData = signal<CourseData | null>(null);
   isLoading = signal(true);
   error = signal<string | null>(null);
 
+  // 計算是否可以編輯課程
+  canEdit = computed(() => {
+    const status = this.courseData()?.status;
+    return status === 'draft' || status === 'rejected';
+  });
+
   ngOnInit() {
     // 取得路由參數中的課程 ID
-    this.courseId.set(this.route.snapshot.params['id']);
-    this.loadCourseData();
+    const courseIdParam = this.route.snapshot.params['id'];
+    const courseId = parseInt(courseIdParam);
+    if (!isNaN(courseId)) {
+      this.courseId.set(courseId);
+      this.loadCourseData();
+    } else {
+      this.error.set('無效的課程 ID');
+      this.isLoading.set(false);
+    }
   }
 
   private loadCourseData(): void {
+    const courseId = this.courseId();
+    if (!courseId) return;
+
     this.isLoading.set(true);
     this.error.set(null);
 
-    // TODO: 實際應該呼叫 API 取得課程資料
-    // 這裡使用模擬資料
-    setTimeout(() => {
-      const courseId = parseInt(this.courseId());
-
-      // 模擬資料
-      const mockCourse: CourseData = {
-        id: courseId,
-        name: '從零開始學吉他：初學者入門指南',
-        content: '這是一個專為初學者設計的吉他課程，包含基礎樂理、和弦練習、彈奏技巧等內容。透過系統性的教學方式，讓學員能夠在短時間內掌握吉他演奏的基本技能。',
-        main_category: '藝術才藝',
-        sub_categories: ['音樂', '吉他'],
-        city: '台北市',
-        survey_url: 'https://forms.google.com/example',
-        purchase_message: '感謝購買本課程！請準備您的吉他，我們即將開始精彩的音樂之旅。',
-        image_url: '/assets/images/guitar-course.png',
-        course_plans: [
-          { id: 1, quantity: 1, price: 800 },
-          { id: 2, quantity: 4, price: 3000 },
-          { id: 3, quantity: 8, price: 5600 }
-        ],
-        status: 'published',
-        created_at: '2024-01-15T10:30:00Z',
-        updated_at: '2024-01-20T14:45:00Z'
-      };
-
-      this.courseData.set(mockCourse);
-      this.isLoading.set(false);
-    }, 1000);
+    this.courseService.getApiCoursesIdEdit(courseId).subscribe({
+      next: (response) => {
+        console.log('課程檢視資料:', response);
+        if (response.data && response.data.course) {
+          this.transformAndSetCourseData(response.data.course, response.data.course.price_options || []);
+        }
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        console.error('載入課程資料失敗:', error);
+        let errorMessage = '載入課程資料失敗';
+        if (error.status === 404) {
+          errorMessage = '課程不存在';
+        } else if (error.status === 403) {
+          errorMessage = '您沒有權限查看此課程';
+        }
+        this.error.set(errorMessage);
+        this.isLoading.set(false);
+      }
+    });
   }
 
-  // 取得狀態顯示文字
-  getStatusText(): string {
-    const status = this.courseData()?.status;
-    switch (status) {
-      case 'published':
-        return '已上架';
-      case 'draft':
-        return '草稿';
-      case 'archived':
-        return '已下架';
-      default:
-        return '未知狀態';
-    }
+  // 轉換 API 資料為檢視用格式
+  private transformAndSetCourseData(courseData: any, priceOptions: any[]): void {
+    const transformedData: CourseData = {
+      id: courseData.id,
+      name: courseData.name,
+      content: courseData.content,
+      main_category_id: courseData.main_category_id,
+      sub_category_id: courseData.sub_category_id,
+      city_id: courseData.city_id,
+      survey_url: courseData.survey_url,
+      purchase_message: courseData.purchase_message,
+      main_image: courseData.main_image,
+      price_options: priceOptions.map(option => ({
+        id: option.id,
+        quantity: option.quantity,
+        price: option.price
+      })),
+      status: courseData.status,
+      created_at: courseData.created_at,
+      updated_at: courseData.updated_at
+    };
+
+    this.courseData.set(transformedData);
   }
 
-  // 取得狀態樣式類別
-  getStatusClass(): string {
-    const status = this.courseData()?.status;
-    switch (status) {
-      case 'published':
-        return 'bg-green-100 text-green-800';
-      case 'draft':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'archived':
-        return 'bg-grey-100 text-grey-800';
-      default:
-        return 'bg-grey-100 text-grey-800';
-    }
-  }
 
   // 前往編輯頁面
   goToEdit(): void {

@@ -8,14 +8,16 @@
 
     @if (!isLoading() && courseData()) {
       <div class="flex gap-3">
-        <tmf-button
-          type="button"
-          variant="secondary"
-          iconPosition="left"
-          iconName="settings"
-          (click)="goToEdit()">
-          編輯課程
-        </tmf-button>
+        @if (canEdit()) {
+          <tmf-button
+            type="button"
+            variant="secondary"
+            iconPosition="left"
+            iconName="settings"
+            (click)="goToEdit()">
+            編輯課程
+          </tmf-button>
+        }
 
         <tmf-button
           type="button"
@@ -65,16 +67,16 @@
       <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
         <div class="flex items-start justify-between mb-6">
           <h2 class="text-xl font-semibold text-grey-33">基本資訊</h2>
-          <span class="px-3 py-1 rounded-full text-sm font-medium {{ getStatusClass() }}">
-            {{ getStatusText() }}
+          <span [class]="courseData()?.status | courseStatusClass">
+            {{ courseData()?.status | courseStatus }}
           </span>
         </div>
 
         <!-- 課程圖片 -->
-        @if (courseData()?.image_url) {
+        @if (courseData()?.main_image) {
           <div class="mb-6">
             <img
-              [src]="courseData()?.image_url"
+              [src]="courseData()?.main_image"
               [alt]="courseData()?.name"
               class="w-64 h-48 object-cover rounded-lg border border-grey-d4">
           </div>
@@ -97,14 +99,14 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-grey-33 mb-2">主類別</label>
-              <div class="text-grey-66">{{ courseData()?.main_category }}</div>
+              <div class="text-grey-66">{{ (courseData()?.main_category_id || 0) | category }}</div>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-grey-33 mb-2">次類別</label>
               <div class="flex flex-wrap gap-2">
-                @for (category of courseData()?.sub_categories; track category) {
-                  <span class="px-2 py-1 bg-grey-f7 text-grey-33 text-sm rounded">{{ category }}</span>
+                @if (courseData()?.sub_category_id) {
+                  <span class="px-2 py-1 bg-grey-f7 text-grey-33 text-sm rounded">{{ [courseData()?.sub_category_id!] | subcategory }}</span>
                 }
               </div>
             </div>
@@ -112,7 +114,7 @@
 
           <div>
             <label class="block text-sm font-medium text-grey-33 mb-2">城市</label>
-            <div class="text-grey-66">{{ courseData()?.city }}</div>
+            <div class="text-grey-66">{{ (courseData()?.city_id || 0) | city }}</div>
           </div>
 
           @if (courseData()?.survey_url) {
@@ -142,7 +144,7 @@
         <h2 class="text-xl font-semibold text-grey-33 mb-6">課程方案</h2>
 
         <div class="space-y-4">
-          @for (plan of courseData()?.course_plans; track plan.id; let i = $index) {
+          @for (plan of courseData()?.price_options; track plan.id; let i = $index) {
             <div class="border border-grey-d4 rounded-lg p-4">
               <h3 class="font-medium text-grey-33 mb-4">方案 {{ i + 1 }}</h3>
 

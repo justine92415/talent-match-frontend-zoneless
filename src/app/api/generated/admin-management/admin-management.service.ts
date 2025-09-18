@@ -38,6 +38,8 @@ type _DeepNonNullableObject<T> = {
 import { Observable } from 'rxjs';
 
 import type {
+  GetApiAdminCourseApplications200,
+  GetApiAdminCourseApplicationsParams,
   GetApiAdminProfile200,
   GetApiAdminTeacherApplications200,
   GetApiAdminTeacherApplicationsParams,
@@ -198,6 +200,43 @@ export class AdminManagementService {
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.get<TData>(`/api/admin/teacher-applications`, {
+      ...options,
+      params: { ...params, ...options?.params },
+    });
+  }
+  /**
+ * 取得所有課程申請的列表，包含待審核、已通過、已拒絕等各種狀態的課程。
+管理員可以透過此 API 查看和管理所有課程申請案。
+
+**功能特色：**
+- 支援課程狀態篩選
+- 支援申請時間排序
+- 顯示課程和教師基本資訊
+- 支援分頁瀏覽
+
+**權限要求：**
+- 需要管理員身份認證
+- 需要課程管理權限
+
+ * @summary 取得課程申請列表
+ */
+  getApiAdminCourseApplications<TData = GetApiAdminCourseApplications200>(
+    params?: DeepNonNullable<GetApiAdminCourseApplicationsParams>,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  getApiAdminCourseApplications<TData = GetApiAdminCourseApplications200>(
+    params?: DeepNonNullable<GetApiAdminCourseApplicationsParams>,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  getApiAdminCourseApplications<TData = GetApiAdminCourseApplications200>(
+    params?: DeepNonNullable<GetApiAdminCourseApplicationsParams>,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  getApiAdminCourseApplications<TData = GetApiAdminCourseApplications200>(
+    params?: DeepNonNullable<GetApiAdminCourseApplicationsParams>,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.get<TData>(`/api/admin/course-applications`, {
       ...options,
       params: { ...params, ...options?.params },
     });
@@ -369,6 +408,8 @@ export type PostApiAdminLogoutClientResult = NonNullable<SuccessResponse>;
 export type GetApiAdminProfileClientResult = NonNullable<GetApiAdminProfile200>;
 export type GetApiAdminTeacherApplicationsClientResult =
   NonNullable<GetApiAdminTeacherApplications200>;
+export type GetApiAdminCourseApplicationsClientResult =
+  NonNullable<GetApiAdminCourseApplications200>;
 export type PostApiAdminTeachersTeacherIdApproveClientResult =
   NonNullable<SuccessResponse>;
 export type PostApiAdminTeachersTeacherIdRejectClientResult =

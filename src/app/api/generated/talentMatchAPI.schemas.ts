@@ -2960,25 +2960,38 @@ export interface CreateCourseRequest {
    */
   name: string;
   /**
-   * 課程內容描述 (必填，HTML格式)
+   * 課程內容描述 (選填，HTML格式)
    * @minLength 1
+   * @nullable
    */
-  content: string;
+  content?: string | null;
   /**
-   * 主分類 ID (必填，對應程式設計、語言學習等主分類)
+   * 主分類 ID (選填，對應程式設計、語言學習等主分類)
    * @minimum 1
+   * @nullable
    */
-  main_category_id: number;
+  main_category_id?: number | null;
   /**
-   * 次分類 ID (必填，對應前端、後端等次分類)
+   * 次分類 ID (選填，對應前端、後端等次分類)
    * @minimum 1
+   * @nullable
    */
-  sub_category_id: number;
+  sub_category_id?: number | null;
   /**
-   * 城市 ID (必填，對應課程授課城市)
-   * @minimum 1
+   * 城市 (選填，課程授課城市名稱)
+   * @nullable
    */
-  city_id: number;
+  city?: string | null;
+  /**
+   * 區域 (選填，課程授課區域名稱)
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址 (選填，課程授課詳細地址)
+   * @nullable
+   */
+  address?: string | null;
   /**
    * 問卷調查連結 (選填，用於課後回饋)
    * @nullable
@@ -3026,10 +3039,20 @@ export interface UpdateCourseRequest {
    */
   sub_category_id?: number;
   /**
-   * 城市 ID (選填，對應課程授課城市)
-   * @minimum 1
+   * 城市 (選填，課程授課城市名稱)
+   * @nullable
    */
-  city_id?: number;
+  city?: string | null;
+  /**
+   * 區域 (選填，課程授課區域名稱)
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址 (選填，課程授課詳細地址)
+   * @nullable
+   */
+  address?: string | null;
   /**
    * 問卷調查連結 (選填，用於課後回饋)
    * @nullable
@@ -3100,15 +3123,20 @@ export interface CourseBasicInfo {
    */
   sub_category_id?: number | null;
   /**
-   * 城市 ID
+   * 城市
    * @nullable
    */
-  city_id?: number | null;
+  city?: string | null;
   /**
-   * 區域 ID
+   * 區域
    * @nullable
    */
-  dist_id?: string | null;
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
   /**
    * 問卷調查連結
    * @nullable
@@ -3694,6 +3722,524 @@ export type GetCourseEditNotFoundErrorResponse = NotFoundErrorResponse &
   GetCourseEditNotFoundErrorResponseAllOf;
 
 /**
+ * 課程狀態
+ */
+export type CourseApplicationInfoStatus =
+  (typeof CourseApplicationInfoStatus)[keyof typeof CourseApplicationInfoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseApplicationInfoStatus = {
+  draft: 'draft',
+  submitted: 'submitted',
+  approved: 'approved',
+  rejected: 'rejected',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export type CourseApplicationInfoTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師 UUID */
+  uuid?: string;
+  /** 教師姓名 */
+  name?: string;
+  /** 教師信箱 */
+  email?: string;
+};
+
+export interface CourseApplicationInfo {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /** 課程內容描述（截取前200字） */
+  content?: string;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 課程狀態 */
+  status?: CourseApplicationInfoStatus;
+  /**
+   * 提交審核備註
+   * @nullable
+   */
+  submission_notes?: string | null;
+  /**
+   * 封存原因
+   * @nullable
+   */
+  archive_reason?: string | null;
+  teacher?: CourseApplicationInfoTeacher;
+  /**
+   * 主分類 ID
+   * @nullable
+   */
+  main_category_id?: number | null;
+  /**
+   * 次分類 ID
+   * @nullable
+   */
+  sub_category_id?: number | null;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+/**
+ * 排序方式 (選填，newest: 最新發布, popular: 熱門程度, price_low: 價格由低到高, price_high: 價格由高到低)
+ */
+export type PublicCourseQueryParamsSort =
+  (typeof PublicCourseQueryParamsSort)[keyof typeof PublicCourseQueryParamsSort];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseQueryParamsSort = {
+  newest: 'newest',
+  popular: 'popular',
+  price_low: 'price_low',
+  price_high: 'price_high',
+} as const;
+
+export interface PublicCourseQueryParams {
+  /**
+   * 搜尋關鍵字 (選填，在課程名稱和內容中搜尋，最大200字元)
+   * @maxLength 200
+   */
+  keyword?: string;
+  /**
+   * 主分類 ID (選填，篩選指定主分類的課程)
+   * @minimum 1
+   */
+  main_category_id?: number;
+  /**
+   * 次分類 ID (選填，篩選指定次分類的課程)
+   * @minimum 1
+   */
+  sub_category_id?: number;
+  /** 城市名稱 (選填，地區篩選) */
+  city?: string;
+  /** 排序方式 (選填，newest: 最新發布, popular: 熱門程度, price_low: 價格由低到高, price_high: 價格由高到低) */
+  sort?: PublicCourseQueryParamsSort;
+  /**
+   * 頁碼 (選填，預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量 (選填，預設為 12，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+}
+
+/**
+ * 主分類資訊
+ */
+export type PublicCourseListItemMainCategory = {
+  /** 主分類 ID */
+  id?: number;
+  /** 主分類名稱 */
+  name?: string;
+};
+
+/**
+ * 次分類資訊
+ */
+export type PublicCourseListItemSubCategory = {
+  /** 次分類 ID */
+  id?: number;
+  /** 次分類名稱 */
+  name?: string;
+};
+
+/**
+ * 教師使用者資訊
+ */
+export type PublicCourseListItemTeacherUser = {
+  /** 教師姓名 */
+  name?: string;
+  /** 教師暱稱 */
+  nick_name?: string;
+  /** 教師頭像 URL */
+  avatar_image?: string;
+};
+
+/**
+ * 教師資訊
+ */
+export type PublicCourseListItemTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師使用者資訊 */
+  user?: PublicCourseListItemTeacherUser;
+};
+
+export interface PublicCourseListItem {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID (系統生成的唯一識別碼) */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 最低價格 */
+  min_price?: number;
+  /** 最高價格 */
+  max_price?: number;
+  /** 課程評分 (字串格式的數字) */
+  rate?: string;
+  /** 評價數量 */
+  review_count?: number;
+  /** 學生人數 */
+  student_count?: number;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
+  /** 主分類資訊 */
+  main_category?: PublicCourseListItemMainCategory;
+  /** 次分類資訊 */
+  sub_category?: PublicCourseListItemSubCategory;
+  /** 教師資訊 */
+  teacher?: PublicCourseListItemTeacher;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+export interface PublicCoursePaginationInfo {
+  /** 目前頁碼 */
+  current_page?: number;
+  /** 每頁數量 */
+  per_page?: number;
+  /** 總筆數 */
+  total?: number;
+  /** 總頁數 */
+  total_pages?: number;
+}
+
+export interface PublicCourseFilters {
+  /** 排序方式 */
+  sort?: string;
+  /**
+   * 主分類 ID
+   * @nullable
+   */
+  main_category_id?: number | null;
+  /**
+   * 次分類 ID
+   * @nullable
+   */
+  sub_category_id?: number | null;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 搜尋關鍵字
+   * @nullable
+   */
+  keyword?: string | null;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type PublicCourseListSuccessResponseStatus =
+  (typeof PublicCourseListSuccessResponseStatus)[keyof typeof PublicCourseListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 公開課程列表資料、分頁資訊和篩選條件
+ */
+export type PublicCourseListSuccessResponseData = {
+  /** 公開課程列表 */
+  courses?: PublicCourseListItem[];
+  pagination?: PublicCoursePaginationInfo;
+  filters?: PublicCourseFilters;
+};
+
+export interface PublicCourseListSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: PublicCourseListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 公開課程列表資料、分頁資訊和篩選條件 */
+  data?: PublicCourseListSuccessResponseData;
+}
+
+/**
+ * 主分類資訊
+ */
+export type PublicCourseDetailMainCategory = {
+  /** 主分類 ID */
+  id?: number;
+  /** 主分類名稱 */
+  name?: string;
+};
+
+/**
+ * 次分類資訊
+ */
+export type PublicCourseDetailSubCategory = {
+  /** 次分類 ID */
+  id?: number;
+  /** 次分類名稱 */
+  name?: string;
+};
+
+export interface PublicCourseDetail {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID (系統生成的唯一識別碼) */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程內容描述
+   * @nullable
+   */
+  content?: string | null;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 課程評分 (字串格式的數字) */
+  rate?: string;
+  /** 評價數量 */
+  review_count?: number;
+  /** 學生人數 */
+  student_count?: number;
+  /** 購買次數 */
+  purchase_count?: number;
+  /**
+   * 問卷調查連結
+   * @nullable
+   */
+  survey_url?: string | null;
+  /**
+   * 購買備註訊息
+   * @nullable
+   */
+  purchase_message?: string | null;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
+  /** 主分類資訊 */
+  main_category?: PublicCourseDetailMainCategory;
+  /** 次分類資訊 */
+  sub_category?: PublicCourseDetailSubCategory;
+  /** 建立時間 */
+  created_at?: string;
+}
+
+/**
+ * 教師使用者資訊
+ */
+export type PublicCourseTeacherInfoUser = {
+  /** 教師姓名 */
+  name?: string;
+  /** 教師暱稱 */
+  nick_name?: string;
+  /** 教師頭像 URL */
+  avatar_image?: string;
+};
+
+export interface PublicCourseTeacherInfo {
+  /** 教師 ID */
+  id?: number;
+  /** 教師使用者資訊 */
+  user?: PublicCourseTeacherInfoUser;
+  /**
+   * 教師所在城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 教師所在區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 教師地址
+   * @nullable
+   */
+  address?: string | null;
+  /**
+   * 教師介紹
+   * @nullable
+   */
+  introduction?: string | null;
+  /** 教師總學生數 */
+  total_students?: number;
+  /** 教師總課程數 */
+  total_courses?: number;
+  /** 教師平均評分 */
+  average_rating?: number;
+}
+
+export interface PublicCoursePriceOption {
+  /** 價格方案 ID */
+  id?: number;
+  /** 價格方案 UUID */
+  uuid?: string;
+  /** 價格 */
+  price?: number;
+  /** 堂數 */
+  quantity?: number;
+}
+
+export interface PublicTeacherCertificate {
+  /** 證書 ID */
+  id?: number;
+  /** 證書名稱 */
+  license_name?: string;
+}
+
+export interface PublicTeacherWorkExperience {
+  /** 工作經驗 ID */
+  id?: number;
+  /** 公司名稱 */
+  company_name?: string;
+  /** 職位名稱 */
+  job_title?: string;
+  /** 開始年份 */
+  start_year?: number;
+  /**
+   * 結束年份 (null 表示目前在職)
+   * @nullable
+   */
+  end_year?: number | null;
+}
+
+export interface PublicTeacherLearningExperience {
+  /** 學習經歷 ID */
+  id?: number;
+  /** 學校名稱 */
+  school_name?: string;
+  /** 科系/部門 */
+  department?: string;
+  /** 學位類型 */
+  degree?: string;
+  /** 開始年份 */
+  start_year?: number;
+  /**
+   * 結束年份 (null 表示目前在學)
+   * @nullable
+   */
+  end_year?: number | null;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type PublicCourseDetailSuccessResponseStatus =
+  (typeof PublicCourseDetailSuccessResponseStatus)[keyof typeof PublicCourseDetailSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseDetailSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 公開課程完整詳情資料
+ */
+export type PublicCourseDetailSuccessResponseData = {
+  course?: PublicCourseDetail;
+  teacher?: PublicCourseTeacherInfo;
+  /** 課程價格方案列表 */
+  price_options?: PublicCoursePriceOption[];
+  /** 課程影片列表 (目前為空陣列) */
+  videos?: unknown[];
+  /** 課程檔案列表 (目前為空陣列) */
+  files?: unknown[];
+  /** 可預約時段列表 (目前為空陣列) */
+  available_slots?: unknown[];
+  /** 最近評價列表 (目前為空陣列) */
+  recent_reviews?: unknown[];
+  /** 推薦課程列表 (目前為空陣列) */
+  recommended_courses?: unknown[];
+  /** 教師證書列表 */
+  teacher_certificates?: PublicTeacherCertificate[];
+  /** 教師工作經驗列表 */
+  teacher_work_experiences?: PublicTeacherWorkExperience[];
+  /** 教師學習經歷列表 */
+  teacher_learning_experiences?: PublicTeacherLearningExperience[];
+};
+
+export interface PublicCourseDetailSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: PublicCourseDetailSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 公開課程完整詳情資料 */
+  data?: PublicCourseDetailSuccessResponseData;
+}
+
+export type PublicCourseNotFoundErrorResponseAllOf = {
+  code?: unknown;
+  message?: unknown;
+};
+
+export type PublicCourseNotFoundErrorResponse = NotFoundErrorResponse &
+  PublicCourseNotFoundErrorResponseAllOf;
+
+/**
  * 影片類型 (local: 本地上傳, youtube: YouTube連結)
  */
 export type VideoUploadRequestType =
@@ -3972,6 +4518,69 @@ export type GetApiAdminTeacherApplications200AllOf = {
 export type GetApiAdminTeacherApplications200 = SuccessResponse &
   GetApiAdminTeacherApplications200AllOf;
 
+export type GetApiAdminCourseApplicationsParams = {
+  /**
+ * 課程狀態篩選：
+- submitted: 待審核（已提交）
+- approved: 已核准
+- rejected: 已拒絕
+- draft: 草稿
+- published: 已發布
+- archived: 已封存
+
+ */
+  status?: GetApiAdminCourseApplicationsStatus;
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 排序方式
+   */
+  sort?: GetApiAdminCourseApplicationsSort;
+};
+
+export type GetApiAdminCourseApplicationsStatus =
+  (typeof GetApiAdminCourseApplicationsStatus)[keyof typeof GetApiAdminCourseApplicationsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiAdminCourseApplicationsStatus = {
+  submitted: 'submitted',
+  approved: 'approved',
+  rejected: 'rejected',
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export type GetApiAdminCourseApplicationsSort =
+  (typeof GetApiAdminCourseApplicationsSort)[keyof typeof GetApiAdminCourseApplicationsSort];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiAdminCourseApplicationsSort = {
+  newest: 'newest',
+  oldest: 'oldest',
+} as const;
+
+export type GetApiAdminCourseApplications200AllOfData = {
+  applications?: CourseApplicationInfo[];
+  pagination?: PaginationInfo;
+};
+
+export type GetApiAdminCourseApplications200AllOf = {
+  data?: GetApiAdminCourseApplications200AllOfData;
+};
+
+export type GetApiAdminCourseApplications200 = SuccessResponse &
+  GetApiAdminCourseApplications200AllOf;
+
 export type PostApiAdminTeachersTeacherIdRejectBody = {
   /**
    * 拒絕原因說明
@@ -4153,7 +4762,7 @@ export type PutApiCoursesCourseIdPriceOptionsId200 = SuccessResponse &
 
 export type GetApiCoursesPublicParams = {
   /**
-   * 搜索關鍵字，在課程名稱和描述中搜索
+   * 搜尋關鍵字，在課程名稱和內容中搜尋
    * @maxLength 200
    */
   keyword?: string;
@@ -4168,10 +4777,9 @@ export type GetApiCoursesPublicParams = {
    */
   sub_category_id?: number;
   /**
-   * 城市 ID，用於地區篩選
-   * @minimum 1
+   * 城市名稱，用於地區篩選
    */
-  city_id?: number;
+  city?: string;
   /**
    * 排序方式
    */
@@ -4199,25 +4807,6 @@ export const GetApiCoursesPublicSort = {
   price_low: 'price_low',
   price_high: 'price_high',
 } as const;
-
-export type GetApiCoursesPublic200AllOfData = {
-  courses?: PublicCourseBasicInfo[];
-  pagination?: PaginationInfo;
-};
-
-export type GetApiCoursesPublic200AllOf = {
-  data?: GetApiCoursesPublic200AllOfData;
-};
-
-export type GetApiCoursesPublic200 = SuccessResponse &
-  GetApiCoursesPublic200AllOf;
-
-export type GetApiCoursesPublicId200AllOf = {
-  data?: PublicCourseDetailInfo;
-};
-
-export type GetApiCoursesPublicId200 = SuccessResponse &
-  GetApiCoursesPublicId200AllOf;
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

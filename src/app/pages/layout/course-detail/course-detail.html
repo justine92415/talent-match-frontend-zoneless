@@ -1,388 +1,461 @@
-<div class="relative">
-  <div
-    [style]="{
-      backgroundImage: 'url(' + 'assets/images/guitar-course.png' + ')'
-    }"
-    class="relative h-134.5 w-full bg-cover bg-center bg-no-repeat xl:h-[575px]"
-  >
+<!-- 載入中狀態 -->
+@if (isLoading()) {
+  <div class="flex justify-center items-center py-12">
     <div
-      class="h-full w-full bg-[#10101099] px-3 pb-12 pt-6 backdrop-blur-sm xl:flex xl:items-center xl:p-0"
+      class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
+    ></div>
+    <span class="ml-3 text-grey-66">載入中...</span>
+  </div>
+}
+
+<!-- 錯誤狀態 -->
+@if (error()) {
+  <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+    <div class="flex">
+      <mat-icon class="text-red-500 mr-3">error</mat-icon>
+      <div>
+        <h3 class="text-red-800 font-medium">載入失敗</h3>
+        <p class="text-red-700 mt-1">{{ error() }}</p>
+        <tmf-button
+          type="button"
+          variant="secondary"
+          class="mt-3"
+          (click)="loadCourseDetail()"
+        >
+          重新載入
+        </tmf-button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- 課程詳情 -->
+@if (!isLoading() && !error() && courseDetail()) {
+  <div class="relative">
+    <div
+      [style]="{
+        backgroundImage: 'url(' + course().main_image + ')',
+      }"
+      class="relative h-134.5 w-full bg-cover bg-center bg-no-repeat xl:h-[575px]"
     >
       <div
-        class="flex flex-col gap-6 xl:container xl:mx-auto xl:w-320 xl:flex-row xl:justify-between"
+        class="h-full w-full bg-[#10101099] px-3 pb-12 pt-6 backdrop-blur-sm xl:flex xl:items-center xl:p-0"
       >
-        <!-- 課程縮圖 -->
         <div
-          class="box-border h-49 w-87.5 overflow-hidden rounded-xl border border-grey-9f shadow-lg xl:h-103.75 xl:w-184.5"
+          class="flex flex-col gap-6 xl:container xl:mx-auto xl:w-320 xl:flex-row xl:justify-between"
         >
-          <img
-            class="h-full w-full"
-            src="assets/images/guitar-course.png"
-            alt=""
-          />
-        </div>
-        <div class="flex flex-col gap-3 xl:flex-grow xl:py-3">
-          <!-- 標籤 -->
-          <div class="flex items-center gap-3 xl:pb-6">
-            <div
-              class="inline-block rounded bg-black p-1 text-xs font-bold text-yellow xl:p-2 xl:text-sm"
-            >
-              音樂
-            </div>
-            <div
-              class="inline-block rounded bg-black p-1 text-xs font-bold text-yellow xl:p-2 xl:text-sm"
-            >
-              吉他
-            </div>
-          </div>
-          <!-- 老師頭貼、名字 -->
-          <div class="flex items-center gap-2">
+          <!-- 課程縮圖 -->
+          <div
+            class="box-border h-49 w-87.5 overflow-hidden rounded-xl border border-grey-9f shadow-lg xl:h-103.75 xl:w-184.5"
+          >
             <img
-              class="h-8 w-8 rounded-full border border-grey-e9"
-              [src]="''"
-              alt="teacher avatar"
+              class="h-full w-full object-cover"
+              [src]="course().main_image || 'assets/images/guitar-course.png'"
+              [alt]="course().name || '課程圖片'"
             />
-            <p
-              class="cursor-pointer text-base font-medium text-white"
-              (click)="navigateToTeacherDetail()"
-            >
-              Eric Clapton
-            </p>
           </div>
-          <!-- 課程名稱 -->
-          <h1 class="text-lg font-bold text-white xl:text-3xl">
-            從零開始學吉他：初學者入門指南
-          </h1>
-          <!-- 地區、評分 -->
-          <div class="flex items-center gap-3">
-            <div
-              class="flex items-center justify-center gap-1 text-white xl:border-r xl:border-grey-9f xl:pr-[0.6875rem]"
-            >
-              <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
-                >pin_drop</mat-icon
+          <div class="flex flex-col gap-3 xl:flex-grow xl:py-3">
+            <!-- 標籤 -->
+            <div class="flex items-center gap-3 xl:pb-6">
+              <div
+                class="inline-block rounded bg-black p-1 text-xs font-bold text-yellow xl:p-2 xl:text-sm"
               >
-              <p>台北市 永和區</p>
+                {{ course().main_category?.name }}
+              </div>
+              <div
+                class="inline-block rounded bg-black p-1 text-xs font-bold text-yellow xl:p-2 xl:text-sm"
+              >
+                {{ course().sub_category?.name }}
+              </div>
             </div>
-            <div
-              class="font-inter flex h-full items-center justify-center gap-1 text-white xl:border-r xl:border-grey-9f xl:pr-[0.6875rem]"
-            >
-              <tmf-star-rating [rating]="4"></tmf-star-rating>
-              <p class="text-sm font-medium">5.0</p>
-              <p class="text-sm font-medium">( 23 )</p>
+            <!-- 老師頭貼、名字 -->
+            <div class="flex items-center gap-2">
+              <img
+                class="h-8 w-8 rounded-full border border-grey-e9"
+                [src]="
+                  teacher()?.user?.avatar_image ||
+                  'assets/images/teacher-avatar-1.jpg'
+                "
+                [alt]="teacher()?.user?.name + ' 頭像'"
+              />
+              <p
+                class="cursor-pointer text-base font-medium text-white"
+                (click)="navigateToTeacherDetail()"
+              >
+                {{ teacher()?.user?.name }}
+              </p>
             </div>
+            <!-- 課程名稱 -->
+            <h1 class="text-lg font-bold text-white xl:text-3xl">
+              {{ course().name }}
+            </h1>
+            <!-- 地區、評分 -->
+            <div class="flex items-center gap-3">
+              <div
+                class="flex items-center justify-center gap-1 text-white xl:border-r xl:border-grey-9f xl:pr-[0.6875rem]"
+              >
+                <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
+                  >pin_drop</mat-icon
+                >
+                <p>{{ teacher()?.city }} {{ teacher()?.district }}</p>
+              </div>
+              <div
+                class="font-inter flex h-full items-center justify-center gap-1 text-white xl:border-r xl:border-grey-9f xl:pr-[0.6875rem]"
+              >
+                <tmf-star-rating
+                  [rating]="course().rate || 0"
+                  starSize="medium"
+                ></tmf-star-rating>
+                <p class="text-sm font-medium">{{ course().rate || 0 }}</p>
+                <p class="text-sm font-medium">
+                  ( {{ course().review_count || 0 }} )
+                </p>
+              </div>
+              <div
+                class="font-inter hidden items-center gap-1 text-white xl:flex"
+              >
+                <mat-icon class="!text-xl !leading-5 !w-5 !h-5">face</mat-icon>
+                <p>{{ course().student_count || 0 }}</p>
+              </div>
+            </div>
+            <!-- 學習人數 -->
             <div
-              class="font-inter hidden items-center gap-1 text-white xl:flex"
+              class="flex items-center justify-start gap-1 text-white xl:hidden"
             >
               <mat-icon class="!text-xl !leading-5 !w-5 !h-5">face</mat-icon>
-              <p>120 人學習</p>
+              <p>學習人數資訊</p>
             </div>
-          </div>
-          <!-- 學習人數 -->
-          <div
-            class="flex items-center justify-start gap-1 text-white xl:hidden"
-          >
-            <mat-icon class="!text-xl !leading-5 !w-5 !h-5">face</mat-icon>
-            <p>120 人學習</p>
-          </div>
-          <!-- 按鈕 -->
-          <div
-            class="flex items-center gap-3 pt-6 xl:flex-grow xl:items-end xl:pt-0"
-          >
-            <tmf-button
-              class="h-10"
-              variant="tertiary"
-              iconPosition="left"
-              iconName="heart_plus"
-              >收藏課程</tmf-button
+            <!-- 按鈕 -->
+            <div
+              class="flex items-center gap-3 pt-6 xl:flex-grow xl:items-end xl:pt-0"
             >
-            <tmf-button
-              class="h-10"
-              variant="ghost"
-              iconPosition="left"
-              iconName="share"
-              >分享課程</tmf-button
-            >
+              <tmf-button
+                class="h-10"
+                variant="tertiary"
+                iconPosition="left"
+                iconName="heart_plus"
+                >收藏課程</tmf-button
+              >
+              <tmf-button
+                class="h-10"
+                variant="ghost"
+                iconPosition="left"
+                iconName="share"
+                >分享課程</tmf-button
+              >
+            </div>
           </div>
         </div>
       </div>
+      <div
+        class="h-0.5 w-full bg-gradient-to-r from-[#F7F7F7] via-[#8D0099] to-[#F7F7F7]"
+      ></div>
     </div>
-    <div
-      class="h-0.5 w-full bg-gradient-to-r from-[#F7F7F7] via-[#8D0099] to-[#F7F7F7]"
-    ></div>
-  </div>
-  <!-- nav -->
-  <nav
-    class="sticky top-0 z-50 border-b border-grey-d4 bg-white px-3 pb-4 pt-3"
-  >
-    <ul
-      class="flex items-center justify-between gap-7.5 text-base text-grey-66 xl:container xl:mx-auto xl:w-320 xl:justify-start xl:gap-8"
+    <!-- nav -->
+    <nav
+      class="sticky top-0 z-50 border-b border-grey-d4 bg-white px-3 pb-4 pt-3"
     >
-      <li>
-        <a
-          class="py-3"
-          [ngClass]="{ active: activeSection() === 'sectionA' }"
-          [routerLink]="['/course-detail/', 'course_id']"
-          fragment="sectionA"
-          >課程介紹</a
-        >
-      </li>
-      <li>
-        <a
-          class="py-3"
-          [ngClass]="{ active: activeSection() === 'sectionB' }"
-          [routerLink]="['/course-detail/', 'course_id']"
-          fragment="sectionB"
-          >授課時間</a
-        >
-      </li>
-      <li>
-        <a
-          class="py-3"
-          [ngClass]="{ active: activeSection() === 'sectionC' }"
-          [routerLink]="['/course-detail/', 'course_id']"
-          fragment="sectionC"
-          >學生評論</a
-        >
-      </li>
-      <li>
-        <a
-          class="py-3"
-          [ngClass]="{ active: activeSection() === 'sectionD' }"
-          [routerLink]="['/course-detail/', 'course_id']"
-          fragment="sectionD"
-          >教師履歷</a
-        >
-      </li>
-    </ul>
-  </nav>
-  <div
-    class="flex flex-col gap-6 pb-12 pt-6 xl:container xl:mx-auto xl:w-320 xl:flex-row xl:pb-20 xl:pt-10"
-  >
-    <div class="mb-6 flex flex-col gap-12 xl:min-w-[845px] xl:pr-6">
-      <!-- 課程介紹 -->
-      <section id="sectionA" #section>
-        <tmf-course-detail-section-title
-          >課程介紹</tmf-course-detail-section-title
-        >
-        <p
-          class="mb-4 text-sm text-grey-33 xl:text-base"
-          [innerHTML]="'course.content'"
-        ></p>
-        <!-- 影片區塊 -->
-        <div
-          class="custom-scrollbar flex w-full items-center justify-between gap-3.75 overflow-x-auto pb-8"
-        ></div>
-      </section>
-
-      <!-- 授課時間 -->
-      <section id="sectionB" #section>
-        <tmf-course-detail-section-title
-          >授課時間</tmf-course-detail-section-title
-        >
-
-        <div class="custom-scrollbar w-full overflow-x-auto pb-8">
-          <!-- 日曆 -->
-          <tmf-weekly-calendar></tmf-weekly-calendar>
-        </div>
-      </section>
-
-      <!-- 學生評論 -->
-      <section id="sectionC" #section>
-        <div class="h-9 mb-4 flex justify-between">
-          <tmf-course-detail-section-title
-            >學生評論</tmf-course-detail-section-title
+      <ul
+        class="flex items-center justify-between gap-7.5 text-base text-grey-66 xl:container xl:mx-auto xl:w-320 xl:justify-start xl:gap-8"
+      >
+        <li>
+          <a
+            class="py-3"
+            [ngClass]="{ active: activeSection() === 'sectionA' }"
+            [routerLink]="['/course-detail/', 'course_id']"
+            fragment="sectionA"
+            >課程介紹</a
           >
-          <tmf-button variant="secondary" [iconName]="'keyboard_arrow_right'">
-            <p class="text-sm font-normal">顯示所有評價</p>
-          </tmf-button>
-        </div>
-        <!-- 評論區 -->
-        <div class="flex flex-col gap-4">
-          <!-- 評論卡片 -->
-          <tmf-review-card
-            class="w-full"
-            type="bordered"
-            [review]="{
-              id: 'review-1',
-              name: 'Eric Clapton',
-              date: '2023-08-09',
-              title: '可以一展長才的平台',
-              content:
-                '可以認識不同領域的高手，並且把喜歡的領域做推廣，是一件開心的事。',
-              rating: 5,
-              avatar: '/assets/images/teacher-avatar-1.jpg'
-            }"
-          ></tmf-review-card>
-        </div>
-      </section>
+        </li>
+        <li>
+          <a
+            class="py-3"
+            [ngClass]="{ active: activeSection() === 'sectionB' }"
+            [routerLink]="['/course-detail/', 'course_id']"
+            fragment="sectionB"
+            >授課時間</a
+          >
+        </li>
+        <li>
+          <a
+            class="py-3"
+            [ngClass]="{ active: activeSection() === 'sectionC' }"
+            [routerLink]="['/course-detail/', 'course_id']"
+            fragment="sectionC"
+            >學生評論</a
+          >
+        </li>
+        <li>
+          <a
+            class="py-3"
+            [ngClass]="{ active: activeSection() === 'sectionD' }"
+            [routerLink]="['/course-detail/', 'course_id']"
+            fragment="sectionD"
+            >教師履歷</a
+          >
+        </li>
+      </ul>
+    </nav>
+    <div
+      class="flex flex-col gap-6 pb-12 pt-6 xl:container xl:mx-auto xl:w-320 xl:flex-row xl:pb-20 xl:pt-10"
+    >
+      <div class="mb-6 flex flex-col gap-12 xl:min-w-[845px] xl:pr-6">
+        <!-- 課程介紹 -->
+        <section id="sectionA" #section>
+          <tmf-course-detail-section-title
+            >課程介紹</tmf-course-detail-section-title
+          >
+          <p class="mb-4 text-sm text-grey-33 xl:text-base whitespace-pre-wrap">
+            {{ course().content || "課程介紹資訊暫無提供" }}
+          </p>
+          <!-- 影片區塊 -->
+          <div
+            class="custom-scrollbar flex w-full items-center justify-between gap-3.75 overflow-x-auto pb-8"
+          ></div>
+        </section>
 
-      <!-- 教師履歷 -->
-      <section id="sectionD" #section>
-        <tmf-course-detail-section-title
-          >教師履歷</tmf-course-detail-section-title
-        >
-        <div
-          class="flex flex-col gap-3 rounded-xl border border-orange-85 bg-white p-3 xl:gap-6 xl:p-6"
-        >
-          <div class="flex items-center gap-2 xl:gap-6">
-            <img
-              class="h-16 w-16 rounded-full border border-grey-e9 xl:h-20 xl:w-20"
-              [src]="'course.teacher.avatar'"
-              alt=""
-            />
+        <!-- 授課時間 -->
+        <section id="sectionB" #section>
+          <tmf-course-detail-section-title
+            >授課時間</tmf-course-detail-section-title
+          >
+
+          <div class="custom-scrollbar w-full overflow-x-auto pb-8">
+            <!-- 日曆 -->
+            <tmf-weekly-calendar></tmf-weekly-calendar>
+          </div>
+        </section>
+
+        <!-- 學生評論 -->
+        <section id="sectionC" #section>
+          <div class="h-9 mb-4 flex justify-between">
+            <tmf-course-detail-section-title
+              >學生評論</tmf-course-detail-section-title
+            >
+            <tmf-button variant="secondary" [iconName]="'keyboard_arrow_right'">
+              <p class="text-sm font-normal">顯示所有評價</p>
+            </tmf-button>
+          </div>
+          <!-- 評論區 -->
+          <div class="flex flex-col gap-4">
+            <!-- 評論卡片 -->
+            <tmf-review-card
+              class="w-full"
+              type="bordered"
+              [review]="{
+                id: 'review-1',
+                name: 'Eric Clapton',
+                date: '2023-08-09',
+                title: '可以一展長才的平台',
+                content:
+                  '可以認識不同領域的高手，並且把喜歡的領域做推廣，是一件開心的事。',
+                rating: 5,
+                avatar: '/assets/images/teacher-avatar-1.jpg',
+              }"
+            ></tmf-review-card>
+          </div>
+        </section>
+
+        <!-- 教師履歷 -->
+        <section id="sectionD" #section>
+          <tmf-course-detail-section-title
+            >教師履歷</tmf-course-detail-section-title
+          >
+          <div
+            class="flex flex-col gap-3 rounded-xl border border-orange-85 bg-white p-3 xl:gap-6 xl:p-6"
+          >
+            <div class="flex items-center gap-2 xl:gap-6">
+              <img
+                class="h-16 w-16 rounded-full border border-grey-e9 xl:h-20 xl:w-20"
+                [src]="'course.teacher.avatar'"
+                alt=""
+              />
+              <div>
+                <p class="text-lg font-medium text-grey-33 xl:mb-1 xl:text-2xl">
+                  Eric Clapton
+                </p>
+                <p class="text-sm font-medium text-grey-9f">
+                  累積完成 120 堂課程
+                </p>
+              </div>
+            </div>
+            <!-- 自介 -->
+            <p
+              class="line-clamp-3 text-base text-grey-33"
+              [innerHTML]="teacher()?.introduction || '教師自介資訊暫無提供'"
+            ></p>
+            <!-- 工作經驗 -->
             <div>
-              <p class="text-lg font-medium text-grey-33 xl:mb-1 xl:text-2xl">
-                Eric Clapton
-              </p>
-              <p class="text-sm font-medium text-grey-9f">
-                累積完成 120 堂課程
-              </p>
+              <p class="mb-1 text-xs text-grey-9f xl:text-sm">工作經驗</p>
+              <ul
+                class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
+              >
+                @for (
+                  work_experience of work_experiences();
+                  track work_experience.id
+                ) {
+                  <li>
+                    {{ work_experience.start_year }}-{{
+                      work_experience.end_year || "至今"
+                    }}｜{{ work_experience.company_name }}｜{{
+                      work_experience.job_title
+                    }}
+                  </li>
+                }
+              </ul>
+            </div>
+            <!-- 教育背景 -->
+            <div>
+              <p class="mb-1 text-xs text-grey-9f xl:text-sm">教育背景</p>
+              <ul
+                class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
+              >
+                @for (education of educations(); track education.id) {
+                  <li>
+                    {{ education.start_year }}-{{
+                      education.end_year || "至今"
+                    }}｜{{ education.school_name }}｜{{ education.degree }}
+                  </li>
+                }
+              </ul>
+            </div>
+            <!-- 證照證書 -->
+            <div>
+              <p class="mb-1 text-xs text-grey-9f xl:text-sm">證照證書</p>
+              <ul
+                class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
+              >
+                @for (certificate of certificates(); track certificate.id) {
+                  <li>{{ certificate.license_name }}</li>
+                }
+              </ul>
+            </div>
+            <div class="flex justify-end">
+              <button (click)="openTeacherDetailPage()">
+                <div class="flex items-center gap-1 text-primary">
+                  <p class="text-sm xl:text-base">了解更多教師履歷</p>
+                  <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
+                    >chevron_right</mat-icon
+                  >
+                </div>
+              </button>
             </div>
           </div>
-          <!-- 自介 -->
-          <p
-            class="line-clamp-3 text-base text-grey-33"
-            [innerHTML]="'course.teacher.introduction'"
-          ></p>
-          <!-- 工作經驗 -->
-          <div>
-            <p class="mb-1 text-xs text-grey-9f xl:text-sm">工作經驗</p>
-            <ul
-              class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
-            >
-              <li>2024-至今｜好棒音樂有限公司｜歌曲演唱表演人員</li>
-            </ul>
+        </section>
+      </div>
+
+      <!-- 課程方案 -->
+      <div class="w-full">
+        <div
+          class="flex flex-col gap-3 rounded-xl border border-grey-d4 bg-white p-3 xl:gap-6 xl:border-0 xl:p-6 xl:shadow-lg"
+        >
+          <div class="text-xl font-bold text-grey-33">課程方案</div>
+          <!-- 方案選擇 -->
+          <div class="flex flex-col gap-3" [formGroup]="formGroup">
+            @if (
+              courseDetail()?.price_options &&
+              (courseDetail()?.price_options)!.length > 0
+            ) {
+              @for (option of courseDetail()?.price_options; track option.id) {
+                <tmf-input-plan
+                  formControlName="purchase_item_id"
+                  [title]="option.quantity + ' 堂課程'"
+                  [price]="option.price || 0"
+                  [value]="option.id?.toString() || ''"
+                  name="purchase_item_id"
+                >
+                </tmf-input-plan>
+              }
+            } @else {
+              <p class="text-grey-66 text-sm">暫無課程方案</p>
+            }
           </div>
-          <!-- 教育背景 -->
-          <div>
-            <p class="mb-1 text-xs text-grey-9f xl:text-sm">教育背景</p>
-            <ul
-              class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
+          <!-- 立即購買、購物車 -->
+          <div
+            class="flex items-center justify-between gap-3 border-b border-dashed border-grey-d4 pb-6 xl:gap-4"
+          >
+            <tmf-button
+              class="w-full h-13"
+              variant="primary"
+              [disabled]="!this.formGroup.controls.purchase_item_id.value"
+              >立即購買</tmf-button
             >
-              <li>2018-2022｜國立台灣藝術大學－音樂學系｜學士</li>
-            </ul>
-          </div>
-          <!-- 證照證書 -->
-          <div>
-            <p class="mb-1 text-xs text-grey-9f xl:text-sm">證照證書</p>
-            <ul
-              class="list-disc pl-6 text-sm font-medium text-grey-33 xl:text-sm"
+            <button
+              class="h-13 w-13 box-border group rounded-lg border p-3 transition-all duration-300 ease-in-out hover:w-auto hover:px-4"
+              [ngClass]="{
+                'border-grey-9f bg-grey-9f text-white cursor-not-allowed':
+                  !this.formGroup.controls.purchase_item_id.value,
+                'border-primary bg-white text-primary cursor-pointer':
+                  this.formGroup.controls.purchase_item_id.value,
+              }"
+              (click)="addToCart()"
             >
-              <li>ISO 9001國際品質認證布拉格音樂機構晉級檢定合格證書</li>
-            </ul>
-          </div>
-          <div class="flex justify-end">
-            <button (click)="openTeacherDetailPage()">
-              <div class="flex items-center gap-1 text-primary">
-                <p class="text-sm xl:text-base">了解更多教師履歷</p>
-                <mat-icon class="!text-xl !leading-5 !w-5 !h-5"
-                  >chevron_right</mat-icon
+              <div
+                class="flex items-center gap-0 group-hover:gap-2 transition-all duration-300 ease-in-out"
+              >
+                <span
+                  class="material-symbols-outlined flex items-center text-xl leading-5 xl:!text-[28px] xl:!leading-7"
+                  >shopping_cart</span
+                >
+                <span
+                  class="whitespace-nowrap text-base-bold xl:text-lg-bold xl:leading-7 max-w-0 overflow-hidden transition-all duration-300 ease-in-out group-hover:max-w-30 opacity-0 group-hover:opacity-100"
+                  >加入購物車</span
                 >
               </div>
             </button>
           </div>
-        </div>
-      </section>
-    </div>
+          <!-- 問卷 -->
+          <div>
+            <p class="mb-3 text-sm text-grey-66 xl:text-base">
+              或許你想在上課前先諮詢教師
+            </p>
 
-    <!-- 課程方案 -->
-    <div class="w-full">
-      <div
-        class="flex flex-col gap-3 rounded-xl border border-grey-d4 bg-white p-3 xl:gap-6 xl:border-0 xl:p-6 xl:shadow-lg"
-      >
-        <div class="text-xl font-bold text-grey-33">課程方案</div>
-        <!-- 方案選擇 -->
-        <div class="flex flex-col gap-3" [formGroup]="formGroup">
-          <tmf-input-plan
-            formControlName="purchase_item_id"
-            title="1 堂課程"
-            [price]="1000"
-            value="course-1"
-            name="purchase_item_id">
-          </tmf-input-plan>
-          <tmf-input-plan
-            formControlName="purchase_item_id"
-            title="10 堂課程"
-            [price]="10000"
-            value="course-2"
-            name="purchase_item_id">
-          </tmf-input-plan>
+            <tmf-button
+              variant="secondary"
+              class="h-13"
+              customClasses="bg-white text-purple border border-purple hover:bg-purple hover:text-white cursor-pointer"
+            >
+              填寫課前諮詢問卷
+            </tmf-button>
+          </div>
         </div>
-        <!-- 立即購買、購物車 -->
-        <div
-          class="flex items-center justify-between gap-3 border-b border-dashed border-grey-d4 pb-6 xl:gap-4"
+      </div>
+    </div>
+    <!-- 底部固定欄位 -->
+    <div
+      class="custom-shadow sticky bottom-0 h-[92px] w-full rounded-xl bg-white px-4 py-3 xl:hidden"
+    >
+      <div class="flex gap-1 text-sm text-grey-33">
+        <p>目前方案：</p>
+        <p>單堂課程</p>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex gap-1 text-2xl font-medium text-grey-33">
+          <p>NT$</p>
+          <p>1,200</p>
+        </div>
+        <button
+          class="rounded-lg bg-primary px-4 py-3 text-base font-bold text-white"
         >
-          <tmf-button class="w-full h-13" variant="primary" [disabled]="!this.formGroup.controls.purchase_item_id.value">立即購買</tmf-button>
-          <button
-            class="h-13 w-13 box-border group rounded-lg border p-3 transition-all duration-300 ease-in-out hover:w-auto hover:px-4"
-            [ngClass]="{
-              'border-grey-9f bg-grey-9f text-white cursor-not-allowed':
-                !this.formGroup.controls.purchase_item_id.value,
-              'border-primary bg-white text-primary cursor-pointer':
-                this.formGroup.controls.purchase_item_id.value
-            }"
-            (click)="addToCart()"
-          >
-            <div class="flex items-center gap-0 group-hover:gap-2 transition-all duration-300 ease-in-out">
-              <span
-                class="material-symbols-outlined flex items-center text-xl leading-5 xl:!text-[28px] xl:!leading-7"
-                >shopping_cart</span
-              >
-              <span
-                class="whitespace-nowrap text-base-bold xl:text-lg-bold xl:leading-7 max-w-0 overflow-hidden transition-all duration-300 ease-in-out group-hover:max-w-30 opacity-0 group-hover:opacity-100"
-                >加入購物車</span
-              >
-            </div>
-          </button>
-        </div>
-        <!-- 問卷 -->
-        <div>
-          <p class="mb-3 text-sm text-grey-66 xl:text-base">
-            或許你想在上課前先諮詢教師
-          </p>
-          
-          <tmf-button variant="secondary" class="h-13" customClasses="bg-white text-purple border border-purple hover:bg-purple hover:text-white cursor-pointer"> 
-            填寫課前諮詢問卷
-          </tmf-button>
-        </div>
+          查看方案
+        </button>
       </div>
     </div>
-  </div>
-  <!-- 底部固定欄位 -->
-  <div
-    class="custom-shadow sticky bottom-0 h-[92px] w-full rounded-xl bg-white px-4 py-3 xl:hidden"
-  >
-    <div class="flex gap-1 text-sm text-grey-33">
-      <p>目前方案：</p>
-      <p>單堂課程</p>
-      
-    </div>
-    <div class="flex items-center justify-between">
-      <div class="flex gap-1 text-2xl font-medium text-grey-33">
-        <p>NT$</p>
-        <p>1,200</p>
-      </div>
-      <button
-        class="rounded-lg bg-primary px-4 py-3 text-base font-bold text-white"
-      >
-        查看方案
-      </button>
-    </div>
-  </div>
-  <!-- 推薦課程 -->
-  <div
-    class="hidden bg-grey-f7 pb-20 pt-10 xl:flex xl:items-center xl:justify-center"
-  >
-    <div class="xl:container xl:w-320">
-      <tmf-course-detail-section-title
-        >其他推薦課程</tmf-course-detail-section-title
-      >
-      <div class="flex gap-6">
-        <!-- @if (recommendCourse$ | async; as recommendCourses) { @for (
+    <!-- 推薦課程 -->
+    <div
+      class="hidden bg-grey-f7 pb-20 pt-10 xl:flex xl:items-center xl:justify-center"
+    >
+      <div class="xl:container xl:w-320">
+        <tmf-course-detail-section-title
+          >其他推薦課程</tmf-course-detail-section-title
+        >
+        <div class="flex gap-6">
+          <!-- @if (recommendCourse$ | async; as recommendCourses) { @for (
         recommendCourse of recommendCourses; track recommendCourse.course_id ) {
         <tmf-card [hoverEffect]="false" [data]="recommendCourse!"></tmf-card>
         } } -->
+        </div>
       </div>
     </div>
   </div>
-</div>
+}

@@ -38,9 +38,9 @@ type _DeepNonNullableObject<T> = {
 import { Observable } from 'rxjs';
 
 import type {
-  GetApiCoursesPublic200,
-  GetApiCoursesPublicId200,
   GetApiCoursesPublicParams,
+  PublicCourseDetailSuccessResponse,
+  PublicCourseListSuccessResponse,
 } from '../talentMatchAPI.schemas';
 
 interface HttpClientOptions {
@@ -73,32 +73,32 @@ export class PublicCoursesService {
  * 瀏覽公開課程列表，支援關鍵字搜索、分類篩選、地區篩選和多種排序方式。
 此 API 無需認證，所有用戶都可存取，只顯示已發布狀態的課程。
 
-**搜索方式：**
+**功能說明：**
 - 關鍵字搜索：在課程名稱和內容中搜索
 - 分類篩選：支援主分類和次分類篩選
 - 地區篩選：依據課程地點篩選
+- 排序選項：newest(最新)、popular(熱門)、price_low(價格低到高)、price_high(價格高到低)
 
-**排序選項：**
-- newest：最新發布優先（預設）
-- popular：熱門程度排序（依據瀏覽次數和評價）
-- price_low：價格由低到高
-- price_high：價格由高到低
+**業務邏輯：**
+- 只查詢已發布 (published) 狀態的課程
+- 支援分頁查詢，預設每頁 12 筆
+- 回傳課程基本資訊、教師資訊、價格範圍等
 
  * @summary 取得公開課程列表
  */
-  getApiCoursesPublic<TData = GetApiCoursesPublic200>(
+  getApiCoursesPublic<TData = PublicCourseListSuccessResponse>(
     params?: DeepNonNullable<GetApiCoursesPublicParams>,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  getApiCoursesPublic<TData = GetApiCoursesPublic200>(
+  getApiCoursesPublic<TData = PublicCourseListSuccessResponse>(
     params?: DeepNonNullable<GetApiCoursesPublicParams>,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  getApiCoursesPublic<TData = GetApiCoursesPublic200>(
+  getApiCoursesPublic<TData = PublicCourseListSuccessResponse>(
     params?: DeepNonNullable<GetApiCoursesPublicParams>,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  getApiCoursesPublic<TData = GetApiCoursesPublic200>(
+  getApiCoursesPublic<TData = PublicCourseListSuccessResponse>(
     params?: DeepNonNullable<GetApiCoursesPublicParams>,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
@@ -108,30 +108,36 @@ export class PublicCoursesService {
     });
   }
   /**
- * 瀏覽指定公開課程的詳細資訊，包含課程完整描述、教師資訊、價格方案、評價統計等。
+ * 瀏覽指定公開課程的詳細資訊，包含課程完整描述、教師資訊、價格方案等。
 此 API 無需認證，所有用戶都可存取。
 
 **功能說明：**
+- 只能瀏覽已發布 (published) 狀態的課程
 - 自動增加課程瀏覽次數
-- 只能瀏覽已發布狀態的課程
 - 包含教師公開資訊和課程價格方案
-- 提供評價統計資料
+- 提供完整的課程詳情資料
+
+**業務邏輯：**
+- 驗證課程存在且為已發布狀態
+- 查詢課程詳細資訊、教師資訊、價格方案
+- 異步增加瀏覽次數（不影響回應時間）
+- 回傳完整課程詳情資料結構
 
  * @summary 取得公開課程詳情
  */
-  getApiCoursesPublicId<TData = GetApiCoursesPublicId200>(
+  getApiCoursesPublicId<TData = PublicCourseDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  getApiCoursesPublicId<TData = GetApiCoursesPublicId200>(
+  getApiCoursesPublicId<TData = PublicCourseDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  getApiCoursesPublicId<TData = GetApiCoursesPublicId200>(
+  getApiCoursesPublicId<TData = PublicCourseDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  getApiCoursesPublicId<TData = GetApiCoursesPublicId200>(
+  getApiCoursesPublicId<TData = PublicCourseDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
@@ -140,6 +146,6 @@ export class PublicCoursesService {
 }
 
 export type GetApiCoursesPublicClientResult =
-  NonNullable<GetApiCoursesPublic200>;
+  NonNullable<PublicCourseListSuccessResponse>;
 export type GetApiCoursesPublicIdClientResult =
-  NonNullable<GetApiCoursesPublicId200>;
+  NonNullable<PublicCourseDetailSuccessResponse>;

@@ -7,10 +7,12 @@ import { Table } from '../../../../../components/table/table';
 import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
 import { CourseStatusManagementService } from '@app/api/generated/course-status-management/course-status-management.service';
 import { CourseBasicInfo } from '@app/api/generated/talentMatchAPI.schemas';
+import { CourseStatusPipe } from '@app/pipes/course-status.pipe';
+import { CourseStatusClassPipe } from '@app/pipes/course-status-class.pipe';
 
 @Component({
   selector: 'tmf-courses',
-  imports: [CommonModule, Pagination, Button, Table],
+  imports: [CommonModule, Pagination, Button, Table, CourseStatusPipe, CourseStatusClassPipe],
   templateUrl: './courses.html',
   styles: ``
 })
@@ -44,8 +46,8 @@ export default class Courses implements OnInit {
 
   // 判斷是否可以切換狀態 (私有方法，只在 computed 中使用)
   private canToggleStatus(course: CourseBasicInfo): boolean {
-    // 只有草稿且審核通過的課程可以發布
-    if (course.status === 'draft' && course.application_status === 'approved') {
+    // 只有已核准的課程可以發布
+    if (course.status === 'approved') {
       return true;
     }
     // 已發布的課程可以下架
@@ -59,14 +61,14 @@ export default class Courses implements OnInit {
   private calculateCourseActions(course: CourseBasicInfo): string[] {
     const actions = ['view'];
 
-    // 只有草稿狀態才可以編輯和刪除
+    // 只有草稿狀態才可以編輯、刪除和提交審核
     if (course.status === 'draft') {
-      actions.push('edit', 'delete');
+      actions.push('edit', 'delete', 'submit');
+    }
 
-      // 草稿狀態且尚未審核或被拒絕時可以提交審核
-      if (!course.application_status || course.application_status === 'rejected') {
-        actions.push('submit');
-      }
+    // 被拒絕的課程可以重新編輯和提交審核
+    if (course.status === 'rejected') {
+      actions.push('edit', 'submit');
     }
 
     return actions;
@@ -136,8 +138,8 @@ export default class Courses implements OnInit {
     if (course.status === 'published') {
       // 已發布的課程 -> 封存
       this.archiveCourse(course.id!);
-    } else if (course.status === 'draft' && course.application_status === 'approved') {
-      // 草稿且已核准 -> 發布
+    } else if (course.status === 'approved') {
+      // 已核准 -> 發布
       this.publishCourse(course.id!);
     }
   }

@@ -3045,7 +3045,7 @@ export interface UpdateCourseRequest {
 }
 
 /**
- * 課程狀態 (draft: 草稿, published: 已發布, archived: 已封存)
+ * 課程狀態 (draft: 草稿, submitted: 已提交審核, approved: 審核通過, rejected: 審核拒絕, published: 已發布, archived: 已封存)
  */
 export type CourseBasicInfoStatus =
   (typeof CourseBasicInfoStatus)[keyof typeof CourseBasicInfoStatus];
@@ -3053,23 +3053,11 @@ export type CourseBasicInfoStatus =
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CourseBasicInfoStatus = {
   draft: 'draft',
-  published: 'published',
-  archived: 'archived',
-} as const;
-
-/**
- * 審核狀態 (pending: 待審核, approved: 已通過, rejected: 已拒絕)
- * @nullable
- */
-export type CourseBasicInfoApplicationStatus =
-  | (typeof CourseBasicInfoApplicationStatus)[keyof typeof CourseBasicInfoApplicationStatus]
-  | null;
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const CourseBasicInfoApplicationStatus = {
-  pending: 'pending',
+  submitted: 'submitted',
   approved: 'approved',
   rejected: 'rejected',
+  published: 'published',
+  archived: 'archived',
 } as const;
 
 export interface CourseBasicInfo {
@@ -3131,13 +3119,8 @@ export interface CourseBasicInfo {
    * @nullable
    */
   purchase_message?: string | null;
-  /** 課程狀態 (draft: 草稿, published: 已發布, archived: 已封存) */
+  /** 課程狀態 (draft: 草稿, submitted: 已提交審核, approved: 審核通過, rejected: 審核拒絕, published: 已發布, archived: 已封存) */
   status?: CourseBasicInfoStatus;
-  /**
-   * 審核狀態 (pending: 待審核, approved: 已通過, rejected: 已拒絕)
-   * @nullable
-   */
-  application_status?: CourseBasicInfoApplicationStatus;
   /**
    * 提交審核備註
    * @nullable

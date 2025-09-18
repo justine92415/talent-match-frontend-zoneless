@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import Pagination from '../../../../../components/pagination/pagination';
 import { Button } from "@components/button/button";
 import { Table } from '../../../../../components/table/table';
+import { ToggleSwitch } from '@components/toggle-switch/toggle-switch';
 import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
 import { CourseStatusManagementService } from '@app/api/generated/course-status-management/course-status-management.service';
 import { CourseBasicInfo } from '@app/api/generated/talentMatchAPI.schemas';
@@ -12,7 +13,7 @@ import { CourseStatusClassPipe } from '@app/pipes/course-status-class.pipe';
 
 @Component({
   selector: 'tmf-courses',
-  imports: [CommonModule, Pagination, Button, Table, CourseStatusPipe, CourseStatusClassPipe],
+  imports: [CommonModule, Pagination, Button, Table, ToggleSwitch, CourseStatusPipe, CourseStatusClassPipe],
   templateUrl: './courses.html',
   styles: ``
 })
@@ -128,7 +129,7 @@ export default class Courses implements OnInit {
     this.router.navigate(['/dashboard/teacher/courses/edit', courseId]);
   }
 
-  // 切換課程發布狀態 (上/下架)
+  // 切換課程發布狀態 (上/下架) - 原有方法保持不變
   toggleCourseStatus(course: CourseBasicInfo): void {
     // 檢查是否可以切換狀態
     if (!this.canToggleStatus(course)) {
@@ -144,60 +145,78 @@ export default class Courses implements OnInit {
     }
   }
 
+  // 處理 toggle-switch 組件的事件 - 注意：checked 參數代表使用者想要的新狀態
+  onToggleSwitchChange(checked: boolean, course: CourseBasicInfo): void {
+    // 檢查是否可以切換狀態
+    if (!this.canToggleStatus(course)) {
+      return; // 如果不能切換，直接返回
+    }
+
+    if (course.status === 'published') {
+      // 要下架課程
+      if (confirm('確定要下架這個課程嗎？下架後學生將無法瀏覽和購買。')) {
+        this.archiveCourse(course.id!);
+      }
+      // 如果取消，狀態保持不變，元件會自動顯示原來的狀態
+    } else if (course.status === 'approved') {
+      // 要發布課程
+      if (confirm('確定要發布這個課程嗎？發布後學生就可以瀏覽和購買。')) {
+        this.publishCourse(course.id!);
+      }
+      // 如果取消，狀態保持不變，元件會自動顯示原來的狀態
+    }
+  }
+
   // 發布課程
   private publishCourse(courseId: number): void {
-    if (confirm('確定要發布這個課程嗎？發布後學生就可以瀏覽和購買。')) {
-      this.courseStatusService.postApiCoursesIdPublish(courseId).subscribe({
-        next: () => {
-          alert('課程發布成功！');
-          this.loadCourses(); // 重新載入課程列表
-        },
-        error: (error) => {
-          console.error('發布課程失敗:', error);
+    this.courseStatusService.postApiCoursesIdPublish(courseId).subscribe({
+      next: () => {
+        alert('課程發布成功！');
+        this.loadCourses(); // 重新載入課程列表
+      },
+      error: (error) => {
+        console.error('發布課程失敗:', error);
 
-          let errorMessage = '發布課程失敗，請稍後再試。';
-          if (error.status === 400) {
-            errorMessage = '課程狀態不符合發布條件，請確認課程已通過審核。';
-          } else if (error.status === 403) {
-            errorMessage = '您沒有權限發布此課程。';
-          } else if (error.status === 404) {
-            errorMessage = '課程不存在。';
-          } else if (error.status >= 500) {
-            errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
-          }
-
-          alert(errorMessage);
+        let errorMessage = '發布課程失敗，請稍後再試。';
+        if (error.status === 400) {
+          errorMessage = '課程狀態不符合發布條件，請確認課程已通過審核。';
+        } else if (error.status === 403) {
+          errorMessage = '您沒有權限發布此課程。';
+        } else if (error.status === 404) {
+          errorMessage = '課程不存在。';
+        } else if (error.status >= 500) {
+          errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
         }
-      });
-    }
+
+        alert(errorMessage);
+      }
+    });
   }
 
   // 封存課程
   private archiveCourse(courseId: number): void {
-    if (confirm('確定要下架這個課程嗎？下架後學生將無法瀏覽和購買。')) {
-      this.courseStatusService.postApiCoursesIdArchive(courseId).subscribe({
-        next: () => {
-          alert('課程下架成功！');
-          this.loadCourses(); // 重新載入課程列表
-        },
-        error: (error) => {
-          console.error('下架課程失敗:', error);
+    this.courseStatusService.postApiCoursesIdArchive(courseId).subscribe({
+      next: () => {
+        alert('課程下架成功！');
+        this.loadCourses(); // 重新載入課程列表
+      },
+      error: (error) => {
+        console.error('下架課程失敗:', error);
 
-          let errorMessage = '下架課程失敗，請稍後再試。';
-          if (error.status === 400) {
-            errorMessage = '課程狀態不符合下架條件。';
-          } else if (error.status === 403) {
-            errorMessage = '您沒有權限下架此課程。';
-          } else if (error.status === 404) {
-            errorMessage = '課程不存在。';
-          } else if (error.status >= 500) {
-            errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
-          }
-
-          alert(errorMessage);
+        let errorMessage = '下架課程失敗，請稍後再試。';
+        if (error.status === 400) {
+          errorMessage = '課程狀態不符合下架條件。';
+        } else if (error.status === 403) {
+          errorMessage = '您沒有權限下架此課程。';
+        } else if (error.status === 404) {
+          errorMessage = '課程不存在。';
+        } else if (error.status >= 500) {
+          errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
         }
-      });
-    }
+
+        alert(errorMessage);
+      }
+    });
   }
 
   // 提交課程審核

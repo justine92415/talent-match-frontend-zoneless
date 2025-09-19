@@ -45,6 +45,14 @@ export default class ResultTag {
   currentPage = signal(1);
   itemsPerPage = signal(12);
 
+  // 篩選選項資料
+  filterOptions: FilterOption[] = [
+    { id: 'latest', name: '最新課程' },
+    { id: 'popular', name: '最高人氣' },
+    { id: 'price-low', name: '最低價格' },
+    { id: 'price-high', name: '最高價格' }
+  ];
+
   // 使用 rxResource 管理 tags 資料
   tagsResource = rxResource({
     stream: () => this.tagsService.getApiTags().pipe(
@@ -185,6 +193,15 @@ export default class ResultTag {
     const tags = this.tagsResource.value() as TagItem[] | undefined;
     const mainCategory = tags?.find((tag: TagItem) => tag.id === selectedMainId);
     return mainCategory?.main_category || '未知分類';
+  });
+
+  // 計算篩選選項的狀態（包含選中狀態）
+  filtersWithSelection = computed(() => {
+    const selectedFilterId = this.selectedFilterId();
+    return this.filterOptions.map(filter => ({
+      ...filter,
+      isSelected: filter.id === selectedFilterId
+    }));
   });
 
   // TmfIcon getter for template

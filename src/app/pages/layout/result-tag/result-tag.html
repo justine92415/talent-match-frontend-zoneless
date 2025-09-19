@@ -99,9 +99,16 @@
       
       <!-- 篩選選項 -->
       <div class="flex gap-0">
-        <div class="flex items-center justify-center box-border px-4 border-r border-grey-d4 text-grey-66">最新課程</div>
-        <div class="flex items-center justify-center box-border px-4 border-r border-grey-d4 text-orange-55 text-base-bold">最高人氣</div>
-        <div class="flex items-center justify-center box-border px-4 border-grey-d4 text-grey-66">最低價格</div>
+        @for (filter of filtersWithSelection(); track filter.id; let isLast = $last) {
+          <div
+            (click)="selectFilter(filter.id)"
+            [class]="'flex items-center justify-center box-border px-4 cursor-pointer transition-all ' +
+                    (filter.isSelected ? 'text-orange-55 text-base-bold' : 'text-grey-66 hover:text-orange-55') +
+                    (!isLast ? ' border-r border-grey-d4' : ' border-grey-d4')"
+          >
+            {{ filter.name }}
+          </div>
+        }
       </div>
     </div>
 

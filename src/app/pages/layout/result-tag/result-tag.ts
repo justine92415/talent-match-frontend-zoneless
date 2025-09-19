@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
@@ -40,6 +40,7 @@ export default class ResultTag implements OnInit {
   private publicCoursesService = inject(PublicCoursesService);
   private tagsService = inject(TagsService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   // 篩選參數 signals
   selectedMainCategoryId = signal<number | null>(null);
@@ -274,6 +275,11 @@ export default class ResultTag implements OnInit {
     this.displayTotalResults.set(this.totalResults());
     this.currentPage.set(page);
     // rxResource 會自動重新載入課程
+  }
+
+  // 課程卡片點擊處理
+  onCourseClick(courseId: string): void {
+    this.router.navigate(['/course-detail', courseId]);
   }
 
   // 轉換 API 回應為 CourseCardData 格式

@@ -188,6 +188,7 @@
         <tmf-course-card
           *ngFor="let course of courses(); trackBy: trackByCourse"
           [course]="course"
+          (courseClick)="onCourseClick($event)"
           class="w-full">
         </tmf-course-card>
       </div>

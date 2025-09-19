@@ -27,35 +27,61 @@
           探索課程
         </h2>
       </div>
-      <div class="flex justify-start gap-6">
-        <div class="p-5 bg-white w-30 h-30 text-center text-grey-33 shadow-lg rounded-xl">
-          <mat-icon
-            class="!w-10 !h-10 !text-[40px] !leading-10 !text-primary mb-3"
-            >{{ TmfIcon.ActionKey }}</mat-icon
-          >
-          <h3 class="text-xl-bold">探索全部</h3>
+      <!-- 載入狀態 -->
+      @if (isTagsLoading()) {
+        <div class="flex justify-center items-center py-10">
+          <div class="text-lg text-grey-66">載入分類中...</div>
         </div>
+      }
 
-        <div class="p-5 bg-primary w-30 h-30 text-center text-white shadow-lg rounded-xl">
-          <mat-icon
-            class="!w-10 !h-10 !text-[40px] !leading-10 !text-white mb-3"
-            >{{ TmfIcon.Skillet }}</mat-icon
-          >
-          <h3 class="text-xl-bold">烹飪料理</h3>
+      <!-- 錯誤狀態 -->
+      @if (tagsError()) {
+        <div class="flex justify-center items-center py-10">
+          <div class="text-lg text-red-50">{{ tagsError() }}</div>
         </div>
-      </div>
-      <div class="flex justify-start gap-3">
-        <div
-          class="flex items-center justify-center rounded-lg h-10 box-border px-3 bg-primary border border-primary text-white text-base"
-        >
-          探索全部
+      }
+
+      <!-- 主分類卡片 -->
+      @if (!isTagsLoading() && !tagsError()) {
+        <div class="flex justify-start gap-6 overflow-x-auto pb-4">
+          @for (category of mainCategories(); track category.id) {
+            <div
+              (click)="selectMainCategory(category.id)"
+              [class]="'p-5 w-30 h-30 text-center shadow-lg rounded-xl cursor-pointer transition-all hover:shadow-xl ' +
+                      (category.isSelected ? 'bg-primary text-white' : 'bg-white text-grey-33')">
+              <mat-icon
+                [class]="'!w-10 !h-10 !text-[40px] !leading-10 mb-3 ' +
+                        (category.isSelected ? '!text-white' : '!text-primary')"
+                >{{ category.icon }}</mat-icon
+              >
+              <h3 class="text-xl-bold">{{ category.main_category }}</h3>
+            </div>
+          }
         </div>
-        <div
-          class="flex items-center justify-center rounded-lg h-10 box-border px-3 bg-white border border-grey-9f text-grey-33"
-        >
-          探索全部
+      }
+      <!-- 子分類標籤 -->
+      @if (!isTagsLoading() && !tagsError() && currentSubCategories().length > 0) {
+        <div class="flex justify-start gap-3 flex-wrap">
+          @for (subCategory of currentSubCategories(); track subCategory.id) {
+            <div
+              (click)="selectSubCategory(subCategory.id)"
+              [class]="'flex items-center justify-center rounded-lg h-10 box-border px-3 cursor-pointer transition-all ' +
+                      (subCategory.isSelected ?
+                        'bg-primary border border-primary text-white' :
+                        'bg-white border border-grey-9f text-grey-33 hover:border-primary hover:text-primary')"
+            >
+              {{ subCategory.name }}
+            </div>
+          }
         </div>
-      </div>
+      }
+
+      <!-- 如果沒有子分類或未選擇主分類時的提示 -->
+      @if (!isTagsLoading() && !tagsError() && selectedMainCategoryId() !== null && currentSubCategories().length === 0) {
+        <div class="flex justify-center items-center py-4">
+          <div class="text-sm text-grey-66">此分類暫無子分類</div>
+        </div>
+      }
     </div>
   </div>
 </section>
@@ -67,7 +93,7 @@
       <!-- 搜尋結果文字 -->
       <div class="flex items-end gap-2 text-3xl-bold text-grey-33">
         <span>共 {{ totalResults() }} 筆與「</span>
-        <span class="text-purple">{{ selectedCategoryName }}</span>
+        <span class="text-purple">{{ selectedCategoryName() }}</span>
         <span>」相關課程</span>
       </div>
       
@@ -79,14 +105,30 @@
       </div>
     </div>
 
+    <!-- 載入狀態 -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-20">
+        <div class="text-lg text-grey-66">載入中...</div>
+      </div>
+    }
+
+    <!-- 錯誤狀態 -->
+    @if (error()) {
+      <div class="flex justify-center items-center py-20">
+        <div class="text-lg text-red-50">{{ error() }}</div>
+      </div>
+    }
+
     <!-- 課程卡片網格 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-      <tmf-course-card 
-        *ngFor="let course of courses; trackBy: trackByCourse"
-        [course]="course"
-        class="w-full">
-      </tmf-course-card>
-    </div>
+    @if (!isLoading() && !error()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <tmf-course-card
+          *ngFor="let course of courses(); trackBy: trackByCourse"
+          [course]="course"
+          class="w-full">
+        </tmf-course-card>
+      </div>
+    }
 
     <!-- 分頁區塊 -->
     <tmf-pagination 

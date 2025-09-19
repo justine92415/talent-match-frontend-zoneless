@@ -1,4 +1,5 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { MatIconModule } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
@@ -7,7 +8,7 @@ import { TmfIconEnum } from '@share/icon.enum';
 import { PublicCoursesService } from '@app/api/generated/public-courses/public-courses.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
 import { TagItem, SubCategoryItem } from '@app/api/generated/talentMatchAPI.schemas';
-import { firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 // 定義分類介面
 interface Category {
@@ -33,31 +34,72 @@ interface FilterOption {
   templateUrl: './result-tag.html',
   styles: ``
 })
-export default class ResultTag implements OnInit {
+export default class ResultTag {
   private publicCoursesService = inject(PublicCoursesService);
   private tagsService = inject(TagsService);
 
-  selectedMainCategoryId = signal<number | null>(null); // 使用數字ID
-  selectedSubCategoryId = signal<number | null>(null); // 使用數字ID
-  selectedFilterId = 'latest'; // 預設篩選：最新課程
-
-  // 分頁相關 (使用 signals)
+  // 篩選參數 signals
+  selectedMainCategoryId = signal<number | null>(null);
+  selectedSubCategoryId = signal<number | null>(null);
+  selectedFilterId = signal('latest');
   currentPage = signal(1);
-  totalResults = signal(0);
   itemsPerPage = signal(12);
 
-  // API 狀態
-  isLoading = signal(false);
-  error = signal<string | null>(null);
-  apiCourses = signal<CourseCardData[]>([]);
+  // 使用 rxResource 管理 tags 資料
+  tagsResource = rxResource({
+    stream: () => this.tagsService.getApiTags().pipe(
+      map(response => {
+        if (response.status && response.data) {
+          return response.data;
+        }
+        throw new Error('載入分類失敗');
+      })
+    )
+  });
 
-  // 分類資料 (從 API 載入)
-  apiTags = signal<TagItem[]>([]);
-  isTagsLoading = signal(false);
-  tagsError = signal<string | null>(null);
+  // 課程查詢參數的 computed signal
+  courseParams = computed(() => {
+    const params: any = {
+      page: this.currentPage(),
+      per_page: this.itemsPerPage(),
+      sort: this.getSortValue(),
+    };
+
+    // 只有當值不為 null 時才添加參數
+    if (this.selectedMainCategoryId() !== null) {
+      params.main_category_id = this.selectedMainCategoryId();
+    }
+
+    if (this.selectedSubCategoryId() !== null) {
+      params.sub_category_id = this.selectedSubCategoryId();
+    }
+
+    return params;
+  });
+
+  // 使用 rxResource 管理課程資料
+  coursesResource = rxResource({
+    params: () => this.courseParams(),
+    stream: ({params}) => {
+      return this.publicCoursesService.getApiCoursesPublic(params).pipe(
+      map(response => {
+        if (response.data) {
+          return {
+            courses: this.transformApiCoursesToCardData(response.data.courses || []),
+            totalResults: response.data.pagination?.total || 0
+          };
+        }
+        throw new Error('載入課程失敗');
+      })
+    )
+    }
+  });
 
   // 計算主分類清單（包含探索全部），附帶圖示
   mainCategories = computed(() => {
+    const tags = this.tagsResource.value() as TagItem[] | undefined;
+    if (!tags) return [];
+
     const iconMap: Record<string, string> = {
       '藝術創作': TmfIconEnum.DrawAbstract,
       '手作工藝': TmfIconEnum.ToolsPliersWireStripper,
@@ -74,7 +116,7 @@ export default class ResultTag implements OnInit {
       isSelected: this.selectedMainCategoryId() === null
     };
 
-    const categoriesWithIcons = this.apiTags().map(tag => ({
+    const categoriesWithIcons = tags.map((tag: TagItem) => ({
       ...tag,
       icon: iconMap[tag.main_category] || TmfIconEnum.Search,
       isSelected: this.selectedMainCategoryId() === tag.id
@@ -86,9 +128,11 @@ export default class ResultTag implements OnInit {
   // 計算當前選中主分類的子分類（包含"全部"選項）
   currentSubCategories = computed(() => {
     const selectedMainId = this.selectedMainCategoryId();
-    if (selectedMainId === null) return [];
+    const tags = this.tagsResource.value() as TagItem[] | undefined;
 
-    const selectedMain = this.apiTags().find(tag => tag.id === selectedMainId);
+    if (selectedMainId === null || !tags) return [];
+
+    const selectedMain = tags.find((tag: TagItem) => tag.id === selectedMainId);
     if (!selectedMain) return [];
 
     const allSubCategory = {
@@ -97,7 +141,7 @@ export default class ResultTag implements OnInit {
       isSelected: this.selectedSubCategoryId() === null
     };
 
-    const subCategoriesWithSelection = selectedMain.sub_category.map(sub => ({
+    const subCategoriesWithSelection = selectedMain.sub_category.map((sub: SubCategoryItem) => ({
       ...sub,
       isSelected: this.selectedSubCategoryId() === sub.id
     }));
@@ -106,9 +150,22 @@ export default class ResultTag implements OnInit {
   });
 
 
-  // 計算總頁數 (使用 computed)
+  // 計算總頁數
   totalPages = computed(() => {
-    return Math.ceil(this.totalResults() / this.itemsPerPage());
+    const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
+    return coursesData ? Math.ceil(coursesData.totalResults / this.itemsPerPage()) : 0;
+  });
+
+  // 總結果數
+  totalResults = computed(() => {
+    const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
+    return coursesData?.totalResults || 0;
+  });
+
+  // 課程列表
+  courses = computed(() => {
+    const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
+    return coursesData?.courses || [];
   });
 
   // 獲取目前選中的分類名稱
@@ -125,7 +182,8 @@ export default class ResultTag implements OnInit {
       if (subCategory) return subCategory.name;
     }
 
-    const mainCategory = this.apiTags().find(tag => tag.id === selectedMainId);
+    const tags = this.tagsResource.value() as TagItem[] | undefined;
+    const mainCategory = tags?.find((tag: TagItem) => tag.id === selectedMainId);
     return mainCategory?.main_category || '未知分類';
   });
 
@@ -141,85 +199,27 @@ export default class ResultTag implements OnInit {
     this.selectedMainCategoryId.set(categoryId);
     this.selectedSubCategoryId.set(null); // 重置子分類
     this.currentPage.set(1); // 重置頁碼
-    this.loadCourses(); // 重新載入課程
+    // rxResource 會自動重新載入課程
   }
 
   // 選擇子分類
   selectSubCategory(subCategoryId: number | null): void {
     this.selectedSubCategoryId.set(subCategoryId);
     this.currentPage.set(1); // 重置頁碼
-    this.loadCourses(); // 重新載入課程
+    // rxResource 會自動重新載入課程
   }
 
   // 選擇篩選選項
   selectFilter(filterId: string): void {
-    this.selectedFilterId = filterId;
+    this.selectedFilterId.set(filterId);
     this.currentPage.set(1); // 重置頁碼
-    this.loadCourses(); // 重新載入課程
+    // rxResource 會自動重新載入課程
   }
 
-  async ngOnInit() {
-    await Promise.all([
-      this.loadTags(),
-      this.loadCourses()
-    ]);
-  }
-
-  // 載入分類標籤資料
-  async loadTags() {
-    this.isTagsLoading.set(true);
-    this.tagsError.set(null);
-
-    try {
-      const response = await firstValueFrom(this.tagsService.getApiTags());
-      if (response.status && response.data) {
-        this.apiTags.set(response.data);
-      } else {
-        this.tagsError.set('載入分類失敗');
-      }
-    } catch (error) {
-      console.error('載入分類失敗:', error);
-      this.tagsError.set('載入分類失敗，請稍後再試');
-    } finally {
-      this.isTagsLoading.set(false);
-    }
-  }
-
-  // 載入課程資料
-  async loadCourses() {
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    try {
-      const params: any = {
-        page: this.currentPage(),
-        per_page: this.itemsPerPage(),
-        sort: this.getSortValue(),
-      };
-
-      const mainCategoryId = this.getMainCategoryId();
-      if (mainCategoryId) {
-        params.main_category_id = mainCategoryId;
-      }
-
-      const subCategoryId = this.getSubCategoryId();
-      if (subCategoryId) {
-        params.sub_category_id = subCategoryId;
-      }
-
-      const response = await firstValueFrom(this.publicCoursesService.getApiCoursesPublic(params));
-
-      if (response.data) {
-        const transformedCourses = this.transformApiCoursesToCardData(response.data.courses || []);
-        this.apiCourses.set(transformedCourses);
-        this.totalResults.set(response.data.pagination?.total || 0);
-      }
-    } catch (error) {
-      console.error('載入課程失敗:', error);
-      this.error.set('載入課程失敗，請稍後再試');
-    } finally {
-      this.isLoading.set(false);
-    }
+  // 頁碼變更處理
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+    // rxResource 會自動重新載入課程
   }
 
   // 轉換 API 回應為 CourseCardData 格式
@@ -251,31 +251,10 @@ export default class ResultTag implements OnInit {
       'price-low': 'price_low',
       'price-high': 'price_high'
     };
-    return sortMap[this.selectedFilterId] || 'newest';
+    return sortMap[this.selectedFilterId()] || 'newest';
   }
-
-  // 獲取主分類 ID
-  private getMainCategoryId(): number | undefined {
-    const selectedId = this.selectedMainCategoryId();
-    return selectedId === null ? undefined : selectedId;
-  }
-
-  // 獲取次分類 ID
-  private getSubCategoryId(): number | undefined {
-    return this.selectedSubCategoryId() || undefined;
-  }
-
-
 
   // TrackBy 函式以提升效能
-  // 使用 API 資料作為課程來源
-  courses = computed(() => this.apiCourses());
-
-  // 分頁變更處理
-  onPageChange(page: number) {
-    this.currentPage.set(page);
-    this.loadCourses();
-  }
 
   trackByCategory(index: number, category: Category): string {
     return category.id;

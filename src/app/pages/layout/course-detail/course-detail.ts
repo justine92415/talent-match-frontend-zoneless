@@ -48,6 +48,7 @@ export default class CourseDetail implements OnInit {
   teacher = computed(() => this.courseDetail()?.teacher);
   plans = computed(() => this.courseDetail()?.price_options || []);
   reviews = computed(() => this.courseDetail()?.recent_reviews || []);
+  schedule = computed(() => this.courseDetail()?.schedule || []);
   hasReviews = computed(() => (this.reviews().length ?? 0) > 0);
   work_experiences = computed(
     () => this.courseDetail()?.teacher_work_experiences || [],

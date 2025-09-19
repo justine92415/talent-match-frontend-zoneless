@@ -20,7 +20,7 @@
 
       <!-- 日期欄位 -->
       <div class="flex-1 flex">
-        @for (day of schedule; track day.date; let last = $last) {
+        @for (day of schedule(); track day.date; let last = $last) {
         <div class="flex-1 flex flex-col">
           <!-- 星期標題 -->
           <div [class]="'h-16 bg-orange-95 border-b border-primary flex flex-col justify-center items-center py-2 px-3 opacity-80'">

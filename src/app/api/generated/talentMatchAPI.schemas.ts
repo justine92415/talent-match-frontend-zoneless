@@ -3653,6 +3653,41 @@ export interface CourseApplicationInfo {
 }
 
 /**
+ * 時段狀態 (unavailable: 教師未開放, available: 可預約, reserved: 已預約)
+ */
+export type CourseSlotStatus =
+  (typeof CourseSlotStatus)[keyof typeof CourseSlotStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseSlotStatus = {
+  unavailable: 'unavailable',
+  available: 'available',
+  reserved: 'reserved',
+} as const;
+
+/**
+ * 單一課程時段資訊
+ */
+export interface CourseSlot {
+  /** 時段時間 (HH:MM 格式) */
+  time: string;
+  /** 時段狀態 (unavailable: 教師未開放, available: 可預約, reserved: 已預約) */
+  status: CourseSlotStatus;
+}
+
+/**
+ * 單日完整課程表
+ */
+export interface DaySchedule {
+  /** 星期幾 */
+  week: string;
+  /** 日期 (YYYY-MM-DD 格式) */
+  date: string;
+  /** 該日的時段列表 */
+  slots: CourseSlot[];
+}
+
+/**
  * 排序方式 (選填，newest: 最新發布, popular: 熱門程度, price_low: 價格由低到高, price_high: 價格由高到低)
  */
 export type PublicCourseQueryParamsSort =
@@ -4054,8 +4089,8 @@ export type PublicCourseDetailSuccessResponseData = {
   videos?: unknown[];
   /** 課程檔案列表 (目前為空陣列) */
   files?: unknown[];
-  /** 可預約時段列表 (目前為空陣列) */
-  available_slots?: unknown[];
+  /** 7天課程表 (從明天開始的連續7天，顯示每日時段狀態) */
+  schedule?: DaySchedule[];
   /** 最近評價列表 (目前為空陣列) */
   recent_reviews?: unknown[];
   /** 推薦課程列表 (目前為空陣列) */

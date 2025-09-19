@@ -2129,160 +2129,6 @@ export interface CertificateUpsertResponse {
 }
 
 /**
- * 星期（0=星期日, 1=星期一, ..., 6=星期六）
- */
-export type ScheduleDayOfWeek =
-  (typeof ScheduleDayOfWeek)[keyof typeof ScheduleDayOfWeek];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleDayOfWeek = {
-  NUMBER_0: 0,
-  NUMBER_1: 1,
-  NUMBER_2: 2,
-  NUMBER_3: 3,
-  NUMBER_4: 4,
-  NUMBER_5: 5,
-  NUMBER_6: 6,
-} as const;
-
-export interface Schedule {
-  /** 排程 ID */
-  id: number;
-  /** 教師 ID */
-  teacher_id: number;
-  /** 星期（0=星期日, 1=星期一, ..., 6=星期六） */
-  day_of_week: ScheduleDayOfWeek;
-  /**
-   * 開始時間（HH:mm 格式）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  start_time: string;
-  /**
-   * 結束時間（HH:mm 格式）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  end_time: string;
-  /** 建立時間 */
-  created_at: string;
-  /** 更新時間 */
-  updated_at: string;
-}
-
-/**
- * 格式化的排程資料
- */
-export interface FormattedSchedules {
-  /** 星期一排程 */
-  monday?: string[];
-  /** 星期二排程 */
-  tuesday?: string[];
-  /** 星期三排程 */
-  wednesday?: string[];
-  /** 星期四排程 */
-  thursday?: string[];
-  /** 星期五排程 */
-  friday?: string[];
-  /** 星期六排程 */
-  saturday?: string[];
-  /** 星期日排程 */
-  sunday?: string[];
-}
-
-/**
- * 回應狀態
- */
-export type ScheduleGetSuccessResponseStatus =
-  (typeof ScheduleGetSuccessResponseStatus)[keyof typeof ScheduleGetSuccessResponseStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleGetSuccessResponseStatus = {
-  success: 'success',
-} as const;
-
-export type ScheduleGetSuccessResponseData = {
-  /** 排程列表 */
-  schedules?: Schedule[];
-  formatted_schedules?: FormattedSchedules;
-};
-
-export interface ScheduleGetSuccessResponse {
-  /** 回應狀態 */
-  status?: ScheduleGetSuccessResponseStatus;
-  /** 成功訊息 */
-  message?: string;
-  data?: ScheduleGetSuccessResponseData;
-}
-
-/**
- * 星期（0=星期日, 1=星期一, ..., 6=星期六，必填）
- */
-export type ScheduleUpdateRequestSchedulesItemDayOfWeek =
-  (typeof ScheduleUpdateRequestSchedulesItemDayOfWeek)[keyof typeof ScheduleUpdateRequestSchedulesItemDayOfWeek];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleUpdateRequestSchedulesItemDayOfWeek = {
-  NUMBER_0: 0,
-  NUMBER_1: 1,
-  NUMBER_2: 2,
-  NUMBER_3: 3,
-  NUMBER_4: 4,
-  NUMBER_5: 5,
-  NUMBER_6: 6,
-} as const;
-
-export type ScheduleUpdateRequestSchedulesItem = {
-  /** 星期（0=星期日, 1=星期一, ..., 6=星期六，必填） */
-  day_of_week: ScheduleUpdateRequestSchedulesItemDayOfWeek;
-  /**
-   * 開始時間（HH:mm 格式，必填）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  start_time: string;
-  /**
-   * 結束時間（HH:mm 格式，必填）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  end_time: string;
-};
-
-export interface ScheduleUpdateRequest {
-  /**
-   * 排程列表（必填，1-50個排程）
-   * @minItems 1
-   * @maxItems 50
-   */
-  schedules: ScheduleUpdateRequestSchedulesItem[];
-}
-
-/**
- * 回應狀態
- */
-export type ScheduleUpdateSuccessResponseStatus =
-  (typeof ScheduleUpdateSuccessResponseStatus)[keyof typeof ScheduleUpdateSuccessResponseStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleUpdateSuccessResponseStatus = {
-  success: 'success',
-} as const;
-
-export type ScheduleUpdateSuccessResponseData = {
-  schedules?: Schedule[];
-  formatted_schedules?: FormattedSchedules;
-  /** 更新的排程數量 */
-  updated_count?: number;
-  /** 刪除的舊排程數量 */
-  deleted_count?: number;
-};
-
-export interface ScheduleUpdateSuccessResponse {
-  /** 回應狀態 */
-  status?: ScheduleUpdateSuccessResponseStatus;
-  /** 成功訊息 */
-  message?: string;
-  data?: ScheduleUpdateSuccessResponseData;
-}
-
-/**
  * 回應狀態
  */
 export type ScheduleConflictCheckSuccessResponseStatus =
@@ -4390,6 +4236,158 @@ export interface PriceOption {
   created_at: string;
   /** 更新時間 */
   updated_at: string;
+}
+
+/**
+ * 標準教學時段
+ */
+export type StandardTimeSlot =
+  (typeof StandardTimeSlot)[keyof typeof StandardTimeSlot];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const StandardTimeSlot = {
+  '09:00': '09:00',
+  '10:00': '10:00',
+  '11:00': '11:00',
+  '13:00': '13:00',
+  '14:00': '14:00',
+  '15:00': '15:00',
+  '16:00': '16:00',
+  '17:00': '17:00',
+  '19:00': '19:00',
+  '20:00': '20:00',
+} as const;
+
+/**
+ * 週次 (1=週一, 2=週二, ..., 7=週日)
+ */
+export type WeekdayString = (typeof WeekdayString)[keyof typeof WeekdayString];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WeekdayString = {
+  NUMBER_1: '1',
+  NUMBER_2: '2',
+  NUMBER_3: '3',
+  NUMBER_4: '4',
+  NUMBER_5: '5',
+  NUMBER_6: '6',
+  NUMBER_7: '7',
+} as const;
+
+/**
+ * 週次時段設定 (鍵為週次字串，值為時段陣列)
+ */
+export type WeeklyScheduleRequestWeeklySchedule = { [key: string]: unknown };
+
+export interface WeeklyScheduleRequest {
+  /** 週次時段設定 (鍵為週次字串，值為時段陣列) */
+  weekly_schedule: WeeklyScheduleRequestWeeklySchedule;
+}
+
+/**
+ * 各天時段數量統計
+ */
+export interface SlotsByDayStats {
+  [key: string]: unknown;
+}
+
+/**
+ * 更新後的週次時段設定
+ */
+export type WeeklyScheduleResponseWeeklySchedule = { [key: string]: unknown };
+
+export interface WeeklyScheduleResponse {
+  /** 更新後的週次時段設定 */
+  weekly_schedule: WeeklyScheduleResponseWeeklySchedule;
+  /**
+   * 總時段數量 (最多 7天 × 10時段)
+   * @minimum 0
+   * @maximum 70
+   */
+  total_slots: number;
+  slots_by_day: SlotsByDayStats;
+  /**
+   * 此次更新的時段數量
+   * @minimum 0
+   */
+  updated_count: number;
+  /**
+   * 此次新建立的時段數量
+   * @minimum 0
+   */
+  created_count: number;
+  /**
+   * 此次刪除的時段數量
+   * @minimum 0
+   */
+  deleted_count: number;
+}
+
+/**
+ * 回應狀態
+ */
+export type WeeklyScheduleSuccessResponseStatus =
+  (typeof WeeklyScheduleSuccessResponseStatus)[keyof typeof WeeklyScheduleSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WeeklyScheduleSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface WeeklyScheduleSuccessResponse {
+  /** 回應狀態 */
+  status: WeeklyScheduleSuccessResponseStatus;
+  /** 成功訊息 */
+  message: string;
+  data: WeeklyScheduleResponse;
+}
+
+/**
+ * 錯誤類型
+ */
+export type WeeklyScheduleValidationErrorErrorType =
+  (typeof WeeklyScheduleValidationErrorErrorType)[keyof typeof WeeklyScheduleValidationErrorErrorType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WeeklyScheduleValidationErrorErrorType = {
+  INVALID_WEEK_DAY: 'INVALID_WEEK_DAY',
+  INVALID_TIME_SLOT: 'INVALID_TIME_SLOT',
+  DUPLICATE_TIME_SLOT: 'DUPLICATE_TIME_SLOT',
+  FORMAT_ERROR: 'FORMAT_ERROR',
+} as const;
+
+export interface WeeklyScheduleValidationError {
+  week_day: WeekdayString;
+  time_slot?: StandardTimeSlot;
+  /** 錯誤類型 */
+  error_type: WeeklyScheduleValidationErrorErrorType;
+  /** 詳細錯誤訊息 */
+  message: string;
+}
+
+export type LegacyScheduleUpdateRequestAvailableSlotsItem = {
+  /**
+   * @minimum 0
+   * @maximum 6
+   */
+  weekday: number;
+  /** @pattern ^\d{2}:\d{2}$ */
+  start_time: string;
+  /** @pattern ^\d{2}:\d{2}$ */
+  end_time: string;
+  is_active?: boolean;
+};
+
+/**
+ * 舊版時段更新請求格式 - 已棄用，請使用 WeeklyScheduleRequest
+ * @deprecated
+ */
+export interface LegacyScheduleUpdateRequest {
+  /**
+   * 可預約時段列表 [已棄用，請使用新版週次格式]
+   * @maxItems 50
+   */
+  available_slots?: LegacyScheduleUpdateRequestAvailableSlotsItem[];
 }
 
 /**

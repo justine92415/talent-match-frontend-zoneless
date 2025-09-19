@@ -56,9 +56,6 @@ import type {
   LearningExperienceUpsertRequest,
   LearningExperienceUpsertResponse,
   ScheduleConflictCheckSuccessResponse,
-  ScheduleGetSuccessResponse,
-  ScheduleUpdateRequest,
-  ScheduleUpdateSuccessResponse,
   TeacherApplicationRequest,
   TeacherApplicationSuccessResponse,
   TeacherApplyStatusSuccessResponse,
@@ -70,6 +67,8 @@ import type {
   TeacherProfileUpdateSuccessResponse,
   TeacherResubmitSuccessResponse,
   TeacherSubmitSuccessResponse,
+  WeeklyScheduleRequest,
+  WeeklyScheduleResponse,
   WorkExperienceBatchCreateRequest,
   WorkExperienceBatchCreateSuccessResponse,
   WorkExperienceCreateRequest,
@@ -951,16 +950,16 @@ if (!data.application_submitted_at) {
 
  * @summary 取得教師時間表
  */
-  getApiTeachersSchedule<TData = ScheduleGetSuccessResponse>(
+  getApiTeachersSchedule<TData = WeeklyScheduleResponse>(
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  getApiTeachersSchedule<TData = ScheduleGetSuccessResponse>(
+  getApiTeachersSchedule<TData = WeeklyScheduleResponse>(
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  getApiTeachersSchedule<TData = ScheduleGetSuccessResponse>(
+  getApiTeachersSchedule<TData = WeeklyScheduleResponse>(
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  getApiTeachersSchedule<TData = ScheduleGetSuccessResponse>(
+  getApiTeachersSchedule<TData = WeeklyScheduleResponse>(
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.get<TData>(`/api/teachers/schedule`, options);
@@ -977,25 +976,25 @@ if (!data.application_submitted_at) {
 
  * @summary 更新教師時間表
  */
-  putApiTeachersSchedule<TData = ScheduleUpdateSuccessResponse>(
-    scheduleUpdateRequest: ScheduleUpdateRequest,
+  putApiTeachersSchedule<TData = WeeklyScheduleResponse>(
+    weeklyScheduleRequest: WeeklyScheduleRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  putApiTeachersSchedule<TData = ScheduleUpdateSuccessResponse>(
-    scheduleUpdateRequest: ScheduleUpdateRequest,
+  putApiTeachersSchedule<TData = WeeklyScheduleResponse>(
+    weeklyScheduleRequest: WeeklyScheduleRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  putApiTeachersSchedule<TData = ScheduleUpdateSuccessResponse>(
-    scheduleUpdateRequest: ScheduleUpdateRequest,
+  putApiTeachersSchedule<TData = WeeklyScheduleResponse>(
+    weeklyScheduleRequest: WeeklyScheduleRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  putApiTeachersSchedule<TData = ScheduleUpdateSuccessResponse>(
-    scheduleUpdateRequest: ScheduleUpdateRequest,
+  putApiTeachersSchedule<TData = WeeklyScheduleResponse>(
+    weeklyScheduleRequest: WeeklyScheduleRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.put<TData>(
       `/api/teachers/schedule`,
-      scheduleUpdateRequest,
+      weeklyScheduleRequest,
       options,
     );
   }
@@ -1080,8 +1079,8 @@ export type PutApiTeachersCertificatesIdClientResult =
 export type DeleteApiTeachersCertificatesIdClientResult =
   NonNullable<CertificateDeleteSuccessResponse>;
 export type GetApiTeachersScheduleClientResult =
-  NonNullable<ScheduleGetSuccessResponse>;
+  NonNullable<WeeklyScheduleResponse>;
 export type PutApiTeachersScheduleClientResult =
-  NonNullable<ScheduleUpdateSuccessResponse>;
+  NonNullable<WeeklyScheduleResponse>;
 export type GetApiTeachersScheduleConflictsClientResult =
   NonNullable<ScheduleConflictCheckSuccessResponse>;

@@ -82,6 +82,7 @@ interface ScheduleData {
 export class EditableWeeklyCalendar {
   // 輸入屬性
   initialData = input<ScheduleData[]>([]);
+  readonly = input<boolean>(false);
 
   // 輸出事件
   scheduleChange = output<ScheduleData[]>();
@@ -153,6 +154,10 @@ export class EditableWeeklyCalendar {
 
   // 處理時段點擊
   onSlotClick(dayIndex: number, slotIndex: number, event: MouseEvent) {
+    // 如果是唯讀模式，不處理點擊
+    if (this.readonly()) {
+      return;
+    }
     // 如果有拖拽行為，不處理點擊
     if (this.isDragging()) {
       return;
@@ -167,6 +172,10 @@ export class EditableWeeklyCalendar {
 
   // 處理滑鼠按下
   onMouseDown(dayIndex: number, slotIndex: number, event: MouseEvent) {
+    // 如果是唯讀模式，不處理滑鼠事件
+    if (this.readonly()) {
+      return;
+    }
     if (event.button !== 0) return; // 只處理左鍵
 
     event.preventDefault();

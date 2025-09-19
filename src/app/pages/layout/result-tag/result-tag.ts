@@ -5,6 +5,7 @@ import { MatIconModule } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
 import Pagination from '@components/pagination/pagination';
+import { Skeleton } from '@components/skeleton/skeleton';
 import { TmfIconEnum } from '@share/icon.enum';
 import { PublicCoursesService } from '@app/api/generated/public-courses/public-courses.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
@@ -31,7 +32,7 @@ interface FilterOption {
 
 @Component({
   selector: 'tmf-result-tag',
-  imports: [MatIconModule, CommonModule, CourseCard, Pagination],
+  imports: [MatIconModule, CommonModule, CourseCard, Pagination, Skeleton],
   templateUrl: './result-tag.html',
   styles: ``
 })
@@ -205,6 +206,9 @@ export default class ResultTag implements OnInit {
       isSelected: filter.id === selectedFilterId
     }));
   });
+
+  // 產生 skeleton 項目數組 (12個)
+  skeletonItems = computed(() => Array.from({ length: 12 }, (_, i) => i));
 
   // TmfIcon getter for template
   get TmfIcon() {

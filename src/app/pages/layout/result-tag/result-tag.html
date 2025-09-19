@@ -96,7 +96,7 @@
         <span class="text-purple">{{ selectedCategoryName() }}</span>
         <span>」相關課程</span>
       </div>
-      
+
       <!-- 篩選選項 -->
       <div class="flex gap-0">
         @for (filter of filtersWithSelection(); track filter.id; let isLast = $last) {
@@ -114,8 +114,58 @@
 
     <!-- 載入狀態 -->
     @if (coursesResource.isLoading()) {
-      <div class="flex justify-center items-center py-20">
-        <div class="text-lg text-grey-66">載入中...</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        @for (item of skeletonItems(); track item) {
+          <div class="group relative m-auto w-full h-full overflow-hidden rounded-xl bg-white max-w-80 shadow-lg">
+            <!-- 圖片區域 -->
+            <div class="h-45 w-full">
+              <tmf-skeleton class="w-full h-full rounded-none"></tmf-skeleton>
+            </div>
+
+            <!-- 內容區域 -->
+            <div class="p-4 h-44 space-y-3">
+              <!-- 標題 -->
+              <div class="space-y-2">
+                <tmf-skeleton class="w-full h-4"></tmf-skeleton>
+                <tmf-skeleton class="w-3/4 h-4"></tmf-skeleton>
+              </div>
+
+              <!-- 描述 -->
+              <div class="space-y-2">
+                <tmf-skeleton class="w-full h-3"></tmf-skeleton>
+                <tmf-skeleton class="w-5/6 h-3"></tmf-skeleton>
+                <tmf-skeleton class="w-4/5 h-3"></tmf-skeleton>
+              </div>
+            </div>
+
+            <!-- 教師資訊區域 -->
+            <div class="max-h-16 box-border flex items-center justify-between border-y border-grey-d4 p-4">
+              <div class="flex items-center">
+                <tmf-skeleton class="mr-2 h-8 w-8 rounded-full"></tmf-skeleton>
+                <tmf-skeleton class="w-20 h-4"></tmf-skeleton>
+              </div>
+              <tmf-skeleton class="w-16 h-4"></tmf-skeleton>
+            </div>
+
+            <!-- 底部資訊區域 -->
+            <div class="flex items-center justify-start p-4 space-x-4">
+              <div class="flex flex-col space-y-2">
+                <tmf-skeleton class="w-8 h-3"></tmf-skeleton>
+                <tmf-skeleton class="w-12 h-3"></tmf-skeleton>
+              </div>
+              <div class="flex flex-col space-y-2">
+                <tmf-skeleton class="w-8 h-3"></tmf-skeleton>
+                <div class="flex items-center gap-1">
+                  <tmf-skeleton class="w-16 h-3"></tmf-skeleton>
+                  <tmf-skeleton class="w-8 h-3"></tmf-skeleton>
+                </div>
+              </div>
+              <div class="flex-grow flex justify-end">
+                <tmf-skeleton class="w-6 h-6 rounded"></tmf-skeleton>
+              </div>
+            </div>
+          </div>
+        }
       </div>
     }
 
@@ -138,7 +188,7 @@
     }
 
     <!-- 分頁區塊 -->
-    <tmf-pagination 
+    <tmf-pagination
       [currentPage]="currentPage()"
       [totalResults]="totalResults()"
       [itemsPerPage]="itemsPerPage()"

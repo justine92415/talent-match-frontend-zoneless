@@ -1,5 +1,6 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { MatIconModule } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
@@ -34,9 +35,10 @@ interface FilterOption {
   templateUrl: './result-tag.html',
   styles: ``
 })
-export default class ResultTag {
+export default class ResultTag implements OnInit {
   private publicCoursesService = inject(PublicCoursesService);
   private tagsService = inject(TagsService);
+  private route = inject(ActivatedRoute);
 
   // 篩選參數 signals
   selectedMainCategoryId = signal<number | null>(null);
@@ -209,6 +211,24 @@ export default class ResultTag {
     return TmfIconEnum;
   }
 
+  ngOnInit(): void {
+    // 從 URL 查詢參數設定初始分類
+    this.route.queryParams.subscribe(params => {
+      if (params['mainCategory']) {
+        const mainCategoryId = parseInt(params['mainCategory'], 10);
+        if (!isNaN(mainCategoryId)) {
+          this.selectedMainCategoryId.set(mainCategoryId);
+        }
+      }
+
+      if (params['subCategory']) {
+        const subCategoryId = parseInt(params['subCategory'], 10);
+        if (!isNaN(subCategoryId)) {
+          this.selectedSubCategoryId.set(subCategoryId);
+        }
+      }
+    });
+  }
 
 
   // 選擇主分類

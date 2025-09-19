@@ -48,6 +48,9 @@ export default class ResultTag implements OnInit {
   currentPage = signal(1);
   itemsPerPage = signal(12);
 
+  // 手動管理分頁顯示的總數
+  displayTotalResults = signal(0);
+
   // 篩選選項資料
   filterOptions: FilterOption[] = [
     { id: 'latest', name: '最新課程' },
@@ -95,6 +98,8 @@ export default class ResultTag implements OnInit {
       return this.publicCoursesService.getApiCoursesPublic(params).pipe(
       map(response => {
         if (response.data) {
+          // 載入完成後更新顯示總數
+          this.displayTotalResults.set(response.data.pagination?.total || 0);
           return {
             courses: this.transformApiCoursesToCardData(response.data.courses || []),
             totalResults: response.data.pagination?.total || 0
@@ -237,6 +242,8 @@ export default class ResultTag implements OnInit {
 
   // 選擇主分類
   selectMainCategory(categoryId: number | null): void {
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
     this.selectedMainCategoryId.set(categoryId);
     this.selectedSubCategoryId.set(null); // 重置子分類
     this.currentPage.set(1); // 重置頁碼
@@ -245,6 +252,8 @@ export default class ResultTag implements OnInit {
 
   // 選擇子分類
   selectSubCategory(subCategoryId: number | null): void {
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
     this.selectedSubCategoryId.set(subCategoryId);
     this.currentPage.set(1); // 重置頁碼
     // rxResource 會自動重新載入課程
@@ -252,6 +261,8 @@ export default class ResultTag implements OnInit {
 
   // 選擇篩選選項
   selectFilter(filterId: string): void {
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
     this.selectedFilterId.set(filterId);
     this.currentPage.set(1); // 重置頁碼
     // rxResource 會自動重新載入課程
@@ -259,6 +270,8 @@ export default class ResultTag implements OnInit {
 
   // 頁碼變更處理
   onPageChange(page: number): void {
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
     this.currentPage.set(page);
     // rxResource 會自動重新載入課程
   }

@@ -190,7 +190,7 @@
     <!-- 分頁區塊 -->
     <tmf-pagination
       [currentPage]="currentPage()"
-      [totalResults]="totalResults()"
+      [totalResults]="displayTotalResults()"
       [itemsPerPage]="itemsPerPage()"
       (pageChange)="onPageChange($event)">
     </tmf-pagination>

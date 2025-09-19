@@ -29,8 +29,10 @@
       </div>
       <!-- 載入狀態 -->
       @if (tagsResource.isLoading()) {
-        <div class="flex justify-center items-center py-10">
-          <div class="text-lg text-grey-66">載入分類中...</div>
+        <!-- 主分類整塊 skeleton -->
+        <div class="flex flex-col gap-6">
+          <tmf-skeleton class="w-3/4 h-30"></tmf-skeleton>
+          <tmf-skeleton class="w-3/4 h-16"></tmf-skeleton>
         </div>
       }
 
@@ -91,11 +93,15 @@
     <!-- 搜尋結果 Header -->
     <div class="flex justify-between items-center mb-10">
       <!-- 搜尋結果文字 -->
-      <div class="flex items-end gap-2 text-3xl-bold text-grey-33">
-        <span>共 {{ totalResults() }} 筆與「</span>
-        <span class="text-purple">{{ selectedCategoryName() }}</span>
-        <span>」相關課程</span>
-      </div>
+      @if (coursesResource.isLoading()) {
+        <tmf-skeleton class="w-110 h-[41.25px]"></tmf-skeleton>
+      } @else {
+        <div class="flex items-end gap-2 text-3xl-bold text-grey-33">
+          <span>共 {{ totalResults() }} 筆與「</span>
+          <span class="text-purple">{{ selectedCategoryName() }}</span>
+          <span>」相關課程</span>
+        </div>
+      }
 
       <!-- 篩選選項 -->
       <div class="flex gap-0">

@@ -377,17 +377,19 @@
             <tmf-button
               class="w-full h-13"
               variant="primary"
-              [disabled]="!this.formGroup.controls.purchase_item_id.value"
-              >立即購買</tmf-button
+              [disabled]="!this.formGroup.controls.purchase_item_id.value || isAddingToCart()"
+              (click)="buyNow()"
+              >{{ isAddingToCart() ? '處理中...' : '立即購買' }}</tmf-button
             >
             <button
               class="h-13 w-13 box-border group rounded-lg border p-3 transition-all duration-300 ease-in-out hover:w-auto hover:px-4"
               [ngClass]="{
                 'border-grey-9f bg-grey-9f text-white cursor-not-allowed':
-                  !this.formGroup.controls.purchase_item_id.value,
+                  !this.formGroup.controls.purchase_item_id.value || isAddingToCart(),
                 'border-primary bg-white text-primary cursor-pointer':
-                  this.formGroup.controls.purchase_item_id.value,
+                  this.formGroup.controls.purchase_item_id.value && !isAddingToCart(),
               }"
+              [disabled]="!this.formGroup.controls.purchase_item_id.value || isAddingToCart()"
               (click)="addToCart()"
             >
               <div

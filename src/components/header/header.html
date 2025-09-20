@@ -403,75 +403,107 @@
   <div
     class="w-80 bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl py-3 z-50"
   >
-    <!-- 購物車項目 -->
-    <div class="max-h-75 overflow-y-auto">
-      @for (item of cartItems(); track item.id; let isLast = $last) {
-        <div class="flex items-start gap-3 py-1 px-4">
-          <!-- 課程圖片 -->
-          <div class="w-21 h-12 bg-grey-d4 rounded-lg flex-shrink-0"></div>
+    <!-- 載入狀態 -->
+    @if (cartResource.isLoading()) {
+      <div class="flex justify-center items-center py-8">
+        <div class="text-sm text-grey-66">載入購物車中...</div>
+      </div>
+    }
 
-          <!-- 課程資訊 -->
-          <div class="flex-1">
-            <!-- 標籤 -->
-            <div class="flex gap-2 mb-1">
-              @for (tag of item.tags; track tag) {
-                <span
-                  class="px-1 py-0.5 bg-grey-d4 text-xs text-grey-33 rounded"
-                  >{{ tag }}</span
-                >
+    <!-- 錯誤狀態 -->
+    @else if (cartResource.error()) {
+      <div class="flex justify-center items-center py-8">
+        <div class="text-sm text-red-50">{{ cartResource.error() }}</div>
+      </div>
+    }
+
+    <!-- 空購物車狀態 -->
+    @else if (totalItems() === 0) {
+      <div class="flex flex-col items-center justify-center py-8 px-4">
+        <mat-icon class="!w-12 !h-12 !text-grey-9f !text-5xl !leading-12 mb-3">shopping_cart</mat-icon>
+        <p class="text-sm text-grey-66 mb-4 text-center">購物車是空的</p>
+        <tmf-button (click)="goToSearch()" class="h-9">探索課程</tmf-button>
+      </div>
+    }
+
+    <!-- 購物車項目 -->
+    @else {
+      <div class="max-h-75 overflow-y-auto">
+        @for (item of cartItems(); track item.id; let isLast = $last) {
+          <div class="flex items-start gap-3 py-1 px-4">
+            <!-- 課程圖片 -->
+            <div class="w-21 h-12 bg-grey-d4 rounded-lg flex-shrink-0">
+              @if (item.course?.main_image) {
+                <img
+                  [src]="item.course?.main_image"
+                  [alt]="item.course?.name || '課程圖片'"
+                  class="w-full h-full object-cover rounded-lg"
+                />
               }
             </div>
 
-            <!-- 課程標題 -->
-            <h4 class="text-sm font-bold text-grey-33 leading-tight mb-1">
-              {{ item.title }}
-            </h4>
+            <!-- 課程資訊 -->
+            <div class="flex-1">
+              <!-- 課程標題 -->
+              <h4 class="text-sm font-bold text-grey-33 leading-tight mb-1">
+                {{ item.course?.name || '課程名稱' }}
+              </h4>
 
-            <!-- 課程類型和價格 -->
-            <div class="flex justify-between items-end pt-1">
-              <span class="text-sm text-grey-66">{{ item.courseType }}</span>
-              <span class="text-sm font-medium text-grey-33"
-                >NT$ {{ item.price.toLocaleString() }}</span
-              >
+              <!-- 價格方案資訊 -->
+              <div class="flex justify-between items-end pt-1">
+                <span class="text-sm text-grey-66">{{ (item.price_option?.quantity || 1) * (item.quantity || 1) }} 堂課程</span>
+                <span class="text-sm font-medium text-grey-33">
+                  NT$ {{ ((item.price_option?.price || 0) * (item.quantity || 1)) | number:'1.0-0' }}
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- 分隔線 -->
-        @if (!isLast) {
-          <div class="flex justify-center py-2">
-            <div class="w-full h-px bg-grey-d4 mx-4"></div>
+            <!-- 移除按鈕 -->
+            <button
+              (click)="removeFromCart(item.id || 0)"
+              class="text-grey-66 hover:text-red-50 transition-colors cursor-pointer"
+            >
+              <mat-icon class="!w-4 !h-4 !text-base !leading-4">close</mat-icon>
+            </button>
           </div>
+
+          <!-- 分隔線 -->
+          @if (!isLast) {
+            <div class="flex justify-center py-2">
+              <div class="w-full h-px bg-grey-d4 mx-4"></div>
+            </div>
+          }
         }
-      }
-    </div>
-
-    <!-- 總計區域 -->
-    <div class="px-4 py-3 bg-white">
-      <!-- 項目數量 -->
-      <div class="flex gap-1 mb-3">
-        <span class="text-sm text-grey-66">共計</span>
-        <span class="text-sm font-medium text-grey-66">{{ totalItems() }}</span>
-        <span class="text-sm text-grey-66">項課程</span>
       </div>
 
-      <!-- 總計和結帳按鈕 -->
-      <div class="flex items-center justify-between gap-6">
-        <div class="flex items-baseline gap-1">
-          <span class="text-sm text-grey-33">總計</span>
-          <span class="text-base font-medium text-grey-33">NT$</span>
-          <span class="text-base font-medium text-grey-33">{{
-            totalPrice().toLocaleString()
-          }}</span>
+      <!-- 總計區域 -->
+      <div class="px-4 py-3 bg-white">
+        <!-- 項目數量 -->
+        <div class="flex gap-1 mb-3">
+          <span class="text-sm text-grey-66">共計</span>
+          <span class="text-sm font-medium text-grey-66">{{ totalItems() }}</span>
+          <span class="text-sm text-grey-66">項課程</span>
         </div>
 
-        <button
-          class="px-4 py-2 bg-primary text-white text-base font-bold rounded-lg hover:bg-orange-55 transition-colors"
-        >
-          前往結帳
-        </button>
+        <!-- 總計和結帳按鈕 -->
+        <div class="flex items-center justify-between gap-6">
+          <div class="flex items-baseline gap-1">
+            <span class="text-sm text-grey-33">總計</span>
+            <span class="text-base font-medium text-grey-33">NT$</span>
+            <span class="text-base font-medium text-grey-33">{{
+              totalPrice() | number:'1.0-0'
+            }}</span>
+          </div>
+
+          <button
+            (click)="goToCart()"
+            class="px-4 py-2 bg-primary text-white text-base font-bold rounded-lg hover:bg-orange-55 transition-colors"
+          >
+            前往結帳
+          </button>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </ng-template>
 

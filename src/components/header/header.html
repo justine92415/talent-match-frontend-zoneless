@@ -184,49 +184,66 @@
 
       <!-- 分類選單 -->
       <div class="space-y-0">
-        @for (category of mobileMenuCategories(); track category.id) {
-          <div class="border-b border-grey-e9">
-            <!-- 主分類項目 -->
-            <div
-              class="box-border h-12 py-3 flex items-center justify-between cursor-pointer hover:bg-grey-f7 transition-colors px-0"
-              (click)="onMobileCategoryClick(category)"
-            >
-              <span class="text-base text-grey-33 flex-1 text-left">{{
-                category.name
-              }}</span>
-              @if (category.id !== "all") {
-                <mat-icon
-                  class="!w-6 !h-6 !text-grey-9f material-icons-outlined transition-transform duration-200"
-                  [class.-rotate-90]="isCategoryExpanded(category.id)"
-                >
-                  {{ TmfIconEnum.KeyboardArrowDown }}
-                </mat-icon>
-              }
-            </div>
+        <!-- 載入狀態 -->
+        @if (tagsResource.isLoading()) {
+          <div class="py-6 flex justify-center">
+            <div class="text-sm text-grey-66">載入分類中...</div>
+          </div>
+        }
 
-            <!-- 子分類區域 (手風琴內容) -->
-            @if (
-              category.subcategories &&
-              category.subcategories.length > 0 &&
-              isCategoryExpanded(category.id)
-            ) {
-              <div class="bg-grey-f7 py-2 animate-fadeIn">
-                @for (
-                  subcategory of category.subcategories;
-                  track subcategory.id
-                ) {
-                  <div
-                    class="pl-6 pr-0 py-2 flex items-center cursor-pointer hover:bg-grey-e9 transition-colors"
-                    (click)="onMobileSubcategoryClick(subcategory)"
+        <!-- 錯誤狀態 -->
+        @if (tagsResource.error()) {
+          <div class="py-6 flex justify-center">
+            <div class="text-sm text-red-50">載入失敗，請稍後再試</div>
+          </div>
+        }
+
+        <!-- 正常狀態 -->
+        @if (!tagsResource.isLoading() && !tagsResource.error()) {
+          @for (category of categories(); track category.id) {
+            <div class="border-b border-grey-e9">
+              <!-- 主分類項目 -->
+              <div
+                class="box-border h-12 py-3 flex items-center justify-between cursor-pointer hover:bg-grey-f7 transition-colors px-0"
+                (click)="onMobileCategoryClick(category)"
+              >
+                <span class="text-base text-grey-33 flex-1 text-left">{{
+                  category.main_category
+                }}</span>
+                @if (category.id !== null) {
+                  <mat-icon
+                    class="!w-6 !h-6 !text-grey-9f material-icons-outlined transition-transform duration-200"
+                    [class.-rotate-90]="category.isExpanded"
                   >
-                    <span class="text-sm text-grey-66 flex-1 text-left">{{
-                      subcategory.name
-                    }}</span>
-                  </div>
+                    {{ TmfIconEnum.KeyboardArrowDown }}
+                  </mat-icon>
                 }
               </div>
-            }
-          </div>
+
+              <!-- 子分類區域 (手風琴內容) -->
+              @if (
+                category.sub_category &&
+                category.sub_category.length > 0 &&
+                category.isExpanded
+              ) {
+                <div class="bg-grey-f7 py-2 animate-fadeIn">
+                  @for (
+                    subcategory of category.sub_category;
+                    track subcategory.id
+                  ) {
+                    <div
+                      class="pl-6 pr-0 py-2 flex items-center cursor-pointer hover:bg-grey-e9 transition-colors"
+                      (click)="onMobileSubcategoryClick(subcategory, $event)"
+                    >
+                      <span class="text-sm text-grey-66 flex-1 text-left">{{
+                        subcategory.name
+                      }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
         }
       </div>
     </div>
@@ -266,50 +283,68 @@
   <div
     class="hidden bg-white border-t border-purple shadow-[0px_10px_15px_-3px_rgba(0,0,0,0.1)] rounded-b-xl z-50 lg:flex"
   >
-    <!-- 左側分類選單 -->
-    <div class="py-3 border-r border-grey-d4">
-      <ul class="max-h-60 overflow-y-auto w-[9.0625rem]">
-        @for (category of categories(); track category.id) {
-          <li>
-            <button
-              class="w-full flex justify-between items-center py-3 px-6 text-base transition-all duration-200 text-left cursor-pointer"
-              [class]="{
-                'text-primary': selectedCategory()?.id === category.id,
-                'text-grey-33 hover:text-primary':
-                  selectedCategory()?.id !== category.id,
-              }"
-              (click)="selectCategory(category)"
-            >
-              <span>{{ category.name }}</span>
-              @if (category.subcategories.length > 0) {
-                <mat-icon class="!w-6 !h-6 !text-base material-icons-outlined">
-                  {{ TmfIconEnum.KeyboardArrowRight }}
-                </mat-icon>
-              }
-            </button>
-          </li>
-        }
-      </ul>
-    </div>
-
-    <!-- 右側子分類選單 -->
-    @if (selectedCategory() && selectedCategory()!.subcategories.length > 0) {
-      <div class="py-3 w-60">
-        <div class="flex flex-wrap">
-          @for (
-            subcategory of selectedCategory()!.subcategories;
-            track subcategory.id
-          ) {
-            <div class="w-1/2">
-              <button
-                class="w-full flex justify-center items-center py-3 px-6 text-base text-grey-33 hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
-              >
-                {{ subcategory.name }}
-              </button>
-            </div>
-          }
-        </div>
+    <!-- 載入狀態 -->
+    @if (tagsResource.isLoading()) {
+      <div class="py-6 px-8">
+        <div class="text-sm text-grey-66">載入分類中...</div>
       </div>
+    }
+
+    <!-- 錯誤狀態 -->
+    @if (tagsResource.error()) {
+      <div class="py-6 px-8">
+        <div class="text-sm text-red-50">載入失敗，請稍後再試</div>
+      </div>
+    }
+
+    <!-- 正常狀態 -->
+    @if (!tagsResource.isLoading() && !tagsResource.error()) {
+      <!-- 左側分類選單 -->
+      <div class="py-3 border-r border-grey-d4">
+        <ul class="max-h-60 overflow-y-auto w-[9.0625rem]">
+          @for (category of categories(); track category.id) {
+            <li>
+              <button
+                class="w-full flex justify-between items-center py-3 px-6 text-base transition-all duration-200 text-left cursor-pointer"
+                [class]="{
+                  'text-primary': category.isSelected,
+                  'text-grey-33 hover:text-primary': !category.isSelected,
+                }"
+                (click)="selectCategory(category)"
+                (dblclick)="category.sub_category && category.sub_category.length > 0 ? navigateToCategory(category) : null"
+              >
+                <span>{{ category.main_category }}</span>
+                @if (category.sub_category && category.sub_category.length > 0) {
+                  <mat-icon class="!w-6 !h-6 !text-base material-icons-outlined">
+                    {{ TmfIconEnum.KeyboardArrowRight }}
+                  </mat-icon>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- 右側子分類選單 -->
+      @if (shouldShowSubCategories()) {
+        <div class="py-3 w-60">
+          <div class="flex flex-wrap">
+            @for (
+              subcategory of currentSubCategories();
+              track subcategory.id
+            ) {
+              <div class="w-1/2">
+                <button
+                  class="w-full flex justify-center items-center py-3 px-6 text-base text-grey-33 hover:bg-primary hover:text-white transition-all duration-200 cursor-pointer"
+                  (click)="navigateToSubcategory(subcategory, selectedMainCategoryId()!)"
+                >
+                  {{ subcategory.name }}
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
     }
   </div>
 </ng-template>

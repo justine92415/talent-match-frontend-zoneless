@@ -1,0 +1,213 @@
+<div>
+  <!-- 頁面標題和操作按鈕 -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-grey-33 mb-2">課程檢視</h1>
+      <p class="text-grey-66">查看課程的詳細資訊</p>
+    </div>
+
+    @if (!isLoading() && courseData()) {
+      <div class="flex gap-3">
+        @if (canEdit()) {
+          <tmf-button
+            type="button"
+            variant="secondary"
+            iconPosition="left"
+            iconName="settings"
+            (click)="goToEdit()">
+            編輯課程
+          </tmf-button>
+        }
+
+        <tmf-button
+          type="button"
+          variant="secondary"
+          iconPosition="left"
+          iconName="arrow_left_alt"
+          (click)="goBack()">
+          返回列表
+        </tmf-button>
+      </div>
+    }
+  </div>
+
+  <!-- 載入中狀態 -->
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <span class="ml-3 text-grey-66">載入中...</span>
+    </div>
+  }
+
+  <!-- 錯誤狀態 -->
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+      <div class="flex">
+        <mat-icon class="text-red-500 mr-3">error</mat-icon>
+        <div>
+          <h3 class="text-red-800 font-medium">載入失敗</h3>
+          <p class="text-red-700 mt-1">{{ error() }}</p>
+          <tmf-button
+            type="button"
+            variant="secondary"
+            class="mt-3"
+            (click)="refresh()">
+            重新載入
+          </tmf-button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 課程資料顯示 -->
+  @if (!isLoading() && !error() && courseData()) {
+    <div class="space-y-8">
+
+      <!-- 課程基本資訊 -->
+      <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+        <div class="flex items-start justify-between mb-6">
+          <h2 class="text-xl font-semibold text-grey-33">基本資訊</h2>
+          <span [class]="courseData()?.status | courseStatusClass">
+            {{ courseData()?.status | courseStatus }}
+          </span>
+        </div>
+
+        <!-- 課程圖片 -->
+        @if (courseData()?.main_image) {
+          <div class="mb-6">
+            <img
+              [src]="courseData()?.main_image"
+              [alt]="courseData()?.name"
+              class="w-64 h-48 object-cover rounded-lg border border-grey-d4">
+          </div>
+        }
+
+        <!-- 基本資訊項目 -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">課程名稱</label>
+            <div class="text-grey-66">{{ courseData()?.name }}</div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">課程內容</label>
+            <div class="text-grey-66 leading-relaxed" style="word-wrap: break-word; word-break: break-word;">
+              {{ courseData()?.content }}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">主類別</label>
+              <div class="text-grey-66">{{ (courseData()?.main_category_id || 0) | category }}</div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">次類別</label>
+              <div class="flex flex-wrap gap-2">
+                @if (courseData()?.sub_category_id) {
+                  <span class="px-2 py-1 bg-grey-f7 text-grey-33 text-sm rounded">{{ [courseData()?.sub_category_id!] | subcategory }}</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">城市</label>
+            <div class="text-grey-66">{{ courseData()?.city }}</div>
+          </div>
+
+          @if (courseData()?.district) {
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">區域</label>
+              <div class="text-grey-66">{{ courseData()?.district }}</div>
+            </div>
+          }
+
+          @if (courseData()?.address) {
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">地址</label>
+              <div class="text-grey-66">{{ courseData()?.address }}</div>
+            </div>
+          }
+
+          @if (courseData()?.survey_url) {
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">問卷網址</label>
+              <div class="text-grey-66">
+                <a [href]="courseData()?.survey_url" target="_blank" class="text-primary hover:underline">
+                  {{ courseData()?.survey_url }}
+                </a>
+              </div>
+            </div>
+          }
+
+          @if (courseData()?.purchase_message) {
+            <div>
+              <label class="block text-sm font-medium text-grey-33 mb-2">購買訊息</label>
+              <div class="text-grey-66 leading-relaxed" style="word-wrap: break-word; word-break: break-word;">
+                {{ courseData()?.purchase_message }}
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- 課程方案 -->
+      <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-grey-33 mb-6">課程方案</h2>
+
+        <div class="space-y-4">
+          @for (plan of courseData()?.price_options; track plan.id; let i = $index) {
+            <div class="border border-grey-d4 rounded-lg p-4">
+              <h3 class="font-medium text-grey-33 mb-4">方案 {{ i + 1 }}</h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="text-grey-66">堂數：</span>
+                  <span class="text-grey-33">{{ plan.quantity }} 堂</span>
+                </div>
+                <div>
+                  <span class="text-grey-66">價格：</span>
+                  <span class="text-grey-33">{{ plan.price }} 元</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- 課程時間資訊 -->
+      <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-grey-33 mb-6">時間資訊</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">建立時間</label>
+            <div class="text-grey-66">{{ courseData()?.created_at | date: 'yyyy/MM/dd HH:mm' }}</div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">最後更新</label>
+            <div class="text-grey-66">{{ courseData()?.updated_at | date: 'yyyy/MM/dd HH:mm' }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- 無資料狀態 -->
+  @if (!isLoading() && !error() && !courseData()) {
+    <div class="text-center py-12">
+      <mat-icon class="text-grey-9f mb-4" style="font-size: 4rem; width: 4rem; height: 4rem;">folder_open</mat-icon>
+      <h3 class="text-lg font-medium text-grey-33 mb-2">找不到課程資料</h3>
+      <p class="text-grey-66 mb-6">該課程可能已被刪除或您沒有權限查看。</p>
+      <tmf-button
+        type="button"
+        (click)="goBack()">
+        返回課程列表
+      </tmf-button>
+    </div>
+  }
+</div>

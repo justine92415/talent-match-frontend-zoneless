@@ -162,14 +162,30 @@
       </div>
     </div>
 
+    <!-- 載入狀態 -->
+    @if (isLoading()) {
+      <div class="flex justify-center items-center py-20">
+        <div class="text-lg text-grey-66">載入中...</div>
+      </div>
+    }
+
+    <!-- 錯誤狀態 -->
+    @if (error()) {
+      <div class="flex justify-center items-center py-20">
+        <div class="text-lg text-red-50">{{ error() }}</div>
+      </div>
+    }
+
     <!-- 課程卡片網格 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-      <tmf-course-card 
-        *ngFor="let course of courses; trackBy: trackByCourse"
-        [course]="course"
-        class="w-full">
-      </tmf-course-card>
-    </div>
+    @if (!isLoading() && !error()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <tmf-course-card
+          *ngFor="let course of courses(); trackBy: trackByCourse"
+          [course]="course"
+          class="w-full">
+        </tmf-course-card>
+      </div>
+    }
 
     <!-- 分頁區塊 -->
     <tmf-pagination 

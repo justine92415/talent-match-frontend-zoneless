@@ -3,8 +3,30 @@
  * Do not edit manually.
  * Talent Match API
  * 全面重構後的 Talent Match 後端 API 文件
- * OpenAPI spec version: 2.0.0
+
+🆕 v2.1 新功能：整合式課程建立 API，支援同時上傳圖片和設定價格方案
+ * OpenAPI spec version: 2.1.0
  */
+/**
+ * 回應狀態
+ */
+export type SuccessResponseStatus =
+  (typeof SuccessResponseStatus)[keyof typeof SuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface SuccessResponse {
+  /** 回應狀態 */
+  status?: SuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 回傳資料 */
+  data?: unknown;
+}
+
 export interface UserProfile {
   /** 使用者 ID */
   id?: number;
@@ -173,6 +195,24 @@ export const ServerErrorResponseStatus = {
 export interface ServerErrorResponse {
   /** 回應狀態 */
   status?: ServerErrorResponseStatus;
+  /** 錯誤訊息 */
+  message?: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type ErrorResponseStatus =
+  (typeof ErrorResponseStatus)[keyof typeof ErrorResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ErrorResponseStatus = {
+  error: 'error',
+} as const;
+
+export interface ErrorResponse {
+  /** 回應狀態 */
+  status?: ErrorResponseStatus;
   /** 錯誤訊息 */
   message?: string;
 }
@@ -2089,160 +2129,6 @@ export interface CertificateUpsertResponse {
 }
 
 /**
- * 星期（0=星期日, 1=星期一, ..., 6=星期六）
- */
-export type ScheduleDayOfWeek =
-  (typeof ScheduleDayOfWeek)[keyof typeof ScheduleDayOfWeek];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleDayOfWeek = {
-  NUMBER_0: 0,
-  NUMBER_1: 1,
-  NUMBER_2: 2,
-  NUMBER_3: 3,
-  NUMBER_4: 4,
-  NUMBER_5: 5,
-  NUMBER_6: 6,
-} as const;
-
-export interface Schedule {
-  /** 排程 ID */
-  id: number;
-  /** 教師 ID */
-  teacher_id: number;
-  /** 星期（0=星期日, 1=星期一, ..., 6=星期六） */
-  day_of_week: ScheduleDayOfWeek;
-  /**
-   * 開始時間（HH:mm 格式）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  start_time: string;
-  /**
-   * 結束時間（HH:mm 格式）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  end_time: string;
-  /** 建立時間 */
-  created_at: string;
-  /** 更新時間 */
-  updated_at: string;
-}
-
-/**
- * 格式化的排程資料
- */
-export interface FormattedSchedules {
-  /** 星期一排程 */
-  monday?: string[];
-  /** 星期二排程 */
-  tuesday?: string[];
-  /** 星期三排程 */
-  wednesday?: string[];
-  /** 星期四排程 */
-  thursday?: string[];
-  /** 星期五排程 */
-  friday?: string[];
-  /** 星期六排程 */
-  saturday?: string[];
-  /** 星期日排程 */
-  sunday?: string[];
-}
-
-/**
- * 回應狀態
- */
-export type ScheduleGetSuccessResponseStatus =
-  (typeof ScheduleGetSuccessResponseStatus)[keyof typeof ScheduleGetSuccessResponseStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleGetSuccessResponseStatus = {
-  success: 'success',
-} as const;
-
-export type ScheduleGetSuccessResponseData = {
-  /** 排程列表 */
-  schedules?: Schedule[];
-  formatted_schedules?: FormattedSchedules;
-};
-
-export interface ScheduleGetSuccessResponse {
-  /** 回應狀態 */
-  status?: ScheduleGetSuccessResponseStatus;
-  /** 成功訊息 */
-  message?: string;
-  data?: ScheduleGetSuccessResponseData;
-}
-
-/**
- * 星期（0=星期日, 1=星期一, ..., 6=星期六，必填）
- */
-export type ScheduleUpdateRequestSchedulesItemDayOfWeek =
-  (typeof ScheduleUpdateRequestSchedulesItemDayOfWeek)[keyof typeof ScheduleUpdateRequestSchedulesItemDayOfWeek];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleUpdateRequestSchedulesItemDayOfWeek = {
-  NUMBER_0: 0,
-  NUMBER_1: 1,
-  NUMBER_2: 2,
-  NUMBER_3: 3,
-  NUMBER_4: 4,
-  NUMBER_5: 5,
-  NUMBER_6: 6,
-} as const;
-
-export type ScheduleUpdateRequestSchedulesItem = {
-  /** 星期（0=星期日, 1=星期一, ..., 6=星期六，必填） */
-  day_of_week: ScheduleUpdateRequestSchedulesItemDayOfWeek;
-  /**
-   * 開始時間（HH:mm 格式，必填）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  start_time: string;
-  /**
-   * 結束時間（HH:mm 格式，必填）
-   * @pattern ^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$
-   */
-  end_time: string;
-};
-
-export interface ScheduleUpdateRequest {
-  /**
-   * 排程列表（必填，1-50個排程）
-   * @minItems 1
-   * @maxItems 50
-   */
-  schedules: ScheduleUpdateRequestSchedulesItem[];
-}
-
-/**
- * 回應狀態
- */
-export type ScheduleUpdateSuccessResponseStatus =
-  (typeof ScheduleUpdateSuccessResponseStatus)[keyof typeof ScheduleUpdateSuccessResponseStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const ScheduleUpdateSuccessResponseStatus = {
-  success: 'success',
-} as const;
-
-export type ScheduleUpdateSuccessResponseData = {
-  schedules?: Schedule[];
-  formatted_schedules?: FormattedSchedules;
-  /** 更新的排程數量 */
-  updated_count?: number;
-  /** 刪除的舊排程數量 */
-  deleted_count?: number;
-};
-
-export interface ScheduleUpdateSuccessResponse {
-  /** 回應狀態 */
-  status?: ScheduleUpdateSuccessResponseStatus;
-  /** 成功訊息 */
-  message?: string;
-  data?: ScheduleUpdateSuccessResponseData;
-}
-
-/**
  * 回應狀態
  */
 export type ScheduleConflictCheckSuccessResponseStatus =
@@ -2433,6 +2319,455 @@ export type TeacherApplicationBusinessErrorResponseAllOf = {
 export type TeacherApplicationBusinessErrorResponse = BusinessErrorResponse &
   TeacherApplicationBusinessErrorResponseAllOf;
 
+/**
+ * 申請狀態
+ */
+export type TeacherApplicationInfoApplicationStatus =
+  (typeof TeacherApplicationInfoApplicationStatus)[keyof typeof TeacherApplicationInfoApplicationStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherApplicationInfoApplicationStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export interface TeacherApplicationInfo {
+  /** 申請 ID */
+  id?: number;
+  /** 教師 ID */
+  teacher_id?: number;
+  /** 教師姓名 */
+  name?: string;
+  /** 教師電子郵件 */
+  email?: string;
+  /** 國籍 */
+  nationality?: string;
+  /** 自我介紹 */
+  introduction?: string;
+  /** 教學經驗 */
+  teaching_experience?: string;
+  /** 申請狀態 */
+  application_status?: TeacherApplicationInfoApplicationStatus;
+  /** 申請時間 */
+  created_at?: string;
+}
+
+export interface TeacherDashboardOverview {
+  /** 總學生數 */
+  total_students?: number;
+  /** 活躍課程數 */
+  active_courses?: number;
+  /** 總收入 */
+  total_earnings?: number;
+  /** 待確認預約數 */
+  pending_reservations?: number;
+  /** 平均評分 */
+  average_rating?: number;
+  /** 總評價數 */
+  total_reviews?: number;
+}
+
+export type TeacherDetailedStatisticsMonthlyEarningsItem = {
+  /** 月份 */
+  month?: string;
+  /** 金額 */
+  amount?: number;
+};
+
+export type TeacherDetailedStatisticsCoursePerformanceItem = {
+  /** 課程名稱 */
+  course_name?: string;
+  /** 學生數 */
+  student_count?: number;
+  /** 評分 */
+  rating?: number;
+};
+
+export type TeacherDetailedStatisticsTeachingHours = {
+  /** 本月教學時數 */
+  this_month?: number;
+  /** 上月教學時數 */
+  last_month?: number;
+};
+
+export interface TeacherDetailedStatistics {
+  monthly_earnings?: TeacherDetailedStatisticsMonthlyEarningsItem[];
+  course_performance?: TeacherDetailedStatisticsCoursePerformanceItem[];
+  teaching_hours?: TeacherDetailedStatisticsTeachingHours;
+}
+
+export type TeacherStudentInfoEnrolledCoursesItem = {
+  /** 課程名稱 */
+  course_name?: string;
+  /** 學習進度 (0-100%) */
+  progress?: number;
+};
+
+export interface TeacherStudentInfo {
+  /** 學生 ID */
+  id?: number;
+  /** 學生姓名 */
+  name?: string;
+  /** 學生電子郵件 */
+  email?: string;
+  /**
+   * 學生頭像
+   * @nullable
+   */
+  avatar?: string | null;
+  enrolled_courses?: TeacherStudentInfoEnrolledCoursesItem[];
+  /** 總課堂數 */
+  total_lessons?: number;
+  /** 已完成課堂數 */
+  completed_lessons?: number;
+}
+
+/**
+ * 預約狀態
+ */
+export type TeacherReservationInfoStatus =
+  (typeof TeacherReservationInfoStatus)[keyof typeof TeacherReservationInfoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherReservationInfoStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface TeacherReservationInfo {
+  /** 預約 ID */
+  id?: number;
+  /** 學生姓名 */
+  student_name?: string;
+  /** 課程名稱 */
+  course_name?: string;
+  /** 預約日期 */
+  reservation_date?: string;
+  /** 預約時間 */
+  reservation_time?: string;
+  /** 預約狀態 */
+  status?: TeacherReservationInfoStatus;
+  /**
+   * 備註
+   * @nullable
+   */
+  notes?: string | null;
+}
+
+/**
+ * 收入來源類型
+ */
+export type TeacherEarningInfoSourceType =
+  (typeof TeacherEarningInfoSourceType)[keyof typeof TeacherEarningInfoSourceType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherEarningInfoSourceType = {
+  course_sale: 'course_sale',
+  lesson_fee: 'lesson_fee',
+  bonus: 'bonus',
+} as const;
+
+/**
+ * 收入狀態
+ */
+export type TeacherEarningInfoStatus =
+  (typeof TeacherEarningInfoStatus)[keyof typeof TeacherEarningInfoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherEarningInfoStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  paid: 'paid',
+} as const;
+
+export interface TeacherEarningInfo {
+  /** 收入記錄 ID */
+  id?: number;
+  /** 收入來源類型 */
+  source_type?: TeacherEarningInfoSourceType;
+  /** 收入金額 */
+  amount?: number;
+  /** 收入描述 */
+  description?: string;
+  /** 收入日期 */
+  earned_date?: string;
+  /** 收入狀態 */
+  status?: TeacherEarningInfoStatus;
+}
+
+export interface EarningSummary {
+  /** 總收入 */
+  total_earnings?: number;
+  /** 本月收入 */
+  this_month_earnings?: number;
+  /** 上月收入 */
+  last_month_earnings?: number;
+  /** 待結算金額 */
+  pending_amount?: number;
+  /** 成長率 (%) */
+  growth_rate?: number;
+}
+
+/**
+ * 結算狀態
+ */
+export type TeacherSettlementInfoStatus =
+  (typeof TeacherSettlementInfoStatus)[keyof typeof TeacherSettlementInfoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TeacherSettlementInfoStatus = {
+  pending: 'pending',
+  processing: 'processing',
+  completed: 'completed',
+} as const;
+
+export interface TeacherSettlementInfo {
+  /** 結算 ID */
+  id?: number;
+  /** 結算期間開始 */
+  period_start?: string;
+  /** 結算期間結束 */
+  period_end?: string;
+  /** 結算總金額 */
+  total_amount?: number;
+  /** 平台手續費 */
+  platform_fee?: number;
+  /** 實際收入 */
+  net_amount?: number;
+  /** 結算狀態 */
+  status?: TeacherSettlementInfoStatus;
+  /**
+   * 結算時間
+   * @nullable
+   */
+  settled_at?: string | null;
+}
+
+export type SettlementDetailInfoPeriodInfo = {
+  /** 期間開始日 */
+  start_date?: string;
+  /** 期間結束日 */
+  end_date?: string;
+};
+
+export type SettlementDetailInfoEarningsBreakdownItem = {
+  /** 收入來源 */
+  source?: string;
+  /** 金額 */
+  amount?: number;
+  /** 收入日期 */
+  date?: string;
+};
+
+export type SettlementDetailInfoDeductionsItem = {
+  /** 扣款類型 */
+  type?: string;
+  /** 扣款金額 */
+  amount?: number;
+  /** 扣款比例 (%) */
+  rate?: number;
+};
+
+export interface SettlementDetailInfo {
+  /** 結算 ID */
+  settlement_id?: number;
+  period_info?: SettlementDetailInfoPeriodInfo;
+  earnings_breakdown?: SettlementDetailInfoEarningsBreakdownItem[];
+  deductions?: SettlementDetailInfoDeductionsItem[];
+  /** 最終結算金額 */
+  final_amount?: number;
+}
+
+export type EarningsStatisticsOverviewBestMonth = {
+  /** 最佳月份 */
+  month?: string;
+  /** 收入金額 */
+  amount?: number;
+};
+
+export type EarningsStatisticsOverview = {
+  /** 總營收 */
+  total_revenue?: number;
+  /** 月均收入 */
+  average_monthly?: number;
+  best_month?: EarningsStatisticsOverviewBestMonth;
+};
+
+export type EarningsStatisticsTrendsItem = {
+  /** 月份 */
+  month?: string;
+  /** 收入 */
+  earnings?: number;
+  /** 成長率 (%) */
+  growth?: number;
+};
+
+export type EarningsStatisticsBySourceItem = {
+  /** 收入來源 */
+  source_type?: string;
+  /** 金額 */
+  amount?: number;
+  /** 佔比 (%) */
+  percentage?: number;
+};
+
+export interface EarningsStatistics {
+  overview?: EarningsStatisticsOverview;
+  trends?: EarningsStatisticsTrendsItem[];
+  by_source?: EarningsStatisticsBySourceItem[];
+}
+
+/**
+ * 學習狀態
+ */
+export type StudentDetailInfoLearningStatus =
+  (typeof StudentDetailInfoLearningStatus)[keyof typeof StudentDetailInfoLearningStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const StudentDetailInfoLearningStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  suspended: 'suspended',
+} as const;
+
+/**
+ * 課程狀態
+ */
+export type StudentDetailInfoEnrolledCoursesItemStatus =
+  (typeof StudentDetailInfoEnrolledCoursesItemStatus)[keyof typeof StudentDetailInfoEnrolledCoursesItemStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const StudentDetailInfoEnrolledCoursesItemStatus = {
+  enrolled: 'enrolled',
+  in_progress: 'in_progress',
+  completed: 'completed',
+  dropped: 'dropped',
+} as const;
+
+export type StudentDetailInfoEnrolledCoursesItem = {
+  /** 課程 ID */
+  course_id?: number;
+  /** 課程名稱 */
+  course_name?: string;
+  /** 報名日期 */
+  enrollment_date?: string;
+  /** 學習進度 (0-100) */
+  progress?: number;
+  /** 課程狀態 */
+  status?: StudentDetailInfoEnrolledCoursesItemStatus;
+};
+
+/**
+ * 出席狀態
+ */
+export type StudentDetailInfoLessonHistoryItemStatus =
+  (typeof StudentDetailInfoLessonHistoryItemStatus)[keyof typeof StudentDetailInfoLessonHistoryItemStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const StudentDetailInfoLessonHistoryItemStatus = {
+  attended: 'attended',
+  absent: 'absent',
+  cancelled: 'cancelled',
+} as const;
+
+export type StudentDetailInfoLessonHistoryItem = {
+  /** 上課日期 */
+  lesson_date?: string;
+  /** 上課時間 */
+  lesson_time?: string;
+  /** 課程名稱 */
+  course_name?: string;
+  /** 出席狀態 */
+  status?: StudentDetailInfoLessonHistoryItemStatus;
+  /**
+   * 課堂筆記
+   * @nullable
+   */
+  notes?: string | null;
+};
+
+/**
+ * 付款狀態
+ */
+export type StudentDetailInfoPaymentHistoryItemStatus =
+  (typeof StudentDetailInfoPaymentHistoryItemStatus)[keyof typeof StudentDetailInfoPaymentHistoryItemStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const StudentDetailInfoPaymentHistoryItemStatus = {
+  pending: 'pending',
+  completed: 'completed',
+  failed: 'failed',
+  refunded: 'refunded',
+} as const;
+
+export type StudentDetailInfoPaymentHistoryItem = {
+  /** 付款日期 */
+  payment_date?: string;
+  /** 付款金額 */
+  amount?: number;
+  /** 課程名稱 */
+  course_name?: string;
+  /** 付款方式 */
+  payment_method?: string;
+  /** 付款狀態 */
+  status?: StudentDetailInfoPaymentHistoryItemStatus;
+};
+
+/**
+ * 學習偏好
+ * @nullable
+ */
+export type StudentDetailInfoLearningPreferences = {
+  /** 偏好上課時間 */
+  preferred_time?: string[];
+  /** 學習風格 */
+  learning_style?: string;
+  /**
+   * 特殊需求
+   * @nullable
+   */
+  special_requirements?: string | null;
+} | null;
+
+export interface StudentDetailInfo {
+  /** 學生 ID */
+  id?: number;
+  /** 學生姓名 */
+  name?: string;
+  /** 學生電子郵件 */
+  email?: string;
+  /**
+   * 學生頭像 URL
+   * @nullable
+   */
+  avatar?: string | null;
+  /**
+   * 聯絡電話
+   * @nullable
+   */
+  phone?: string | null;
+  /** 註冊日期 */
+  registration_date?: string;
+  /** 學習狀態 */
+  learning_status?: StudentDetailInfoLearningStatus;
+  /** 已報名課程 */
+  enrolled_courses?: StudentDetailInfoEnrolledCoursesItem[];
+  /** 上課記錄 */
+  lesson_history?: StudentDetailInfoLessonHistoryItem[];
+  /** 付款記錄 */
+  payment_history?: StudentDetailInfoPaymentHistoryItem[];
+  /** 總付款金額 */
+  total_paid?: number;
+  /**
+   * 學習偏好
+   * @nullable
+   */
+  learning_preferences?: StudentDetailInfoLearningPreferences;
+}
+
 export interface SubCategoryItem {
   /** 次分類 ID */
   id: number;
@@ -2463,6 +2798,1850 @@ export interface GetTagsSuccessResponse {
   data: TagItem[];
 }
 
+export interface CreateCourseRequest {
+  /**
+   * 課程名稱 (必填，1-255字元)
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+  /**
+   * 課程內容描述 (選填，HTML格式)
+   * @minLength 1
+   * @nullable
+   */
+  content?: string | null;
+  /**
+   * 主分類 ID (選填，對應程式設計、語言學習等主分類)
+   * @minimum 1
+   * @nullable
+   */
+  main_category_id?: number | null;
+  /**
+   * 次分類 ID (選填，對應前端、後端等次分類)
+   * @minimum 1
+   * @nullable
+   */
+  sub_category_id?: number | null;
+  /**
+   * 城市 (選填，課程授課城市名稱)
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域 (選填，課程授課區域名稱)
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址 (選填，課程授課詳細地址)
+   * @nullable
+   */
+  address?: string | null;
+  /**
+   * 問卷調查連結 (選填，用於課後回饋)
+   * @nullable
+   */
+  survey_url?: string | null;
+  /**
+   * 購買備註訊息 (選填，顯示給學生的額外資訊)
+   * @nullable
+   */
+  purchase_message?: string | null;
+}
+
+export interface IntegratedCourseCreateRequest {
+  /** 課程基本資料 (JSON 字串格式) */
+  courseData: string;
+  /** 價格方案陣列 (JSON 字串格式) */
+  priceOptions: string;
+  /**
+   * 課程主圖 (可選，支援 JPEG/PNG/WebP，最大 10MB)
+   * @nullable
+   */
+  courseImage?: Blob | null;
+}
+
+export interface UpdateCourseRequest {
+  /**
+   * 課程名稱 (選填，1-255字元)
+   * @minLength 1
+   * @maxLength 255
+   */
+  name?: string;
+  /**
+   * 課程內容描述 (選填，HTML格式)
+   * @minLength 1
+   */
+  content?: string;
+  /**
+   * 主分類 ID (選填，對應程式設計、語言學習等主分類)
+   * @minimum 1
+   */
+  main_category_id?: number;
+  /**
+   * 次分類 ID (選填，對應前端、後端等次分類)
+   * @minimum 1
+   */
+  sub_category_id?: number;
+  /**
+   * 城市 (選填，課程授課城市名稱)
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域 (選填，課程授課區域名稱)
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址 (選填，課程授課詳細地址)
+   * @nullable
+   */
+  address?: string | null;
+  /**
+   * 問卷調查連結 (選填，用於課後回饋)
+   * @nullable
+   */
+  survey_url?: string | null;
+  /**
+   * 購買備註訊息 (選填，顯示給學生的額外資訊)
+   * @nullable
+   */
+  purchase_message?: string | null;
+  /** JSON 格式的價格方案資料 (選填，課程價格設定) */
+  price_options?: string;
+}
+
+/**
+ * 課程狀態 (draft: 草稿, submitted: 已提交審核, approved: 審核通過, rejected: 審核拒絕, published: 已發布, archived: 已封存)
+ */
+export type CourseBasicInfoStatus =
+  (typeof CourseBasicInfoStatus)[keyof typeof CourseBasicInfoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseBasicInfoStatus = {
+  draft: 'draft',
+  submitted: 'submitted',
+  approved: 'approved',
+  rejected: 'rejected',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export interface CourseBasicInfo {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID (系統生成的唯一識別碼) */
+  uuid?: string;
+  /** 教師 ID (Teacher 表的主鍵，非 User ID) */
+  teacher_id?: number;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程內容描述 (HTML格式)
+   * @nullable
+   */
+  content?: string | null;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 課程評分 (0-5分) */
+  rate?: number;
+  /** 評價數量 */
+  review_count?: number;
+  /** 瀏覽次數 */
+  view_count?: number;
+  /** 購買次數 */
+  purchase_count?: number;
+  /** 學生人數 */
+  student_count?: number;
+  /**
+   * 主分類 ID
+   * @nullable
+   */
+  main_category_id?: number | null;
+  /**
+   * 次分類 ID
+   * @nullable
+   */
+  sub_category_id?: number | null;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
+  /**
+   * 問卷調查連結
+   * @nullable
+   */
+  survey_url?: string | null;
+  /**
+   * 購買備註訊息
+   * @nullable
+   */
+  purchase_message?: string | null;
+  /** 課程狀態 (draft: 草稿, submitted: 已提交審核, approved: 審核通過, rejected: 審核拒絕, published: 已發布, archived: 已封存) */
+  status?: CourseBasicInfoStatus;
+  /**
+   * 提交審核備註
+   * @nullable
+   */
+  submission_notes?: string | null;
+  /**
+   * 封存原因
+   * @nullable
+   */
+  archive_reason?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+export type CourseWithPriceOptionsAllOf = {
+  /** 課程價格方案列表 */
+  price_options?: PriceOption[];
+};
+
+export type CourseWithPriceOptions = CourseBasicInfo &
+  CourseWithPriceOptionsAllOf;
+
+/**
+ * 回應狀態 (建立成功固定為 success)
+ */
+export type CreateCourseSuccessResponseStatus =
+  (typeof CreateCourseSuccessResponseStatus)[keyof typeof CreateCourseSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateCourseSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 建立的課程資料
+ */
+export type CreateCourseSuccessResponseData = {
+  course?: CourseBasicInfo;
+};
+
+export interface CreateCourseSuccessResponse {
+  /** 回應狀態 (建立成功固定為 success) */
+  status?: CreateCourseSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 建立的課程資料 */
+  data?: CreateCourseSuccessResponseData;
+}
+
+/**
+ * 回應狀態 (更新成功固定為 success)
+ */
+export type UpdateCourseSuccessResponseStatus =
+  (typeof UpdateCourseSuccessResponseStatus)[keyof typeof UpdateCourseSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateCourseSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 更新後的課程資料
+ */
+export type UpdateCourseSuccessResponseData = {
+  course?: CourseBasicInfo;
+};
+
+export interface UpdateCourseSuccessResponse {
+  /** 回應狀態 (更新成功固定為 success) */
+  status?: UpdateCourseSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 更新後的課程資料 */
+  data?: UpdateCourseSuccessResponseData;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type GetCourseSuccessResponseStatus =
+  (typeof GetCourseSuccessResponseStatus)[keyof typeof GetCourseSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetCourseSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 課程詳細資料
+ */
+export type GetCourseSuccessResponseData = {
+  course?: CourseBasicInfo;
+};
+
+export interface GetCourseSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: GetCourseSuccessResponseStatus;
+  /**
+   * 回應訊息 (可能為空)
+   * @nullable
+   */
+  message?: string | null;
+  /** 課程詳細資料 */
+  data?: GetCourseSuccessResponseData;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type GetCourseForEditSuccessResponseStatus =
+  (typeof GetCourseForEditSuccessResponseStatus)[keyof typeof GetCourseForEditSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetCourseForEditSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 包含價格方案的完整課程資料
+ */
+export type GetCourseForEditSuccessResponseData = {
+  course?: CourseWithPriceOptions;
+};
+
+export interface GetCourseForEditSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: GetCourseForEditSuccessResponseStatus;
+  /**
+   * 回應訊息 (可能為空)
+   * @nullable
+   */
+  message?: string | null;
+  /** 包含價格方案的完整課程資料 */
+  data?: GetCourseForEditSuccessResponseData;
+}
+
+export interface CourseListQueryParams {
+  /**
+   * 頁碼 (選填，預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁數量 (選填，預設為 20，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+}
+
+export interface PaginationInfo {
+  /** 目前頁碼 */
+  page?: number;
+  /** 每頁數量 */
+  limit?: number;
+  /** 總筆數 */
+  total?: number;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type GetCourseListSuccessResponseStatus =
+  (typeof GetCourseListSuccessResponseStatus)[keyof typeof GetCourseListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetCourseListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 教師課程列表資料和分頁資訊
+ */
+export type GetCourseListSuccessResponseData = {
+  /** 課程列表 */
+  courses?: CourseBasicInfo[];
+  /** 總筆數 */
+  total?: number;
+  /** 目前頁碼 */
+  page?: number;
+  /** 每頁數量 */
+  limit?: number;
+};
+
+export interface GetCourseListSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: GetCourseListSuccessResponseStatus;
+  /**
+   * 回應訊息 (可能為空)
+   * @nullable
+   */
+  message?: string | null;
+  /** 教師課程列表資料和分頁資訊 */
+  data?: GetCourseListSuccessResponseData;
+}
+
+export type GetCourseListPermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetCourseListPermissionErrorResponse = ForbiddenErrorResponse &
+  GetCourseListPermissionErrorResponseAllOf;
+
+export type PublicCourseBasicInfoPriceRange = {
+  /** 最低價格 */
+  min?: number;
+  /** 最高價格 */
+  max?: number;
+};
+
+export interface PublicCourseBasicInfo {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 課程評分 (0-5分) */
+  rate?: number;
+  /** 評價數量 */
+  review_count?: number;
+  /** 教師姓名 */
+  teacher_name?: string;
+  price_range?: PublicCourseBasicInfoPriceRange;
+}
+
+export type PublicCourseDetailInfoAllOfTeacherInfo = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師姓名 */
+  name?: string;
+  /**
+   * 教師頭像
+   * @nullable
+   */
+  avatar?: string | null;
+};
+
+export type PublicCourseDetailInfoAllOfPriceOptionsItem = {
+  /** 價格方案 ID */
+  id?: number;
+  /** 價格 */
+  price?: number;
+  /** 堂數 */
+  quantity?: number;
+};
+
+export type PublicCourseDetailInfoAllOf = {
+  /** 課程內容描述 */
+  content?: string;
+  teacher_info?: PublicCourseDetailInfoAllOfTeacherInfo;
+  price_options?: PublicCourseDetailInfoAllOfPriceOptionsItem[];
+};
+
+export type PublicCourseDetailInfo = PublicCourseBasicInfo &
+  PublicCourseDetailInfoAllOf;
+
+export interface PriceOptionCreateRequest {
+  /**
+   * 價格 (必填，範圍 1-999999)
+   * @minimum 1
+   * @maximum 999999
+   */
+  price: number;
+  /**
+   * 堂數 (必填，範圍 1-999)
+   * @minimum 1
+   * @maximum 999
+   */
+  quantity: number;
+}
+
+export interface PriceOptionUpdateRequest {
+  /**
+   * 價格 (選填，範圍 1-999999)
+   * @minimum 1
+   * @maximum 999999
+   */
+  price?: number;
+  /**
+   * 堂數 (選填，範圍 1-999)
+   * @minimum 1
+   * @maximum 999
+   */
+  quantity?: number;
+}
+
+export interface PriceOptionInfo {
+  /** 價格方案 ID */
+  id?: number;
+  /** 價格方案 UUID */
+  uuid?: string;
+  /** 所屬課程 ID */
+  course_id?: number;
+  /** 價格 */
+  price?: number;
+  /** 堂數 */
+  quantity?: number;
+  /** 是否啟用 */
+  is_active?: boolean;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+/**
+ * 回應狀態 (刪除成功固定為 success)
+ */
+export type DeleteCourseSuccessResponseStatus =
+  (typeof DeleteCourseSuccessResponseStatus)[keyof typeof DeleteCourseSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const DeleteCourseSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 刪除操作無回傳資料
+ * @nullable
+ */
+export type DeleteCourseSuccessResponseData = unknown | null;
+
+export interface DeleteCourseSuccessResponse {
+  /** 回應狀態 (刪除成功固定為 success) */
+  status?: DeleteCourseSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 刪除操作無回傳資料
+   * @nullable
+   */
+  data?: DeleteCourseSuccessResponseData;
+}
+
+export type DeleteCourseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type DeleteCourseBusinessErrorResponse = BusinessErrorResponse &
+  DeleteCourseBusinessErrorResponseAllOf;
+
+export type DeleteCoursePermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type DeleteCoursePermissionErrorResponse = ForbiddenErrorResponse &
+  DeleteCoursePermissionErrorResponseAllOf;
+
+export type DeleteCourseNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type DeleteCourseNotFoundErrorResponse = NotFoundErrorResponse &
+  DeleteCourseNotFoundErrorResponseAllOf;
+
+export interface SubmitCourseRequest {
+  /**
+   * 提交審核備註 (選填，提供給審核者的額外說明)
+   * @nullable
+   */
+  submission_notes?: string | null;
+}
+
+export interface ResubmitCourseRequest {
+  /**
+   * 重新提交審核備註 (選填，說明修正的內容)
+   * @nullable
+   */
+  submission_notes?: string | null;
+}
+
+export interface ArchiveCourseRequest {
+  /**
+   * 封存原因 (選填，說明封存的理由)
+   * @nullable
+   */
+  archive_reason?: string | null;
+}
+
+/**
+ * 回應狀態 (操作成功固定為 success)
+ */
+export type CourseStatusManagementSuccessResponseStatus =
+  (typeof CourseStatusManagementSuccessResponseStatus)[keyof typeof CourseStatusManagementSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseStatusManagementSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 狀態管理操作無回傳資料
+ * @nullable
+ */
+export type CourseStatusManagementSuccessResponseData = unknown | null;
+
+export interface CourseStatusManagementSuccessResponse {
+  /** 回應狀態 (操作成功固定為 success) */
+  status?: CourseStatusManagementSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 狀態管理操作無回傳資料
+   * @nullable
+   */
+  data?: CourseStatusManagementSuccessResponseData;
+}
+
+export type SubmitCourseSuccessResponseAllOf = {
+  message?: unknown;
+};
+
+export type SubmitCourseSuccessResponse =
+  CourseStatusManagementSuccessResponse & SubmitCourseSuccessResponseAllOf;
+
+export type ResubmitCourseSuccessResponseAllOf = {
+  message?: unknown;
+};
+
+export type ResubmitCourseSuccessResponse =
+  CourseStatusManagementSuccessResponse & ResubmitCourseSuccessResponseAllOf;
+
+export type PublishCourseSuccessResponseAllOf = {
+  message?: unknown;
+};
+
+export type PublishCourseSuccessResponse =
+  CourseStatusManagementSuccessResponse & PublishCourseSuccessResponseAllOf;
+
+export type ArchiveCourseSuccessResponseAllOf = {
+  message?: unknown;
+};
+
+export type ArchiveCourseSuccessResponse =
+  CourseStatusManagementSuccessResponse & ArchiveCourseSuccessResponseAllOf;
+
+export type CourseStatusBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CourseStatusBusinessErrorResponse = BusinessErrorResponse &
+  CourseStatusBusinessErrorResponseAllOf;
+
+export type SubmitCourseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type SubmitCourseBusinessErrorResponse =
+  CourseStatusBusinessErrorResponse & SubmitCourseBusinessErrorResponseAllOf;
+
+export type ResubmitCourseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type ResubmitCourseBusinessErrorResponse =
+  CourseStatusBusinessErrorResponse & ResubmitCourseBusinessErrorResponseAllOf;
+
+export type PublishCourseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type PublishCourseBusinessErrorResponse =
+  CourseStatusBusinessErrorResponse & PublishCourseBusinessErrorResponseAllOf;
+
+export type ArchiveCourseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type ArchiveCourseBusinessErrorResponse =
+  CourseStatusBusinessErrorResponse & ArchiveCourseBusinessErrorResponseAllOf;
+
+export type CourseStatusPermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CourseStatusPermissionErrorResponse = ForbiddenErrorResponse &
+  CourseStatusPermissionErrorResponseAllOf;
+
+export type CourseStatusNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CourseStatusNotFoundErrorResponse = NotFoundErrorResponse &
+  CourseStatusNotFoundErrorResponseAllOf;
+
+export type GetCoursePermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetCoursePermissionErrorResponse = ForbiddenErrorResponse &
+  GetCoursePermissionErrorResponseAllOf;
+
+export type GetCourseNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetCourseNotFoundErrorResponse = NotFoundErrorResponse &
+  GetCourseNotFoundErrorResponseAllOf;
+
+export type CreateCourseValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type CreateCourseValidationErrorResponse = ValidationErrorResponse &
+  CreateCourseValidationErrorResponseAllOf;
+
+export type CreateCourseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CreateCourseBusinessErrorResponse = BusinessErrorResponse &
+  CreateCourseBusinessErrorResponseAllOf;
+
+export type CreateCourseTeacherPermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CreateCourseTeacherPermissionErrorResponse =
+  ForbiddenErrorResponse & CreateCourseTeacherPermissionErrorResponseAllOf;
+
+export type UpdateCourseValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type UpdateCourseValidationErrorResponse = ValidationErrorResponse &
+  UpdateCourseValidationErrorResponseAllOf;
+
+export type UpdateCourseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type UpdateCourseBusinessErrorResponse = BusinessErrorResponse &
+  UpdateCourseBusinessErrorResponseAllOf;
+
+export type UpdateCoursePermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type UpdateCoursePermissionErrorResponse = ForbiddenErrorResponse &
+  UpdateCoursePermissionErrorResponseAllOf;
+
+export type UpdateCourseNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type UpdateCourseNotFoundErrorResponse = NotFoundErrorResponse &
+  UpdateCourseNotFoundErrorResponseAllOf;
+
+export type GetCourseEditPermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetCourseEditPermissionErrorResponse = ForbiddenErrorResponse &
+  GetCourseEditPermissionErrorResponseAllOf;
+
+export type GetCourseEditNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetCourseEditNotFoundErrorResponse = NotFoundErrorResponse &
+  GetCourseEditNotFoundErrorResponseAllOf;
+
+/**
+ * 課程狀態
+ */
+export type CourseApplicationInfoStatus =
+  (typeof CourseApplicationInfoStatus)[keyof typeof CourseApplicationInfoStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseApplicationInfoStatus = {
+  draft: 'draft',
+  submitted: 'submitted',
+  approved: 'approved',
+  rejected: 'rejected',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export type CourseApplicationInfoTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師 UUID */
+  uuid?: string;
+  /** 教師姓名 */
+  name?: string;
+  /** 教師信箱 */
+  email?: string;
+};
+
+export interface CourseApplicationInfo {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /** 課程內容描述（截取前200字） */
+  content?: string;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 課程狀態 */
+  status?: CourseApplicationInfoStatus;
+  /**
+   * 提交審核備註
+   * @nullable
+   */
+  submission_notes?: string | null;
+  /**
+   * 封存原因
+   * @nullable
+   */
+  archive_reason?: string | null;
+  teacher?: CourseApplicationInfoTeacher;
+  /**
+   * 主分類 ID
+   * @nullable
+   */
+  main_category_id?: number | null;
+  /**
+   * 次分類 ID
+   * @nullable
+   */
+  sub_category_id?: number | null;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+/**
+ * 時段狀態 (unavailable: 教師未開放, available: 可預約, reserved: 已預約)
+ */
+export type CourseSlotStatus =
+  (typeof CourseSlotStatus)[keyof typeof CourseSlotStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseSlotStatus = {
+  unavailable: 'unavailable',
+  available: 'available',
+  reserved: 'reserved',
+} as const;
+
+/**
+ * 單一課程時段資訊
+ */
+export interface CourseSlot {
+  /** 時段時間 (HH:MM 格式) */
+  time: string;
+  /** 時段狀態 (unavailable: 教師未開放, available: 可預約, reserved: 已預約) */
+  status: CourseSlotStatus;
+}
+
+/**
+ * 單日完整課程表
+ */
+export interface DaySchedule {
+  /** 星期幾 */
+  week: string;
+  /** 日期 (YYYY-MM-DD 格式) */
+  date: string;
+  /** 該日的時段列表 */
+  slots: CourseSlot[];
+}
+
+/**
+ * 排序方式 (選填，newest: 最新發布, popular: 熱門程度, price_low: 價格由低到高, price_high: 價格由高到低)
+ */
+export type PublicCourseQueryParamsSort =
+  (typeof PublicCourseQueryParamsSort)[keyof typeof PublicCourseQueryParamsSort];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseQueryParamsSort = {
+  newest: 'newest',
+  popular: 'popular',
+  price_low: 'price_low',
+  price_high: 'price_high',
+} as const;
+
+export interface PublicCourseQueryParams {
+  /**
+   * 搜尋關鍵字 (選填，在課程名稱和內容中搜尋，最大200字元)
+   * @maxLength 200
+   */
+  keyword?: string;
+  /**
+   * 主分類 ID (選填，篩選指定主分類的課程)
+   * @minimum 1
+   */
+  main_category_id?: number;
+  /**
+   * 次分類 ID (選填，篩選指定次分類的課程)
+   * @minimum 1
+   */
+  sub_category_id?: number;
+  /** 城市名稱 (選填，地區篩選) */
+  city?: string;
+  /** 排序方式 (選填，newest: 最新發布, popular: 熱門程度, price_low: 價格由低到高, price_high: 價格由高到低) */
+  sort?: PublicCourseQueryParamsSort;
+  /**
+   * 頁碼 (選填，預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量 (選填，預設為 12，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+}
+
+/**
+ * 主分類資訊
+ */
+export type PublicCourseListItemMainCategory = {
+  /** 主分類 ID */
+  id?: number;
+  /** 主分類名稱 */
+  name?: string;
+};
+
+/**
+ * 次分類資訊
+ */
+export type PublicCourseListItemSubCategory = {
+  /** 次分類 ID */
+  id?: number;
+  /** 次分類名稱 */
+  name?: string;
+};
+
+/**
+ * 教師使用者資訊
+ */
+export type PublicCourseListItemTeacherUser = {
+  /** 教師姓名 */
+  name?: string;
+  /** 教師暱稱 */
+  nick_name?: string;
+  /** 教師頭像 URL */
+  avatar_image?: string;
+};
+
+/**
+ * 教師資訊
+ */
+export type PublicCourseListItemTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師使用者資訊 */
+  user?: PublicCourseListItemTeacherUser;
+};
+
+export interface PublicCourseListItem {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID (系統生成的唯一識別碼) */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 最低價格 */
+  min_price?: number;
+  /** 最高價格 */
+  max_price?: number;
+  /** 課程評分 (字串格式的數字) */
+  rate?: string;
+  /** 評價數量 */
+  review_count?: number;
+  /** 學生人數 */
+  student_count?: number;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
+  /** 主分類資訊 */
+  main_category?: PublicCourseListItemMainCategory;
+  /** 次分類資訊 */
+  sub_category?: PublicCourseListItemSubCategory;
+  /** 教師資訊 */
+  teacher?: PublicCourseListItemTeacher;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+export interface PublicCoursePaginationInfo {
+  /** 目前頁碼 */
+  current_page?: number;
+  /** 每頁數量 */
+  per_page?: number;
+  /** 總筆數 */
+  total?: number;
+  /** 總頁數 */
+  total_pages?: number;
+}
+
+export interface PublicCourseFilters {
+  /** 排序方式 */
+  sort?: string;
+  /**
+   * 主分類 ID
+   * @nullable
+   */
+  main_category_id?: number | null;
+  /**
+   * 次分類 ID
+   * @nullable
+   */
+  sub_category_id?: number | null;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 搜尋關鍵字
+   * @nullable
+   */
+  keyword?: string | null;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type PublicCourseListSuccessResponseStatus =
+  (typeof PublicCourseListSuccessResponseStatus)[keyof typeof PublicCourseListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 公開課程列表資料、分頁資訊和篩選條件
+ */
+export type PublicCourseListSuccessResponseData = {
+  /** 公開課程列表 */
+  courses?: PublicCourseListItem[];
+  pagination?: PublicCoursePaginationInfo;
+  filters?: PublicCourseFilters;
+};
+
+export interface PublicCourseListSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: PublicCourseListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 公開課程列表資料、分頁資訊和篩選條件 */
+  data?: PublicCourseListSuccessResponseData;
+}
+
+/**
+ * 主分類資訊
+ */
+export type PublicCourseDetailMainCategory = {
+  /** 主分類 ID */
+  id?: number;
+  /** 主分類名稱 */
+  name?: string;
+};
+
+/**
+ * 次分類資訊
+ */
+export type PublicCourseDetailSubCategory = {
+  /** 次分類 ID */
+  id?: number;
+  /** 次分類名稱 */
+  name?: string;
+};
+
+export interface PublicCourseDetail {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID (系統生成的唯一識別碼) */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程內容描述
+   * @nullable
+   */
+  content?: string | null;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 課程評分 (字串格式的數字) */
+  rate?: string;
+  /** 評價數量 */
+  review_count?: number;
+  /** 學生人數 */
+  student_count?: number;
+  /** 購買次數 */
+  purchase_count?: number;
+  /**
+   * 問卷調查連結
+   * @nullable
+   */
+  survey_url?: string | null;
+  /**
+   * 購買備註訊息
+   * @nullable
+   */
+  purchase_message?: string | null;
+  /**
+   * 城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 地址
+   * @nullable
+   */
+  address?: string | null;
+  /** 主分類資訊 */
+  main_category?: PublicCourseDetailMainCategory;
+  /** 次分類資訊 */
+  sub_category?: PublicCourseDetailSubCategory;
+  /** 建立時間 */
+  created_at?: string;
+}
+
+/**
+ * 教師使用者資訊
+ */
+export type PublicCourseTeacherInfoUser = {
+  /** 教師姓名 */
+  name?: string;
+  /** 教師暱稱 */
+  nick_name?: string;
+  /** 教師頭像 URL */
+  avatar_image?: string;
+};
+
+export interface PublicCourseTeacherInfo {
+  /** 教師 ID */
+  id?: number;
+  /** 教師使用者資訊 */
+  user?: PublicCourseTeacherInfoUser;
+  /**
+   * 教師所在城市
+   * @nullable
+   */
+  city?: string | null;
+  /**
+   * 教師所在區域
+   * @nullable
+   */
+  district?: string | null;
+  /**
+   * 教師地址
+   * @nullable
+   */
+  address?: string | null;
+  /**
+   * 教師介紹
+   * @nullable
+   */
+  introduction?: string | null;
+  /** 教師總學生數 */
+  total_students?: number;
+  /** 教師總課程數 */
+  total_courses?: number;
+  /** 教師平均評分 */
+  average_rating?: number;
+}
+
+export interface PublicCoursePriceOption {
+  /** 價格方案 ID */
+  id?: number;
+  /** 價格方案 UUID */
+  uuid?: string;
+  /** 價格 */
+  price?: number;
+  /** 堂數 */
+  quantity?: number;
+}
+
+export interface PublicTeacherCertificate {
+  /** 證書 ID */
+  id?: number;
+  /** 證書名稱 */
+  license_name?: string;
+}
+
+export interface PublicTeacherWorkExperience {
+  /** 工作經驗 ID */
+  id?: number;
+  /** 公司名稱 */
+  company_name?: string;
+  /** 職位名稱 */
+  job_title?: string;
+  /** 開始年份 */
+  start_year?: number;
+  /**
+   * 結束年份 (null 表示目前在職)
+   * @nullable
+   */
+  end_year?: number | null;
+}
+
+export interface PublicTeacherLearningExperience {
+  /** 學習經歷 ID */
+  id?: number;
+  /** 學校名稱 */
+  school_name?: string;
+  /** 科系/部門 */
+  department?: string;
+  /** 學位類型 */
+  degree?: string;
+  /** 開始年份 */
+  start_year?: number;
+  /**
+   * 結束年份 (null 表示目前在學)
+   * @nullable
+   */
+  end_year?: number | null;
+}
+
+/**
+ * 回應狀態 (取得成功固定為 success)
+ */
+export type PublicCourseDetailSuccessResponseStatus =
+  (typeof PublicCourseDetailSuccessResponseStatus)[keyof typeof PublicCourseDetailSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseDetailSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 公開課程完整詳情資料
+ */
+export type PublicCourseDetailSuccessResponseData = {
+  course?: PublicCourseDetail;
+  teacher?: PublicCourseTeacherInfo;
+  /** 課程價格方案列表 */
+  price_options?: PublicCoursePriceOption[];
+  /** 課程影片列表 (目前為空陣列) */
+  videos?: unknown[];
+  /** 課程檔案列表 (目前為空陣列) */
+  files?: unknown[];
+  /** 7天課程表 (從明天開始的連續7天，顯示每日時段狀態) */
+  schedule?: DaySchedule[];
+  /** 最近評價列表 (目前為空陣列) */
+  recent_reviews?: unknown[];
+  /** 推薦課程列表 (目前為空陣列) */
+  recommended_courses?: unknown[];
+  /** 教師證書列表 */
+  teacher_certificates?: PublicTeacherCertificate[];
+  /** 教師工作經驗列表 */
+  teacher_work_experiences?: PublicTeacherWorkExperience[];
+  /** 教師學習經歷列表 */
+  teacher_learning_experiences?: PublicTeacherLearningExperience[];
+};
+
+export interface PublicCourseDetailSuccessResponse {
+  /** 回應狀態 (取得成功固定為 success) */
+  status?: PublicCourseDetailSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 公開課程完整詳情資料 */
+  data?: PublicCourseDetailSuccessResponseData;
+}
+
+export type PublicCourseNotFoundErrorResponseAllOf = {
+  code?: unknown;
+  message?: unknown;
+};
+
+export type PublicCourseNotFoundErrorResponse = NotFoundErrorResponse &
+  PublicCourseNotFoundErrorResponseAllOf;
+
+/**
+ * 影片類型 (local: 本地上傳, youtube: YouTube連結)
+ */
+export type VideoUploadRequestType =
+  (typeof VideoUploadRequestType)[keyof typeof VideoUploadRequestType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoUploadRequestType = {
+  local: 'local',
+  youtube: 'youtube',
+} as const;
+
+export interface VideoUploadRequest {
+  /**
+   * 影片名稱 (必填，1-255字元)
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+  /**
+   * 影片分類 (必填)
+   * @minLength 1
+   * @maxLength 100
+   */
+  category: string;
+  /**
+   * 影片簡介 (必填)
+   * @minLength 1
+   * @maxLength 1000
+   */
+  intro: string;
+  /** 影片類型 (local: 本地上傳, youtube: YouTube連結) */
+  type: VideoUploadRequestType;
+  /** YouTube 影片網址 (當 type 為 youtube 時必填) */
+  youtube_url?: string;
+}
+
+export interface VideoUpdateRequest {
+  /**
+   * 影片名稱 (選填，1-255字元)
+   * @minLength 1
+   * @maxLength 255
+   */
+  name?: string;
+  /**
+   * 影片分類 (選填)
+   * @minLength 1
+   * @maxLength 100
+   */
+  category?: string;
+  /**
+   * 影片簡介 (選填)
+   * @minLength 1
+   * @maxLength 1000
+   */
+  intro?: string;
+  /**
+   * YouTube 影片網址 (選填)
+   * @nullable
+   */
+  youtube_url?: string | null;
+}
+
+/**
+ * 影片類型
+ */
+export type VideoBasicInfoType =
+  (typeof VideoBasicInfoType)[keyof typeof VideoBasicInfoType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoBasicInfoType = {
+  local: 'local',
+  youtube: 'youtube',
+} as const;
+
+export interface VideoBasicInfo {
+  /** 影片 ID */
+  id?: number;
+  /** 影片 UUID */
+  uuid?: string;
+  /** 影片名稱 */
+  name?: string;
+  /** 影片分類 */
+  category?: string;
+  /** 影片簡介 */
+  intro?: string;
+  /** 影片類型 */
+  type?: VideoBasicInfoType;
+  /**
+   * 影片長度 (秒)
+   * @nullable
+   */
+  duration?: number | null;
+  /**
+   * 縮圖 URL
+   * @nullable
+   */
+  thumbnail_url?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+}
+
+export type VideoDetailInfoAllOf = {
+  /**
+   * 影片檔案 URL (本地上傳)
+   * @nullable
+   */
+  file_url?: string | null;
+  /**
+   * YouTube 影片 URL
+   * @nullable
+   */
+  youtube_url?: string | null;
+  /**
+   * 檔案大小 (bytes)
+   * @nullable
+   */
+  file_size?: number | null;
+};
+
+export type VideoDetailInfo = VideoBasicInfo & VideoDetailInfoAllOf;
+
+export type VideoInfo = VideoDetailInfo;
+
+export interface PriceOption {
+  /** 價格方案 ID */
+  id: number;
+  /** 價格方案唯一識別碼 */
+  uuid: string;
+  /** 所屬課程 ID */
+  course_id: number;
+  /**
+   * 方案價格（新台幣）
+   * @minimum 1
+   * @maximum 999999.99
+   */
+  price: number;
+  /**
+   * 方案堂數
+   * @minimum 1
+   * @maximum 999
+   */
+  quantity: number;
+  /** 是否啟用 */
+  is_active: boolean;
+  /** 建立時間 */
+  created_at: string;
+  /** 更新時間 */
+  updated_at: string;
+}
+
+/**
+ * 標準教學時段
+ */
+export type StandardTimeSlot =
+  (typeof StandardTimeSlot)[keyof typeof StandardTimeSlot];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const StandardTimeSlot = {
+  '09:00': '09:00',
+  '10:00': '10:00',
+  '11:00': '11:00',
+  '13:00': '13:00',
+  '14:00': '14:00',
+  '15:00': '15:00',
+  '16:00': '16:00',
+  '17:00': '17:00',
+  '19:00': '19:00',
+  '20:00': '20:00',
+} as const;
+
+/**
+ * 週次 (1=週一, 2=週二, ..., 7=週日)
+ */
+export type WeekdayString = (typeof WeekdayString)[keyof typeof WeekdayString];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WeekdayString = {
+  NUMBER_1: '1',
+  NUMBER_2: '2',
+  NUMBER_3: '3',
+  NUMBER_4: '4',
+  NUMBER_5: '5',
+  NUMBER_6: '6',
+  NUMBER_7: '7',
+} as const;
+
+/**
+ * 週次時段設定 (鍵為週次字串，值為時段陣列)
+ */
+export type WeeklyScheduleRequestWeeklySchedule = { [key: string]: unknown };
+
+export interface WeeklyScheduleRequest {
+  /** 週次時段設定 (鍵為週次字串，值為時段陣列) */
+  weekly_schedule: WeeklyScheduleRequestWeeklySchedule;
+}
+
+/**
+ * 各天時段數量統計
+ */
+export interface SlotsByDayStats {
+  [key: string]: unknown;
+}
+
+/**
+ * 更新後的週次時段設定
+ */
+export type WeeklyScheduleResponseWeeklySchedule = { [key: string]: unknown };
+
+export interface WeeklyScheduleResponse {
+  /** 更新後的週次時段設定 */
+  weekly_schedule: WeeklyScheduleResponseWeeklySchedule;
+  /**
+   * 總時段數量 (最多 7天 × 10時段)
+   * @minimum 0
+   * @maximum 70
+   */
+  total_slots: number;
+  slots_by_day: SlotsByDayStats;
+  /**
+   * 此次更新的時段數量
+   * @minimum 0
+   */
+  updated_count: number;
+  /**
+   * 此次新建立的時段數量
+   * @minimum 0
+   */
+  created_count: number;
+  /**
+   * 此次刪除的時段數量
+   * @minimum 0
+   */
+  deleted_count: number;
+}
+
+/**
+ * 回應狀態
+ */
+export type WeeklyScheduleSuccessResponseStatus =
+  (typeof WeeklyScheduleSuccessResponseStatus)[keyof typeof WeeklyScheduleSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WeeklyScheduleSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface WeeklyScheduleSuccessResponse {
+  /** 回應狀態 */
+  status: WeeklyScheduleSuccessResponseStatus;
+  /** 成功訊息 */
+  message: string;
+  data: WeeklyScheduleResponse;
+}
+
+/**
+ * 錯誤類型
+ */
+export type WeeklyScheduleValidationErrorErrorType =
+  (typeof WeeklyScheduleValidationErrorErrorType)[keyof typeof WeeklyScheduleValidationErrorErrorType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const WeeklyScheduleValidationErrorErrorType = {
+  INVALID_WEEK_DAY: 'INVALID_WEEK_DAY',
+  INVALID_TIME_SLOT: 'INVALID_TIME_SLOT',
+  DUPLICATE_TIME_SLOT: 'DUPLICATE_TIME_SLOT',
+  FORMAT_ERROR: 'FORMAT_ERROR',
+} as const;
+
+export interface WeeklyScheduleValidationError {
+  week_day: WeekdayString;
+  time_slot?: StandardTimeSlot;
+  /** 錯誤類型 */
+  error_type: WeeklyScheduleValidationErrorErrorType;
+  /** 詳細錯誤訊息 */
+  message: string;
+}
+
+export type LegacyScheduleUpdateRequestAvailableSlotsItem = {
+  /**
+   * @minimum 0
+   * @maximum 6
+   */
+  weekday: number;
+  /** @pattern ^\d{2}:\d{2}$ */
+  start_time: string;
+  /** @pattern ^\d{2}:\d{2}$ */
+  end_time: string;
+  is_active?: boolean;
+};
+
+/**
+ * 舊版時段更新請求格式 - 已棄用，請使用 WeeklyScheduleRequest
+ * @deprecated
+ */
+export interface LegacyScheduleUpdateRequest {
+  /**
+   * 可預約時段列表 [已棄用，請使用新版週次格式]
+   * @maxItems 50
+   */
+  available_slots?: LegacyScheduleUpdateRequestAvailableSlotsItem[];
+}
+
+/**
+ * 伺服器內部錯誤
+ */
+export type InternalServerErrorResponse = ServerErrorResponse;
+
+export type PostApiAdminLoginBody = {
+  /**
+   * 管理員帳號
+   * @minLength 3
+   * @maxLength 50
+   */
+  username: string;
+  /**
+   * 管理員密碼
+   * @minLength 8
+   * @maxLength 100
+   */
+  password: string;
+};
+
+export type PostApiAdminLogin200AllOfDataAdmin = {
+  /** 管理員 ID */
+  id?: number;
+  /** 管理員帳號 */
+  username?: string;
+  /** 管理員姓名 */
+  name?: string;
+  /** 管理員權限列表 */
+  permissions?: string[];
+};
+
+export type PostApiAdminLogin200AllOfData = {
+  /** JWT 存取 Token */
+  access_token?: string;
+  /** JWT 刷新 Token */
+  refresh_token?: string;
+  /** Token 有效期（秒） */
+  expires_in?: number;
+  admin?: PostApiAdminLogin200AllOfDataAdmin;
+};
+
+export type PostApiAdminLogin200AllOf = {
+  data?: PostApiAdminLogin200AllOfData;
+};
+
+export type PostApiAdminLogin200 = SuccessResponse & PostApiAdminLogin200AllOf;
+
+export type GetApiAdminProfile200AllOfData = {
+  /** 管理員 ID */
+  id?: number;
+  /** 管理員帳號 */
+  username?: string;
+  /** 管理員姓名 */
+  name?: string;
+  /** 管理員信箱 */
+  email?: string;
+  /** 管理員角色 */
+  role?: string;
+  /** 權限列表 */
+  permissions?: string[];
+  /** 最後登入時間 */
+  last_login_at?: string;
+  /** 帳號建立時間 */
+  created_at?: string;
+};
+
+export type GetApiAdminProfile200AllOf = {
+  data?: GetApiAdminProfile200AllOfData;
+};
+
+export type GetApiAdminProfile200 = SuccessResponse &
+  GetApiAdminProfile200AllOf;
+
+export type GetApiAdminTeacherApplicationsParams = {
+  /**
+   * 申請狀態篩選
+   */
+  status?: GetApiAdminTeacherApplicationsStatus;
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 排序方式
+   */
+  sort?: GetApiAdminTeacherApplicationsSort;
+};
+
+export type GetApiAdminTeacherApplicationsStatus =
+  (typeof GetApiAdminTeacherApplicationsStatus)[keyof typeof GetApiAdminTeacherApplicationsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiAdminTeacherApplicationsStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+} as const;
+
+export type GetApiAdminTeacherApplicationsSort =
+  (typeof GetApiAdminTeacherApplicationsSort)[keyof typeof GetApiAdminTeacherApplicationsSort];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiAdminTeacherApplicationsSort = {
+  newest: 'newest',
+  oldest: 'oldest',
+} as const;
+
+export type GetApiAdminTeacherApplications200AllOfData = {
+  applications?: TeacherApplicationInfo[];
+  pagination?: PaginationInfo;
+};
+
+export type GetApiAdminTeacherApplications200AllOf = {
+  data?: GetApiAdminTeacherApplications200AllOfData;
+};
+
+export type GetApiAdminTeacherApplications200 = SuccessResponse &
+  GetApiAdminTeacherApplications200AllOf;
+
+export type GetApiAdminCourseApplicationsParams = {
+  /**
+ * 課程狀態篩選：
+- submitted: 待審核（已提交）
+- approved: 已核准
+- rejected: 已拒絕
+- draft: 草稿
+- published: 已發布
+- archived: 已封存
+
+ */
+  status?: GetApiAdminCourseApplicationsStatus;
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 排序方式
+   */
+  sort?: GetApiAdminCourseApplicationsSort;
+};
+
+export type GetApiAdminCourseApplicationsStatus =
+  (typeof GetApiAdminCourseApplicationsStatus)[keyof typeof GetApiAdminCourseApplicationsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiAdminCourseApplicationsStatus = {
+  submitted: 'submitted',
+  approved: 'approved',
+  rejected: 'rejected',
+  draft: 'draft',
+  published: 'published',
+  archived: 'archived',
+} as const;
+
+export type GetApiAdminCourseApplicationsSort =
+  (typeof GetApiAdminCourseApplicationsSort)[keyof typeof GetApiAdminCourseApplicationsSort];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiAdminCourseApplicationsSort = {
+  newest: 'newest',
+  oldest: 'oldest',
+} as const;
+
+export type GetApiAdminCourseApplications200AllOfData = {
+  applications?: CourseApplicationInfo[];
+  pagination?: PaginationInfo;
+};
+
+export type GetApiAdminCourseApplications200AllOf = {
+  data?: GetApiAdminCourseApplications200AllOfData;
+};
+
+export type GetApiAdminCourseApplications200 = SuccessResponse &
+  GetApiAdminCourseApplications200AllOf;
+
+export type PostApiAdminTeachersTeacherIdRejectBody = {
+  /**
+   * 拒絕原因說明
+   * @minLength 10
+   * @maxLength 500
+   */
+  reason: string;
+  /**
+   * 額外備註（內部使用）
+   * @maxLength 1000
+   */
+  notes?: string;
+};
+
+export type PostApiAdminCoursesCourseIdRejectBody = {
+  /**
+   * 拒絕原因說明
+   * @minLength 10
+   * @maxLength 500
+   */
+  reason: string;
+  /**
+   * 額外備註（內部使用）
+   * @maxLength 1000
+   */
+  notes?: string;
+};
+
 export type PostApiAuthRegister400 =
   | RegisterValidationErrorResponse
   | RegisterBusinessErrorResponse;
@@ -2482,6 +4661,37 @@ export type PostApiAuthResetPassword400 =
 export type PutApiAuthProfile400 =
   | UpdateProfileValidationError
   | UpdateProfileBusinessError;
+
+export type PostApiCoursesBody = {
+  /** 課程基本資料 (JSON 字串格式) */
+  courseData: string;
+  /** 價格方案陣列 (JSON 字串格式) */
+  priceOptions: string;
+  /** 課程主圖 (可選，支援 JPEG/PNG/WebP，最大 10MB) */
+  courseImage?: Blob;
+};
+
+export type PostApiCourses400 =
+  | CreateCourseValidationErrorResponse
+  | CreateCourseBusinessErrorResponse;
+
+export type GetApiCoursesParams = {
+  /**
+   * 頁碼 (預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁數量 (預設為 20，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+};
+
+export type PutApiCoursesId400 =
+  | CreateCourseValidationErrorResponse
+  | CreateCourseBusinessErrorResponse;
 
 export type PostApiFilesUploadBody = {
   /** 要上傳的檔案列表 */
@@ -2562,6 +4772,405 @@ export type GetApiFilesTestConnection200 = {
   data?: GetApiFilesTestConnection200Data;
 };
 
+export type GetApiCoursesCourseIdPriceOptions200AllOf = {
+  data?: PriceOptionInfo[];
+};
+
+export type GetApiCoursesCourseIdPriceOptions200 = SuccessResponse &
+  GetApiCoursesCourseIdPriceOptions200AllOf;
+
+export type PostApiCoursesCourseIdPriceOptions201AllOf = {
+  data?: PriceOptionInfo;
+};
+
+export type PostApiCoursesCourseIdPriceOptions201 = SuccessResponse &
+  PostApiCoursesCourseIdPriceOptions201AllOf;
+
+export type PutApiCoursesCourseIdPriceOptionsId200AllOf = {
+  data?: PriceOptionInfo;
+};
+
+export type PutApiCoursesCourseIdPriceOptionsId200 = SuccessResponse &
+  PutApiCoursesCourseIdPriceOptionsId200AllOf;
+
+export type GetApiCoursesPublicParams = {
+  /**
+   * 搜尋關鍵字，在課程名稱和內容中搜尋
+   * @maxLength 200
+   */
+  keyword?: string;
+  /**
+   * 主分類 ID
+   * @minimum 1
+   */
+  main_category_id?: number;
+  /**
+   * 次分類 ID
+   * @minimum 1
+   */
+  sub_category_id?: number;
+  /**
+   * 城市名稱，用於地區篩選
+   */
+  city?: string;
+  /**
+   * 排序方式
+   */
+  sort?: GetApiCoursesPublicSort;
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+};
+
+export type GetApiCoursesPublicSort =
+  (typeof GetApiCoursesPublicSort)[keyof typeof GetApiCoursesPublicSort];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiCoursesPublicSort = {
+  newest: 'newest',
+  popular: 'popular',
+  price_low: 'price_low',
+  price_high: 'price_high',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdOverviewParams = {
+  /**
+   * 統計資料時間範圍
+   */
+  date_range?: GetApiTeacherDashboardTeacherIdOverviewDateRange;
+};
+
+export type GetApiTeacherDashboardTeacherIdOverviewDateRange =
+  (typeof GetApiTeacherDashboardTeacherIdOverviewDateRange)[keyof typeof GetApiTeacherDashboardTeacherIdOverviewDateRange];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdOverviewDateRange = {
+  '7d': '7d',
+  '30d': '30d',
+  '90d': '90d',
+  '1y': '1y',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdOverview200AllOf = {
+  data?: TeacherDashboardOverview;
+};
+
+export type GetApiTeacherDashboardTeacherIdOverview200 = SuccessResponse &
+  GetApiTeacherDashboardTeacherIdOverview200AllOf;
+
+export type GetApiTeacherDashboardTeacherIdStatisticsParams = {
+  /**
+   * 統計開始日期
+   */
+  start_date?: string;
+  /**
+   * 統計結束日期
+   */
+  end_date?: string;
+  /**
+   * 統計資料的時間粒度
+   */
+  granularity?: GetApiTeacherDashboardTeacherIdStatisticsGranularity;
+};
+
+export type GetApiTeacherDashboardTeacherIdStatisticsGranularity =
+  (typeof GetApiTeacherDashboardTeacherIdStatisticsGranularity)[keyof typeof GetApiTeacherDashboardTeacherIdStatisticsGranularity];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdStatisticsGranularity = {
+  daily: 'daily',
+  weekly: 'weekly',
+  monthly: 'monthly',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdStatistics200AllOf = {
+  data?: TeacherDetailedStatistics;
+};
+
+export type GetApiTeacherDashboardTeacherIdStatistics200 = SuccessResponse &
+  GetApiTeacherDashboardTeacherIdStatistics200AllOf;
+
+export type GetApiTeacherDashboardTeacherIdStudentsParams = {
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 搜索學生姓名或暱稱
+   * @maxLength 200
+   */
+  search?: string;
+  /**
+   * 學習狀態篩選
+   */
+  status?: GetApiTeacherDashboardTeacherIdStudentsStatus;
+};
+
+export type GetApiTeacherDashboardTeacherIdStudentsStatus =
+  (typeof GetApiTeacherDashboardTeacherIdStudentsStatus)[keyof typeof GetApiTeacherDashboardTeacherIdStudentsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdStudentsStatus = {
+  active: 'active',
+  inactive: 'inactive',
+  completed: 'completed',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdStudents200AllOfData = {
+  students?: TeacherStudentInfo[];
+  pagination?: PaginationInfo;
+};
+
+export type GetApiTeacherDashboardTeacherIdStudents200AllOf = {
+  data?: GetApiTeacherDashboardTeacherIdStudents200AllOfData;
+};
+
+export type GetApiTeacherDashboardTeacherIdStudents200 = SuccessResponse &
+  GetApiTeacherDashboardTeacherIdStudents200AllOf;
+
+export type GetApiTeacherDashboardTeacherIdStudentsStudentId200AllOf = {
+  data?: StudentDetailInfo;
+};
+
+export type GetApiTeacherDashboardTeacherIdStudentsStudentId200 =
+  SuccessResponse & GetApiTeacherDashboardTeacherIdStudentsStudentId200AllOf;
+
+export type GetApiTeacherDashboardTeacherIdReservationsParams = {
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 預約狀態篩選
+   */
+  status?: GetApiTeacherDashboardTeacherIdReservationsStatus;
+  /**
+   * 預約開始日期篩選
+   */
+  start_date?: string;
+  /**
+   * 預約結束日期篩選
+   */
+  end_date?: string;
+};
+
+export type GetApiTeacherDashboardTeacherIdReservationsStatus =
+  (typeof GetApiTeacherDashboardTeacherIdReservationsStatus)[keyof typeof GetApiTeacherDashboardTeacherIdReservationsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdReservationsStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdReservations200AllOfData = {
+  reservations?: TeacherReservationInfo[];
+  pagination?: PaginationInfo;
+};
+
+export type GetApiTeacherDashboardTeacherIdReservations200AllOf = {
+  data?: GetApiTeacherDashboardTeacherIdReservations200AllOfData;
+};
+
+export type GetApiTeacherDashboardTeacherIdReservations200 = SuccessResponse &
+  GetApiTeacherDashboardTeacherIdReservations200AllOf;
+
+/**
+ * 新的預約狀態
+ */
+export type PutApiTeacherDashboardTeacherIdReservationsReservationIdStatusBodyStatus =
+  (typeof PutApiTeacherDashboardTeacherIdReservationsReservationIdStatusBodyStatus)[keyof typeof PutApiTeacherDashboardTeacherIdReservationsReservationIdStatusBodyStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PutApiTeacherDashboardTeacherIdReservationsReservationIdStatusBodyStatus =
+  {
+    confirmed: 'confirmed',
+    rejected: 'rejected',
+    completed: 'completed',
+    cancelled: 'cancelled',
+  } as const;
+
+export type PutApiTeacherDashboardTeacherIdReservationsReservationIdStatusBody =
+  {
+    /** 新的預約狀態 */
+    status: PutApiTeacherDashboardTeacherIdReservationsReservationIdStatusBodyStatus;
+    /**
+     * 狀態變更原因（拒絕或取消時建議提供）
+     * @maxLength 500
+     */
+    reason?: string;
+  };
+
+export type GetApiTeacherDashboardTeacherIdEarningsParams = {
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 收入開始日期
+   */
+  start_date?: string;
+  /**
+   * 收入結束日期
+   */
+  end_date?: string;
+  /**
+   * 收入狀態篩選
+   */
+  status?: GetApiTeacherDashboardTeacherIdEarningsStatus;
+};
+
+export type GetApiTeacherDashboardTeacherIdEarningsStatus =
+  (typeof GetApiTeacherDashboardTeacherIdEarningsStatus)[keyof typeof GetApiTeacherDashboardTeacherIdEarningsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdEarningsStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  paid: 'paid',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdEarnings200AllOfData = {
+  earnings?: TeacherEarningInfo[];
+  pagination?: PaginationInfo;
+  summary?: EarningSummary;
+};
+
+export type GetApiTeacherDashboardTeacherIdEarnings200AllOf = {
+  data?: GetApiTeacherDashboardTeacherIdEarnings200AllOfData;
+};
+
+export type GetApiTeacherDashboardTeacherIdEarnings200 = SuccessResponse &
+  GetApiTeacherDashboardTeacherIdEarnings200AllOf;
+
+export type GetApiTeacherDashboardTeacherIdSettlementsParams = {
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 結算年份篩選
+   * @minimum 2020
+   */
+  year?: number;
+  /**
+   * 結算狀態篩選
+   */
+  status?: GetApiTeacherDashboardTeacherIdSettlementsStatus;
+};
+
+export type GetApiTeacherDashboardTeacherIdSettlementsStatus =
+  (typeof GetApiTeacherDashboardTeacherIdSettlementsStatus)[keyof typeof GetApiTeacherDashboardTeacherIdSettlementsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdSettlementsStatus = {
+  processing: 'processing',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdSettlements200AllOfData = {
+  settlements?: TeacherSettlementInfo[];
+  pagination?: PaginationInfo;
+};
+
+export type GetApiTeacherDashboardTeacherIdSettlements200AllOf = {
+  data?: GetApiTeacherDashboardTeacherIdSettlements200AllOfData;
+};
+
+export type GetApiTeacherDashboardTeacherIdSettlements200 = SuccessResponse &
+  GetApiTeacherDashboardTeacherIdSettlements200AllOf;
+
+export type GetApiTeacherDashboardTeacherIdSettlementsSettlementId200AllOf = {
+  data?: SettlementDetailInfo;
+};
+
+export type GetApiTeacherDashboardTeacherIdSettlementsSettlementId200 =
+  SuccessResponse &
+    GetApiTeacherDashboardTeacherIdSettlementsSettlementId200AllOf;
+
+export type GetApiTeacherDashboardTeacherIdEarningsStatsParams = {
+  /**
+   * 統計時間週期
+   */
+  period?: GetApiTeacherDashboardTeacherIdEarningsStatsPeriod;
+  /**
+   * 統計資料分組方式
+   */
+  group_by?: GetApiTeacherDashboardTeacherIdEarningsStatsGroupBy;
+  /**
+   * 是否包含收入預測
+   */
+  include_forecast?: boolean;
+};
+
+export type GetApiTeacherDashboardTeacherIdEarningsStatsPeriod =
+  (typeof GetApiTeacherDashboardTeacherIdEarningsStatsPeriod)[keyof typeof GetApiTeacherDashboardTeacherIdEarningsStatsPeriod];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdEarningsStatsPeriod = {
+  '7d': '7d',
+  '30d': '30d',
+  '90d': '90d',
+  '6m': '6m',
+  '1y': '1y',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdEarningsStatsGroupBy =
+  (typeof GetApiTeacherDashboardTeacherIdEarningsStatsGroupBy)[keyof typeof GetApiTeacherDashboardTeacherIdEarningsStatsGroupBy];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiTeacherDashboardTeacherIdEarningsStatsGroupBy = {
+  day: 'day',
+  week: 'week',
+  month: 'month',
+} as const;
+
+export type GetApiTeacherDashboardTeacherIdEarningsStats200AllOf = {
+  data?: EarningsStatistics;
+};
+
+export type GetApiTeacherDashboardTeacherIdEarningsStats200 = SuccessResponse &
+  GetApiTeacherDashboardTeacherIdEarningsStats200AllOf;
+
 export type PostApiTeachersApply400 =
   | TeacherApplicationValidationErrorResponse
   | TeacherApplicationBusinessErrorResponse;
@@ -2585,6 +5194,97 @@ export type PostApiUploadAvatarBody = {
 export type PostApiUploadAvatar400 =
   | AvatarValidationErrorResponse
   | AvatarBusinessErrorResponse;
+
+/**
+ * 影片類型
+ */
+export type PostApiVideosBodyOneVideoType =
+  (typeof PostApiVideosBodyOneVideoType)[keyof typeof PostApiVideosBodyOneVideoType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiVideosBodyOneVideoType = {
+  youtube: 'youtube',
+  storage: 'storage',
+} as const;
+
+export type PostApiVideosBodyOne = {
+  /**
+   * 影片名稱
+   * @maxLength 200
+   */
+  name: string;
+  /**
+   * 影片分類
+   * @maxLength 100
+   */
+  category: string;
+  /**
+   * 影片介紹
+   * @maxLength 2000
+   */
+  intro: string;
+  /** 影片類型 */
+  video_type: PostApiVideosBodyOneVideoType;
+  /** YouTube 影片 URL（當 video_type 為 youtube 時必填） */
+  youtube_url?: string;
+  /** 影片檔案（當 video_type 為 storage 時必填） */
+  video_file?: Blob;
+  /** 影片縮圖（選填） */
+  thumbnail?: Blob;
+};
+
+export type PostApiVideos201AllOf = {
+  data?: VideoDetailInfo;
+};
+
+export type PostApiVideos201 = SuccessResponse & PostApiVideos201AllOf;
+
+export type GetApiVideosParams = {
+  /**
+   * 頁碼
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁顯示數量
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 依分類篩選（空字串或不提供表示不篩選）
+   * @maxLength 100
+   */
+  category?: string;
+  /**
+   * 搜索關鍵字，在影片名稱中搜索
+   * @maxLength 200
+   */
+  search?: string;
+};
+
+export type GetApiVideos200AllOfData = {
+  videos?: VideoBasicInfo[];
+  pagination?: PaginationInfo;
+};
+
+export type GetApiVideos200AllOf = {
+  data?: GetApiVideos200AllOfData;
+};
+
+export type GetApiVideos200 = SuccessResponse & GetApiVideos200AllOf;
+
+export type GetApiVideosId200AllOf = {
+  data?: VideoDetailInfo;
+};
+
+export type GetApiVideosId200 = SuccessResponse & GetApiVideosId200AllOf;
+
+export type PutApiVideosId200AllOf = {
+  data?: VideoDetailInfo;
+};
+
+export type PutApiVideosId200 = SuccessResponse & PutApiVideosId200AllOf;
 
 export type GetApiPing200 = {
   message?: string;

@@ -15,8 +15,8 @@
           class="p-3 rounded-lg cursor-pointer flex items-center gap-3 text-grey-33 text-base hover:bg-orange-55 hover:text-white transition-colors duration-200"
           [routerLink]="item.route"
           [routerLinkActive]="['bg-orange-55', '!text-white']"
-          [routerLinkActiveOptions]="{ exact: true }"
-        >
+          >
+          <!-- [routerLinkActiveOptions]="{ exact: true }" -->
           <mat-icon>{{ item.icon }}</mat-icon>
           <p>{{ item.label }}</p>
         </a>

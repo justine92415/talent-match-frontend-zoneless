@@ -3,7 +3,9 @@
  * Do not edit manually.
  * Talent Match API
  * 全面重構後的 Talent Match 後端 API 文件
- * OpenAPI spec version: 2.0.0
+
+🆕 v2.1 新功能：整合式課程建立 API，支援同時上傳圖片和設定價格方案
+ * OpenAPI spec version: 2.1.0
  */
 import { HttpClient } from '@angular/common/http';
 import type {

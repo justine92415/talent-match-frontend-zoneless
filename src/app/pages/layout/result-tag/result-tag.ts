@@ -1,9 +1,16 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatIconModule } from "@angular/material/icon";
 import { CommonModule } from '@angular/common';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
 import Pagination from '@components/pagination/pagination';
+import { Skeleton } from '@components/skeleton/skeleton';
 import { TmfIconEnum } from '@share/icon.enum';
+import { PublicCoursesService } from '@app/api/generated/public-courses/public-courses.service';
+import { TagsService } from '@app/api/generated/tags/tags.service';
+import { TagItem, SubCategoryItem } from '@app/api/generated/talentMatchAPI.schemas';
+import { map } from 'rxjs/operators';
 
 // 定義分類介面
 interface Category {
@@ -25,257 +32,290 @@ interface FilterOption {
 
 @Component({
   selector: 'tmf-result-tag',
-  imports: [MatIconModule, CommonModule, CourseCard, Pagination],
+  imports: [MatIconModule, CommonModule, CourseCard, Pagination, Skeleton],
   templateUrl: './result-tag.html',
   styles: ``
 })
-export default class ResultTag {
-  selectedMainCategoryId = 'art'; // 預設選中藝術創作
-  selectedSubCategoryId = 'all-art'; // 預設選中所有藝術
-  selectedFilterId = 'latest'; // 預設篩選：最新課程
+export default class ResultTag implements OnInit {
+  private publicCoursesService = inject(PublicCoursesService);
+  private tagsService = inject(TagsService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
-  // 分頁相關 (使用 signals)
+  // 篩選參數 signals
+  selectedMainCategoryId = signal<number | null>(null);
+  selectedSubCategoryId = signal<number | null>(null);
+  selectedFilterId = signal('latest');
   currentPage = signal(1);
-  totalResults = signal(120);
   itemsPerPage = signal(12);
 
-  // 主要分類資料
-  mainCategories: Category[] = [
-    { id: 'all', name: '探索全部', icon: 'key' },
-    { id: 'cooking', name: '烹飪料理', icon: 'restaurant' },
-    { id: 'finance', name: '理財投資', icon: 'savings' },
-    { id: 'art', name: '藝術創作', icon: 'draw' },
-    { id: 'craft', name: '手作工藝', icon: 'build' },
-    { id: 'dance', name: '舞蹈表演', icon: 'directions_run' }
+  // 手動管理分頁顯示的總數
+  displayTotalResults = signal(0);
+
+  // 篩選選項資料
+  filterOptions: FilterOption[] = [
+    { id: 'latest', name: '最新課程' },
+    { id: 'popular', name: '最高人氣' },
+    { id: 'price-low', name: '最低價格' },
+    { id: 'price-high', name: '最高價格' }
   ];
 
-  // 子分類資料（藝術創作相關）
-  subCategories: SubCategory[] = [
-    { id: 'all-art', name: '所有藝術', parentId: 'art' },
-    { id: 'digital-art', name: '電腦繪圖', parentId: 'art' },
-    { id: '3d-model', name: '3D 模型', parentId: 'art' },
-    { id: 'pencil-sketch', name: '鉛筆素描', parentId: 'art' },
-    { id: 'web-design', name: '網頁設計', parentId: 'art' },
-    { id: 'animation', name: '動畫特效', parentId: 'art' },
-    { id: 'color-theory', name: '色彩學', parentId: 'art' },
-    { id: 'graphic-design', name: '平面設計', parentId: 'art' },
-    { id: 'watercolor', name: '水彩插畫', parentId: 'art' }
-  ];
+  // 使用 rxResource 管理 tags 資料
+  tagsResource = rxResource({
+    stream: () => this.tagsService.getApiTags().pipe(
+      map(response => {
+        if (response.status && response.data) {
+          return response.data;
+        }
+        throw new Error('載入分類失敗');
+      })
+    )
+  });
 
-  // 模擬課程資料
-  courses: CourseCardData[] = [
-    {
-      id: '1',
-      title: '細針縫夢：手作裁縫入門',
-      description: '無論您是對裁縫有濃厚興趣，還是想要學習一技之長，這門課程都將是您的理想選擇。在這個由專業裁縫師親自指導的課程中，您將從基礎開始，逐步學習裁剪、縫紉和製作各種服裝和布藝作品所需的技能和知識。',
-      imageSrc: 'assets/images/reel_art_1.jpg',
-      level: '新手班',
-      category: '手工藝－裁縫',
-      price: 770,
-      teacher: {
-        name: '王太郎',
-        avatar: 'assets/images/teacher-avatar-1.jpg'
-      },
-      rating: {
-        score: 4.5,
-        count: 12
-      }
-    },
-    {
-      id: '2',
-      title: '饗宴廚藝：美食烹飪工作坊',
-      description: '我是文文，你們的烹飪大師！非常榮幸能夠與你們分享我的烹飪熱情和廚藝技巧。從我學習烹飪的那一刻起，我就深深著迷於美食的世界,並一直在不斷地探索和創新。無論是烤、煮、炸還是蒸,每一.....',
-      imageSrc: 'assets/images/reel_cooking_1.jpg',
-      level: '高手班',
-      category: '烹飪－西式',
-      price: 1200,
-      teacher: {
-        name: '文文',
-        avatar: 'assets/images/teacher-avatar-2.jpg'
-      },
-      rating: {
-        score: 4.0,
-        count: 333
-      }
-    },
-    {
-      id: '3',
-      title: '琴韻魔法：鋼琴彈奏交響指南',
-      description: '我專業且有耐心，致力於幫助學生掌握鋼琴演奏技巧，同時注重培養他們的音樂感和表達能力。',
-      imageSrc: 'assets/images/reel_cooking_2.jpg',
-      level: '大師班',
-      category: '音樂－鋼琴',
-      price: 600,
-      teacher: {
-        name: '齊齊cy',
-        avatar: 'assets/images/teacher-avatar-3.jpg'
-      },
-      rating: {
-        score: 4.5,
-        count: 100
-      }
-    },
-    {
-      id: '4',
-      title: '下班晚餐吃什麼？教你快出做出一道菜',
-      description: '美味料理的速成指南，千萬別錯過\n教你如何先備料，以及做菜的順序。\n擺脫手忙腳亂的狀況！',
-      imageSrc: 'assets/images/reel_cooking_3.jpg',
-      level: '新手班',
-      category: '烹飪－中式',
-      price: 600,
-      teacher: {
-        name: '林雯',
-        avatar: 'assets/images/teacher-avatar-4.jpg'
-      },
-      rating: {
-        score: 4.5,
-        count: 500
-      }
-    },
-    {
-      id: '5',
-      title: '細針縫夢：手作裁縫入門',
-      description: '無論您是對裁縫有濃厚興趣，還是想要學習一技之長，這門課程都將是您的理想選擇。',
-      imageSrc: 'assets/images/reel_art_1.jpg',
-      level: '新手班',
-      category: '手工藝－裁縫',
-      price: 770,
-      teacher: {
-        name: '王太郎',
-        avatar: 'assets/images/teacher-avatar-1.jpg'
-      },
-      rating: {
-        score: 4.5,
-        count: 12
-      }
-    },
-    {
-      id: '6',
-      title: '饗宴廚藝：美食烹飪工作坊',
-      description: '我是文文，你們的烹飪大師！非常榮幸能夠與你們分享我的烹飪熱情和廚藝技巧。',
-      imageSrc: 'assets/images/reel_cooking_1.jpg',
-      level: '高手班',
-      category: '烹飪－西式',
-      price: 1200,
-      teacher: {
-        name: '文文',
-        avatar: 'assets/images/teacher-avatar-2.jpg'
-      },
-      rating: {
-        score: 4.0,
-        count: 333
-      }
-    },
-    {
-      id: '7',
-      title: '琴韻魔法：鋼琴彈奏交響指南',
-      description: '我專業且有耐心，致力於幫助學生掌握鋼琴演奏技巧。',
-      imageSrc: 'assets/images/reel_cooking_2.jpg',
-      level: '大師班',
-      category: '音樂－鋼琴',
-      price: 600,
-      teacher: {
-        name: '齊齊cy',
-        avatar: 'assets/images/teacher-avatar-3.jpg'
-      },
-      rating: {
-        score: 4.5,
-        count: 100
-      }
-    },
-    {
-      id: '8',
-      title: '下班晚餐吃什麼？教你快出做出一道菜',
-      description: '美味料理的速成指南，千萬別錯過。教你如何先備料，以及做菜的順序。',
-      imageSrc: 'assets/images/reel_cooking_3.jpg',
-      level: '新手班',
-      category: '烹飪－中式',
-      price: 600,
-      teacher: {
-        name: '林雯',
-        avatar: 'assets/images/teacher-avatar-4.jpg'
-      },
-      rating: {
-        score: 4.5,
-        count: 500
-      }
+  // 課程查詢參數的 computed signal
+  courseParams = computed(() => {
+    const params: any = {
+      page: this.currentPage(),
+      per_page: this.itemsPerPage(),
+      sort: this.getSortValue(),
+    };
+
+    // 只有當值不為 null 時才添加參數
+    if (this.selectedMainCategoryId() !== null) {
+      params.main_category_id = this.selectedMainCategoryId();
     }
-  ];
 
-  // 計算總頁數 (使用 computed)
+    if (this.selectedSubCategoryId() !== null) {
+      params.sub_category_id = this.selectedSubCategoryId();
+    }
+
+    return params;
+  });
+
+  // 使用 rxResource 管理課程資料
+  coursesResource = rxResource({
+    params: () => this.courseParams(),
+    stream: ({params}) => {
+      return this.publicCoursesService.getApiCoursesPublic(params).pipe(
+      map(response => {
+        if (response.data) {
+          // 載入完成後更新顯示總數
+          this.displayTotalResults.set(response.data.pagination?.total || 0);
+          return {
+            courses: this.transformApiCoursesToCardData(response.data.courses || []),
+            totalResults: response.data.pagination?.total || 0
+          };
+        }
+        throw new Error('載入課程失敗');
+      })
+    )
+    }
+  });
+
+  // 計算主分類清單（包含探索全部），附帶圖示
+  mainCategories = computed(() => {
+    const tags = this.tagsResource.value() as TagItem[] | undefined;
+    if (!tags) return [];
+
+    const iconMap: Record<string, string> = {
+      '藝術創作': TmfIconEnum.DrawAbstract,
+      '手作工藝': TmfIconEnum.ToolsPliersWireStripper,
+      '舞蹈表演': TmfIconEnum.Taunt,
+      '樂器演奏': TmfIconEnum.QueueMusic,
+    };
+
+    const allCategory = {
+      id: null,
+      main_category: '探索全部',
+      sub_category: [],
+      icon_url: null,
+      icon: TmfIconEnum.ActionKey,
+      isSelected: this.selectedMainCategoryId() === null
+    };
+
+    const categoriesWithIcons = tags.map((tag: TagItem) => ({
+      ...tag,
+      icon: iconMap[tag.main_category] || TmfIconEnum.Search,
+      isSelected: this.selectedMainCategoryId() === tag.id
+    }));
+
+    return [allCategory, ...categoriesWithIcons];
+  });
+
+  // 計算當前選中主分類的子分類（包含"全部"選項）
+  currentSubCategories = computed(() => {
+    const selectedMainId = this.selectedMainCategoryId();
+    const tags = this.tagsResource.value() as TagItem[] | undefined;
+
+    if (selectedMainId === null || !tags) return [];
+
+    const selectedMain = tags.find((tag: TagItem) => tag.id === selectedMainId);
+    if (!selectedMain) return [];
+
+    const allSubCategory = {
+      id: null,
+      name: `所有${selectedMain.main_category}`,
+      isSelected: this.selectedSubCategoryId() === null
+    };
+
+    const subCategoriesWithSelection = selectedMain.sub_category.map((sub: SubCategoryItem) => ({
+      ...sub,
+      isSelected: this.selectedSubCategoryId() === sub.id
+    }));
+
+    return [allSubCategory, ...subCategoriesWithSelection];
+  });
+
+
+  // 計算總頁數
   totalPages = computed(() => {
-    return Math.ceil(this.totalResults() / this.itemsPerPage());
+    const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
+    return coursesData ? Math.ceil(coursesData.totalResults / this.itemsPerPage()) : 0;
+  });
+
+  // 總結果數
+  totalResults = computed(() => {
+    const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
+    return coursesData?.totalResults || 0;
+  });
+
+  // 課程列表
+  courses = computed(() => {
+    const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
+    return coursesData?.courses || [];
   });
 
   // 獲取目前選中的分類名稱
-  get selectedCategoryName(): string {
-    const subCategory = this.subCategories.find(sub => sub.id === this.selectedSubCategoryId);
-    return subCategory?.name || '所有藝術';
-  }
+  selectedCategoryName = computed(() => {
+    const selectedMainId = this.selectedMainCategoryId();
+    const selectedSubId = this.selectedSubCategoryId();
+
+    if (selectedMainId === null) {
+      return '全部課程';
+    }
+
+    if (selectedSubId) {
+      const subCategory = this.currentSubCategories().find(sub => sub.id === selectedSubId);
+      if (subCategory) return subCategory.name;
+    }
+
+    const tags = this.tagsResource.value() as TagItem[] | undefined;
+    const mainCategory = tags?.find((tag: TagItem) => tag.id === selectedMainId);
+    return mainCategory?.main_category || '未知分類';
+  });
+
+  // 計算篩選選項的狀態（包含選中狀態）
+  filtersWithSelection = computed(() => {
+    const selectedFilterId = this.selectedFilterId();
+    return this.filterOptions.map(filter => ({
+      ...filter,
+      isSelected: filter.id === selectedFilterId
+    }));
+  });
+
+  // 產生 skeleton 項目數組 (12個)
+  skeletonItems = computed(() => Array.from({ length: 12 }, (_, i) => i));
 
   // TmfIcon getter for template
   get TmfIcon() {
     return TmfIconEnum;
   }
 
-  // 頁碼變更處理
-  onPageChange(page: number): void {
-    this.currentPage.set(page);
+  ngOnInit(): void {
+    // 從 URL 查詢參數設定初始分類
+    this.route.queryParams.subscribe(params => {
+      if (params['mainCategory']) {
+        const mainCategoryId = parseInt(params['mainCategory'], 10);
+        if (!isNaN(mainCategoryId)) {
+          this.selectedMainCategoryId.set(mainCategoryId);
+        }
+      }
+
+      if (params['subCategory']) {
+        const subCategoryId = parseInt(params['subCategory'], 10);
+        if (!isNaN(subCategoryId)) {
+          this.selectedSubCategoryId.set(subCategoryId);
+        }
+      }
+    });
   }
 
+
   // 選擇主分類
-  selectMainCategory(categoryId: string): void {
-    this.selectedMainCategoryId = categoryId;
-    this.updateSubCategories(categoryId);
-    this.selectedSubCategoryId = this.getDefaultSubCategory(categoryId);
+  selectMainCategory(categoryId: number | null): void {
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
+    this.selectedMainCategoryId.set(categoryId);
+    this.selectedSubCategoryId.set(null); // 重置子分類
     this.currentPage.set(1); // 重置頁碼
+    // rxResource 會自動重新載入課程
   }
 
   // 選擇子分類
-  selectSubCategory(subCategoryId: string): void {
-    this.selectedSubCategoryId = subCategoryId;
+  selectSubCategory(subCategoryId: number | null): void {
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
+    this.selectedSubCategoryId.set(subCategoryId);
     this.currentPage.set(1); // 重置頁碼
+    // rxResource 會自動重新載入課程
   }
 
   // 選擇篩選選項
   selectFilter(filterId: string): void {
-    this.selectedFilterId = filterId;
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
+    this.selectedFilterId.set(filterId);
     this.currentPage.set(1); // 重置頁碼
-    // 這裡可以加入重新排序課程的邏輯
+    // rxResource 會自動重新載入課程
   }
 
-
-  // 更新子分類（這裡先只處理藝術創作，其他分類可以後續擴展）
-  private updateSubCategories(categoryId: string): void {
-    if (categoryId === 'art') {
-      this.subCategories = [
-        { id: 'all-art', name: '所有藝術', parentId: 'art' },
-        { id: 'digital-art', name: '電腦繪圖', parentId: 'art' },
-        { id: '3d-model', name: '3D 模型', parentId: 'art' },
-        { id: 'pencil-sketch', name: '鉛筆素描', parentId: 'art' },
-        { id: 'web-design', name: '網頁設計', parentId: 'art' },
-        { id: 'animation', name: '動畫特效', parentId: 'art' },
-        { id: 'color-theory', name: '色彩學', parentId: 'art' },
-        { id: 'graphic-design', name: '平面設計', parentId: 'art' },
-        { id: 'watercolor', name: '水彩插畫', parentId: 'art' }
-      ];
-    } else {
-      // 其他分類暫時顯示空數組，可以後續添加對應的子分類
-      this.subCategories = [];
-    }
+  // 頁碼變更處理
+  onPageChange(page: number): void {
+    // 保存當前總數，避免分頁消失
+    this.displayTotalResults.set(this.totalResults());
+    this.currentPage.set(page);
+    // rxResource 會自動重新載入課程
   }
 
-  // 獲取預設子分類
-  private getDefaultSubCategory(categoryId: string): string {
-    switch (categoryId) {
-      case 'art':
-        return 'all-art';
-      default:
-        return '';
-    }
+  // 課程卡片點擊處理
+  onCourseClick(courseId: string): void {
+    this.router.navigate(['/course-detail', courseId]);
+  }
+
+  // 轉換 API 回應為 CourseCardData 格式
+  private transformApiCoursesToCardData(apiCourses: any[]): CourseCardData[] {
+    return apiCourses.map(course => ({
+      id: course.id?.toString() || '',
+      title: course.name || '',
+      description: '', // API 回應中沒有 description，可能需要另外處理
+      imageSrc: course.image_url || 'assets/images/default-course.jpg',
+      level: '一般班', // API 回應中沒有 level，可能需要根據其他資料推斷
+      category: `${course.main_category?.name || ''}－${course.sub_category?.name || ''}`,
+      price: course.min_price || 0,
+      teacher: {
+        name: course.teacher?.user?.name || '',
+        avatar: course.teacher?.user?.avatar_image || 'assets/images/default-avatar.jpg'
+      },
+      rating: {
+        score: parseFloat(course.rate || '0'),
+        count: course.review_count || 0
+      }
+    }));
+  }
+
+  // 獲取排序值
+  private getSortValue(): string {
+    const sortMap: Record<string, string> = {
+      'latest': 'newest',
+      'popular': 'popular',
+      'price-low': 'price_low',
+      'price-high': 'price_high'
+    };
+    return sortMap[this.selectedFilterId()] || 'newest';
   }
 
   // TrackBy 函式以提升效能
+
   trackByCategory(index: number, category: Category): string {
     return category.id;
   }

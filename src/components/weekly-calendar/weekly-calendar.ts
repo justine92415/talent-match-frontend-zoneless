@@ -1,19 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, computed } from '@angular/core';
 import { ReserveTag } from '@components/reserve-tag/reserve-tag';
+import { DaySchedule } from '@app/api/generated/talentMatchAPI.schemas';
 
-type Status = 'unavailable' | 'available' | 'reserved';
-
-interface TimeSlot {
-  time: string;
-  status: Status;
-}
-
-interface DaySchedule {
-  week: string;
-  date: string;
-  slots: TimeSlot[];
-}
 
 @Component({
   selector: 'tmf-weekly-calendar',
@@ -23,6 +12,9 @@ interface DaySchedule {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeeklyCalendar {
+  // 接受外部傳入的 schedule 資料
+  scheduleData = input<DaySchedule[]>([]);
+
   times = [
     '09:00',
     '10:00',
@@ -36,7 +28,8 @@ export class WeeklyCalendar {
     '20:00',
   ];
 
-  schedule: DaySchedule[] = [
+  // 預設的 schedule 資料，作為 fallback
+  defaultSchedule: DaySchedule[] = [
     {
       week: '週日',
       date: '2024-03-31',
@@ -150,4 +143,10 @@ export class WeeklyCalendar {
       ],
     },
   ];
+
+  // 使用傳入的 schedule 資料，如果沒有則使用預設資料
+  schedule = computed(() => {
+    const inputSchedule = this.scheduleData();
+    return inputSchedule.length > 0 ? inputSchedule : this.defaultSchedule;
+  });
 }

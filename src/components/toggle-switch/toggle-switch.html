@@ -1,0 +1,6 @@
+<div [class]="containerClasses()" (click)="onToggle()">
+  <div
+    class="relative rounded-full transition-all after:content-[''] after:absolute after:top-[2px] after:bg-white after:rounded-full after:transition-all"
+    [class]="switchClasses() + ' ' + knobClasses() + ' ' + backgroundClasses() + ' ' + toggleClasses()"
+  ></div>
+</div>

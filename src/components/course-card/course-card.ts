@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 import { StarRating } from "@components/star-rating/star-rating";
@@ -34,11 +34,16 @@ export interface CourseCardData {
 })
 export class CourseCard {
   @Input() course!: CourseCardData;
+  @Output() courseClick = new EventEmitter<string>();
 
   // Math object for template use
   Math = Math;
 
   get TmfIcon() {
     return TmfIconEnum;
+  }
+
+  onCourseClick(): void {
+    this.courseClick.emit(this.course.id);
   }
 }

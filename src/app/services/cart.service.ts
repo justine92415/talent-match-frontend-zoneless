@@ -73,32 +73,67 @@ export class CartService {
 
   // 移除購物車項目
   removeFromCart(itemId: number): Observable<any> {
-    return this.cartApiService.deleteApiCartItemsItemId(itemId).pipe(
-      tap(() => {
-        // 重新載入購物車
-        this.cartResource.reload();
-      })
-    );
+    // 先更新本地狀態
+    const currentData = this.cartResource.value() as CartData;
+    if (currentData) {
+      const updatedItems = currentData.items?.filter(item => item.id !== itemId) || [];
+      const updatedData = {
+        ...currentData,
+        items: updatedItems,
+        summary: {
+          ...currentData.summary,
+          total_amount: updatedItems.reduce((total, item) =>
+            total + ((item.price_option?.price || 0) * (item.quantity || 1)), 0
+          )
+        }
+      };
+      this.cartResource.set(updatedData);
+    }
+
+    return this.cartApiService.deleteApiCartItemsItemId(itemId);
   }
 
   // 更新購物車項目數量
   updateQuantity(itemId: number, quantity: number): Observable<any> {
-    return this.cartApiService.putApiCartItemsItemId(itemId, { quantity }).pipe(
-      tap(() => {
-        // 重新載入購物車
-        this.cartResource.reload();
-      })
-    );
+    // 先更新本地狀態
+    const currentData = this.cartResource.value() as CartData;
+    if (currentData) {
+      const updatedItems = currentData.items?.map(item =>
+        item.id === itemId ? { ...item, quantity } : item
+      ) || [];
+      const updatedData = {
+        ...currentData,
+        items: updatedItems,
+        summary: {
+          ...currentData.summary,
+          total_amount: updatedItems.reduce((total, item) =>
+            total + ((item.price_option?.price || 0) * (item.quantity || 1)), 0
+          )
+        }
+      };
+      this.cartResource.set(updatedData);
+    }
+
+    return this.cartApiService.putApiCartItemsItemId(itemId, { quantity });
   }
 
   // 清空購物車
   clearCart(): Observable<any> {
-    return this.cartApiService.deleteApiCart().pipe(
-      tap(() => {
-        // 重新載入購物車
-        this.cartResource.reload();
-      })
-    );
+    // 先更新本地狀態
+    const currentData = this.cartResource.value() as CartData;
+    if (currentData) {
+      const updatedData = {
+        ...currentData,
+        items: [],
+        summary: {
+          ...currentData.summary,
+          total_amount: 0
+        }
+      };
+      this.cartResource.set(updatedData);
+    }
+
+    return this.cartApiService.deleteApiCart();
   }
 
   // 導向搜尋頁面

@@ -4454,6 +4454,28 @@ export interface UpdateCartItemRequest {
 }
 
 /**
+ * 主分類資料
+ * @nullable
+ */
+export type CartCourseInfoMainCategory = {
+  /** 主分類 ID */
+  id?: number;
+  /** 主分類名稱 */
+  name?: string;
+} | null;
+
+/**
+ * 次分類資料
+ * @nullable
+ */
+export type CartCourseInfoSubCategory = {
+  /** 次分類 ID */
+  id?: number;
+  /** 次分類名稱 */
+  name?: string;
+} | null;
+
+/**
  * 教師使用者資料
  */
 export type CartCourseInfoTeacherUser = {
@@ -4487,6 +4509,16 @@ export interface CartCourseInfo {
   main_image?: string | null;
   /** 課程狀態 */
   status?: string;
+  /**
+   * 主分類資料
+   * @nullable
+   */
+  main_category?: CartCourseInfoMainCategory;
+  /**
+   * 次分類資料
+   * @nullable
+   */
+  sub_category?: CartCourseInfoSubCategory;
   /** 授課教師資料 */
   teacher?: CartCourseInfoTeacher;
 }

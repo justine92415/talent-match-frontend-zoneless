@@ -24,7 +24,7 @@ import { CommonModule } from '@angular/common';
       background-color: white;
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class Table {
   // 表格元件提供語義化結構，內容由父元件透過 ng-content 投影

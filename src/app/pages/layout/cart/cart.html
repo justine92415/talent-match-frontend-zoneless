@@ -36,68 +36,145 @@
             </div>
           </div>
 
-          <!-- 表體 -->
-          @for (courseItem of itemsWithSelection(); track courseItem.id) {
-            <div 
-              tbody 
-              [class.selected]="courseItem.isSelected"
-            >
-              <!-- 勾選欄位 -->
-              <div class="flex w-12 items-center justify-center px-4">
-                <input
-                  type="checkbox"
-                  [checked]="courseItem.isSelected"
-                  (change)="toggleSelectItem(courseItem)"
-                  class="h-5 w-5 rounded border transition-colors duration-200"
-                />
-              </div>
-              
-              <!-- 課程內容 -->
-              <div class="flex flex-1 items-center gap-3 px-4">
-                <!-- 課程圖片 -->
-                <div class="h-28 w-50 overflow-hidden rounded-lg">
-                  <img
-                    [src]="courseItem.image"
-                    [alt]="courseItem.title"
-                    class="h-full w-full object-cover"
-                  />
+          <!-- 載入狀態 -->
+          @if (cartResource.isLoading()) {
+            @for (item of [1,2,3]; track item) {
+              <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+                <div class="flex w-12 items-center justify-center px-4">
+                  <tmf-skeleton class="h-5 w-5 rounded"></tmf-skeleton>
                 </div>
-                <!-- 課程資訊 -->
-                <div class="flex flex-col gap-1">
-                  <!-- 標籤 -->
-                  <div class="flex gap-2">
-                    @for (tag of courseItem.tags; track tag) {
-                      <span class="rounded bg-grey-d4 px-2 py-1 text-sm text-grey-33">{{ tag }}</span>
-                    }
+                <div class="flex flex-1 items-center gap-3 px-4">
+                  <tmf-skeleton class="h-28 w-50 rounded-lg"></tmf-skeleton>
+                  <div class="flex flex-col gap-2">
+                    <tmf-skeleton class="h-4 w-32"></tmf-skeleton>
+                    <tmf-skeleton class="h-6 w-48"></tmf-skeleton>
+                    <tmf-skeleton class="h-4 w-24"></tmf-skeleton>
                   </div>
-                  <!-- 課程標題 -->
-                  <h3 class="text-lg-bold text-grey-33">{{ courseItem.title }}</h3>
-                  <!-- 課程類型 -->
-                  <p class="text-sm text-grey-66">{{ courseItem.type }}</p>
+                </div>
+                <div class="flex w-35 items-center justify-center px-3">
+                  <tmf-skeleton class="h-6 w-20"></tmf-skeleton>
+                </div>
+                <div class="flex w-30 items-center justify-center gap-3 px-3">
+                  <tmf-skeleton class="h-6 w-6 rounded"></tmf-skeleton>
                 </div>
               </div>
+            }
+          }
 
-              <!-- 價格 -->
-              <div class="flex w-35 items-center justify-center px-3">
-                <span class="font-inter text-lg font-medium text-grey-33">NT$ {{ courseItem.price | number }}</span>
-              </div>
-
-              <!-- 操作 -->
-              <div class="flex w-30 items-center justify-center gap-3 px-3">
-                <button 
-                  class="text-grey-66 hover:text-grey-33"
-                  (click)="deleteCourse(courseItem)"
-                >
-                  <mat-icon class="!text-6 !h-6 !w-6">delete</mat-icon>
-                </button>
-                <button 
-                  class="text-grey-66 hover:text-grey-33"
-                  (click)="toggleFavorite(courseItem)"
-                >
-                  <mat-icon class="!text-6 !h-6 !w-6">favorite_border</mat-icon>
-                </button>
+          <!-- 錯誤狀態 -->
+          @else if (!!cartResource.error()) {
+            <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+              <div class="flex items-center justify-center w-full h-full">
+                <span class="text-red-500">載入購物車失敗，請重新整理頁面</span>
               </div>
             </div>
+          }
+
+          <!-- 空購物車狀態 -->
+          @else if (cartItems().length === 0) {
+            <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+              <div class="flex items-center justify-center w-full h-full">
+                <div class="text-center">
+                  <p class="text-grey-66 mb-4">購物車是空的</p>
+                  <tmf-button (click)="cartService.goToSearch()" variant="secondary">探索課程</tmf-button>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- 購物車項目 -->
+          @else if (cartResource.value() && cartItems().length > 0) {
+            <ng-container tbody>
+              @for (courseItem of itemsWithSelection(); track courseItem.id || $index; let i = $index) {
+                <div class="h-36 flex border-b border-grey-d4 bg-white transition-colors hover:bg-grey-f7">
+                  <!-- 勾選欄位 -->
+                  <div class="flex w-12 items-center justify-center px-4">
+                    <input
+                      type="checkbox"
+                      [checked]="courseItem.isSelected"
+                      (change)="toggleSelectItem(courseItem)"
+                      class="h-5 w-5 rounded border transition-colors duration-200"
+                    />
+                  </div>
+
+                  <!-- 課程內容 -->
+                  <div class="flex flex-1 items-center gap-3 px-4">
+                    <!-- 課程圖片 -->
+                    @if (courseItem.course?.main_image) {
+                      <img
+                        [src]="courseItem.course?.main_image"
+                        [alt]="courseItem.course?.name || '課程'"
+                        class="w-50 h-28 object-cover rounded-lg"
+                      />
+                    } @else {
+                      <div class="w-20 h-20 bg-grey-e9 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-grey-9f text-2xl">school</span>
+                      </div>
+                    }
+
+                    <!-- 課程資訊 -->
+                    <div class="flex flex-col gap-1">
+                      <!-- 課程類別 -->
+                      @if (courseItem.course?.main_category || courseItem.course?.sub_category) {
+                        <div class="flex gap-2">
+                          @if (courseItem.course?.main_category) {
+                            <span class="rounded bg-grey-d4 px-2 py-1 text-sm text-grey-33">{{ courseItem.course?.main_category?.name }}</span>
+                          }
+                          @if (courseItem.course?.sub_category) {
+                            <span class="rounded bg-grey-d4 px-2 py-1 text-sm text-grey-33">{{ courseItem.course?.sub_category?.name }}</span>
+                          }
+                        </div>
+                      }
+                      <!-- 課程標題 -->
+                      <h3 class="text-base text-grey-33 line-clamp-2">{{ courseItem.course?.name || '課程名稱' }}</h3>
+                      <!-- 價格方案 -->
+                      <p class="text-sm text-grey-66">{{ (courseItem.price_option?.quantity || 1) * (courseItem.quantity || 1) }} 堂課程</p>
+                    </div>
+                  </div>
+
+                  <!-- 價格與數量控制 -->
+                  <div class="flex w-35 flex-col items-center justify-center gap-2 px-3">
+                    <!-- 價格 -->
+                    <span class="font-inter text-lg font-medium text-grey-33">
+                      NT$ {{ ((courseItem.price_option?.price || 0) * (courseItem.quantity || 1)) | number:'1.0-0' }}
+                    </span>
+                    <!-- 數量控制 -->
+                    <div class="flex items-center gap-2">
+                      <button
+                        class="cursor-pointer flex h-8 w-8 items-center justify-center rounded border border-grey-d4 text-grey-66 hover:bg-grey-f7 disabled:opacity-50"
+                        [disabled]="courseItem.quantity! <= 1 || isUpdating().has(courseItem.id!)"
+                        (click)="updateQuantity(courseItem.id!, (courseItem.quantity || 1) - 1)"
+                      >
+                        <mat-icon class="!leading-4 !text-base !h-4 !w-4">remove</mat-icon>
+                      </button>
+                      <span class="w-8 text-center text-sm">{{ courseItem.quantity || 1 }}</span>
+                      <button
+                        class="cursor-pointer flex h-8 w-8 items-center justify-center rounded border border-grey-d4 text-grey-66 hover:bg-grey-f7 disabled:opacity-50"
+                        [disabled]="isUpdating().has(courseItem.id!)"
+                        (click)="updateQuantity(courseItem.id!, (courseItem.quantity || 1) + 1)"
+                      >
+                        <mat-icon class="!leading-4 !text-base !h-4 !w-4">add</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 操作 -->
+                  <div class="flex w-30 items-center justify-center px-3">
+                    <button
+                      class="cursor-pointer text-grey-66 hover:text-grey-33 disabled:opacity-50"
+                      [disabled]="isRemoving().has(courseItem.id!)"
+                      (click)="removeItem(courseItem.id!)"
+                    >
+                      @if (isRemoving().has(courseItem.id!)) {
+                        <mat-icon class="!text-6 !h-6 !w-6 animate-spin">hourglass_empty</mat-icon>
+                      } @else {
+                        <mat-icon class="!text-6 !h-6 !w-6">delete</mat-icon>
+                      }
+                    </button>
+                  </div>
+                </div>
+              }
+            </ng-container>
           }
         </tmf-table>
       </div>
@@ -113,22 +190,42 @@
             <!-- 共計 -->
             <div class="flex justify-end items-center gap-1 text-lg text-grey-66">
               <span>共計</span>
-              <span class="font-inter font-medium">1</span>
+              <span class="font-inter font-medium">{{ selectedItems().size }}</span>
               <span>項課程</span>
             </div>
-            
+
             <!-- 總計 -->
             <div class="flex justify-end items-baseline gap-1">
               <span class="text-base text-grey-33">總計</span>
               <span class="font-inter text-4xl font-medium uppercase text-grey-33">NT$</span>
-              <span class="font-inter text-4xl font-medium uppercase text-grey-33">1,200</span>
+              <span class="font-inter text-4xl font-medium uppercase text-grey-33">{{ selectedTotalPrice() | number:'1.0-0' }}</span>
             </div>
           </div>
 
           <!-- 按鈕區 -->
           <div class="space-y-4">
-            <tmf-button class="h-13">前往結帳</tmf-button>
-            <tmf-button class="h-13" variant="secondary">繼續購物</tmf-button>
+            <tmf-button
+              class="h-13"
+              [disabled]="selectedItems().size === 0"
+              (click)="checkout()"
+            >
+              前往結帳
+            </tmf-button>
+            <tmf-button
+              class="h-13"
+              variant="secondary"
+              (click)="cartService.goToSearch()"
+            >
+              繼續購物
+            </tmf-button>
+            <tmf-button
+              class="h-13"
+              variant="secondary"
+              (click)="clearCart()"
+              [disabled]="cartItems().length === 0"
+            >
+              清空購物車
+            </tmf-button>
           </div>
         </div>
       </div>

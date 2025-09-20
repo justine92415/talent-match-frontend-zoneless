@@ -10,6 +10,7 @@ import {
   OnInit,
   AfterViewInit,
 } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { RouterLink, Router } from '@angular/router';
@@ -18,21 +19,24 @@ import { DropdownManagerService } from './dropdown-manager.service';
 import { Button } from '@components/button/button';
 import { Skeleton } from '@components/skeleton/skeleton';
 import { AuthService } from '@app/services/auth.service';
+import { TagsService } from '@app/api/generated/tags/tags.service';
+import { TagItem, SubCategoryItem } from '@app/api/generated/talentMatchAPI.schemas';
+import { map } from 'rxjs/operators';
 
 interface City {
   id: string;
   name: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  subcategories: Subcategory[];
+// 使用 API 的原始類型，這裡只是為了類型擴展
+interface CategoryWithSelection extends Omit<TagItem, 'id'> {
+  id: number | null;
+  isSelected?: boolean;
+  isExpanded?: boolean;
 }
 
-interface Subcategory {
-  id: string;
-  name: string;
+interface SubcategoryWithSelection extends SubCategoryItem {
+  isSelected?: boolean;
 }
 
 interface Notification {
@@ -100,6 +104,7 @@ export class Header implements OnInit, AfterViewInit {
   viewContainerRef = inject(ViewContainerRef);
   authService = inject(AuthService);
   private router = inject(Router);
+  private tagsService = inject(TagsService);
 
   // 認證相關的計算屬性
   isAuthenticated = this.authService.isAuthenticated;
@@ -125,62 +130,17 @@ export class Header implements OnInit, AfterViewInit {
     { id: 'taitung', name: '台東縣' },
   ]);
 
-  // 課程分類 Mock Data
-  readonly categories = signal<Category[]>([
-    {
-      id: 'all',
-      name: '探索全部',
-      subcategories: [],
-    },
-    {
-      id: 'cooking',
-      name: '烹飪料理',
-      subcategories: [
-        { id: 'all-cooking', name: '所有料理' },
-        { id: 'chinese', name: '中式料理' },
-        { id: 'western', name: '西式料理' },
-        { id: 'japanese', name: '日式料理' },
-        { id: 'baking', name: '烘焙甜點' },
-      ],
-    },
-    {
-      id: 'finance',
-      name: '理財投資',
-      subcategories: [
-        { id: 'all-finance', name: '所有投資' },
-        { id: 'stocks', name: '股票投資' },
-        { id: 'crypto', name: '加密貨幣' },
-        { id: 'real-estate', name: '房地產' },
-        { id: 'insurance', name: '保險規劃' },
-      ],
-    },
-    {
-      id: 'art',
-      name: '藝術創作',
-      subcategories: [
-        { id: 'all-art', name: '所有藝術' },
-        { id: 'digital', name: '電腦繪圖' },
-        { id: '3d-model', name: '3D 模型' },
-        { id: 'sketch', name: '鉛筆素描' },
-        { id: 'web-design', name: '網頁設計' },
-        { id: 'animation', name: '動畫特效' },
-        { id: 'color', name: '色彩學' },
-        { id: 'graphic', name: '平面設計' },
-        { id: 'watercolor', name: '水彩插圖' },
-      ],
-    },
-    {
-      id: 'craft',
-      name: '手作工藝',
-      subcategories: [
-        { id: 'all-craft', name: '所有工藝' },
-        { id: 'pottery', name: '陶藝製作' },
-        { id: 'knitting', name: '編織刺繡' },
-        { id: 'woodwork', name: '木工雕刻' },
-        { id: 'jewelry', name: '首飾製作' },
-      ],
-    },
-  ]);
+  // 使用 rxResource 管理 tags 資料
+  tagsResource = rxResource({
+    stream: () => this.tagsService.getApiTags().pipe(
+      map(response => {
+        if (response.status && response.data) {
+          return response.data;
+        }
+        throw new Error('載入分類失敗');
+      })
+    )
+  });
 
   // 通知 Mock Data
   readonly notifications = signal<Notification[]>([
@@ -345,12 +305,59 @@ export class Header implements OnInit, AfterViewInit {
   });
 
   readonly selectedCity = signal<string>('台北市');
-  readonly selectedCategory = signal<Category | null>(null);
+  readonly selectedCategory = signal<CategoryWithSelection | null>(null);
+
+  // 計算主分類清單（包含探索全部），附帶選中和展開狀態
+  categories = computed(() => {
+    const tags = this.tagsResource.value() as TagItem[] | undefined;
+    if (!tags) return [];
+
+    const selectedCat = this.selectedCategory();
+    const selectedId = selectedCat?.id;
+    const expandedCategoryId = this.expandedCategory();
+
+    const allCategory: CategoryWithSelection = {
+      id: null,
+      main_category: '探索全部',
+      sub_category: [],
+      icon_url: null,
+      isSelected: selectedCat !== null && selectedId === null,
+      isExpanded: expandedCategoryId === 'all'
+    };
+
+    const categoriesWithSelection = tags.map((tag: TagItem) => ({
+      ...tag,
+      isSelected: selectedCat !== null && selectedId === tag.id,
+      isExpanded: expandedCategoryId === tag.id?.toString()
+    }));
+
+    return [allCategory, ...categoriesWithSelection];
+  });
+
+  // 計算當前選中主分類的子分類
+  currentSubCategories = computed(() => {
+    const selectedCat = this.selectedCategory();
+    if (!selectedCat || !selectedCat.sub_category || selectedCat.sub_category.length === 0) {
+      return [];
+    }
+    return selectedCat.sub_category;
+  });
+
+  // 計算是否應該顯示子分類區域
+  shouldShowSubCategories = computed(() => {
+    const selectedCat = this.selectedCategory();
+    return selectedCat && selectedCat.sub_category && selectedCat.sub_category.length > 0;
+  });
+
+  // 計算當前選中分類的主分類ID（用於子分類導航）
+  selectedMainCategoryId = computed(() => {
+    const selectedCat = this.selectedCategory();
+    return selectedCat?.id || null;
+  });
 
   // Mobile 選單狀態
   readonly isMobileMenuOpen = signal<boolean>(false);
   readonly expandedCategory = signal<string | null>(null);
-  readonly mobileMenuCategories = computed(() => this.categories());
 
   // 使用 computed 創建派生 signal
   readonly totalItems = computed(() => this.cartItems().length);
@@ -373,13 +380,50 @@ export class Header implements OnInit, AfterViewInit {
     this.selectedCity.set(city.name);
   }
 
-  selectCategory(category: Category): void {
-    // 如果點擊的是同一個分類，則取消選擇
+  selectCategory(category: CategoryWithSelection): void {
+    // 如果沒有子分類，直接導航
+    if (!category.sub_category || category.sub_category.length === 0) {
+      this.navigateToCategory(category);
+      return;
+    }
+
+    // 有子分類的情況：如果點擊的是同一個分類，則取消選擇
     if (this.selectedCategory()?.id === category.id) {
       this.selectedCategory.set(null);
     } else {
       this.selectedCategory.set(category);
     }
+  }
+
+  // 點擊主分類導航到 result-tag 頁面
+  navigateToCategory(category: CategoryWithSelection): void {
+    if (category.id === null) {
+      // 探索全部 - 不傳分類參數
+      this.router.navigate(['/result-tag']);
+    } else {
+      // 特定分類 - 傳入主分類ID
+      this.router.navigate(['/result-tag'], {
+        queryParams: { mainCategory: category.id }
+      });
+    }
+
+    // 導航後還原下拉選單狀態
+    this.selectedCategory.set(null);
+    this.dropdownManager.closeDropdown(DROPDOWN_IDS.EXPLORE);
+  }
+
+  // 點擊子分類導航到 result-tag 頁面
+  navigateToSubcategory(subcategory: SubcategoryWithSelection, mainCategoryId: number): void {
+    this.router.navigate(['/result-tag'], {
+      queryParams: {
+        mainCategory: mainCategoryId,
+        subCategory: subcategory.id
+      }
+    });
+
+    // 導航後還原下拉選單狀態
+    this.selectedCategory.set(null);
+    this.dropdownManager.closeDropdown(DROPDOWN_IDS.EXPLORE);
   }
 
   onUserMenuItemClick(item: UserMenuItem): void {
@@ -465,33 +509,38 @@ export class Header implements OnInit, AfterViewInit {
     console.log('Toggle mobile city selection');
   }
 
-  onMobileCategoryClick(category: Category): void {
+  onMobileCategoryClick(category: CategoryWithSelection): void {
     // 如果分類沒有子分類，直接導航
-    if (!category.subcategories || category.subcategories.length === 0) {
-      console.log('Navigate to category:', category.name);
-      // TODO: 實作導航邏輯
+    if (!category.sub_category || category.sub_category.length === 0) {
+      this.navigateToCategory(category);
+      this.closeMobileMenu(); // 導航後關閉手機選單
       return;
     }
 
     // 有子分類的話，切換展開狀態
     const currentExpanded = this.expandedCategory();
-    if (currentExpanded === category.id) {
+    const categoryIdStr = category.id ? category.id.toString() : 'all';
+    if (currentExpanded === categoryIdStr) {
       // 如果當前分類已展開，則收合
       this.expandedCategory.set(null);
     } else {
       // 否則展開當前分類
-      this.expandedCategory.set(category.id);
+      this.expandedCategory.set(categoryIdStr);
     }
   }
 
-  onMobileSubcategoryClick(subcategory: Subcategory): void {
-    console.log('Navigate to subcategory:', subcategory.name);
-    // TODO: 實作子分類導航邏輯
+  onMobileSubcategoryClick(subcategory: SubcategoryWithSelection, event: Event): void {
+    event.stopPropagation(); // 防止事件冒泡到父分類
+
+    // 找到當前展開的主分類ID
+    const expandedCategoryId = this.expandedCategory();
+    if (expandedCategoryId && expandedCategoryId !== 'all') {
+      const mainCategoryId = parseInt(expandedCategoryId, 10);
+      this.navigateToSubcategory(subcategory, mainCategoryId);
+      this.closeMobileMenu(); // 導航後關閉手機選單
+    }
   }
 
-  isCategoryExpanded(categoryId: string): boolean {
-    return this.expandedCategory() === categoryId;
-  }
 
   ngAfterViewInit(): void {
     // 註冊所有下拉選單

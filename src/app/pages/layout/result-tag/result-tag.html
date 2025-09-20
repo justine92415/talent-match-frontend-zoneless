@@ -27,35 +27,63 @@
           探索課程
         </h2>
       </div>
-      <div class="flex justify-start gap-6">
-        <div class="p-5 bg-white w-30 h-30 text-center text-grey-33 shadow-lg rounded-xl">
-          <mat-icon
-            class="!w-10 !h-10 !text-[40px] !leading-10 !text-primary mb-3"
-            >{{ TmfIcon.ActionKey }}</mat-icon
-          >
-          <h3 class="text-xl-bold">探索全部</h3>
+      <!-- 載入狀態 -->
+      @if (tagsResource.isLoading()) {
+        <!-- 主分類整塊 skeleton -->
+        <div class="flex flex-col gap-6">
+          <tmf-skeleton class="w-3/4 h-30"></tmf-skeleton>
+          <tmf-skeleton class="w-3/4 h-16"></tmf-skeleton>
         </div>
+      }
 
-        <div class="p-5 bg-primary w-30 h-30 text-center text-white shadow-lg rounded-xl">
-          <mat-icon
-            class="!w-10 !h-10 !text-[40px] !leading-10 !text-white mb-3"
-            >{{ TmfIcon.Skillet }}</mat-icon
-          >
-          <h3 class="text-xl-bold">烹飪料理</h3>
+      <!-- 錯誤狀態 -->
+      @if (tagsResource.error()) {
+        <div class="flex justify-center items-center py-10">
+          <div class="text-lg text-red-50">{{ tagsResource.error() }}</div>
         </div>
-      </div>
-      <div class="flex justify-start gap-3">
-        <div
-          class="flex items-center justify-center rounded-lg h-10 box-border px-3 bg-primary border border-primary text-white text-base"
-        >
-          探索全部
+      }
+
+      <!-- 主分類卡片 -->
+      @if (!tagsResource.isLoading() && !tagsResource.error()) {
+        <div class="flex justify-start gap-6 overflow-x-auto pb-4">
+          @for (category of mainCategories(); track category.id) {
+            <div
+              (click)="selectMainCategory(category.id)"
+              [class]="'p-5 w-30 h-30 text-center shadow-lg rounded-xl cursor-pointer transition-all hover:shadow-xl ' +
+                      (category.isSelected ? 'bg-primary text-white' : 'bg-white text-grey-33')">
+              <mat-icon
+                [class]="'!w-10 !h-10 !text-[40px] !leading-10 mb-3 ' +
+                        (category.isSelected ? '!text-white' : '!text-primary')"
+                >{{ category.icon }}</mat-icon
+              >
+              <h3 class="text-xl-bold">{{ category.main_category }}</h3>
+            </div>
+          }
         </div>
-        <div
-          class="flex items-center justify-center rounded-lg h-10 box-border px-3 bg-white border border-grey-9f text-grey-33"
-        >
-          探索全部
+      }
+      <!-- 子分類標籤 -->
+      @if (!tagsResource.isLoading() && !tagsResource.error() && currentSubCategories().length > 0) {
+        <div class="flex justify-start gap-3 flex-wrap">
+          @for (subCategory of currentSubCategories(); track subCategory.id) {
+            <div
+              (click)="selectSubCategory(subCategory.id)"
+              [class]="'flex items-center justify-center rounded-lg h-10 box-border px-3 cursor-pointer transition-all ' +
+                      (subCategory.isSelected ?
+                        'bg-primary border border-primary text-white' :
+                        'bg-white border border-grey-9f text-grey-33 hover:border-primary hover:text-primary')"
+            >
+              {{ subCategory.name }}
+            </div>
+          }
         </div>
-      </div>
+      }
+
+      <!-- 如果沒有子分類或未選擇主分類時的提示 -->
+      @if (!tagsResource.isLoading() && !tagsResource.error() && selectedMainCategoryId() !== null && currentSubCategories().length === 0) {
+        <div class="flex justify-center items-center py-4">
+          <div class="text-sm text-grey-66">此分類暫無子分類</div>
+        </div>
+      }
     </div>
   </div>
 </section>
@@ -65,33 +93,111 @@
     <!-- 搜尋結果 Header -->
     <div class="flex justify-between items-center mb-10">
       <!-- 搜尋結果文字 -->
-      <div class="flex items-end gap-2 text-3xl-bold text-grey-33">
-        <span>共 {{ totalResults() }} 筆與「</span>
-        <span class="text-purple">{{ selectedCategoryName }}</span>
-        <span>」相關課程</span>
-      </div>
-      
+      @if (coursesResource.isLoading()) {
+        <tmf-skeleton class="w-110 h-[41.25px]"></tmf-skeleton>
+      } @else {
+        <div class="flex items-end gap-2 text-3xl-bold text-grey-33">
+          <span>共 {{ totalResults() }} 筆與「</span>
+          <span class="text-purple">{{ selectedCategoryName() }}</span>
+          <span>」相關課程</span>
+        </div>
+      }
+
       <!-- 篩選選項 -->
       <div class="flex gap-0">
-        <div class="flex items-center justify-center box-border px-4 border-r border-grey-d4 text-grey-66">最新課程</div>
-        <div class="flex items-center justify-center box-border px-4 border-r border-grey-d4 text-orange-55 text-base-bold">最高人氣</div>
-        <div class="flex items-center justify-center box-border px-4 border-grey-d4 text-grey-66">最低價格</div>
+        @for (filter of filtersWithSelection(); track filter.id; let isLast = $last) {
+          <div
+            (click)="selectFilter(filter.id)"
+            [class]="'flex items-center justify-center box-border px-4 cursor-pointer transition-all ' +
+                    (filter.isSelected ? 'text-orange-55 text-base-bold' : 'text-grey-66 hover:text-orange-55') +
+                    (!isLast ? ' border-r border-grey-d4' : ' border-grey-d4')"
+          >
+            {{ filter.name }}
+          </div>
+        }
       </div>
     </div>
 
+    <!-- 載入狀態 -->
+    @if (coursesResource.isLoading()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        @for (item of skeletonItems(); track item) {
+          <div class="group relative m-auto w-full h-full overflow-hidden rounded-xl bg-white max-w-80 shadow-lg">
+            <!-- 圖片區域 -->
+            <div class="h-45 w-full">
+              <tmf-skeleton class="w-full h-full rounded-none"></tmf-skeleton>
+            </div>
+
+            <!-- 內容區域 -->
+            <div class="p-4 h-44 space-y-3">
+              <!-- 標題 -->
+              <div class="space-y-2">
+                <tmf-skeleton class="w-full h-4"></tmf-skeleton>
+                <tmf-skeleton class="w-3/4 h-4"></tmf-skeleton>
+              </div>
+
+              <!-- 描述 -->
+              <div class="space-y-2">
+                <tmf-skeleton class="w-full h-3"></tmf-skeleton>
+                <tmf-skeleton class="w-5/6 h-3"></tmf-skeleton>
+                <tmf-skeleton class="w-4/5 h-3"></tmf-skeleton>
+              </div>
+            </div>
+
+            <!-- 教師資訊區域 -->
+            <div class="max-h-16 box-border flex items-center justify-between border-y border-grey-d4 p-4">
+              <div class="flex items-center">
+                <tmf-skeleton class="mr-2 h-8 w-8 rounded-full"></tmf-skeleton>
+                <tmf-skeleton class="w-20 h-4"></tmf-skeleton>
+              </div>
+              <tmf-skeleton class="w-16 h-4"></tmf-skeleton>
+            </div>
+
+            <!-- 底部資訊區域 -->
+            <div class="flex items-center justify-start p-4 space-x-4">
+              <div class="flex flex-col space-y-2">
+                <tmf-skeleton class="w-8 h-3"></tmf-skeleton>
+                <tmf-skeleton class="w-12 h-3"></tmf-skeleton>
+              </div>
+              <div class="flex flex-col space-y-2">
+                <tmf-skeleton class="w-8 h-3"></tmf-skeleton>
+                <div class="flex items-center gap-1">
+                  <tmf-skeleton class="w-16 h-3"></tmf-skeleton>
+                  <tmf-skeleton class="w-8 h-3"></tmf-skeleton>
+                </div>
+              </div>
+              <div class="flex-grow flex justify-end">
+                <tmf-skeleton class="w-6 h-6 rounded"></tmf-skeleton>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- 錯誤狀態 -->
+    @if (coursesResource.error()) {
+      <div class="flex justify-center items-center py-20">
+        <div class="text-lg text-red-50">{{ coursesResource.error() }}</div>
+      </div>
+    }
+
     <!-- 課程卡片網格 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-      <tmf-course-card 
-        *ngFor="let course of courses; trackBy: trackByCourse"
-        [course]="course"
-        class="w-full">
-      </tmf-course-card>
-    </div>
+    @if (!coursesResource.isLoading() && !coursesResource.error()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <tmf-course-card
+          *ngFor="let course of courses(); trackBy: trackByCourse"
+          [course]="course"
+          (courseClick)="onCourseClick($event)"
+          class="w-full">
+        </tmf-course-card>
+      </div>
+    }
 
     <!-- 分頁區塊 -->
-    <tmf-pagination 
+    <tmf-pagination
       [currentPage]="currentPage()"
-      [totalResults]="totalResults()"
+      [totalResults]="displayTotalResults()"
       [itemsPerPage]="itemsPerPage()"
       (pageChange)="onPageChange($event)">
     </tmf-pagination>

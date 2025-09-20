@@ -4425,6 +4425,234 @@ export interface LegacyScheduleUpdateRequest {
   available_slots?: LegacyScheduleUpdateRequestAvailableSlotsItem[];
 }
 
+export interface AddCartItemRequest {
+  /**
+   * 課程 ID (必填，必須是已發布的課程)
+   * @minimum 1
+   */
+  course_id: number;
+  /**
+   * 價格方案 ID (必填，必須屬於指定課程)
+   * @minimum 1
+   */
+  price_option_id: number;
+  /**
+   * 購買數量 (選填，預設為 1，範圍 1-999)
+   * @minimum 1
+   * @maximum 999
+   */
+  quantity?: number;
+}
+
+export interface UpdateCartItemRequest {
+  /**
+   * 更新後的購買數量 (必填，範圍 1-999)
+   * @minimum 1
+   * @maximum 999
+   */
+  quantity: number;
+}
+
+/**
+ * 教師使用者資料
+ */
+export type CartCourseInfoTeacherUser = {
+  /** 教師真實姓名 */
+  name?: string;
+  /** 教師暱稱 */
+  nick_name?: string;
+};
+
+/**
+ * 授課教師資料
+ */
+export type CartCourseInfoTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師使用者資料 */
+  user?: CartCourseInfoTeacherUser;
+};
+
+export interface CartCourseInfo {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 課程狀態 */
+  status?: string;
+  /** 授課教師資料 */
+  teacher?: CartCourseInfoTeacher;
+}
+
+export interface CartPriceOptionInfo {
+  /** 價格方案 ID */
+  id?: number;
+  /** 價格方案 UUID */
+  uuid?: string;
+  /** 方案價格 (單位：新台幣) */
+  price?: number;
+  /** 方案包含的課程數量或時數 */
+  quantity?: number;
+}
+
+export interface CartItemWithDetails {
+  /** 購物車項目 ID */
+  id?: number;
+  /** 購物車項目 UUID */
+  uuid?: string;
+  /** 使用者 ID */
+  user_id?: number;
+  /** 課程 ID */
+  course_id?: number;
+  /** 價格方案 ID */
+  price_option_id?: number;
+  /** 購買數量 */
+  quantity?: number;
+  /** 項目是否有效 (課程和價格方案是否存在且可購買) */
+  is_valid?: boolean;
+  /**
+   * 項目無效的原因 (當 is_valid 為 false 時)
+   * @nullable
+   */
+  invalid_reason?: string | null;
+  /** 加入購物車時間 */
+  created_at?: string;
+  /** 最後更新時間 */
+  updated_at?: string;
+  /**
+   * 關聯課程資料 (若課程不存在則為 null)
+   * @nullable
+   */
+  course?: CartCourseInfo;
+  /**
+   * 關聯價格方案資料 (若方案不存在則為 null)
+   * @nullable
+   */
+  price_option?: CartPriceOptionInfo;
+}
+
+export interface CartSummary {
+  /** 購物車總商品數量 (所有項目的 quantity 總和) */
+  total_items?: number;
+  /** 購物車總金額 (僅計算有效項目，單位：新台幣) */
+  total_amount?: number;
+  /** 有效項目數量 (可正常購買的項目) */
+  valid_items?: number;
+  /** 無效項目數量 (課程下架或價格方案不存在等) */
+  invalid_items?: number;
+}
+
+export interface CartData {
+  /** 購物車項目列表 */
+  items?: CartItemWithDetails[];
+  /** 購物車摘要統計 */
+  summary?: CartSummary;
+}
+
+export type AddCartItemSuccessResponseAllOf = {
+  /** 成功訊息 */
+  message?: unknown;
+  /** 加入的購物車項目資料 */
+  data?: CartItemWithDetails;
+};
+
+export type AddCartItemSuccessResponse = SuccessResponse &
+  AddCartItemSuccessResponseAllOf;
+
+export type UpdateCartItemSuccessResponseAllOf = {
+  /** 成功訊息 */
+  message?: unknown;
+  /** 更新後的購物車項目資料 */
+  data?: CartItemWithDetails;
+};
+
+export type UpdateCartItemSuccessResponse = SuccessResponse &
+  UpdateCartItemSuccessResponseAllOf;
+
+export type GetCartSuccessResponseAllOf = {
+  /** 成功訊息 */
+  message?: unknown;
+  /** 購物車完整資料 */
+  data?: CartData;
+};
+
+export type GetCartSuccessResponse = SuccessResponse &
+  GetCartSuccessResponseAllOf;
+
+/**
+ * 此 API 無回傳資料
+ * @nullable
+ */
+export type RemoveCartItemSuccessResponseAllOfData = unknown | null;
+
+export type RemoveCartItemSuccessResponseAllOf = {
+  /** 成功訊息 */
+  message?: unknown;
+  /**
+   * 此 API 無回傳資料
+   * @nullable
+   */
+  data?: RemoveCartItemSuccessResponseAllOfData;
+};
+
+export type RemoveCartItemSuccessResponse = SuccessResponse &
+  RemoveCartItemSuccessResponseAllOf;
+
+/**
+ * 此 API 無回傳資料
+ * @nullable
+ */
+export type ClearCartSuccessResponseAllOfData = unknown | null;
+
+export type ClearCartSuccessResponseAllOf = {
+  /** 成功訊息 */
+  message?: unknown;
+  /**
+   * 此 API 無回傳資料
+   * @nullable
+   */
+  data?: ClearCartSuccessResponseAllOfData;
+};
+
+export type ClearCartSuccessResponse = SuccessResponse &
+  ClearCartSuccessResponseAllOf;
+
+export type CartValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type CartValidationErrorResponse = ValidationErrorResponse &
+  CartValidationErrorResponseAllOf;
+
+export type CartBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CartBusinessErrorResponse = BusinessErrorResponse &
+  CartBusinessErrorResponseAllOf;
+
+export type CartItemNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CartItemNotFoundErrorResponse = NotFoundErrorResponse &
+  CartItemNotFoundErrorResponseAllOf;
+
+export type CartAccessForbiddenErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type CartAccessForbiddenErrorResponse = ForbiddenErrorResponse &
+  CartAccessForbiddenErrorResponseAllOf;
+
 /**
  * 伺服器內部錯誤
  */
@@ -4471,6 +4699,76 @@ export type PostApiAdminLogin200AllOf = {
 };
 
 export type PostApiAdminLogin200 = SuccessResponse & PostApiAdminLogin200AllOf;
+
+/**
+ * 管理員角色（預設為 admin）
+ */
+export type PostApiAdminCreateBodyRole =
+  (typeof PostApiAdminCreateBodyRole)[keyof typeof PostApiAdminCreateBodyRole];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PostApiAdminCreateBodyRole = {
+  super_admin: 'super_admin',
+  admin: 'admin',
+} as const;
+
+export type PostApiAdminCreateBody = {
+  /**
+   * 管理員帳號（只能包含英文字母、數字和底線）
+   * @minLength 3
+   * @maxLength 50
+   * @pattern ^[a-zA-Z0-9_]+$
+   */
+  username: string;
+  /**
+   * 管理員密碼（至少8個字元）
+   * @minLength 8
+   * @maxLength 128
+   */
+  password: string;
+  /**
+   * 管理員姓名
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  /**
+   * 管理員電子郵件
+   * @maxLength 255
+   */
+  email: string;
+  /** 管理員角色（預設為 admin） */
+  role?: PostApiAdminCreateBodyRole;
+};
+
+export type PostApiAdminCreate201AllOfDataAdmin = {
+  /** 管理員 ID */
+  id?: number;
+  /** 管理員帳號 */
+  username?: string;
+  /** 管理員姓名 */
+  name?: string;
+  /** 管理員電子郵件 */
+  email?: string;
+  /** 管理員角色 */
+  role?: string;
+  /**
+   * 最後登入時間（新帳號為 null）
+   * @nullable
+   */
+  last_login_at?: string | null;
+};
+
+export type PostApiAdminCreate201AllOfData = {
+  admin?: PostApiAdminCreate201AllOfDataAdmin;
+};
+
+export type PostApiAdminCreate201AllOf = {
+  data?: PostApiAdminCreate201AllOfData;
+};
+
+export type PostApiAdminCreate201 = SuccessResponse &
+  PostApiAdminCreate201AllOf;
 
 export type GetApiAdminProfile200AllOfData = {
   /** 管理員 ID */
@@ -4661,6 +4959,10 @@ export type PostApiAuthResetPassword400 =
 export type PutApiAuthProfile400 =
   | UpdateProfileValidationError
   | UpdateProfileBusinessError;
+
+export type PostApiCartItems400 =
+  | CartValidationErrorResponse
+  | CartBusinessErrorResponse;
 
 export type PostApiCoursesBody = {
   /** 課程基本資料 (JSON 字串格式) */

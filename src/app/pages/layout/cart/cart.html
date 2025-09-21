@@ -206,10 +206,14 @@
           <div class="space-y-4">
             <tmf-button
               class="h-13"
-              [disabled]="selectedItems().size === 0"
+              [disabled]="selectedItems().size === 0 || isCheckingOut()"
               (click)="checkout()"
             >
-              前往結帳
+              @if (isCheckingOut()) {
+                處理中...
+              } @else {
+                前往結帳
+              }
             </tmf-button>
             <tmf-button
               class="h-13"

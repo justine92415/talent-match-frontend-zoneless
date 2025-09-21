@@ -4686,6 +4686,562 @@ export type CartAccessForbiddenErrorResponse = ForbiddenErrorResponse &
   CartAccessForbiddenErrorResponseAllOf;
 
 /**
+ * 付款方式（必填）- line_pay: LINE Pay, credit_card: 信用卡, bank_transfer: 銀行轉帳
+ */
+export type CreateOrderRequestPurchaseWay =
+  (typeof CreateOrderRequestPurchaseWay)[keyof typeof CreateOrderRequestPurchaseWay];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateOrderRequestPurchaseWay = {
+  line_pay: 'line_pay',
+  credit_card: 'credit_card',
+  bank_transfer: 'bank_transfer',
+} as const;
+
+export interface CreateOrderRequest {
+  /**
+   * 要結帳的購物車項目 ID 陣列（必填，至少包含一項）
+   * @minItems 1
+   */
+  cart_item_ids: number[];
+  /** 付款方式（必填）- line_pay: LINE Pay, credit_card: 信用卡, bank_transfer: 銀行轉帳 */
+  purchase_way: CreateOrderRequestPurchaseWay;
+  /**
+   * 購買者姓名（必填，最多50字元）
+   * @minLength 1
+   * @maxLength 50
+   */
+  buyer_name: string;
+  /**
+   * 購買者手機號碼（必填，格式：09開頭的10位數字）
+   * @pattern ^09\d{8}$
+   */
+  buyer_phone: string;
+  /**
+   * 購買者電子信箱（必填，用於接收訂單通知）
+   * @maxLength 255
+   */
+  buyer_email: string;
+}
+
+/**
+ * 回應狀態（固定為 success）
+ */
+export type CreateOrderSuccessResponseStatus =
+  (typeof CreateOrderSuccessResponseStatus)[keyof typeof CreateOrderSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateOrderSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 訂單狀態
+ */
+export type CreateOrderSuccessResponseDataOrderStatus =
+  (typeof CreateOrderSuccessResponseDataOrderStatus)[keyof typeof CreateOrderSuccessResponseDataOrderStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateOrderSuccessResponseDataOrderStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  cancelled: 'cancelled',
+  completed: 'completed',
+} as const;
+
+/**
+ * 付款方式
+ */
+export type CreateOrderSuccessResponseDataOrderPurchaseWay =
+  (typeof CreateOrderSuccessResponseDataOrderPurchaseWay)[keyof typeof CreateOrderSuccessResponseDataOrderPurchaseWay];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateOrderSuccessResponseDataOrderPurchaseWay = {
+  line_pay: 'line_pay',
+  credit_card: 'credit_card',
+  bank_transfer: 'bank_transfer',
+} as const;
+
+/**
+ * 付款狀態
+ */
+export type CreateOrderSuccessResponseDataOrderPaymentStatus =
+  (typeof CreateOrderSuccessResponseDataOrderPaymentStatus)[keyof typeof CreateOrderSuccessResponseDataOrderPaymentStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateOrderSuccessResponseDataOrderPaymentStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  failed: 'failed',
+  refunded: 'refunded',
+} as const;
+
+/**
+ * 訂單基本資料
+ */
+export type CreateOrderSuccessResponseDataOrder = {
+  /** 訂單ID */
+  id?: number;
+  /** 訂單UUID */
+  uuid?: string;
+  /** 購買者用戶ID */
+  buyer_id?: number;
+  /** 訂單狀態 */
+  status?: CreateOrderSuccessResponseDataOrderStatus;
+  /** 付款方式 */
+  purchase_way?: CreateOrderSuccessResponseDataOrderPurchaseWay;
+  /** 購買者姓名 */
+  buyer_name?: string;
+  /** 購買者手機 */
+  buyer_phone?: string;
+  /** 購買者信箱 */
+  buyer_email?: string;
+  /** 訂單總金額 */
+  total_amount?: number;
+  /** 付款狀態 */
+  payment_status?: CreateOrderSuccessResponseDataOrderPaymentStatus;
+  /**
+   * 付款時間
+   * @nullable
+   */
+  paid_at?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+};
+
+export type CreateOrderSuccessResponseDataOrderItemsItemCourseTeacherUser = {
+  /** 老師暱稱 */
+  nick_name?: string;
+};
+
+/**
+ * 授課老師資訊
+ */
+export type CreateOrderSuccessResponseDataOrderItemsItemCourseTeacher = {
+  user?: CreateOrderSuccessResponseDataOrderItemsItemCourseTeacherUser;
+};
+
+/**
+ * 課程資料
+ */
+export type CreateOrderSuccessResponseDataOrderItemsItemCourse = {
+  /** 課程ID */
+  id?: number;
+  /** 課程UUID */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程主圖片URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 授課老師資訊 */
+  teacher?: CreateOrderSuccessResponseDataOrderItemsItemCourseTeacher;
+};
+
+/**
+ * 價格選項資料
+ */
+export type CreateOrderSuccessResponseDataOrderItemsItemPriceOption = {
+  /** 價格選項ID */
+  id?: number;
+  /** 價格選項UUID */
+  uuid?: string;
+  /** 價格 */
+  price?: number;
+  /** 可購買數量 */
+  quantity?: number;
+};
+
+export type CreateOrderSuccessResponseDataOrderItemsItem = {
+  /** 訂單項目ID */
+  id?: number;
+  /** 訂單項目UUID */
+  uuid?: string;
+  /** 所屬訂單ID */
+  order_id?: number;
+  /** 課程ID */
+  course_id?: number;
+  /** 價格選項ID */
+  price_option_id?: number;
+  /** 購買數量 */
+  quantity?: number;
+  /** 單價 */
+  unit_price?: number;
+  /** 小計 */
+  total_price?: number;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+  /** 課程資料 */
+  course?: CreateOrderSuccessResponseDataOrderItemsItemCourse;
+  /** 價格選項資料 */
+  price_option?: CreateOrderSuccessResponseDataOrderItemsItemPriceOption;
+};
+
+/**
+ * 建立的訂單完整資料（包含訂單基本資料和訂單項目清單）
+ */
+export type CreateOrderSuccessResponseData = {
+  /** 訂單基本資料 */
+  order?: CreateOrderSuccessResponseDataOrder;
+  /** 訂單項目清單 */
+  order_items?: CreateOrderSuccessResponseDataOrderItemsItem[];
+};
+
+export interface CreateOrderSuccessResponse {
+  /** 回應狀態（固定為 success） */
+  status?: CreateOrderSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 建立的訂單完整資料（包含訂單基本資料和訂單項目清單） */
+  data?: CreateOrderSuccessResponseData;
+}
+
+/**
+ * 回應狀態（固定為 success）
+ */
+export type OrderDetailSuccessResponseStatus =
+  (typeof OrderDetailSuccessResponseStatus)[keyof typeof OrderDetailSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const OrderDetailSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 訂單狀態
+ */
+export type OrderDetailSuccessResponseDataAllOfStatus =
+  (typeof OrderDetailSuccessResponseDataAllOfStatus)[keyof typeof OrderDetailSuccessResponseDataAllOfStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const OrderDetailSuccessResponseDataAllOfStatus = {
+  pending: 'pending',
+  confirmed: 'confirmed',
+  cancelled: 'cancelled',
+  completed: 'completed',
+} as const;
+
+/**
+ * 付款方式
+ */
+export type OrderDetailSuccessResponseDataAllOfPurchaseWay =
+  (typeof OrderDetailSuccessResponseDataAllOfPurchaseWay)[keyof typeof OrderDetailSuccessResponseDataAllOfPurchaseWay];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const OrderDetailSuccessResponseDataAllOfPurchaseWay = {
+  line_pay: 'line_pay',
+  credit_card: 'credit_card',
+  bank_transfer: 'bank_transfer',
+} as const;
+
+/**
+ * 付款狀態
+ */
+export type OrderDetailSuccessResponseDataAllOfPaymentStatus =
+  (typeof OrderDetailSuccessResponseDataAllOfPaymentStatus)[keyof typeof OrderDetailSuccessResponseDataAllOfPaymentStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const OrderDetailSuccessResponseDataAllOfPaymentStatus = {
+  pending: 'pending',
+  paid: 'paid',
+  failed: 'failed',
+  refunded: 'refunded',
+} as const;
+
+/**
+ * 訂單基本資料
+ */
+export type OrderDetailSuccessResponseDataAllOf = {
+  /** 訂單ID */
+  id?: number;
+  /** 訂單UUID */
+  uuid?: string;
+  /** 購買者用戶ID */
+  buyer_id?: number;
+  /** 訂單狀態 */
+  status?: OrderDetailSuccessResponseDataAllOfStatus;
+  /** 付款方式 */
+  purchase_way?: OrderDetailSuccessResponseDataAllOfPurchaseWay;
+  /** 購買者姓名 */
+  buyer_name?: string;
+  /** 購買者手機 */
+  buyer_phone?: string;
+  /** 購買者信箱 */
+  buyer_email?: string;
+  /** 訂單總金額 */
+  total_amount?: number;
+  /** 付款狀態 */
+  payment_status?: OrderDetailSuccessResponseDataAllOfPaymentStatus;
+  /**
+   * 付款時間
+   * @nullable
+   */
+  paid_at?: string | null;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+};
+
+export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacherUser =
+  {
+    /** 老師暱稱 */
+    nick_name?: string;
+  };
+
+/**
+ * 授課老師資訊
+ */
+export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacher = {
+  user?: OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacherUser;
+};
+
+/**
+ * 課程資料
+ */
+export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourse = {
+  /** 課程ID */
+  id?: number;
+  /** 課程UUID */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程主圖片URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 授課老師資訊 */
+  teacher?: OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacher;
+};
+
+/**
+ * 價格選項資料
+ */
+export type OrderDetailSuccessResponseDataAllOfFiveItemsItemPriceOption = {
+  /** 價格選項ID */
+  id?: number;
+  /** 價格選項UUID */
+  uuid?: string;
+  /** 價格 */
+  price?: number;
+  /** 可購買數量 */
+  quantity?: number;
+};
+
+export type OrderDetailSuccessResponseDataAllOfFiveItemsItem = {
+  /** 訂單項目ID */
+  id?: number;
+  /** 訂單項目UUID */
+  uuid?: string;
+  /** 所屬訂單ID */
+  order_id?: number;
+  /** 課程ID */
+  course_id?: number;
+  /** 價格選項ID */
+  price_option_id?: number;
+  /** 購買數量 */
+  quantity?: number;
+  /** 單價 */
+  unit_price?: number;
+  /** 小計 */
+  total_price?: number;
+  /** 建立時間 */
+  created_at?: string;
+  /** 更新時間 */
+  updated_at?: string;
+  /** 課程資料 */
+  course?: OrderDetailSuccessResponseDataAllOfFiveItemsItemCourse;
+  /** 價格選項資料 */
+  price_option?: OrderDetailSuccessResponseDataAllOfFiveItemsItemPriceOption;
+};
+
+export type OrderDetailSuccessResponseDataAllOfFive = {
+  /** 訂單項目清單 */
+  items?: OrderDetailSuccessResponseDataAllOfFiveItemsItem[];
+};
+
+/**
+ * 訂單詳情資料（包含訂單基本資料和訂單項目清單）
+ */
+export type OrderDetailSuccessResponseData =
+  OrderDetailSuccessResponseDataAllOf & OrderDetailSuccessResponseDataAllOfFive;
+
+export interface OrderDetailSuccessResponse {
+  /** 回應狀態（固定為 success） */
+  status?: OrderDetailSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 訂單詳情資料（包含訂單基本資料和訂單項目清單） */
+  data?: OrderDetailSuccessResponseData;
+}
+
+export type OrderValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type OrderValidationErrorResponse = ValidationErrorResponse &
+  OrderValidationErrorResponseAllOf;
+
+export type OrderBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type OrderBusinessErrorResponse = BusinessErrorResponse &
+  OrderBusinessErrorResponseAllOf;
+
+export interface EcpayFormData {
+  /** 綠界商店代號 */
+  MerchantID?: string;
+  /** 商店訂單編號 */
+  MerchantTradeNo?: string;
+  /** 商店交易時間 */
+  MerchantTradeDate?: string;
+  /** 交易類型 */
+  PaymentType?: string;
+  /** 交易金額 */
+  TotalAmount?: string;
+  /** 交易描述 */
+  TradeDesc?: string;
+  /** 商品名稱 */
+  ItemName?: string;
+  /** 付款完成返回商店網址 */
+  ReturnURL?: string;
+  /** 付款方式 */
+  ChoosePayment?: string;
+  /** 加密類型 */
+  EncryptType?: string;
+  /** 檢查碼 */
+  CheckMacValue?: string;
+}
+
+export interface PaymentInfo {
+  /**
+   * 綠界交易編號
+   * @nullable
+   */
+  trade_no?: string | null;
+  /**
+   * 付款時間
+   * @nullable
+   */
+  payment_date?: string | null;
+  /**
+   * 付款方式
+   * @nullable
+   */
+  payment_type?: string | null;
+  /**
+   * ATM 銀行代碼
+   * @nullable
+   */
+  bank_code?: string | null;
+  /**
+   * ATM 虛擬帳號
+   * @nullable
+   */
+  v_account?: string | null;
+  /**
+   * 繳費期限
+   * @nullable
+   */
+  expire_date?: string | null;
+}
+
+export type CreatePaymentSuccessResponseAllOfData = {
+  /** 綠界付款頁面網址 */
+  payment_url?: string;
+  /** 需要自動提交到綠界的表單資料 */
+  form_data?: EcpayFormData;
+  /** 商店訂單編號 */
+  merchant_trade_no?: string;
+  /** 訂單總金額 */
+  total_amount?: number;
+  /** 綠界官方 SDK 生成的 HTML 表單 (可直接在前端使用) */
+  html_form?: string;
+};
+
+export type CreatePaymentSuccessResponseAllOf = {
+  /** 成功訊息 */
+  message?: unknown;
+  data?: CreatePaymentSuccessResponseAllOfData;
+};
+
+export type CreatePaymentSuccessResponse = SuccessResponse &
+  CreatePaymentSuccessResponseAllOf;
+
+/**
+ * 付款狀態
+ */
+export type PaymentStatusSuccessResponseAllOfDataPaymentStatus =
+  (typeof PaymentStatusSuccessResponseAllOfDataPaymentStatus)[keyof typeof PaymentStatusSuccessResponseAllOfDataPaymentStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PaymentStatusSuccessResponseAllOfDataPaymentStatus = {
+  pending: 'pending',
+  processing: 'processing',
+  completed: 'completed',
+  failed: 'failed',
+  expired: 'expired',
+} as const;
+
+export type PaymentStatusSuccessResponseAllOfData = {
+  /** 付款狀態 */
+  payment_status?: PaymentStatusSuccessResponseAllOfDataPaymentStatus;
+  /**
+   * 商店訂單編號
+   * @nullable
+   */
+  merchant_trade_no?: string | null;
+  /**
+   * 實際使用的付款方式
+   * @nullable
+   */
+  actual_payment_method?: string | null;
+  /**
+   * 付款完成時間
+   * @nullable
+   */
+  paid_at?: string | null;
+  /**
+   * 付款相關資訊 (如 ATM 虛擬帳號等)
+   * @nullable
+   */
+  payment_info?: PaymentInfo;
+};
+
+export type PaymentStatusSuccessResponseAllOf = {
+  /** 成功訊息 */
+  message?: unknown;
+  data?: PaymentStatusSuccessResponseAllOfData;
+};
+
+export type PaymentStatusSuccessResponse = SuccessResponse &
+  PaymentStatusSuccessResponseAllOf;
+
+export type PaymentValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type PaymentValidationErrorResponse = ValidationErrorResponse &
+  PaymentValidationErrorResponseAllOf;
+
+export type PaymentBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type PaymentBusinessErrorResponse = BusinessErrorResponse &
+  PaymentBusinessErrorResponseAllOf;
+
+/**
  * 伺服器內部錯誤
  */
 export type InternalServerErrorResponse = ServerErrorResponse;
@@ -5104,6 +5660,46 @@ export type GetApiFilesTestConnection200 = {
   success?: boolean;
   message?: string;
   data?: GetApiFilesTestConnection200Data;
+};
+
+export type PostApiOrders400 =
+  | OrderValidationErrorResponse
+  | OrderBusinessErrorResponse;
+
+export type PostApiPaymentsEcpayCallbackBody = {
+  /** 商店代號 */
+  MerchantID?: string;
+  /** 商店訂單編號 */
+  MerchantTradeNo?: string;
+  /** 交易狀態 (1=成功) */
+  RtnCode?: string;
+  /** 交易訊息 */
+  RtnMsg?: string;
+  /** 綠界交易編號 */
+  TradeNo?: string;
+  /** 交易金額 */
+  TradeAmt?: string;
+  /** 付款時間 */
+  PaymentDate?: string;
+  /** 付款方式 */
+  PaymentType?: string;
+  /** 檢查碼 */
+  CheckMacValue?: string;
+};
+
+export type GetApiPaymentsEcpayReturnParams = {
+  /**
+   * 商店訂單編號
+   */
+  MerchantTradeNo?: string;
+  /**
+   * 交易狀態 (1=成功)
+   */
+  RtnCode?: string;
+  /**
+   * 交易訊息
+   */
+  RtnMsg?: string;
 };
 
 export type GetApiCoursesCourseIdPriceOptions200AllOf = {

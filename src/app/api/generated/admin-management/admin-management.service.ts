@@ -44,6 +44,8 @@ import type {
   GetApiAdminTeacherApplications200,
   GetApiAdminTeacherApplicationsParams,
   PostApiAdminCoursesCourseIdRejectBody,
+  PostApiAdminCreate201,
+  PostApiAdminCreateBody,
   PostApiAdminLogin200,
   PostApiAdminLoginBody,
   PostApiAdminTeachersTeacherIdRejectBody,
@@ -112,6 +114,46 @@ export class AdminManagementService {
     return this.http.post<TData>(
       `/api/admin/login`,
       postApiAdminLoginBody,
+      options,
+    );
+  }
+  /**
+ * 建立新的管理員帳號，用於平台管理和審核操作。
+此功能通常由超級管理員或系統初始化時使用。
+
+**建立流程：**
+1. 驗證帳號和電子郵件唯一性
+2. 加密密碼並儲存
+3. 設定管理員角色和權限
+4. 記錄建立日誌
+
+**安全機制：**
+- 密碼加密儲存
+- 帳號唯一性檢查
+- 強密碼要求
+- 建立日誌記錄
+
+ * @summary 建立管理員帳號
+ */
+  postApiAdminCreate<TData = PostApiAdminCreate201>(
+    postApiAdminCreateBody: PostApiAdminCreateBody,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  postApiAdminCreate<TData = PostApiAdminCreate201>(
+    postApiAdminCreateBody: PostApiAdminCreateBody,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  postApiAdminCreate<TData = PostApiAdminCreate201>(
+    postApiAdminCreateBody: PostApiAdminCreateBody,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  postApiAdminCreate<TData = PostApiAdminCreate201>(
+    postApiAdminCreateBody: PostApiAdminCreateBody,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.post<TData>(
+      `/api/admin/create`,
+      postApiAdminCreateBody,
       options,
     );
   }
@@ -404,6 +446,7 @@ export class AdminManagementService {
 }
 
 export type PostApiAdminLoginClientResult = NonNullable<PostApiAdminLogin200>;
+export type PostApiAdminCreateClientResult = NonNullable<PostApiAdminCreate201>;
 export type PostApiAdminLogoutClientResult = NonNullable<SuccessResponse>;
 export type GetApiAdminProfileClientResult = NonNullable<GetApiAdminProfile200>;
 export type GetApiAdminTeacherApplicationsClientResult =

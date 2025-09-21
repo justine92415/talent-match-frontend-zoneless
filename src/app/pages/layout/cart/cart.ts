@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, effect } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { Stepper, StepItem } from '../../../../components/stepper/stepper';
@@ -6,6 +6,12 @@ import { Table } from '../../../../components/table/table';
 import { Button } from "@components/button/button";
 import { CourseDetailSectionTitle } from "@components/course-detail-section-title/course-detail-section-title";
 import { CourseCard, CourseCardData } from "@components/course-card/course-card";
+import { Skeleton } from "@components/skeleton/skeleton";
+import { CartService } from '@app/services/cart.service';
+import { CartItemWithDetails, CreateOrderRequest, CreateOrderRequestPurchaseWay } from '@app/api/generated/talentMatchAPI.schemas';
+import { PaymentService } from '@app/api/generated/payment/payment.service';
+import { OrdersService } from '@app/api/generated/orders/orders.service';
+import { HttpClient } from '@angular/common/http';
 
 // 定義課程項目介面
 export interface CourseItem {
@@ -20,11 +26,15 @@ export interface CourseItem {
 
 @Component({
   selector: 'tmf-cart',
-  imports: [MatIcon, CommonModule, Stepper, Table, Button, CourseDetailSectionTitle, CourseCard],
+  imports: [MatIcon, CommonModule, Stepper, Table, Button, CourseDetailSectionTitle, CourseCard, Skeleton],
   templateUrl: './cart.html',
   styles: ``
 })
 export default class Cart {
+  cartService = inject(CartService);
+  private paymentService = inject(PaymentService);
+  private ordersService = inject(OrdersService);
+  private http = inject(HttpClient);
   // 步驟定義
   steps: StepItem[] = [
     { id: 1, label: '購物清單' },
@@ -33,41 +43,21 @@ export default class Cart {
   ];
 
   // 當前步驟 (1: 購物清單, 2: 訂單資訊, 3: 訂單完成)
-  currentStep = signal(3);
+  currentStep = signal(1);
 
-  // 課程清單資料
-  courseData = signal<CourseItem[]>([
-    {
-      id: 1,
-      image: 'assets/images/guitar-course.png',
-      title: '從零開始學吉他：初學者入門指南',
-      type: '單堂課程',
-      price: 1200,
-      tags: ['新手班', '音樂', '吉他'],
-      selected: true
-    },
-    {
-      id: 2,
-      image: 'assets/images/reel_cooking_1.jpg',
-      title: '饗宴廚藝：美食烹飪工作坊',
-      type: '十堂課程',
-      price: 12000,
-      tags: ['高手班', '烹飪料理'],
-      selected: false
-    },
-    {
-      id: 3,
-      image: 'assets/images/reel_art_1.jpg',
-      title: '琴韻魔法：鋼琴彈奏交響指南',
-      type: '單堂課程',
-      price: 1200,
-      tags: ['大師班', '音樂', '鋼琴'],
-      selected: false
-    }
-  ]);
+  // 購物車資源和資料
+  cartResource = this.cartService.cartResource;
+  cartItems = this.cartService.cartItems;
+  totalItems = this.cartService.cartItemCount;
+  totalPrice = this.cartService.totalAmount;
 
-  // 選中的項目
-  selectedItems = signal<Set<string | number>>(new Set([1]));
+  // 選中的項目（用於結帳）
+  selectedItems = signal<Set<number>>(new Set());
+
+  // 操作狀態
+  isUpdating = signal<Set<number>>(new Set());
+  isRemoving = signal<Set<number>>(new Set());
+  isCheckingOut = signal<boolean>(false);
 
   // 我的收藏課程資料
   favoriteCoursesData = signal<CourseCardData[]>([
@@ -141,25 +131,42 @@ export default class Cart {
     }
   ]);
 
-  // Computed properties 替換模板方法調用
+  // 計算所有購物車項目是否被選中
   isAllSelected = computed(() => {
-    const data = this.courseData();
-    return data.length > 0 && data.every(item => this.selectedItems().has(item.id));
+    const items = this.cartItems();
+    const selected = this.selectedItems();
+    return items.length > 0 && items.every(item => item.id && selected.has(item.id));
   });
 
+  // 計算是否有部分項目被選中
   isSomeSelected = computed(() => {
-    const data = this.courseData();
-    const selectedCount = data.filter(item => this.selectedItems().has(item.id)).length;
-    return selectedCount > 0 && selectedCount < data.length;
+    const items = this.cartItems();
+    const selected = this.selectedItems();
+    const selectedCount = items.filter(item => item.id && selected.has(item.id)).length;
+    return selectedCount > 0 && selectedCount < items.length;
   });
 
-  // 統一數據結構：課程資料 + 選中狀態
+  // 購物車項目加上選中狀態
   itemsWithSelection = computed(() => {
     const selected = this.selectedItems();
-    return this.courseData().map(item => ({
+    const items = this.cartItems();
+
+    return items.map(item => ({
       ...item,
-      isSelected: selected.has(item.id)
+      isSelected: item.id ? selected.has(item.id) : false
     }));
+  });
+
+  // 選中項目的總金額
+  selectedTotalPrice = computed(() => {
+    const selected = this.selectedItems();
+    return this.cartItems()
+      .filter(item => item.id && selected.has(item.id))
+      .reduce((total, item) => {
+        const price = item.price_option?.price || 0;
+        const quantity = item.quantity || 1;
+        return total + (price * quantity);
+      }, 0);
   });
 
   // 處理步驟變更
@@ -173,37 +180,248 @@ export default class Cart {
     if (allSelected) {
       this.selectedItems.set(new Set());
     } else {
-      const allIds = this.courseData().map(item => item.id);
+      const allIds = this.cartItems()
+        .map(item => item.id)
+        .filter(id => id !== undefined) as number[];
       this.selectedItems.set(new Set(allIds));
     }
   }
 
   // 切換單個項目選擇
-  toggleSelectItem(course: CourseItem): void {
+  toggleSelectItem(item: CartItemWithDetails): void {
+    if (!item.id) return;
+
     const currentSelection = new Set(this.selectedItems());
-    if (currentSelection.has(course.id)) {
-      currentSelection.delete(course.id);
+    if (currentSelection.has(item.id)) {
+      currentSelection.delete(item.id);
     } else {
-      currentSelection.add(course.id);
+      currentSelection.add(item.id);
     }
     this.selectedItems.set(currentSelection);
   }
 
+  // 更新購物車項目數量
+  updateQuantity(itemId: number, newQuantity: number): void {
+    if (newQuantity < 1) return;
 
-  // 刪除課程
-  deleteCourse(course: CourseItem): void {
-    const updatedData = this.courseData().filter(item => item.id !== course.id);
-    this.courseData.set(updatedData);
-    
-    // 同時從選中項目中移除
-    const currentSelection = new Set(this.selectedItems());
-    currentSelection.delete(course.id);
-    this.selectedItems.set(currentSelection);
+    const updatingSet = new Set(this.isUpdating());
+    updatingSet.add(itemId);
+    this.isUpdating.set(updatingSet);
+
+    this.cartService.updateQuantity(itemId, newQuantity).subscribe({
+      next: () => {
+        const updatingSet = new Set(this.isUpdating());
+        updatingSet.delete(itemId);
+        this.isUpdating.set(updatingSet);
+      },
+      error: (error) => {
+        console.error('更新數量失敗:', error);
+        const updatingSet = new Set(this.isUpdating());
+        updatingSet.delete(itemId);
+        this.isUpdating.set(updatingSet);
+      }
+    });
   }
 
-  // 加入收藏
-  toggleFavorite(course: CourseItem): void {
-    console.log('Toggle favorite for:', course.title);
-    // 實作收藏功能
+  // 移除購物車項目
+  removeItem(itemId: number): void {
+    const removingSet = new Set(this.isRemoving());
+    removingSet.add(itemId);
+    this.isRemoving.set(removingSet);
+
+    this.cartService.removeFromCart(itemId).subscribe({
+      next: () => {
+        // 從選中項目中移除
+        const currentSelection = new Set(this.selectedItems());
+        currentSelection.delete(itemId);
+        this.selectedItems.set(currentSelection);
+
+        const removingSet = new Set(this.isRemoving());
+        removingSet.delete(itemId);
+        this.isRemoving.set(removingSet);
+      },
+      error: (error) => {
+        console.error('移除項目失敗:', error);
+        const removingSet = new Set(this.isRemoving());
+        removingSet.delete(itemId);
+        this.isRemoving.set(removingSet);
+      }
+    });
+  }
+
+  // 清空購物車
+  clearCart(): void {
+    if (confirm('確定要清空購物車嗎？')) {
+      this.cartService.clearCart().subscribe({
+        next: () => {
+          this.selectedItems.set(new Set());
+        },
+        error: (error) => {
+          console.error('清空購物車失敗:', error);
+        }
+      });
+    }
+  }
+
+  // 結帳功能
+  checkout(): void {
+    const selectedCount = this.selectedItems().size;
+    if (selectedCount === 0) {
+      alert('請選擇要結帳的課程');
+      return;
+    }
+
+    const totalAmount = this.selectedTotalPrice();
+    const selected = this.selectedItems();
+    const selectedItems = this.cartItems().filter(item => item.id && selected.has(item.id));
+
+    if (confirm(`確定要結帳嗎？\n選中 ${selectedCount} 個項目\n總金額：NT$ ${totalAmount.toLocaleString()}`)) {
+      this.processPayment(selectedItems, totalAmount);
+    }
+  }
+
+  // 處理付款流程
+  private processPayment(selectedItems: CartItemWithDetails[], totalAmount: number): void {
+    this.isCheckingOut.set(true);
+
+    console.log('開始結帳流程，項目：', selectedItems);
+    console.log('總金額：', totalAmount);
+
+    // 先建立訂單
+    this.createOrder(selectedItems, totalAmount);
+  }
+
+  // 建立訂單
+  private createOrder(selectedItems: CartItemWithDetails[], totalAmount: number): void {
+    console.log('選中的購物車項目：', selectedItems);
+
+    // 檢查並取得有效的購物車項目ID
+    const cartItemIds = selectedItems
+      .map(item => item.id)
+      .filter(id => id !== undefined && id !== null) as number[];
+
+    console.log('提取的購物車項目ID：', cartItemIds);
+
+    if (cartItemIds.length === 0) {
+      alert('沒有有效的購物車項目ID，無法建立訂單');
+      this.isCheckingOut.set(false);
+      return;
+    }
+
+    // 準備訂單請求資料
+    const createOrderRequest: CreateOrderRequest = {
+      cart_item_ids: cartItemIds,
+      purchase_way: CreateOrderRequestPurchaseWay.credit_card,
+      buyer_name: '測試買家', // TODO: 從使用者資料或表單取得
+      buyer_phone: '0912345678', // TODO: 從使用者資料或表單取得
+      buyer_email: 'test@example.com' // TODO: 從使用者資料或表單取得
+    };
+
+    console.log('創建訂單請求：', createOrderRequest);
+
+    this.ordersService.postApiOrders(createOrderRequest).subscribe({
+      next: (orderResponse) => {
+        console.log('訂單建立成功：', orderResponse);
+        console.log('回應資料結構：', JSON.stringify(orderResponse, null, 2));
+
+        if (orderResponse.data?.order?.id) {
+          // 使用真實的訂單ID進行付款
+          this.processOrderPayment(orderResponse.data.order.id, totalAmount);
+        } else {
+          console.error('訂單資料無效：', orderResponse);
+          alert(`訂單建立失敗：無效的訂單資料\n回應狀態: ${orderResponse.status}\n回應訊息: ${orderResponse.message}\n訂單資料: ${JSON.stringify(orderResponse.data)}`);
+          this.isCheckingOut.set(false);
+        }
+      },
+      error: (error) => {
+        console.error('建立訂單失敗:', error);
+        console.error('錯誤詳細資訊：', JSON.stringify(error, null, 2));
+
+        let errorMessage = '建立訂單失敗，請稍後再試';
+        if (error.error?.message) {
+          errorMessage += `\n錯誤訊息: ${error.error.message}`;
+        }
+        if (error.error?.errors) {
+          errorMessage += `\n詳細錯誤: ${JSON.stringify(error.error.errors)}`;
+        }
+
+        alert(errorMessage);
+        this.isCheckingOut.set(false);
+      }
+    });
+  }
+
+  // 處理訂單付款
+  private processOrderPayment(orderId: number, totalAmount: number): void {
+    console.log('開始處理付款，訂單ID：', orderId);
+
+    // 創建付款請求體，包含必要欄位
+    const paymentRequest = {
+      purchase_way: 'credit_card', // 付款方式
+      amount: totalAmount     // 付款金額
+    };
+
+    // 直接使用 HttpClient 發送包含請求體的 POST 請求
+    this.http.post<any>(`/api/orders/${orderId}/payment`, paymentRequest).subscribe({
+      next: (response) => {
+        console.log('付款API回應：', response);
+        if (response.data?.html_form) {
+          // 使用綠界提供的 HTML 表單
+          this.submitEcpayForm(response.data.html_form);
+        } else if (response.data?.payment_url && response.data?.form_data) {
+          // 手動創建表單並提交
+          this.createAndSubmitForm(response.data.payment_url, response.data.form_data);
+        } else {
+          alert('付款資料格式錯誤');
+          this.isCheckingOut.set(false);
+        }
+      },
+      error: (error) => {
+        console.error('創建付款失敗:', error);
+        alert('創建付款失敗，請稍後再試');
+        this.isCheckingOut.set(false);
+      }
+    });
+  }
+
+  // 提交綠界 HTML 表單
+  private submitEcpayForm(htmlForm: string): void {
+    // 創建一個隱藏的 div 來放置表單
+    const div = document.createElement('div');
+    div.innerHTML = htmlForm;
+    div.style.display = 'none';
+    document.body.appendChild(div);
+
+    // 查找表單並自動提交
+    const form = div.querySelector('form');
+    if (form) {
+      document.body.appendChild(form);
+      form.submit();
+    } else {
+      alert('付款表單格式錯誤');
+      this.isCheckingOut.set(false);
+    }
+  }
+
+  // 手動創建並提交表單到綠界
+  private createAndSubmitForm(paymentUrl: string, formData: any): void {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = paymentUrl;
+    form.style.display = 'none';
+
+    // 添加表單欄位
+    Object.keys(formData).forEach(key => {
+      if (formData[key] !== undefined && formData[key] !== null) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = formData[key].toString();
+        form.appendChild(input);
+      }
+    });
+
+    document.body.appendChild(form);
+    form.submit();
   }
 }

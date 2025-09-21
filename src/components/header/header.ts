@@ -14,6 +14,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { RouterLink, Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
 import { Button } from '@components/button/button';
@@ -21,6 +22,7 @@ import { Skeleton } from '@components/skeleton/skeleton';
 import { AuthService } from '@app/services/auth.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
 import { TagItem, SubCategoryItem } from '@app/api/generated/talentMatchAPI.schemas';
+import { CartService } from '@app/services/cart.service';
 import { map } from 'rxjs/operators';
 
 interface City {
@@ -77,7 +79,7 @@ const DROPDOWN_IDS = {
 
 @Component({
   selector: 'tmf-header',
-  imports: [MatIconModule, OverlayModule, Button, Skeleton, RouterLink],
+  imports: [MatIconModule, OverlayModule, Button, Skeleton, RouterLink, CommonModule],
   providers: [DropdownManagerService],
   templateUrl: './header.html',
   styleUrl: './header.css',
@@ -105,6 +107,7 @@ export class Header implements OnInit, AfterViewInit {
   authService = inject(AuthService);
   private router = inject(Router);
   private tagsService = inject(TagsService);
+  private cartService = inject(CartService);
 
   // 認證相關的計算屬性
   isAuthenticated = this.authService.isAuthenticated;
@@ -173,25 +176,9 @@ export class Header implements OnInit, AfterViewInit {
     },
   ]);
 
-  // 購物車 Mock Data
-  readonly cartItems = signal<CartItem[]>([
-    {
-      id: 'cooking-workshop',
-      title: '饗宴廚藝：美食烹飪工作坊',
-      tags: ['高手班', '烹飪料理'],
-      courseType: '十堂課程',
-      price: 12000,
-      imageUrl: 'assets/images/cooking-course.jpg',
-    },
-    {
-      id: 'piano-masterclass',
-      title: '琴韻魔法：鋼琴彈奏交響指南',
-      tags: ['大師班', '音樂', '鋼琴'],
-      courseType: '單堂課程',
-      price: 1200,
-      imageUrl: 'assets/images/piano-course.jpg',
-    },
-  ]);
+  // 購物車資源和資料
+  cartResource = this.cartService.cartResource;
+  cartItems = this.cartService.cartItems;
 
   // 用戶選單 - 根據角色動態生成
   readonly userMenuItems = computed<UserMenuItem[]>(() => {
@@ -359,11 +346,9 @@ export class Header implements OnInit, AfterViewInit {
   readonly isMobileMenuOpen = signal<boolean>(false);
   readonly expandedCategory = signal<string | null>(null);
 
-  // 使用 computed 創建派生 signal
-  readonly totalItems = computed(() => this.cartItems().length);
-  readonly totalPrice = computed(() =>
-    this.cartItems().reduce((sum, item) => sum + item.price, 0),
-  );
+  // 購物車計算屬性
+  totalItems = this.cartService.cartItemCount;
+  totalPrice = this.cartService.totalAmount;
 
   get TmfIconEnum() {
     return TmfIconEnum;
@@ -476,6 +461,28 @@ export class Header implements OnInit, AfterViewInit {
       trigger,
       this.viewContainerRef,
     );
+  }
+
+  // 購物車相關方法
+  removeFromCart(itemId: number): void {
+    this.cartService.removeFromCart(itemId).subscribe({
+      next: () => {
+        // 移除成功，rxResource 會自動更新
+      },
+      error: (error) => {
+        console.error('移除購物車項目失敗:', error);
+      }
+    });
+  }
+
+  goToCart(): void {
+    this.cartService.goToCart();
+    this.dropdownManager.closeDropdown(DROPDOWN_IDS.CART);
+  }
+
+  goToSearch(): void {
+    this.cartService.goToSearch();
+    this.dropdownManager.closeDropdown(DROPDOWN_IDS.CART);
   }
 
   // 用戶下拉選單控制

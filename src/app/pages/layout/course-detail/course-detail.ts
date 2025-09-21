@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+import { JsonPipe, NgClass } from '@angular/common';
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +11,7 @@ import { WeeklyCalendar } from '@components/weekly-calendar/weekly-calendar';
 import { InputPlan } from '@components/form/input-plan/input-plan';
 import { PublicCoursesService } from '@app/api/generated/public-courses/public-courses.service';
 import { PublicCourseDetailSuccessResponseData } from '@app/api/generated/talentMatchAPI.schemas';
+import { CartService } from '@app/services/cart.service';
 
 @Component({
   selector: 'tmf-course-detail',
@@ -33,6 +34,7 @@ export default class CourseDetail implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private publicCoursesService = inject(PublicCoursesService);
+  private cartService = inject(CartService);
 
   // 課程詳情資料
   courseDetail = signal<PublicCourseDetailSuccessResponseData | null>(null);
@@ -60,10 +62,17 @@ export default class CourseDetail implements OnInit {
     () => this.courseDetail()?.teacher_certificates || [],
   );
   // UI 狀態
-
   activeSection = signal('sectionA');
+  isAddingToCart = signal<boolean>(false);
+
   formGroup = this.fb.group({
     purchase_item_id: this.fb.control(''),
+  });
+
+  // 計算選中的價格方案 ID
+  selectedPriceOptionId = computed(() => {
+    const value = this.formGroup.controls.purchase_item_id.value;
+    return value ? Number(value) : null;
   });
 
   ngOnInit() {
@@ -119,6 +128,59 @@ export default class CourseDetail implements OnInit {
   copyToClipboard() {}
   openAllReviews() {}
   openTeacherDetailPage() {}
-  addToCart() {}
+
+  // 加入購物車
+  addToCart(): void {
+    const courseId = this.course()?.id;
+    // 直接從表單控制項獲取最新值
+    const priceOptionValue = this.formGroup.controls.purchase_item_id.value;
+    const priceOptionId = priceOptionValue ? Number(priceOptionValue) : null;
+
+    if (!courseId || !priceOptionId) {
+      alert('請選擇價格方案');
+      return;
+    }
+
+    this.isAddingToCart.set(true);
+
+    this.cartService.addToCart(courseId, priceOptionId).subscribe({
+      next: () => {
+        alert('已加入購物車！');
+        this.isAddingToCart.set(false);
+      },
+      error: (error) => {
+        console.error('加入購物車失敗:', error);
+        alert('加入購物車失敗，請稍後再試');
+        this.isAddingToCart.set(false);
+      }
+    });
+  }
+
+  // 立即購買
+  buyNow(): void {
+    const courseId = this.course()?.id;
+    // 直接從表單控制項獲取最新值
+    const priceOptionValue = this.formGroup.controls.purchase_item_id.value;
+    const priceOptionId = priceOptionValue ? Number(priceOptionValue) : null;
+
+    if (!courseId || !priceOptionId) {
+      alert('請選擇價格方案');
+      return;
+    }
+
+    this.isAddingToCart.set(true);
+
+    this.cartService.buyNow(courseId, priceOptionId).subscribe({
+      next: () => {
+        // buyNow 會自動導向購物車頁面，不需要額外處理
+      },
+      error: (error) => {
+        console.error('立即購買失敗:', error);
+        alert('立即購買失敗，請稍後再試');
+        this.isAddingToCart.set(false);
+      }
+    });
+  }
+
   openSurvey() {}
 }

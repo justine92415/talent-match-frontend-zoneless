@@ -31,6 +31,11 @@ const routes: Routes = [
     path: 'cart',
     loadComponent: () => import('./cart/cart'),
   },
+  {
+    // 付款結果頁
+    path: 'payment/:orderId/result',
+    loadComponent: () => import('./payment-result/payment-result'),
+  },
 ];
 
 export default routes;

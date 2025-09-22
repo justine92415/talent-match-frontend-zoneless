@@ -141,36 +141,6 @@ export class PaymentService {
     );
   }
   /**
- * 手動檢查訂單付款狀態，主要用於開發階段測試。
-
-**注意**：正常情況下綠界會自動回調更新付款狀態，
-此 API 僅用於開發測試和異常狀況的手動檢查。
-
- * @summary 手動檢查付款狀態 (開發用)
- */
-  postApiOrdersOrderIdPaymentCheck<TData = PaymentStatusSuccessResponse>(
-    orderId: number,
-    options?: HttpClientOptions & { observe?: 'body' },
-  ): Observable<TData>;
-  postApiOrdersOrderIdPaymentCheck<TData = PaymentStatusSuccessResponse>(
-    orderId: number,
-    options?: HttpClientOptions & { observe: 'events' },
-  ): Observable<HttpEvent<TData>>;
-  postApiOrdersOrderIdPaymentCheck<TData = PaymentStatusSuccessResponse>(
-    orderId: number,
-    options?: HttpClientOptions & { observe: 'response' },
-  ): Observable<AngularHttpResponse<TData>>;
-  postApiOrdersOrderIdPaymentCheck<TData = PaymentStatusSuccessResponse>(
-    orderId: number,
-    options?: HttpClientOptions & { observe?: any },
-  ): Observable<any> {
-    return this.http.post<TData>(
-      `/api/orders/${orderId}/payment/check`,
-      undefined,
-      options,
-    );
-  }
-  /**
  * 綠界金流的付款結果回調端點 (無需認證)。
 
 **注意**：
@@ -292,8 +262,6 @@ export class PaymentService {
 export type PostApiOrdersOrderIdPaymentClientResult =
   NonNullable<CreatePaymentSuccessResponse>;
 export type GetApiOrdersOrderIdPaymentStatusClientResult =
-  NonNullable<PaymentStatusSuccessResponse>;
-export type PostApiOrdersOrderIdPaymentCheckClientResult =
   NonNullable<PaymentStatusSuccessResponse>;
 export type PostApiPaymentsEcpayCallbackClientResult = NonNullable<string>;
 export type GetApiPaymentsEcpayReturnClientResult = NonNullable<unknown>;

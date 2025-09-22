@@ -4736,20 +4736,6 @@ export const CreateOrderSuccessResponseStatus = {
 } as const;
 
 /**
- * 訂單狀態
- */
-export type CreateOrderSuccessResponseDataOrderStatus =
-  (typeof CreateOrderSuccessResponseDataOrderStatus)[keyof typeof CreateOrderSuccessResponseDataOrderStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const CreateOrderSuccessResponseDataOrderStatus = {
-  pending: 'pending',
-  confirmed: 'confirmed',
-  cancelled: 'cancelled',
-  completed: 'completed',
-} as const;
-
-/**
  * 付款方式
  */
 export type CreateOrderSuccessResponseDataOrderPurchaseWay =
@@ -4771,8 +4757,11 @@ export type CreateOrderSuccessResponseDataOrderPaymentStatus =
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const CreateOrderSuccessResponseDataOrderPaymentStatus = {
   pending: 'pending',
-  paid: 'paid',
+  processing: 'processing',
+  completed: 'completed',
   failed: 'failed',
+  cancelled: 'cancelled',
+  expired: 'expired',
   refunded: 'refunded',
 } as const;
 
@@ -4786,8 +4775,6 @@ export type CreateOrderSuccessResponseDataOrder = {
   uuid?: string;
   /** 購買者用戶ID */
   buyer_id?: number;
-  /** 訂單狀態 */
-  status?: CreateOrderSuccessResponseDataOrderStatus;
   /** 付款方式 */
   purchase_way?: CreateOrderSuccessResponseDataOrderPurchaseWay;
   /** 購買者姓名 */
@@ -4914,20 +4901,6 @@ export const OrderDetailSuccessResponseStatus = {
 } as const;
 
 /**
- * 訂單狀態
- */
-export type OrderDetailSuccessResponseDataAllOfStatus =
-  (typeof OrderDetailSuccessResponseDataAllOfStatus)[keyof typeof OrderDetailSuccessResponseDataAllOfStatus];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const OrderDetailSuccessResponseDataAllOfStatus = {
-  pending: 'pending',
-  confirmed: 'confirmed',
-  cancelled: 'cancelled',
-  completed: 'completed',
-} as const;
-
-/**
  * 付款方式
  */
 export type OrderDetailSuccessResponseDataAllOfPurchaseWay =
@@ -4949,8 +4922,11 @@ export type OrderDetailSuccessResponseDataAllOfPaymentStatus =
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const OrderDetailSuccessResponseDataAllOfPaymentStatus = {
   pending: 'pending',
-  paid: 'paid',
+  processing: 'processing',
+  completed: 'completed',
   failed: 'failed',
+  cancelled: 'cancelled',
+  expired: 'expired',
   refunded: 'refunded',
 } as const;
 
@@ -4964,8 +4940,6 @@ export type OrderDetailSuccessResponseDataAllOf = {
   uuid?: string;
   /** 購買者用戶ID */
   buyer_id?: number;
-  /** 訂單狀態 */
-  status?: OrderDetailSuccessResponseDataAllOfStatus;
   /** 付款方式 */
   purchase_way?: OrderDetailSuccessResponseDataAllOfPurchaseWay;
   /** 購買者姓名 */
@@ -4989,7 +4963,7 @@ export type OrderDetailSuccessResponseDataAllOf = {
   updated_at?: string;
 };
 
-export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacherUser =
+export type OrderDetailSuccessResponseDataAllOfFourItemsItemCourseTeacherUser =
   {
     /** 老師暱稱 */
     nick_name?: string;
@@ -4998,14 +4972,14 @@ export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacherUser =
 /**
  * 授課老師資訊
  */
-export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacher = {
-  user?: OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacherUser;
+export type OrderDetailSuccessResponseDataAllOfFourItemsItemCourseTeacher = {
+  user?: OrderDetailSuccessResponseDataAllOfFourItemsItemCourseTeacherUser;
 };
 
 /**
  * 課程資料
  */
-export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourse = {
+export type OrderDetailSuccessResponseDataAllOfFourItemsItemCourse = {
   /** 課程ID */
   id?: number;
   /** 課程UUID */
@@ -5018,13 +4992,13 @@ export type OrderDetailSuccessResponseDataAllOfFiveItemsItemCourse = {
    */
   main_image?: string | null;
   /** 授課老師資訊 */
-  teacher?: OrderDetailSuccessResponseDataAllOfFiveItemsItemCourseTeacher;
+  teacher?: OrderDetailSuccessResponseDataAllOfFourItemsItemCourseTeacher;
 };
 
 /**
  * 價格選項資料
  */
-export type OrderDetailSuccessResponseDataAllOfFiveItemsItemPriceOption = {
+export type OrderDetailSuccessResponseDataAllOfFourItemsItemPriceOption = {
   /** 價格選項ID */
   id?: number;
   /** 價格選項UUID */
@@ -5035,7 +5009,7 @@ export type OrderDetailSuccessResponseDataAllOfFiveItemsItemPriceOption = {
   quantity?: number;
 };
 
-export type OrderDetailSuccessResponseDataAllOfFiveItemsItem = {
+export type OrderDetailSuccessResponseDataAllOfFourItemsItem = {
   /** 訂單項目ID */
   id?: number;
   /** 訂單項目UUID */
@@ -5057,21 +5031,21 @@ export type OrderDetailSuccessResponseDataAllOfFiveItemsItem = {
   /** 更新時間 */
   updated_at?: string;
   /** 課程資料 */
-  course?: OrderDetailSuccessResponseDataAllOfFiveItemsItemCourse;
+  course?: OrderDetailSuccessResponseDataAllOfFourItemsItemCourse;
   /** 價格選項資料 */
-  price_option?: OrderDetailSuccessResponseDataAllOfFiveItemsItemPriceOption;
+  price_option?: OrderDetailSuccessResponseDataAllOfFourItemsItemPriceOption;
 };
 
-export type OrderDetailSuccessResponseDataAllOfFive = {
+export type OrderDetailSuccessResponseDataAllOfFour = {
   /** 訂單項目清單 */
-  items?: OrderDetailSuccessResponseDataAllOfFiveItemsItem[];
+  items?: OrderDetailSuccessResponseDataAllOfFourItemsItem[];
 };
 
 /**
  * 訂單詳情資料（包含訂單基本資料和訂單項目清單）
  */
 export type OrderDetailSuccessResponseData =
-  OrderDetailSuccessResponseDataAllOf & OrderDetailSuccessResponseDataAllOfFive;
+  OrderDetailSuccessResponseDataAllOf & OrderDetailSuccessResponseDataAllOfFour;
 
 export interface OrderDetailSuccessResponse {
   /** 回應狀態（固定為 success） */

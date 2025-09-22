@@ -1,0 +1,123 @@
+<section class="bg-white py-10 xl:pt-10 xl:pb-20">
+  <div class="container mx-auto w-full max-w-320 flex flex-col gap-6">
+    <!-- 步驟指示器 -->
+    <tmf-stepper
+      class="py-4"
+      [steps]="steps"
+      [currentStep]="3"
+      [showOnlyCurrentLabel]="false">
+    </tmf-stepper>
+
+    @if (orderResource.isLoading()) {
+      <!-- 載入中 -->
+      <div class="text-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p class="text-grey-66">載入訂單資料中...</p>
+      </div>
+    } @else if (orderResource.error()) {
+      <!-- 錯誤狀態 -->
+      <div class="text-center py-12">
+        <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-grey-33 mb-2">載入失敗</h2>
+        <p class="text-grey-66">無法載入訂單資料，請稍後再試</p>
+      </div>
+    } @else if (orderResource.value()) {
+      @let order = orderResource.value()!.data;
+
+      <!-- 付款結果內容 -->
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 rounded-full bg-orange-95 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-grey-33 mb-2">付款成功！</h2>
+        <p class="text-grey-66">您的訂單已成功付款，感謝您的購買</p>
+      </div>
+
+      <!-- 訂單詳細內容 -->
+      <div class="space-y-6">
+        <!-- 訂單基本資訊 -->
+        <div>
+          <h3 class="text-lg font-bold text-grey-33 mb-4">訂單資訊</h3>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-grey-66">訂單編號</span>
+              <p class="font-medium text-grey-33">{{ order?.id || '-' }}</p>
+            </div>
+            <div>
+              <span class="text-grey-66">訂單日期</span>
+              <p class="font-medium text-grey-33">{{ order?.created_at | date:'yyyy/MM/dd HH:mm' }}</p>
+            </div>
+            <div>
+              <span class="text-grey-66">付款方式</span>
+              <p class="font-medium text-grey-33">{{ order?.purchase_way | purchaseWay }}</p>
+            </div>
+            <div>
+              <span class="text-grey-66">付款狀態</span>
+              <p class="font-medium text-primary">{{ order?.payment_status | paymentStatus }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 訂單商品 -->
+        <div>
+          <h3 class="text-lg font-bold text-grey-33 mb-4">訂單商品</h3>
+          <div class="space-y-4">
+            @for (item of order?.items || []; track item.id) {
+              <div class="flex items-center gap-4 pb-4 border-b border-grey-d4">
+                <img
+                  [src]="item.course?.main_image || 'https://picsum.photos/80/60?random=' + item.id"
+                  [alt]="item.course?.name || '課程'"
+                  class="w-20 h-15 rounded-lg object-cover"
+                />
+                <div class="flex-1">
+                  <h4 class="font-medium text-grey-33 mb-1">{{ item.course?.name || '課程名稱' }}</h4>
+                  <p class="text-sm text-grey-66 mb-2">
+                    {{ item.price_option?.quantity || 0 }}堂課程
+                  </p>
+                </div>
+                <div class="text-right">
+                  <p class="text-sm text-grey-66">數量：{{ item.quantity || 1 }}</p>
+                  <p class="font-bold text-grey-33">NT$ {{ (item.total_price || 0) | number }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- 總計 -->
+        <div class="flex justify-between">
+          <span class="font-bold text-lg text-grey-33">總計</span>
+          <span class="font-bold text-xl text-primary">NT$ {{ (order?.total_amount || 0) | number }}</span>
+        </div>
+
+        <!-- 操作按鈕 -->
+        <div class="flex justify-center gap-4 pt-6">
+          <tmf-button
+            class="h-10"
+            variant="secondary"
+            (click)="goToShopping()">
+            繼續購物
+          </tmf-button>
+          <tmf-button
+            class="h-10"
+            variant="secondary"
+            (click)="goToOrders()">
+            查看訂單
+          </tmf-button>
+          <tmf-button
+            class="h-10"
+            variant="primary"
+            (click)="goToReservation()">
+            預約課程
+          </tmf-button>
+        </div>
+      </div>
+    }
+  </div>
+</section>

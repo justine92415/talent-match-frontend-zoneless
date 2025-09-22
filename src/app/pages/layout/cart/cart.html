@@ -11,8 +11,9 @@
 
     <!-- 主要內容區 -->
     <div class="flex flex-col gap-6 xl:flex-row">
-      <!-- 購物車清單 -->
-      <div class="w-full xl:w-238.5">
+      <!-- 第一步：購物車清單 -->
+      @if (currentStep() === 1) {
+        <div class="w-full xl:w-238.5">
         <tmf-table>
           <!-- 表頭 -->
           <div thead class="flex w-full">
@@ -177,14 +178,142 @@
             </ng-container>
           }
         </tmf-table>
-      </div>
+        </div>
+      }
+
+      <!-- 第二步：訂單資訊表單 -->
+      @if (currentStep() === 2) {
+        <div class="w-full xl:w-238.5">
+          <!-- 訂單內容摘要 -->
+          <div class="bg-white rounded-xl p-6 shadow-lg mb-6">
+            <h2 class="text-xl-bold leading-7 text-grey-33 mb-4">訂單內容</h2>
+            <div class="space-y-4">
+              @for (item of selectedCartItems(); track item.id) {
+                <div class="flex items-center gap-4 p-4 border border-grey-e9 rounded-lg">
+                  <!-- 課程圖片 -->
+                  @if (item.course?.main_image) {
+                    <img
+                      [src]="item.course?.main_image"
+                      [alt]="item.course?.name || '課程'"
+                      class="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                    />
+                  } @else {
+                    <div class="w-16 h-16 bg-grey-e9 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span class="material-symbols-outlined text-grey-9f text-xl">school</span>
+                    </div>
+                  }
+
+                  <!-- 課程資訊 -->
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-medium text-grey-33 line-clamp-2">{{ item.course?.name || '課程名稱' }}</h3>
+                    <p class="text-sm text-grey-66 mt-1">
+                      {{ (item.price_option?.quantity || 1) * (item.quantity || 1) }} 堂課程 × {{ item.quantity || 1 }}
+                    </p>
+                  </div>
+
+                  <!-- 價格 -->
+                  <div class="text-right flex-shrink-0">
+                    <span class="text-lg font-medium text-grey-33">
+                      NT$ {{ ((item.price_option?.price || 0) * (item.quantity || 1)) | number:'1.0-0' }}
+                    </span>
+                  </div>
+                </div>
+              }
+
+              <!-- 總計 -->
+              <div class="border-t pt-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-lg font-medium text-grey-33">總計</span>
+                  <span class="text-xl font-bold text-grey-33">
+                    NT$ {{ selectedTotalPrice() | number:'1.0-0' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 訂單資訊表單 -->
+          <form [formGroup]="orderForm" class="bg-white rounded-xl p-6 shadow-lg">
+            <h2 class="text-xl-bold leading-7 text-grey-33 mb-6">訂單資訊</h2>
+
+            <!-- 購買者姓名 -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-grey-33 mb-2">
+                購買者姓名 <span class="text-red-500">*</span>
+              </label>
+              <tmf-input-text
+                formControlName="buyer_name"
+                placeholder="請輸入購買者姓名"
+              ></tmf-input-text>
+              @if (getFieldError('buyer_name')) {
+                <p class="text-red-500 text-sm mt-1">{{ getFieldError('buyer_name') }}</p>
+              }
+            </div>
+
+            <!-- 手機號碼 -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-grey-33 mb-2">
+                手機號碼 <span class="text-red-500">*</span>
+              </label>
+              <tmf-input-text
+                formControlName="buyer_phone"
+                placeholder="請輸入手機號碼 (09開頭的10位數字)"
+              ></tmf-input-text>
+              @if (getFieldError('buyer_phone')) {
+                <p class="text-red-500 text-sm mt-1">{{ getFieldError('buyer_phone') }}</p>
+              }
+            </div>
+
+            <!-- 電子信箱 -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-grey-33 mb-2">
+                電子信箱 <span class="text-red-500">*</span>
+              </label>
+              <tmf-input-text
+                formControlName="buyer_email"
+                type="email"
+                placeholder="請輸入電子信箱"
+              ></tmf-input-text>
+              @if (getFieldError('buyer_email')) {
+                <p class="text-red-500 text-sm mt-1">{{ getFieldError('buyer_email') }}</p>
+              }
+            </div>
+
+            <!-- 付款方式 -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-grey-33 mb-2">
+                付款方式 <span class="text-red-500">*</span>
+              </label>
+              <tmf-input-select
+                formControlName="purchase_way"
+                [options]="paymentOptions"
+                placeholder="請選擇付款方式"
+              ></tmf-input-select>
+            </div>
+
+          </form>
+        </div>
+      }
+
+      <!-- 第三步：付款處理中 -->
+      @if (currentStep() === 3) {
+        <div class="w-full xl:w-238.5">
+          <div class="bg-white rounded-xl p-6 shadow-lg text-center">
+            <div class="py-8">
+              <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <h2 class="text-xl-bold leading-7 text-grey-33 mb-2">處理付款中...</h2>
+              <p class="text-grey-66">正在建立訂單並跳轉至付款頁面，請稍候</p>
+            </div>
+          </div>
+        </div>
+      }
 
       <!-- 右側訂單總計 -->
       <div class="w-full xl:w-75.5 xl:flex-1">
         <div class="flex flex-col gap-6 rounded-xl bg-white p-6 shadow-lg">
           <!-- 標題 -->
           <h2 class="text-xl-bold leading-7 text-grey-33">我的訂單</h2>
-          
+
           <!-- 統計資訊 -->
           <div class="space-y-3 pt-6">
             <!-- 共計 -->
@@ -202,53 +331,77 @@
             </div>
           </div>
 
-          <!-- 按鈕區 -->
-          <div class="space-y-4">
-            <tmf-button
-              class="h-13"
-              [disabled]="selectedItems().size === 0 || isCheckingOut()"
-              (click)="checkout()"
-            >
-              @if (isCheckingOut()) {
-                處理中...
-              } @else {
+          <!-- 第一步按鈕區 -->
+          @if (currentStep() === 1) {
+            <div class="space-y-4">
+              <tmf-button
+                class="h-13"
+                [disabled]="selectedItems().size === 0"
+                (click)="checkout()"
+              >
                 前往結帳
-              }
-            </tmf-button>
-            <tmf-button
-              class="h-13"
-              variant="secondary"
-              (click)="cartService.goToSearch()"
-            >
-              繼續購物
-            </tmf-button>
-            <tmf-button
-              class="h-13"
-              variant="secondary"
-              (click)="clearCart()"
-              [disabled]="cartItems().length === 0"
-            >
-              清空購物車
-            </tmf-button>
-          </div>
+              </tmf-button>
+              <tmf-button
+                class="h-13"
+                variant="secondary"
+                (click)="cartService.goToSearch()"
+              >
+                繼續購物
+              </tmf-button>
+              <tmf-button
+                class="h-13"
+                variant="secondary"
+                (click)="clearCart()"
+                [disabled]="cartItems().length === 0"
+              >
+                清空購物車
+              </tmf-button>
+            </div>
+          }
+
+          <!-- 第二步：訂單確認按鈕 -->
+          @if (currentStep() === 2) {
+            <div class="space-y-4">
+              <tmf-button
+                class="h-13"
+                [disabled]="isCheckingOut()"
+                (click)="submitOrder()"
+              >
+                @if (isCheckingOut()) {
+                  處理中...
+                } @else {
+                  確認訂單並付款
+                }
+              </tmf-button>
+              <tmf-button
+                class="h-13"
+                variant="secondary"
+                (click)="currentStep.set(1)"
+              >
+                返回購物車
+              </tmf-button>
+            </div>
+          }
         </div>
       </div>
     </div>
   </div>
 </section>
-<!-- 我的收藏區塊 -->
-<section class="bg-grey-f7 py-10 xl:pt-10 xl:pb-20">
-  <div class="container mx-auto w-full max-w-320">
-    <!-- 段落標題 -->
-    <tmf-course-detail-section-title class="mb-6">
-      我的收藏
-    </tmf-course-detail-section-title>
-    
-    <!-- 收藏課程卡片列表 -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      @for (course of favoriteCoursesData(); track course.id) {
-        <tmf-course-card [course]="course"></tmf-course-card>
-      }
+<!-- 我的收藏區塊（只在第一步顯示） -->
+@if (currentStep() === 1) {
+  <section class="bg-grey-f7 py-10 xl:pt-10 xl:pb-20">
+    <div class="container mx-auto w-full max-w-320">
+      <!-- 段落標題 -->
+      <tmf-course-detail-section-title class="mb-6">
+        我的收藏
+      </tmf-course-detail-section-title>
+
+      <!-- 收藏課程卡片列表 -->
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        @for (course of favoriteCoursesData(); track course.id) {
+          <tmf-course-card [course]="course"></tmf-course-card>
+        }
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+}

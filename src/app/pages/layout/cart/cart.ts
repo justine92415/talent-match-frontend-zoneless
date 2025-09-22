@@ -1,6 +1,7 @@
 import { Component, signal, computed, inject, OnInit, effect } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Stepper, StepItem } from '../../../../components/stepper/stepper';
 import { Table } from '../../../../components/table/table';
 import { Button } from "@components/button/button";
@@ -12,6 +13,8 @@ import { CartItemWithDetails, CreateOrderRequest, CreateOrderRequestPurchaseWay 
 import { PaymentService } from '@app/api/generated/payment/payment.service';
 import { OrdersService } from '@app/api/generated/orders/orders.service';
 import { HttpClient } from '@angular/common/http';
+import { InputText } from '@components/form/input-text/input-text';
+import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 
 // 定義課程項目介面
 export interface CourseItem {
@@ -26,7 +29,7 @@ export interface CourseItem {
 
 @Component({
   selector: 'tmf-cart',
-  imports: [MatIcon, CommonModule, Stepper, Table, Button, CourseDetailSectionTitle, CourseCard, Skeleton],
+  imports: [MatIcon, CommonModule, ReactiveFormsModule, Stepper, Table, Button, CourseDetailSectionTitle, CourseCard, Skeleton, InputText, InputSelect],
   templateUrl: './cart.html',
   styles: ``
 })
@@ -35,11 +38,12 @@ export default class Cart {
   private paymentService = inject(PaymentService);
   private ordersService = inject(OrdersService);
   private http = inject(HttpClient);
+  private fb = inject(FormBuilder);
   // 步驟定義
   steps: StepItem[] = [
     { id: 1, label: '購物清單' },
     { id: 2, label: '訂單資訊' },
-    { id: 3, label: '訂單完成' }
+    { id: 3, label: '付款完成' }
   ];
 
   // 當前步驟 (1: 購物清單, 2: 訂單資訊, 3: 訂單完成)
@@ -58,6 +62,20 @@ export default class Cart {
   isUpdating = signal<Set<number>>(new Set());
   isRemoving = signal<Set<number>>(new Set());
   isCheckingOut = signal<boolean>(false);
+
+  // 響應式表單
+  orderForm: FormGroup = this.fb.group({
+    buyer_name: ['', [Validators.required, Validators.maxLength(50)]],
+    buyer_phone: ['', [Validators.required, Validators.pattern(/^09\d{8}$/)]],
+    buyer_email: ['', [Validators.required, Validators.email]],
+    purchase_way: [CreateOrderRequestPurchaseWay.credit_card, Validators.required]
+  });
+
+  // 付款方式選項
+  paymentOptions: SelectOption[] = [
+    { value: CreateOrderRequestPurchaseWay.credit_card, label: '信用卡' },
+    { value: CreateOrderRequestPurchaseWay.bank_transfer, label: '銀行轉帳' }
+  ];
 
   // 我的收藏課程資料
   favoriteCoursesData = signal<CourseCardData[]>([
@@ -169,6 +187,12 @@ export default class Cart {
       }, 0);
   });
 
+  // 選中的購物車項目
+  selectedCartItems = computed(() => {
+    const selected = this.selectedItems();
+    return this.cartItems().filter(item => item.id && selected.has(item.id));
+  });
+
   // 處理步驟變更
   onStepChange(step: number): void {
     this.currentStep.set(step);
@@ -263,7 +287,7 @@ export default class Cart {
     }
   }
 
-  // 結帳功能
+  // 第一步：前往訂單資訊頁面
   checkout(): void {
     const selectedCount = this.selectedItems().size;
     if (selectedCount === 0) {
@@ -271,13 +295,61 @@ export default class Cart {
       return;
     }
 
+    // 進入第二步驟
+    this.currentStep.set(2);
+  }
+
+  // 第二步：提交訂單表單
+  submitOrder(): void {
+    // 標記所有欄位為已觸碰，以顯示驗證錯誤
+    this.orderForm.markAllAsTouched();
+
+    // 驗證表單
+    if (this.orderForm.invalid) {
+      return;
+    }
+
+    const selectedCount = this.selectedItems().size;
     const totalAmount = this.selectedTotalPrice();
     const selected = this.selectedItems();
     const selectedItems = this.cartItems().filter(item => item.id && selected.has(item.id));
 
-    if (confirm(`確定要結帳嗎？\n選中 ${selectedCount} 個項目\n總金額：NT$ ${totalAmount.toLocaleString()}`)) {
-      this.processPayment(selectedItems, totalAmount);
+    // 進入第三步驟（處理中）
+    this.currentStep.set(3);
+
+    // 建立訂單並進行付款
+    this.processPayment(selectedItems, totalAmount);
+  }
+
+  // 取得表單欄位錯誤訊息
+  getFieldError(fieldName: string): string | null {
+    const field = this.orderForm.get(fieldName);
+    if (field && field.invalid && field.touched) {
+      if (field.errors?.['required']) {
+        switch (fieldName) {
+          case 'buyer_name': return '請輸入購買者姓名';
+          case 'buyer_phone': return '請輸入手機號碼';
+          case 'buyer_email': return '請輸入電子信箱';
+          default: return '此欄位為必填';
+        }
+      }
+      if (field.errors?.['maxlength']) {
+        return '姓名不能超過50個字元';
+      }
+      if (field.errors?.['pattern']) {
+        return '請輸入正確的手機號碼格式（09開頭的10位數字）';
+      }
+      if (field.errors?.['email']) {
+        return '請輸入正確的電子信箱格式';
+      }
     }
+    return null;
+  }
+
+  // 檢查欄位是否有錯誤
+  hasFieldError(fieldName: string): boolean {
+    const field = this.orderForm.get(fieldName);
+    return !!(field && field.invalid && field.touched);
   }
 
   // 處理付款流程
@@ -308,13 +380,16 @@ export default class Cart {
       return;
     }
 
+    // 從響應式表單取得資料
+    const formValue = this.orderForm.value;
+
     // 準備訂單請求資料
     const createOrderRequest: CreateOrderRequest = {
       cart_item_ids: cartItemIds,
-      purchase_way: CreateOrderRequestPurchaseWay.credit_card,
-      buyer_name: '測試買家', // TODO: 從使用者資料或表單取得
-      buyer_phone: '0912345678', // TODO: 從使用者資料或表單取得
-      buyer_email: 'test@example.com' // TODO: 從使用者資料或表單取得
+      purchase_way: formValue.purchase_way,
+      buyer_name: formValue.buyer_name.trim(),
+      buyer_phone: formValue.buyer_phone.trim(),
+      buyer_email: formValue.buyer_email.trim()
     };
 
     console.log('創建訂單請求：', createOrderRequest);

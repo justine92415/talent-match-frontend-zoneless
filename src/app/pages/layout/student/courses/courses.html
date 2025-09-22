@@ -2,8 +2,43 @@
   <div class="container mx-auto px-4 py-8">
     <!-- 頁面標題 -->
     <div class="mb-8">
-      <h1 class="text-3xl font-bold text-grey-33 mb-2">我的購課記錄</h1>
-      <p class="text-grey-66">查看已購買的課程，並進行預約管理</p>
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h1 class="text-3xl font-bold text-grey-33 mb-2">我的購課記錄</h1>
+          <p class="text-grey-66">查看已購買的課程，並進行預約管理</p>
+        </div>
+
+        <!-- Dialog 測試按鈕 -->
+        <div class="flex gap-2">
+          <tmf-button
+            class="h-10"
+            variant="secondary"
+            (click)="testConfirmDialog()">
+            測試確認對話框
+          </tmf-button>
+
+          <tmf-button
+            class="h-10"
+            variant="tertiary"
+            (click)="testAlertDialog('info')">
+            測試提示對話框
+          </tmf-button>
+
+          <tmf-button
+            class="h-10"
+            variant="ghost"
+            (click)="testAlertDialog('error')">
+            測試錯誤對話框
+          </tmf-button>
+
+          <tmf-button
+            class="h-10"
+            variant="primary"
+            (click)="testReserveDialog()">
+            測試預約對話框
+          </tmf-button>
+        </div>
+      </div>
     </div>
 
     <!-- 課程列表 -->

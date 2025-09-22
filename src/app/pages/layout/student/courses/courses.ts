@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Button } from '@components/button/button';
+import { DialogService } from '@share/services/dialog.service';
 
 // 購買記錄介面定義
 interface PurchaseRecord {
@@ -41,6 +42,8 @@ interface PurchaseRecord {
   styles: ``
 })
 export default class Courses {
+  private dialogService = inject(DialogService);
+
   // 模擬購買記錄資料
   purchases: PurchaseRecord[] = [
     {
@@ -184,5 +187,55 @@ export default class Courses {
       case 'cancelled': return 'bg-grey-f4 text-grey-66';
       default: return 'bg-grey-f4 text-grey-66';
     }
+  }
+
+  // Dialog 測試方法
+  testConfirmDialog() {
+    this.dialogService.openConfirm({
+      title: '確認測試',
+      message: '這是一個確認對話框的測試，請選擇您的操作。',
+      type: 'warning',
+      confirmText: '確定',
+      cancelText: '取消'
+    }).subscribe(result => {
+      if (result.confirmed) {
+        this.testAlertDialog('success', '您點擊了確認按鈕！');
+      } else {
+        this.testAlertDialog('info', '您點擊了取消按鈕！');
+      }
+    });
+  }
+
+  testAlertDialog(type: 'info' | 'warning' | 'error' | 'success' = 'info', customMessage?: string) {
+    const messages = {
+      info: customMessage || '這是一個資訊提示對話框。',
+      warning: customMessage || '這是一個警告提示對話框。',
+      error: customMessage || '這是一個錯誤提示對話框。',
+      success: customMessage || '這是一個成功提示對話框。'
+    };
+
+    this.dialogService.openAlert({
+      title: `${type.toUpperCase()} 測試`,
+      message: messages[type],
+      type: type,
+      confirmText: '我知道了'
+    }).subscribe(() => {
+      console.log('Alert dialog closed');
+    });
+  }
+
+  testReserveDialog() {
+    this.dialogService.openReserve({
+      student_id: '6',
+      course_id: '26',
+      teacher_id: '8',
+      course_name: '搖滾鼓技進階'
+    }).subscribe(result => {
+      if (result.confirmed) {
+        this.testAlertDialog('success', '預約已成功提交！');
+      } else {
+        console.log('預約對話框已取消');
+      }
+    });
   }
 }

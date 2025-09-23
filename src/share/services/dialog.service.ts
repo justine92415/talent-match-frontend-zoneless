@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ConfirmDialog, ConfirmDialogData } from '@components/dialogs/confirm-dialog/confirm-dialog';
 import { ReserveComponent } from '@components/dialogs/reserve/reserve';
+import type { RemainingLessonsInfo } from '@app/api/generated/talentMatchAPI.schemas';
 
 // Dialog 配置介面
 export interface DialogConfig {
@@ -37,6 +38,12 @@ export interface ReserveDialogConfig {
 export interface DialogResult<T = any> {
   confirmed: boolean;
   data?: T;
+}
+
+// 預約結果類型
+export interface ReserveDialogResult {
+  success: boolean;
+  remainingLessons?: RemainingLessonsInfo;
 }
 
 @Injectable({
@@ -158,7 +165,7 @@ export class DialogService {
   /**
    * 開啟預約對話框
    */
-  openReserve(config: ReserveDialogConfig): Observable<DialogResult<boolean>> {
+  openReserve(config: ReserveDialogConfig): Observable<DialogResult<ReserveDialogResult>> {
     const dialogRef = this.dialog.open(ReserveComponent, {
       data: config,
       width: '500px',
@@ -168,7 +175,10 @@ export class DialogService {
     });
 
     return dialogRef.closed.pipe(
-      map(result => ({ confirmed: !!result, data: result as boolean }))
+      map(result => ({
+        confirmed: !!result,
+        data: result as ReserveDialogResult
+      }))
     );
   }
 

@@ -5413,6 +5413,198 @@ export type PurchaseBusinessErrorResponseAllOf = {
 export type PurchaseBusinessErrorResponse = BusinessErrorResponse &
   PurchaseBusinessErrorResponseAllOf;
 
+export interface CreateReservationRequest {
+  /** 課程 ID (必填，學生必須已購買此課程) */
+  course_id: number;
+  /** 教師 ID (必填，必須與課程教師一致) */
+  teacher_id: number;
+  /**
+   * 預約日期 (必填，格式：YYYY-MM-DD，不能是過去日期)
+   * @pattern ^\d{4}-\d{2}-\d{2}$
+   */
+  reserve_date: string;
+  /**
+   * 預約時間 (必填，格式：HH:mm，必須是教師可預約時段)
+   * @pattern ^([0-1]?[0-9]|2[0-3]):([0-5][0-9])$
+   */
+  reserve_time: string;
+}
+
+/**
+ * 教師使用者資料
+ */
+export type ReservationCourseInfoTeacherUser = {
+  /** 教師暱稱 */
+  nick_name?: string;
+  /**
+   * 教師頭像 URL
+   * @nullable
+   */
+  avatar_image?: string | null;
+};
+
+/**
+ * 授課教師資訊
+ */
+export type ReservationCourseInfoTeacher = {
+  /** 教師使用者資料 */
+  user?: ReservationCourseInfoTeacherUser;
+};
+
+export interface ReservationCourseInfo {
+  /** 課程 ID */
+  id?: number;
+  /** 課程名稱 */
+  name?: string;
+  /** 授課教師資訊 */
+  teacher?: ReservationCourseInfoTeacher;
+}
+
+/**
+ * 參與者角色
+ */
+export type ReservationParticipantInfoRole =
+  (typeof ReservationParticipantInfoRole)[keyof typeof ReservationParticipantInfoRole];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReservationParticipantInfoRole = {
+  student: 'student',
+  teacher: 'teacher',
+} as const;
+
+export interface ReservationParticipantInfo {
+  /** 參與者 ID */
+  id?: number;
+  /** 參與者暱稱 */
+  nick_name?: string;
+  /** 參與者角色 */
+  role?: ReservationParticipantInfoRole;
+  /**
+   * 參與者頭像 URL
+   * @nullable
+   */
+  avatar_image?: string | null;
+}
+
+/**
+ * 教師端預約狀態
+ */
+export type ReservationDetailTeacherStatus =
+  (typeof ReservationDetailTeacherStatus)[keyof typeof ReservationDetailTeacherStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReservationDetailTeacherStatus = {
+  reserved: 'reserved',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+/**
+ * 學生端預約狀態
+ */
+export type ReservationDetailStudentStatus =
+  (typeof ReservationDetailStudentStatus)[keyof typeof ReservationDetailStudentStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReservationDetailStudentStatus = {
+  reserved: 'reserved',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
+export interface ReservationDetail {
+  /** 預約 ID */
+  id?: number;
+  /** 預約 UUID */
+  uuid?: string;
+  /** 課程 ID */
+  course_id?: number;
+  /** 教師 ID */
+  teacher_id?: number;
+  /** 學生 ID */
+  student_id?: number;
+  /** 預約上課時間 */
+  reserve_time?: string;
+  /** 教師端預約狀態 */
+  teacher_status?: ReservationDetailTeacherStatus;
+  /** 學生端預約狀態 */
+  student_status?: ReservationDetailStudentStatus;
+  /** 預約建立時間 */
+  created_at?: string;
+  /** 預約更新時間 */
+  updated_at?: string;
+  /** 課程詳細資訊 (選擇性提供) */
+  course?: ReservationCourseInfo;
+  /** 參與者資訊 (根據角色顯示對方資料) */
+  participant?: ReservationParticipantInfo;
+}
+
+export interface RemainingLessonsInfo {
+  /** 總堂數 */
+  total?: number;
+  /** 已使用堂數 */
+  used?: number;
+  /** 剩餘堂數 */
+  remaining?: number;
+}
+
+/**
+ * 回應狀態
+ */
+export type CreateReservationSuccessResponseStatus =
+  (typeof CreateReservationSuccessResponseStatus)[keyof typeof CreateReservationSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CreateReservationSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 預約建立結果資料
+ */
+export type CreateReservationSuccessResponseData = {
+  reservation?: ReservationDetail;
+  remaining_lessons?: RemainingLessonsInfo;
+};
+
+export interface CreateReservationSuccessResponse {
+  /** 回應狀態 */
+  status?: CreateReservationSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 預約建立結果資料 */
+  data?: CreateReservationSuccessResponseData;
+}
+
+export type ReservationValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type ReservationValidationErrorResponse = ValidationErrorResponse &
+  ReservationValidationErrorResponseAllOf;
+
+export type ReservationUnauthorizedErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type ReservationUnauthorizedErrorResponse = UnauthorizedErrorResponse &
+  ReservationUnauthorizedErrorResponseAllOf;
+
+export type ReservationBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type ReservationBusinessErrorResponse = BusinessErrorResponse &
+  ReservationBusinessErrorResponseAllOf;
+
+export type ReservationNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type ReservationNotFoundErrorResponse = NotFoundErrorResponse &
+  ReservationNotFoundErrorResponseAllOf;
+
 /**
  * 伺服器內部錯誤
  */
@@ -5961,6 +6153,10 @@ export type GetApiPurchasesParams = {
    */
   course_id?: number;
 };
+
+export type PostApiReservations400 =
+  | ReservationValidationErrorResponse
+  | ReservationBusinessErrorResponse;
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

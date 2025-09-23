@@ -8,13 +8,14 @@ import {
   Inject
 } from '@angular/core';
 import { NgClass, CommonModule } from '@angular/common';
-import { DialogService } from '@share/services/dialog.service';
+import { DialogService, ReserveDialogResult } from '@share/services/dialog.service';
 import { MatIcon } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { finalize, of, switchMap, catchError } from 'rxjs';
 import { CoursesService } from '@app/api/generated/courses/courses.service';
+import { ReservationManagementService } from '@app/api/generated/reservation-management/reservation-management.service';
 import { rxResource } from '@angular/core/rxjs-interop';
-import type { AvailableSlotInfo } from '@app/api/generated/talentMatchAPI.schemas';
+import type { AvailableSlotInfo, CreateReservationRequest } from '@app/api/generated/talentMatchAPI.schemas';
 
 interface Day {
   year: number;
@@ -81,9 +82,10 @@ export class ReserveComponent {
 
   private dialogService = inject(DialogService);
   private coursesService = inject(CoursesService);
+  private reservationService = inject(ReservationManagementService);
 
   constructor(
-    public dialogRef: DialogRef<boolean, ReserveComponent>,
+    public dialogRef: DialogRef<ReserveDialogResult, ReserveComponent>,
     @Inject(DIALOG_DATA)
     public data: {
       student_id: string;
@@ -251,24 +253,55 @@ export class ReserveComponent {
   }
 
   bookNow(): void {
+    const currentDate = this.currentDate();
+    const currentTime = this.currentTime();
+
+    if (!currentDate || !currentTime) {
+      return;
+    }
+
     this.inProgress.set(true);
 
-    // 使用假資料替代 API 呼叫
-    setTimeout(() => {
-      this.dialogRef.close(true);
-      const reserve_time = this.selectedReseveTime().split('T').join(' ');
+    const reservationRequest: CreateReservationRequest = {
+      course_id: parseInt(this.data.course_id),
+      teacher_id: parseInt(this.data.teacher_id),
+      reserve_date: this.getFormattedDate(currentDate),
+      reserve_time: currentTime
+    };
 
-      this.dialogService.openAlert({
-        title: '預約完成',
-        message: `預約成功，請於 ${reserve_time} 準時上課。`,
-        type: 'success'
-      }).subscribe();
+    this.reservationService.postApiReservations(reservationRequest)
+      .pipe(
+        finalize(() => this.inProgress.set(false))
+      )
+      .subscribe({
+        next: (response) => {
+          // 關閉對話框並傳回剩餘堂數資訊
+          this.dialogRef.close({
+            success: true,
+            remainingLessons: response.data?.remaining_lessons
+          });
 
-      this.inProgress.set(false);
-    }, 2000);
+          const reserve_datetime = `${this.getFormattedDate(currentDate)} ${currentTime}`;
+          this.dialogService.openAlert({
+            title: '預約完成',
+            message: `預約成功，請於 ${reserve_datetime} 準時上課。`,
+            type: 'success'
+          }).subscribe();
+        },
+        error: (error) => {
+          console.error('Reservation failed:', error);
+          this.dialogService.openAlert({
+            title: '預約失敗',
+            message: error.error?.message || '發生錯誤，請稍後再試。',
+            type: 'error'
+          }).subscribe();
+        }
+      });
   }
 
   close() {
-    this.dialogRef.close(false);
+    this.dialogRef.close({
+      success: false
+    });
   }
 }

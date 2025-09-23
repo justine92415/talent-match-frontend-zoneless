@@ -75,15 +75,38 @@ export default class Courses {
       teacher_id: purchase.course.teacher.id?.toString() || '',
       course_name: purchase.course.name || ''
     }).subscribe(result => {
-      if (result.confirmed) {
-        // 預約成功後可以刷新預約記錄或導向預約列表
-        this.dialogService.openAlert({
-          title: '預約成功',
-          message: '課程預約已成功提交！',
-          type: 'success'
-        }).subscribe();
+      if (result.confirmed && result.data?.success && result.data?.remainingLessons) {
+        // 更新本地購課記錄的堂數狀態
+        this.updateLocalPurchaseRecord(courseId, result.data.remainingLessons);
       }
     });
+  }
+
+  // 更新本地購課記錄狀態
+  private updateLocalPurchaseRecord(courseId: number, remainingLessons: any) {
+    const currentData = this.purchasesResource.value();
+    if (!currentData?.data?.purchases) return;
+
+    const updatedPurchases = currentData.data.purchases.map(purchase => {
+      if (purchase.course?.id === courseId) {
+        return {
+          ...purchase,
+          quantity_total: remainingLessons.total || purchase.quantity_total,
+          quantity_used: remainingLessons.used || purchase.quantity_used,
+          quantity_remaining: remainingLessons.remaining ?? purchase.quantity_remaining
+        };
+      }
+      return purchase;
+    });
+
+    // 更新 resource 的值
+    this.purchasesResource.update(() => ({
+      ...currentData,
+      data: {
+        ...currentData.data,
+        purchases: updatedPurchases
+      }
+    }));
   }
 
   onViewReservations(courseId: number) {

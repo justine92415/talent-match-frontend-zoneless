@@ -12,6 +12,9 @@ import { DialogService } from '@share/services/dialog.service';
 import { MatIcon } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { finalize, of, switchMap, catchError } from 'rxjs';
+import { CoursesService } from '@app/api/generated/courses/courses.service';
+import { rxResource } from '@angular/core/rxjs-interop';
+import type { AvailableSlotInfo } from '@app/api/generated/talentMatchAPI.schemas';
 
 interface Day {
   year: number;
@@ -51,13 +54,33 @@ export class ReserveComponent {
   days: WritableSignal<Day[]> = signal([]);
   currentDate: WritableSignal<Day | null> = signal(null);
   currentTime: WritableSignal<string | null> = signal(null);
-  morningTimes: WritableSignal<string[]> = signal([]);
-  afternoonTimes: WritableSignal<string[]> = signal([]);
-  eveningTimes: WritableSignal<string[]> = signal([]);
-  isLoading: WritableSignal<boolean> = signal(false);
   inProgress: WritableSignal<boolean> = signal(false);
 
+  // 使用 rxResource 載入可用時段
+  timeSlotsResource = rxResource({
+    params: () => ({
+      date: this.currentDate() ? this.getFormattedDate(this.currentDate()!) : null
+    }),
+    stream: ({ params }) => {
+      if (!params.date) {
+        return of({
+          status: 'success' as const,
+          message: '',
+          data: {
+            date: '',
+            available_slots: []
+          }
+        });
+      }
+      return this.coursesService.getApiCoursesIdAvailableSlots(
+        parseInt(this.data.course_id),
+        { date: params.date }
+      );
+    }
+  });
+
   private dialogService = inject(DialogService);
+  private coursesService = inject(CoursesService);
 
   constructor(
     public dialogRef: DialogRef<boolean, ReserveComponent>,
@@ -69,6 +92,42 @@ export class ReserveComponent {
       course_name: string;
     }
   ) {}
+
+  // 格式化日期為 YYYY-MM-DD
+  getFormattedDate(day: Day): string {
+    return `${day.year}-${String(day.month + 1).padStart(2, '0')}-${String(day.date).padStart(2, '0')}`;
+  }
+
+  // 分類時段為早上、下午、晚上
+  morningTimes = computed(() => {
+    const slots: AvailableSlotInfo[] = this.timeSlotsResource.value()?.data?.available_slots || [];
+    return slots
+      .filter((slot: AvailableSlotInfo) => {
+        const hour = parseInt(slot.start_time?.split(':')[0] || '0');
+        return hour >= 6 && hour < 12;
+      })
+      .map((slot: AvailableSlotInfo) => slot.start_time || '');
+  });
+
+  afternoonTimes = computed(() => {
+    const slots: AvailableSlotInfo[] = this.timeSlotsResource.value()?.data?.available_slots || [];
+    return slots
+      .filter((slot: AvailableSlotInfo) => {
+        const hour = parseInt(slot.start_time?.split(':')[0] || '0');
+        return hour >= 12 && hour < 18;
+      })
+      .map((slot: AvailableSlotInfo) => slot.start_time || '');
+  });
+
+  eveningTimes = computed(() => {
+    const slots: AvailableSlotInfo[] = this.timeSlotsResource.value()?.data?.available_slots || [];
+    return slots
+      .filter((slot: AvailableSlotInfo) => {
+        const hour = parseInt(slot.start_time?.split(':')[0] || '0');
+        return hour >= 18;
+      })
+      .map((slot: AvailableSlotInfo) => slot.start_time || '');
+  });
 
   selectedReseveTime = computed(() => {
     if (this.currentDate()) {
@@ -180,21 +239,6 @@ export class ReserveComponent {
         this.previousMonth();
       }
     }
-    this.isLoading.set(true);
-
-    // 使用假資料替代 API 呼叫
-    setTimeout(() => {
-      const fakeTimeSlots = {
-        morningTimes: ['09:00', '10:00', '11:00'],
-        afternoonTimes: ['14:00', '15:00', '16:00'],
-        eveningTimes: ['19:00', '20:00', '21:00']
-      };
-
-      this.morningTimes.set(fakeTimeSlots.morningTimes);
-      this.afternoonTimes.set(fakeTimeSlots.afternoonTimes);
-      this.eveningTimes.set(fakeTimeSlots.eveningTimes);
-      this.isLoading.set(false);
-    }, 1000);
   }
 
   selectTime(time: string): void {

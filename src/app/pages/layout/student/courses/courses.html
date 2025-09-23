@@ -8,50 +8,41 @@
           <p class="text-grey-66">查看已購買的課程，並進行預約管理</p>
         </div>
 
-        <!-- Dialog 測試按鈕 -->
-        <div class="flex gap-2">
-          <tmf-button
-            class="h-10"
-            variant="secondary"
-            (click)="testConfirmDialog()">
-            測試確認對話框
-          </tmf-button>
-
-          <tmf-button
-            class="h-10"
-            variant="tertiary"
-            (click)="testAlertDialog('info')">
-            測試提示對話框
-          </tmf-button>
-
-          <tmf-button
-            class="h-10"
-            variant="ghost"
-            (click)="testAlertDialog('error')">
-            測試錯誤對話框
-          </tmf-button>
-
-          <tmf-button
-            class="h-10"
-            variant="primary"
-            (click)="testReserveDialog()">
-            測試預約對話框
-          </tmf-button>
-        </div>
       </div>
     </div>
 
+    <!-- 載入狀態 -->
+    @if (purchasesResource.isLoading()) {
+      <div class="flex justify-center items-center py-12">
+        <div class="text-grey-66 text-lg">載入中...</div>
+      </div>
+    }
+
+    <!-- 錯誤狀態 -->
+    @if (purchasesResource.error()) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <div class="text-red-600 text-lg mb-2">載入失敗</div>
+        <div class="text-grey-66 mb-4">無法載入購課記錄，請稍後再試</div>
+        <tmf-button
+          variant="primary"
+          (click)="purchasesResource.reload()">
+          重新載入
+        </tmf-button>
+      </div>
+    }
+
     <!-- 課程列表 -->
-    <div class="space-y-6">
-      @for (purchase of purchases; track purchase.id) {
+    @if (purchasesResource.value()?.data?.purchases; as purchases) {
+      <div class="space-y-6">
+        @for (purchase of purchases; track purchase.id) {
         <div class="bg-white rounded-lg border border-grey-d4 overflow-hidden hover:shadow-lg transition-shadow duration-200">
           <!-- 課程主要資訊 -->
           <div class="flex gap-4 p-6">
             <!-- 課程圖片 -->
             <div class="flex-shrink-0">
               <img
-                [src]="purchase.course.main_image || 'https://picsum.photos/120/90?random=' + purchase.course.id"
-                [alt]="purchase.course.name"
+                [src]="purchase.course?.main_image || 'https://picsum.photos/120/90?random=' + purchase.course?.id"
+                [alt]="purchase.course?.name"
                 class="w-30 h-22.5 rounded-lg object-cover"
               />
             </div>
@@ -60,9 +51,9 @@
             <div class="flex-1 min-w-0">
               <div class="flex justify-between items-start mb-3">
                 <div>
-                  <h3 class="text-xl font-bold text-grey-33 mb-2">{{ purchase.course.name }}</h3>
+                  <h3 class="text-xl font-bold text-grey-33 mb-2">{{ purchase.course?.name }}</h3>
                   <p class="text-grey-66 text-sm">
-                    指導老師：{{ purchase.course.teacher.user.nick_name || purchase.course.teacher.user.name }}
+                    指導老師：{{ purchase.course?.teacher?.user?.nick_name || purchase.course?.teacher?.user?.name }}
                   </p>
                 </div>
               </div>
@@ -89,9 +80,9 @@
                 <tmf-button
                   class="h-10 flex-1"
                   variant="primary"
-                  [disabled]="purchase.quantity_remaining === 0"
-                  (click)="onBookCourse(purchase.course.id)">
-                  @if (purchase.quantity_remaining > 0) {
+                  [disabled]="(purchase.quantity_remaining ?? 0) === 0"
+                  (click)="onBookCourse(purchase.course?.id!)">
+                  @if ((purchase.quantity_remaining ?? 0) > 0) {
                     預約課程
                   } @else {
                     已用完
@@ -101,8 +92,8 @@
                 <tmf-button
                   class="h-10 flex-1"
                   variant="secondary"
-                  (click)="onViewReservations(purchase.course.id)">
-                  @if (isReservationExpanded(purchase.course.id)) {
+                  (click)="onViewReservations(purchase.course?.id!)">
+                  @if (isReservationExpanded(purchase.course?.id!)) {
                     收起預約
                   } @else {
                     查看預約
@@ -113,13 +104,13 @@
           </div>
 
           <!-- 展開的預約記錄區塊 -->
-          @if (isReservationExpanded(purchase.course.id)) {
+          @if (isReservationExpanded(purchase.course?.id!)) {
             <div class="border-t border-grey-d4 bg-grey-f9 p-6">
               <h4 class="text-lg font-bold text-grey-33 mb-4">預約記錄</h4>
 
-              @if (getCourseReservations(purchase.course.id).length > 0) {
+              @if (getCourseReservations(purchase.course?.id!).length > 0) {
                 <div class="space-y-3">
-                  @for (reservation of getCourseReservations(purchase.course.id); track reservation.id) {
+                  @for (reservation of getCourseReservations(purchase.course?.id!); track reservation.id) {
                     <div class="bg-white rounded-lg p-4 border border-grey-d4">
                       <div class="flex justify-between items-start mb-3">
                         <div class="flex-1">
@@ -165,7 +156,7 @@
                   <tmf-button
                     class="h-10 w-32 mt-4"
                     variant="primary"
-                    (click)="onBookCourse(purchase.course.id)">
+                    (click)="onBookCourse(purchase.course?.id!)">
                     立即預約
                   </tmf-button>
                 </div>
@@ -175,17 +166,30 @@
         </div>
       }
 
-      <!-- 空狀態 -->
-      @if (purchases.length === 0) {
-        <div class="text-center py-12">
-          <div class="text-grey-66 text-lg mb-4">尚未購買任何課程</div>
-          <tmf-button
-            class="h-12 w-40"
-            variant="primary">
-            探索課程
-          </tmf-button>
-        </div>
-      }
-    </div>
+        <!-- 空狀態 -->
+        @if (purchases.length === 0) {
+          <div class="text-center py-12">
+            <div class="text-grey-66 text-lg mb-4">尚未購買任何課程</div>
+            <tmf-button
+              class="h-12 w-40"
+              variant="primary">
+              探索課程
+            </tmf-button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- 資料為空時的狀態 -->
+    @if (purchasesResource.value()?.data?.purchases?.length === 0) {
+      <div class="text-center py-12">
+        <div class="text-grey-66 text-lg mb-4">尚未購買任何課程</div>
+        <tmf-button
+          class="h-12 w-40"
+          variant="primary">
+          探索課程
+        </tmf-button>
+      </div>
+    }
   </div>
 </div>

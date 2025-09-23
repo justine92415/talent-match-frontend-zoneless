@@ -3567,6 +3567,84 @@ export type GetCourseEditNotFoundErrorResponseAllOf = {
 export type GetCourseEditNotFoundErrorResponse = NotFoundErrorResponse &
   GetCourseEditNotFoundErrorResponseAllOf;
 
+export interface AvailableSlotsQueryParams {
+  /**
+   * 查詢日期 (必填，格式 YYYY-MM-DD)
+   * @pattern ^\d{4}-\d{2}-\d{2}$
+   */
+  date: string;
+}
+
+export interface AvailableSlotInfo {
+  /** 時段 ID (預約時使用) */
+  slot_id?: number;
+  /**
+   * 開始時間 (HH:mm 格式)
+   * @pattern ^\d{2}:\d{2}$
+   */
+  start_time?: string;
+  /**
+   * 結束時間 (HH:mm 格式)
+   * @pattern ^\d{2}:\d{2}$
+   */
+  end_time?: string;
+}
+
+/**
+ * 回應狀態 (查詢成功固定為 success)
+ */
+export type GetAvailableSlotsSuccessResponseStatus =
+  (typeof GetAvailableSlotsSuccessResponseStatus)[keyof typeof GetAvailableSlotsSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetAvailableSlotsSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 可預約時段查詢結果
+ */
+export type GetAvailableSlotsSuccessResponseData = {
+  /**
+   * 查詢日期
+   * @pattern ^\d{4}-\d{2}-\d{2}$
+   */
+  date?: string;
+  /** 該日期可預約的時段列表 (已排除被預約的時段) */
+  available_slots?: AvailableSlotInfo[];
+};
+
+export interface GetAvailableSlotsSuccessResponse {
+  /** 回應狀態 (查詢成功固定為 success) */
+  status?: GetAvailableSlotsSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 可預約時段查詢結果 */
+  data?: GetAvailableSlotsSuccessResponseData;
+}
+
+export type GetAvailableSlotsValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type GetAvailableSlotsValidationErrorResponse = ValidationErrorResponse &
+  GetAvailableSlotsValidationErrorResponseAllOf;
+
+export type GetAvailableSlotsNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetAvailableSlotsNotFoundErrorResponse = NotFoundErrorResponse &
+  GetAvailableSlotsNotFoundErrorResponseAllOf;
+
+export type GetAvailableSlotsBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type GetAvailableSlotsBusinessErrorResponse = BusinessErrorResponse &
+  GetAvailableSlotsBusinessErrorResponseAllOf;
+
 /**
  * 課程狀態
  */
@@ -5215,6 +5293,126 @@ export type PaymentBusinessErrorResponseAllOf = {
 export type PaymentBusinessErrorResponse = BusinessErrorResponse &
   PaymentBusinessErrorResponseAllOf;
 
+export interface PurchaseListQueryParams {
+  /** 課程 ID (選填，用於篩選特定課程的購買記錄) */
+  course_id?: number;
+}
+
+/**
+ * 教師使用者資料
+ */
+export type PurchaseCourseInfoTeacherUser = {
+  /** 教師真實姓名 */
+  name?: string;
+  /** 教師暱稱 */
+  nick_name?: string;
+};
+
+/**
+ * 授課教師資訊
+ */
+export type PurchaseCourseInfoTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師使用者資料 */
+  user?: PurchaseCourseInfoTeacherUser;
+};
+
+export interface PurchaseCourseInfo {
+  /** 課程 ID */
+  id?: number;
+  /** 課程 UUID */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+  /**
+   * 課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 授課教師資訊 */
+  teacher?: PurchaseCourseInfoTeacher;
+}
+
+/**
+ * @nullable
+ */
+export type PurchaseOrderInfo = {
+  /** 訂單 ID */
+  id?: number;
+  /** 訂單 UUID */
+  uuid?: string;
+  /** 訂單總金額 */
+  total_amount?: number;
+  /** 付款完成時間 */
+  paid_at?: string;
+} | null;
+
+export interface PurchaseRecordDetail {
+  /** 購買記錄 ID */
+  id?: number;
+  /** 購買記錄 UUID */
+  uuid?: string;
+  /** 使用者 ID */
+  user_id?: number;
+  /** 課程 ID */
+  course_id?: number;
+  /** 訂單 ID */
+  order_id?: number;
+  /** 購買總堂數 */
+  quantity_total?: number;
+  /** 已使用堂數 */
+  quantity_used?: number;
+  /** 剩餘堂數 */
+  quantity_remaining?: number;
+  /** 購買記錄建立時間 */
+  created_at?: string;
+  course?: PurchaseCourseInfo;
+  order?: PurchaseOrderInfo;
+}
+
+/**
+ * 回應狀態
+ */
+export type PurchaseListSuccessResponseStatus =
+  (typeof PurchaseListSuccessResponseStatus)[keyof typeof PurchaseListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PurchaseListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 購買記錄資料
+ */
+export type PurchaseListSuccessResponseData = {
+  /** 購買記錄列表 */
+  purchases?: PurchaseRecordDetail[];
+};
+
+export interface PurchaseListSuccessResponse {
+  /** 回應狀態 */
+  status?: PurchaseListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 購買記錄資料 */
+  data?: PurchaseListSuccessResponseData;
+}
+
+export type PurchaseUnauthorizedErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type PurchaseUnauthorizedErrorResponse = UnauthorizedErrorResponse &
+  PurchaseUnauthorizedErrorResponseAllOf;
+
+export type PurchaseBusinessErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type PurchaseBusinessErrorResponse = BusinessErrorResponse &
+  PurchaseBusinessErrorResponseAllOf;
+
 /**
  * 伺服器內部錯誤
  */
@@ -5557,6 +5755,18 @@ export type PutApiCoursesId400 =
   | CreateCourseValidationErrorResponse
   | CreateCourseBusinessErrorResponse;
 
+export type GetApiCoursesIdAvailableSlotsParams = {
+  /**
+   * 查詢日期 (YYYY-MM-DD 格式)
+   * @pattern ^\\d{4}-\\d{2}-\\d{2}$
+   */
+  date: string;
+};
+
+export type GetApiCoursesIdAvailableSlots400 =
+  | GetAvailableSlotsValidationErrorResponse
+  | GetAvailableSlotsBusinessErrorResponse;
+
 export type PostApiFilesUploadBody = {
   /** 要上傳的檔案列表 */
   files: Blob[];
@@ -5744,6 +5954,13 @@ export const GetApiCoursesPublicSort = {
   price_low: 'price_low',
   price_high: 'price_high',
 } as const;
+
+export type GetApiPurchasesParams = {
+  /**
+   * 課程 ID (選填，用於篩選特定課程的購買記錄)
+   */
+  course_id?: number;
+};
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

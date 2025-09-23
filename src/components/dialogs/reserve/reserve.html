@@ -63,7 +63,7 @@
         <div
           class="relative grid min-h-[192px] grid-cols-3 text-center text-grey-66"
         >
-          @if (isLoading()) {
+          @if (timeSlotsResource.isLoading()) {
             <div
               class="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-white"
             >
@@ -77,6 +77,21 @@
                   ></div>
                 </div>
                 <div class="text-xl text-primary">Loading...</div>
+              </div>
+            </div>
+          }
+
+          @if (timeSlotsResource.error()) {
+            <div
+              class="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-white"
+            >
+              <div class="text-center">
+                <div class="text-red-600 mb-2">載入失敗</div>
+                <button
+                  class="text-primary hover:underline"
+                  (click)="timeSlotsResource.reload()">
+                  重新載入
+                </button>
               </div>
             </div>
           }

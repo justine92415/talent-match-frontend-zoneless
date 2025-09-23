@@ -38,6 +38,7 @@ type _DeepNonNullableObject<T> = {
 import { Observable } from 'rxjs';
 
 import type {
+  CancelReservationSuccessResponse,
   CreateReservationRequest,
   CreateReservationSuccessResponse,
   GetApiReservationsParams,
@@ -141,9 +142,42 @@ export class ReservationManagementService {
       params: { ...params, ...options?.params },
     });
   }
+  /**
+ * 學生或教師取消預約，系統會自動退還課程堂數並更新預約狀態。
+
+**業務邏輯**：
+- 驗證使用者身份認證和權限
+- 檢查預約是否存在且屬於該使用者
+- 驗證取消條件（時間限制等）
+- 將教師和學生狀態都更新為 "cancelled"
+- 退還一堂課程堂數給學生
+- 回傳取消後的預約資訊和退還堂數
+
+ * @summary 取消預約
+ */
+  deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.delete<TData>(`/api/reservations/${id}`, options);
+  }
 }
 
 export type PostApiReservationsClientResult =
   NonNullable<CreateReservationSuccessResponse>;
 export type GetApiReservationsClientResult =
   NonNullable<ReservationListSuccessResponse>;
+export type DeleteApiReservationsIdClientResult =
+  NonNullable<CancelReservationSuccessResponse>;

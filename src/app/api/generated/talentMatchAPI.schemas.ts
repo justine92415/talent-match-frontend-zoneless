@@ -5638,6 +5638,71 @@ export interface ReservationListSuccessResponse {
 }
 
 /**
+ * 教師端預約狀態（已取消）
+ */
+export type CancelledReservationInfoTeacherStatus =
+  (typeof CancelledReservationInfoTeacherStatus)[keyof typeof CancelledReservationInfoTeacherStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CancelledReservationInfoTeacherStatus = {
+  cancelled: 'cancelled',
+} as const;
+
+/**
+ * 學生端預約狀態（已取消）
+ */
+export type CancelledReservationInfoStudentStatus =
+  (typeof CancelledReservationInfoStudentStatus)[keyof typeof CancelledReservationInfoStudentStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CancelledReservationInfoStudentStatus = {
+  cancelled: 'cancelled',
+} as const;
+
+export interface CancelledReservationInfo {
+  /** 預約 ID */
+  id?: number;
+  /** 預約 UUID */
+  uuid?: string;
+  /** 教師端預約狀態（已取消） */
+  teacher_status?: CancelledReservationInfoTeacherStatus;
+  /** 學生端預約狀態（已取消） */
+  student_status?: CancelledReservationInfoStudentStatus;
+  /** 預約更新時間 */
+  updated_at?: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type CancelReservationSuccessResponseStatus =
+  (typeof CancelReservationSuccessResponseStatus)[keyof typeof CancelReservationSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CancelReservationSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 取消預約結果資料
+ */
+export type CancelReservationSuccessResponseData = {
+  /** 已取消的預約資訊 */
+  reservation?: CancelledReservationInfo;
+  /** 退還的課程堂數 */
+  refunded_lessons?: number;
+};
+
+export interface CancelReservationSuccessResponse {
+  /** 回應狀態 */
+  status?: CancelReservationSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 取消預約結果資料 */
+  data?: CancelReservationSuccessResponseData;
+}
+
+/**
  * 伺服器內部錯誤
  */
 export type InternalServerErrorResponse = ServerErrorResponse;
@@ -6243,6 +6308,10 @@ export const GetApiReservationsStatus = {
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
+
+export type DeleteApiReservationsId400 =
+  | ReservationValidationErrorResponse
+  | ReservationBusinessErrorResponse;
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

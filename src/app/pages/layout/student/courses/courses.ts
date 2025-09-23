@@ -101,4 +101,10 @@ export default class Courses {
     return this.expandedReservations.has(courseId);
   }
 
+  // 處理預約取消事件
+  onReservationCancelled(courseId: number) {
+    // 重新載入購課記錄以更新剩餘堂數
+    this.purchasesResource.reload();
+  }
+
 }

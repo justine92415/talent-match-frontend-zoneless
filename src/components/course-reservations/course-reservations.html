@@ -21,7 +21,7 @@
           <div class="flex items-center justify-between">
             <div class="flex-1">
               <div class="flex items-center gap-3">
-                <span class="font-medium">{{ reservation.reserve_time | date:'yyyy-MM-dd HH:mm' }}</span>
+                <span class="font-medium">{{ reservation.reserve_time | date:'yyyy-MM-dd HH:mm':'UTC' }}</span>
                 <span
                   class="px-2 py-1 text-xs rounded-full"
                   [ngClass]="{
@@ -45,6 +45,34 @@
         </div>
       }
     </div>
+
+    <!-- 分頁控制 -->
+    @if (reservationsResource.value()?.data?.pagination && reservationsResource.value()!.data!.pagination!.total_pages! > 1) {
+      <div class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-grey-e5">
+        <!-- 上一頁 -->
+        <tmf-button
+          variant="tertiary"
+          size="sm"
+          [disabled]="currentPage() <= 1"
+          (click)="onPageChange(currentPage() - 1)">
+          上一頁
+        </tmf-button>
+
+        <!-- 頁碼顯示 -->
+        <span class="text-sm text-grey-66 mx-2">
+          第 {{ currentPage() }} 頁 / 共 {{ reservationsResource.value()?.data?.pagination?.total_pages }} 頁
+        </span>
+
+        <!-- 下一頁 -->
+        <tmf-button
+          variant="tertiary"
+          size="sm"
+          [disabled]="currentPage() >= (reservationsResource.value()?.data?.pagination?.total_pages || 1)"
+          (click)="onPageChange(currentPage() + 1)">
+          下一頁
+        </tmf-button>
+      </div>
+    }
   } @else {
     <div class="text-center p-8 text-grey-66">
       <div class="mb-2">📅</div>

@@ -109,7 +109,8 @@
               <h4 class="text-lg font-bold text-grey-33 mb-4">預約記錄</h4>
               <tmf-course-reservations
                 [courseId]="purchase.course?.id!"
-                [reservationUpdated$]="reservationUpdated$" />
+                [reservationUpdated$]="reservationUpdated$"
+                (reservationCancelled)="onReservationCancelled($event)" />
             </div>
           }
         </div>

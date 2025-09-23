@@ -1,14 +1,229 @@
-<div class="container mx-auto px-4 py-6">
-  <!-- 頁面標題 -->
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-grey-33 mb-2">學生預約管理</h1>
-    <p class="text-grey-66">查看和管理學生的課程預約記錄</p>
-  </div>
+<div class="bg-white min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <!-- 頁面標題 -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h1 class="text-3xl font-bold text-grey-33 mb-2">學生預約管理</h1>
+          <p class="text-grey-66">查看和管理學生的課程預約記錄</p>
+        </div>
+      </div>
+    </div>
 
-  <!-- TODO: 實作學生預約查看功能 -->
-  <div class="bg-white rounded-xl shadow-sm border border-grey-d4 p-6">
-    <div class="text-center py-12">
-      <div class="text-grey-66 text-lg">功能開發中...</div>
+    <!-- 篩選工具列 -->
+    <div class="bg-white rounded-lg border border-grey-d4 p-6 mb-6">
+      <form [formGroup]="filterForm">
+      <div class="flex flex-wrap gap-4 items-center">
+        <!-- 課程篩選 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">課程篩選</label>
+          <tmf-input-select
+            formControlName="course"
+            placeholder="全部課程"
+            [options]="courseOptions">
+          </tmf-input-select>
+        </div>
+
+        <!-- 時間範圍 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">時間範圍</label>
+          <tmf-input-select
+            formControlName="timeRange"
+            placeholder="全部時間"
+            [options]="timeRangeOptions">
+          </tmf-input-select>
+        </div>
+
+        <!-- 預約狀態 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">預約狀態</label>
+          <tmf-input-select
+            formControlName="status"
+            placeholder="全部狀態"
+            [options]="statusOptions">
+          </tmf-input-select>
+        </div>
+
+        <!-- 學生搜尋 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">學生搜尋</label>
+          <tmf-input-text
+            formControlName="student"
+            placeholder="搜尋學生姓名或 ID">
+          </tmf-input-text>
+        </div>
+
+        <!-- 篩選按鈕 -->
+        <tmf-button variant="primary" class="h-10">
+          搜尋篩選
+        </tmf-button>
+
+        <!-- 重置按鈕 -->
+        <tmf-button variant="secondary" class="h-10">
+          重置
+        </tmf-button>
+      </div>
+      </form>
+    </div>
+
+    <!-- 載入狀態 -->
+    <div class="flex justify-center items-center py-12">
+      <div class="text-grey-66 text-lg">載入中...</div>
+    </div>
+
+    <!-- 預約記錄列表 -->
+    <div class="space-y-4">
+      <!-- 預約卡片範例 -->
+      <div class="bg-white rounded-lg border border-grey-d4 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <div class="p-6">
+          <!-- 預約時間與狀態 -->
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <div class="text-xl font-bold text-grey-33">📅 2025-09-29</div>
+              <div class="text-lg text-grey-66">11:00 - 12:00</div>
+            </div>
+            <span class="px-3 py-1 text-sm rounded-full bg-green-95 text-green-55">
+              已確認
+            </span>
+          </div>
+
+          <!-- 學生與課程資訊 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-sm font-medium text-grey-33">👤 學生資訊</span>
+              </div>
+              <div class="text-base font-medium text-grey-33">王小明</div>
+              <div class="text-sm text-grey-66">ID: 12345</div>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-sm font-medium text-grey-33">📚 預約課程</span>
+              </div>
+              <div class="text-base font-medium text-grey-33">Python 程式設計進階</div>
+              <div class="text-sm text-grey-66">第 5 堂課</div>
+            </div>
+          </div>
+
+          <!-- 操作按鈕 -->
+          <div class="flex gap-3 pt-4 border-t border-grey-d4">
+            <tmf-button variant="tertiary" size="sm">
+              查看詳情
+            </tmf-button>
+            <tmf-button variant="secondary" size="sm">
+              聯絡學生
+            </tmf-button>
+            <tmf-button variant="tertiary" size="sm" class="text-red-50">
+              取消預約
+            </tmf-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 另一個預約卡片範例 -->
+      <div class="bg-white rounded-lg border border-grey-d4 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <div class="text-xl font-bold text-grey-33">📅 2025-09-29</div>
+              <div class="text-lg text-grey-66">14:00 - 15:00</div>
+            </div>
+            <span class="px-3 py-1 text-sm rounded-full bg-orange-95 text-orange-55">
+              待確認
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-sm font-medium text-grey-33">👤 學生資訊</span>
+              </div>
+              <div class="text-base font-medium text-grey-33">李小美</div>
+              <div class="text-sm text-grey-66">ID: 67890</div>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-sm font-medium text-grey-33">📚 預約課程</span>
+              </div>
+              <div class="text-base font-medium text-grey-33">JavaScript 前端開發</div>
+              <div class="text-sm text-grey-66">第 2 堂課</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-4 border-t border-grey-d4">
+            <tmf-button variant="primary" size="sm">
+              確認預約
+            </tmf-button>
+            <tmf-button variant="tertiary" size="sm">
+              查看詳情
+            </tmf-button>
+            <tmf-button variant="secondary" size="sm">
+              聲絡學生
+            </tmf-button>
+            <tmf-button variant="tertiary" size="sm" class="text-red-50">
+              拒絕預約
+            </tmf-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 已完成的預約卡片範例 -->
+      <div class="bg-white rounded-lg border border-grey-d4 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-4">
+            <div class="flex items-center gap-3">
+              <div class="text-xl font-bold text-grey-33">📅 2025-09-28</div>
+              <div class="text-lg text-grey-66">16:00 - 17:00</div>
+            </div>
+            <span class="px-3 py-1 text-sm rounded-full bg-blue-95 text-blue-50">
+              已完成
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-sm font-medium text-grey-33">👤 學生資訊</span>
+              </div>
+              <div class="text-base font-medium text-grey-33">張小華</div>
+              <div class="text-sm text-grey-66">ID: 11111</div>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-sm font-medium text-grey-33">📚 預約課程</span>
+              </div>
+              <div class="text-base font-medium text-grey-33">React 框架應用</div>
+              <div class="text-sm text-grey-66">第 1 堂課</div>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-4 border-t border-grey-d4">
+            <tmf-button variant="tertiary" size="sm">
+              查看詳情
+            </tmf-button>
+            <tmf-button variant="secondary" size="sm">
+              課程評價
+            </tmf-button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分頁控制 -->
+    <div class="flex justify-center items-center gap-2 mt-8">
+      <tmf-button variant="tertiary" size="sm" [disabled]="true">
+        上一頁
+      </tmf-button>
+      <span class="text-sm text-grey-66 mx-4">第 1 頁 / 共 5 頁</span>
+      <tmf-button variant="tertiary" size="sm">
+        下一頁
+      </tmf-button>
+    </div>
+
+    <!-- 空狀態 (隱藏，實際開發時使用) -->
+    <div class="text-center py-12" style="display: none;">
+      <div class="text-grey-66 text-lg mb-4">暫無預約記錄</div>
+      <div class="text-sm text-grey-66">當學生預約您的課程時，記錄會顯示在這裡</div>
     </div>
   </div>
 </div>

@@ -3148,12 +3148,14 @@ export interface CourseListQueryParams {
 }
 
 export interface PaginationInfo {
-  /** 目前頁碼 */
-  page?: number;
-  /** 每頁數量 */
-  limit?: number;
-  /** 總筆數 */
+  /** 當前頁數 */
+  current_page?: number;
+  /** 每頁筆數 */
+  per_page?: number;
+  /** 總記錄數 */
   total?: number;
+  /** 總頁數 */
+  total_pages?: number;
 }
 
 /**
@@ -5606,6 +5608,36 @@ export type ReservationNotFoundErrorResponse = NotFoundErrorResponse &
   ReservationNotFoundErrorResponseAllOf;
 
 /**
+ * 回應狀態
+ */
+export type ReservationListSuccessResponseStatus =
+  (typeof ReservationListSuccessResponseStatus)[keyof typeof ReservationListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReservationListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 預約列表資料
+ */
+export type ReservationListSuccessResponseData = {
+  /** 預約記錄列表 */
+  reservations?: ReservationDetail[];
+  /** 分頁資訊 */
+  pagination?: PaginationInfo;
+};
+
+export interface ReservationListSuccessResponse {
+  /** 回應狀態 */
+  status?: ReservationListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 預約列表資料 */
+  data?: ReservationListSuccessResponseData;
+}
+
+/**
  * 伺服器內部錯誤
  */
 export type InternalServerErrorResponse = ServerErrorResponse;
@@ -6157,6 +6189,60 @@ export type GetApiPurchasesParams = {
 export type PostApiReservations400 =
   | ReservationValidationErrorResponse
   | ReservationBusinessErrorResponse;
+
+export type GetApiReservationsParams = {
+  /**
+   * 查詢角色（學生或教師視角）
+   */
+  role: GetApiReservationsRole;
+  /**
+   * 課程 ID，篩選特定課程的預約記錄
+   * @minimum 1
+   */
+  course_id?: number;
+  /**
+   * 頁數
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁筆數
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 預約狀態篩選
+   */
+  status?: GetApiReservationsStatus;
+  /**
+   * 查詢起始日期（YYYY-MM-DD）
+   */
+  date_from?: string;
+  /**
+   * 查詢結束日期（YYYY-MM-DD）
+   */
+  date_to?: string;
+};
+
+export type GetApiReservationsRole =
+  (typeof GetApiReservationsRole)[keyof typeof GetApiReservationsRole];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiReservationsRole = {
+  student: 'student',
+  teacher: 'teacher',
+} as const;
+
+export type GetApiReservationsStatus =
+  (typeof GetApiReservationsStatus)[keyof typeof GetApiReservationsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiReservationsStatus = {
+  reserved: 'reserved',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

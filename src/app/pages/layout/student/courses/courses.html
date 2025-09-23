@@ -107,60 +107,9 @@
           @if (isReservationExpanded(purchase.course?.id!)) {
             <div class="border-t border-grey-d4 bg-grey-f9 p-6">
               <h4 class="text-lg font-bold text-grey-33 mb-4">預約記錄</h4>
-
-              @if (getCourseReservations(purchase.course?.id!).length > 0) {
-                <div class="space-y-3">
-                  @for (reservation of getCourseReservations(purchase.course?.id!); track reservation.id) {
-                    <div class="bg-white rounded-lg p-4 border border-grey-d4">
-                      <div class="flex justify-between items-start mb-3">
-                        <div class="flex-1">
-                          <div class="flex items-center gap-3 mb-2">
-                            <span class="font-medium text-grey-33">{{ reservation.date | date:'yyyy/MM/dd (EEE)' }}</span>
-                            <span class="text-grey-66">{{ reservation.time }}</span>
-                            <span class="px-2 py-1 rounded-full text-xs font-medium {{ getReservationStatusClass(reservation.status) }}">
-                              {{ getReservationStatusText(reservation.status) }}
-                            </span>
-                          </div>
-                          @if (reservation.teacher_note) {
-                            <p class="text-sm text-grey-66">
-                              <span class="font-medium">老師備註：</span>{{ reservation.teacher_note }}
-                            </p>
-                          }
-                        </div>
-
-                        <!-- 預約操作按鈕 -->
-                        <div class="flex gap-2">
-                          @if (reservation.status === 'pending' || reservation.status === 'confirmed') {
-                            <tmf-button
-                              class="h-8 w-20"
-                              variant="tertiary"
-                              (click)="onCancelReservation(reservation.id)">
-                              取消
-                            </tmf-button>
-                          }
-                          @if (reservation.status === 'completed') {
-                            <tmf-button
-                              class="h-8 w-20"
-                              variant="secondary">
-                              評價
-                            </tmf-button>
-                          }
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-              } @else {
-                <div class="text-center py-8 text-grey-66">
-                  <p>尚未有預約記錄</p>
-                  <tmf-button
-                    class="h-10 w-32 mt-4"
-                    variant="primary"
-                    (click)="onBookCourse(purchase.course?.id!)">
-                    立即預約
-                  </tmf-button>
-                </div>
-              }
+              <tmf-course-reservations
+                [courseId]="purchase.course?.id!"
+                [reservationUpdated$]="reservationUpdated$" />
             </div>
           }
         </div>

@@ -18,11 +18,30 @@ import type {
 
 import { Injectable, inject } from '@angular/core';
 
+// import type { DeepNonNullable } from '@orval/core/src/utils/deep-non-nullable';
+
+// 使用 TypeScript 內建的 NonNullable 型別
+type DeepNonNullable<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends any[]
+  ? _DeepNonNullableArray<T[number]>
+  : T extends object
+  ? _DeepNonNullableObject<T>
+  : NonNullable<T>;
+
+type _DeepNonNullableArray<T> = Array<DeepNonNullable<NonNullable<T>>>;
+
+type _DeepNonNullableObject<T> = {
+  [P in keyof T]-?: DeepNonNullable<NonNullable<T[P]>>;
+};
+
 import { Observable } from 'rxjs';
 
 import type {
   CreateReservationRequest,
   CreateReservationSuccessResponse,
+  GetApiReservationsParams,
+  ReservationListSuccessResponse,
 } from '../talentMatchAPI.schemas';
 
 interface HttpClientOptions {
@@ -87,7 +106,44 @@ export class ReservationManagementService {
       options,
     );
   }
+  /**
+ * 根據使用者角色查詢預約記錄，支援多種篩選條件。
+
+**業務邏輯**：
+- 學生（role=student）：查詢自己的預約記錄
+- 教師（role=teacher）：查詢自己收到的預約記錄
+- 支援依課程 ID 篩選（course_id）
+- 支援分頁查詢（page, per_page）
+- 支援狀態篩選（status）
+- 支援日期範圍篩選（date_from, date_to）
+- 回傳預約列表和分頁資訊
+
+ * @summary 查詢預約列表
+ */
+  getApiReservations<TData = ReservationListSuccessResponse>(
+    params: DeepNonNullable<GetApiReservationsParams>,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  getApiReservations<TData = ReservationListSuccessResponse>(
+    params: DeepNonNullable<GetApiReservationsParams>,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  getApiReservations<TData = ReservationListSuccessResponse>(
+    params: DeepNonNullable<GetApiReservationsParams>,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  getApiReservations<TData = ReservationListSuccessResponse>(
+    params: DeepNonNullable<GetApiReservationsParams>,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.get<TData>(`/api/reservations`, {
+      ...options,
+      params: { ...params, ...options?.params },
+    });
+  }
 }
 
 export type PostApiReservationsClientResult =
   NonNullable<CreateReservationSuccessResponse>;
+export type GetApiReservationsClientResult =
+  NonNullable<ReservationListSuccessResponse>;

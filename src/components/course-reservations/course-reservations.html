@@ -1,0 +1,54 @@
+@if (reservationsResource.isLoading()) {
+  <div class="flex items-center justify-center p-4">
+    <div class="text-grey-66">載入中...</div>
+  </div>
+} @else if (reservationsResource.error()) {
+  <div class="flex items-center justify-center p-4">
+    <div class="text-center">
+      <div class="text-red-600 mb-2">載入失敗</div>
+      <button
+        class="text-primary hover:underline"
+        (click)="reservationsResource.reload()">
+        重新載入
+      </button>
+    </div>
+  </div>
+} @else {
+  @if (reservationsResource.value()?.data?.reservations && reservationsResource.value()!.data!.reservations!.length > 0) {
+    <div class="space-y-3">
+      @for (reservation of reservationsResource.value()?.data?.reservations; track reservation.id) {
+        <div class="rounded-lg border border-grey-e5 bg-white p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-3">
+                <span class="font-medium">{{ reservation.reserve_time | date:'yyyy-MM-dd HH:mm' }}</span>
+                <span
+                  class="px-2 py-1 text-xs rounded-full"
+                  [ngClass]="{
+                    'bg-green-95 text-green-55': (reservation.student_status || '') === 'reserved',
+                    'bg-blue-95 text-blue-50': (reservation.student_status || '') === 'completed',
+                    'bg-grey-f4 text-grey-66': (reservation.student_status || '') === 'cancelled' || !(reservation.student_status || '')
+                  }">
+                  {{ (reservation.student_status || '') | reservationStatus }}
+                </span>
+              </div>
+            </div>
+            @if (reservation.student_status === 'reserved') {
+              <tmf-button
+                variant="tertiary"
+                size="sm"
+                (click)="onCancelReservation(reservation.id!)">
+                取消預約
+              </tmf-button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="text-center p-8 text-grey-66">
+      <div class="mb-2">📅</div>
+      <div>尚無預約記錄</div>
+    </div>
+  }
+}

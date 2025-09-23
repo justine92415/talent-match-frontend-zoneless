@@ -53,7 +53,14 @@ const routes: Routes = [
     data: { state: 'teacher' },
   },
   {
-    // 老師課程預約管理頁
+    // 可預約時段管理頁
+    path: 'schedule',
+    loadComponent: () => import('./schedule/schedule'),
+    canActivate: [teacherOnlyGuard],
+    data: { state: 'teacher' },
+  },
+  {
+    // 學生預約查看頁
     path: 'reservation',
     loadComponent: () => import('./reservation/reservation'),
     canActivate: [teacherOnlyGuard],

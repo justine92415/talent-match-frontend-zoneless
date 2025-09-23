@@ -1,79 +1,14 @@
 <div class="container mx-auto px-4 py-6">
   <!-- 頁面標題 -->
   <div class="mb-8">
-    <h1 class="text-3xl font-bold text-grey-33 mb-2">課程預約時段管理</h1>
-    <p class="text-grey-66">設定您每週的可預約時段，學生將可以在這些時段預約課程</p>
+    <h1 class="text-3xl font-bold text-grey-33 mb-2">學生預約管理</h1>
+    <p class="text-grey-66">查看和管理學生的課程預約記錄</p>
   </div>
 
-  <!-- 載入錯誤訊息 -->
-  @if (loadError()) {
-    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <mat-icon class="text-red-500 mr-2">error</mat-icon>
-          <p class="text-red-800 font-medium">{{ loadError() }}</p>
-        </div>
-        <tmf-button
-          variant="secondary"
-          size="sm"
-          (click)="loadScheduleData()">
-          重新載入
-        </tmf-button>
-      </div>
-    </div>
-  }
-
-  <!-- 操作按鈕區 -->
-  <div class="mb-6 flex flex-wrap gap-3">
-    @if (!isEditing()) {
-      <!-- 檢視模式按鈕 -->
-      <tmf-button
-        variant="primary"
-        class="h-10"
-        [disabled]="isLoading()"
-        (click)="enterEditMode()">
-        編輯排程
-      </tmf-button>
-    } @else {
-      <!-- 編輯模式按鈕 -->
-      <tmf-button
-        variant="primary"
-        class="h-10"
-        [disabled]="isSaving() || isLoading()"
-        (click)="saveSchedule()">
-        @if (isSaving()) {
-          儲存中...
-        } @else {
-          儲存排程
-        }
-      </tmf-button>
-
-      <tmf-button
-        variant="secondary"
-        class="h-10"
-        [disabled]="isLoading() || isSaving()"
-        (click)="exitEditMode()">
-        取消編輯
-      </tmf-button>
-    }
-  </div>
-
-  <!-- 可編輯週曆元件 -->
+  <!-- TODO: 實作學生預約查看功能 -->
   <div class="bg-white rounded-xl shadow-sm border border-grey-d4 p-6">
-    @if (isLoading()) {
-      <div class="flex items-center justify-center py-12">
-        <div class="text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p class="text-grey-66">載入排程資料中...</p>
-        </div>
-      </div>
-    } @else {
-      <tmf-editable-weekly-calendar
-        [initialData]="scheduleData()"
-        [readonly]="!isEditing()"
-        (scheduleChange)="onScheduleChange($event)">
-      </tmf-editable-weekly-calendar>
-    }
+    <div class="text-center py-12">
+      <div class="text-grey-66 text-lg">功能開發中...</div>
+    </div>
   </div>
-  
 </div>

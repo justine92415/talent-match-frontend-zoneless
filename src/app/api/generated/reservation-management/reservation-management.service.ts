@@ -42,11 +42,13 @@ import type {
   ConfirmReservationSuccessResponse,
   CreateReservationRequest,
   CreateReservationSuccessResponse,
+  GetApiReservationsCourseReservationsParams,
   GetApiReservationsMyReservationsParams,
   GetApiReservationsParams,
   RejectReservationRequest,
   RejectReservationSuccessResponse,
   ReservationListSuccessResponse,
+  TeacherReservationSuccessResponse,
 } from '../talentMatchAPI.schemas';
 
 interface HttpClientOptions {
@@ -182,6 +184,51 @@ export class ReservationManagementService {
     });
   }
   /**
+ * 教師查詢自己課程的預約記錄，支援多種篩選和搜尋功能。
+
+**業務邏輯**：
+- 僅限教師角色使用（需要 teacherAuth middleware）
+- 查詢教師自己教授課程的所有預約記錄
+- 支援按課程 ID 篩選
+- 支援時間範圍篩選（今天/本週/本月/全部）
+- 支援自定義日期範圍篩選
+- 支援預約狀態篩選
+- 支援學生搜尋（暱稱或ID）
+- 按預約時間最新在前排序
+- 包含預約開始和結束時間資訊
+
+ * @summary 教師查詢課程預約列表
+ */
+  getApiReservationsCourseReservations<
+    TData = TeacherReservationSuccessResponse,
+  >(
+    params?: DeepNonNullable<GetApiReservationsCourseReservationsParams>,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  getApiReservationsCourseReservations<
+    TData = TeacherReservationSuccessResponse,
+  >(
+    params?: DeepNonNullable<GetApiReservationsCourseReservationsParams>,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  getApiReservationsCourseReservations<
+    TData = TeacherReservationSuccessResponse,
+  >(
+    params?: DeepNonNullable<GetApiReservationsCourseReservationsParams>,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  getApiReservationsCourseReservations<
+    TData = TeacherReservationSuccessResponse,
+  >(
+    params?: DeepNonNullable<GetApiReservationsCourseReservationsParams>,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.get<TData>(`/api/reservations/course-reservations`, {
+      ...options,
+      params: { ...params, ...options?.params },
+    });
+  }
+  /**
  * 學生或教師取消預約，系統會自動退還課程堂數並更新預約狀態。
 
 **業務邏輯**：
@@ -294,6 +341,8 @@ export type GetApiReservationsClientResult =
   NonNullable<ReservationListSuccessResponse>;
 export type GetApiReservationsMyReservationsClientResult =
   NonNullable<ReservationListSuccessResponse>;
+export type GetApiReservationsCourseReservationsClientResult =
+  NonNullable<TeacherReservationSuccessResponse>;
 export type DeleteApiReservationsIdClientResult =
   NonNullable<CancelReservationSuccessResponse>;
 export type PostApiReservationsIdConfirmClientResult =

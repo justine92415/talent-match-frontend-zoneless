@@ -39,10 +39,12 @@ import { Observable } from 'rxjs';
 
 import type {
   CancelReservationSuccessResponse,
+  ConfirmReservationSuccessResponse,
   CreateReservationRequest,
   CreateReservationSuccessResponse,
   GetApiReservationsParams,
-  PostApiReservationsIdRejectBody,
+  RejectReservationRequest,
+  RejectReservationSuccessResponse,
   ReservationListSuccessResponse,
 } from '../talentMatchAPI.schemas';
 
@@ -175,29 +177,31 @@ export class ReservationManagementService {
     return this.http.delete<TData>(`/api/reservations/${id}`, options);
   }
   /**
- * 教師確認學生的預約請求，將預約狀態從待確認改為已確認。
+ * 教師確認學生的預約請求，將預約狀態從等待確認改為已確認。
 
 **業務邏輯**：
-- 驗證教師身份認證和權限
-- 檢查預約狀態是否為待確認
-- 檢查是否超過回應期限
-- 確認預約並扣除學生課程堂數
+- 驗證教師身份認證和權限（只有預約的教師可以確認）
+- 檢查預約狀態是否為 PENDING（等待確認）
+- 檢查是否超過教師回應期限
+- 更新預約狀態為 RESERVED（已確認）
+- 扣除學生的課程堂數
+- 清除回應期限
 
  * @summary 教師確認預約
  */
-  postApiReservationsIdConfirm<TData = null>(
+  postApiReservationsIdConfirm<TData = ConfirmReservationSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  postApiReservationsIdConfirm<TData = null>(
+  postApiReservationsIdConfirm<TData = ConfirmReservationSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  postApiReservationsIdConfirm<TData = null>(
+  postApiReservationsIdConfirm<TData = ConfirmReservationSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  postApiReservationsIdConfirm<TData = null>(
+  postApiReservationsIdConfirm<TData = ConfirmReservationSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
@@ -211,36 +215,38 @@ export class ReservationManagementService {
  * 教師拒絕學生的預約請求，將預約狀態改為已取消。
 
 **業務邏輯**：
-- 驗證教師身份認證和權限
-- 檢查預約狀態是否為待確認
-- 拒絕預約（不扣除學生課程堂數）
+- 驗證教師身份認證和權限（只有預約的教師可以拒絕）
+- 檢查預約狀態是否為 PENDING（等待確認）
+- 更新預約雙方狀態為 CANCELLED（已取消）
+- 不扣除學生課程堂數（因為確認時才會扣除）
+- 清除回應期限
 - 可選擇性提供拒絕原因
 
  * @summary 教師拒絕預約
  */
-  postApiReservationsIdReject<TData = null>(
+  postApiReservationsIdReject<TData = RejectReservationSuccessResponse>(
     id: number,
-    postApiReservationsIdRejectBody: PostApiReservationsIdRejectBody,
+    rejectReservationRequest?: RejectReservationRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  postApiReservationsIdReject<TData = null>(
+  postApiReservationsIdReject<TData = RejectReservationSuccessResponse>(
     id: number,
-    postApiReservationsIdRejectBody: PostApiReservationsIdRejectBody,
+    rejectReservationRequest?: RejectReservationRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  postApiReservationsIdReject<TData = null>(
+  postApiReservationsIdReject<TData = RejectReservationSuccessResponse>(
     id: number,
-    postApiReservationsIdRejectBody: PostApiReservationsIdRejectBody,
+    rejectReservationRequest?: RejectReservationRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  postApiReservationsIdReject<TData = null>(
+  postApiReservationsIdReject<TData = RejectReservationSuccessResponse>(
     id: number,
-    postApiReservationsIdRejectBody: PostApiReservationsIdRejectBody,
+    rejectReservationRequest?: RejectReservationRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.post<TData>(
       `/api/reservations/${id}/reject`,
-      postApiReservationsIdRejectBody,
+      rejectReservationRequest,
       options,
     );
   }
@@ -252,5 +258,7 @@ export type GetApiReservationsClientResult =
   NonNullable<ReservationListSuccessResponse>;
 export type DeleteApiReservationsIdClientResult =
   NonNullable<CancelReservationSuccessResponse>;
-export type PostApiReservationsIdConfirmClientResult = never;
-export type PostApiReservationsIdRejectClientResult = never;
+export type PostApiReservationsIdConfirmClientResult =
+  NonNullable<ConfirmReservationSuccessResponse>;
+export type PostApiReservationsIdRejectClientResult =
+  NonNullable<RejectReservationSuccessResponse>;

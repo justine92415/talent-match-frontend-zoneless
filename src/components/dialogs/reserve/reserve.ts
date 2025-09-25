@@ -47,6 +47,28 @@ interface Day {
       opacity: 0.5;
       border-top-color: transparent;
     }
+    .time-slot {
+      border-radius: 0.375rem;
+      padding: 0.25rem;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    .time-slot.available {
+      color: #00b300;
+      cursor: pointer;
+    }
+    .time-slot.available:hover {
+      background-color: #f36923;
+      color: white;
+    }
+    .time-slot.unavailable {
+      color: #666666;
+      cursor: not-allowed;
+    }
+    .time-slot.selected {
+      background-color: #f36923;
+      color: white;
+    }
   `
 })
 export class ReserveComponent {
@@ -107,8 +129,7 @@ export class ReserveComponent {
       .filter((slot: AvailableSlotInfo) => {
         const hour = parseInt(slot.start_time?.split(':')[0] || '0');
         return hour >= 6 && hour < 12;
-      })
-      .map((slot: AvailableSlotInfo) => slot.start_time || '');
+      });
   });
 
   afternoonTimes = computed(() => {
@@ -117,8 +138,7 @@ export class ReserveComponent {
       .filter((slot: AvailableSlotInfo) => {
         const hour = parseInt(slot.start_time?.split(':')[0] || '0');
         return hour >= 12 && hour < 18;
-      })
-      .map((slot: AvailableSlotInfo) => slot.start_time || '');
+      });
   });
 
   eveningTimes = computed(() => {
@@ -127,8 +147,7 @@ export class ReserveComponent {
       .filter((slot: AvailableSlotInfo) => {
         const hour = parseInt(slot.start_time?.split(':')[0] || '0');
         return hour >= 18;
-      })
-      .map((slot: AvailableSlotInfo) => slot.start_time || '');
+      });
   });
 
   selectedReseveTime = computed(() => {
@@ -243,8 +262,10 @@ export class ReserveComponent {
     }
   }
 
-  selectTime(time: string): void {
-    this.currentTime.set(time);
+  selectTime(slot: AvailableSlotInfo): void {
+    // 只允許點擊 available 狀態的時段
+    if (slot.status !== 'available') return;
+    this.currentTime.set(slot.start_time || null);
   }
 
   reset(): void {

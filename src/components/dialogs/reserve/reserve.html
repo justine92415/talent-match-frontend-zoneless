@@ -96,45 +96,51 @@
             </div>
           }
           <div class="flex flex-col gap-2">
-            @for (time of morningTimes(); track time) {
+            @for (slot of morningTimes(); track slot.slot_id) {
               <div
-                class="cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
+                class="time-slot"
                 [ngClass]="{
-                  'bg-primary text-white': time === currentTime()
+                  'available': slot.status === 'available' && slot.start_time !== currentTime(),
+                  'unavailable': slot.status === 'unavailable',
+                  'selected': slot.start_time === currentTime()
                 }"
-                (click)="selectTime(time)"
+                (click)="selectTime(slot)"
               >
-                {{ time }}
+                {{ slot.start_time }}
               </div>
             } @empty {
               <div class="text-grey-9f">-</div>
             }
           </div>
           <div class="flex flex-col gap-2">
-            @for (time of afternoonTimes(); track time) {
+            @for (slot of afternoonTimes(); track slot.slot_id) {
               <div
-                class="cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
+                class="time-slot"
                 [ngClass]="{
-                  'bg-primary text-white': time === currentTime()
+                  'available': slot.status === 'available' && slot.start_time !== currentTime(),
+                  'unavailable': slot.status === 'unavailable',
+                  'selected': slot.start_time === currentTime()
                 }"
-                (click)="selectTime(time)"
+                (click)="selectTime(slot)"
               >
-                {{ time }}
+                {{ slot.start_time }}
               </div>
             } @empty {
               <div class="text-grey-9f">-</div>
             }
           </div>
           <div class="flex flex-col gap-2">
-            @for (time of eveningTimes(); track time) {
+            @for (slot of eveningTimes(); track slot.slot_id) {
               <div
-                class="cursor-pointer rounded-md p-1 hover:bg-primary hover:text-white"
+                class="time-slot"
                 [ngClass]="{
-                  'bg-primary text-white': time === currentTime()
+                  'available': slot.status === 'available' && slot.start_time !== currentTime(),
+                  'unavailable': slot.status === 'unavailable',
+                  'selected': slot.start_time === currentTime()
                 }"
-                (click)="selectTime(time)"
+                (click)="selectTime(slot)"
               >
-                {{ time }}
+                {{ slot.start_time }}
               </div>
             } @empty {
               <div class="text-grey-9f">-</div>

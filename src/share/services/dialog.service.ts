@@ -3,6 +3,7 @@ import { Dialog, DialogRef } from '@angular/cdk/dialog';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ConfirmDialog, ConfirmDialogData } from '@components/dialogs/confirm-dialog/confirm-dialog';
+import { InputDialog, InputDialogData } from '@components/dialogs/input-dialog/input-dialog';
 import { ReserveComponent } from '@components/dialogs/reserve/reserve';
 import type { RemainingLessonsInfo } from '@app/api/generated/talentMatchAPI.schemas';
 
@@ -23,6 +24,18 @@ export interface ConfirmDialogConfig extends DialogConfig {
   confirmText?: string;
   cancelText?: string;
   type?: 'info' | 'warning' | 'error' | 'success';
+}
+
+// 輸入對話框配置
+export interface InputDialogConfig extends DialogConfig {
+  inputLabel?: string;
+  placeholder?: string;
+  confirmText?: string;
+  cancelText?: string;
+  type?: 'info' | 'warning' | 'error' | 'success';
+  required?: boolean;
+  defaultValue?: string;
+  validator?: (value: string) => string | null;
 }
 
 // 預約對話框配置
@@ -160,6 +173,49 @@ export class DialogService {
         observer.complete();
       });
     });
+  }
+
+  /**
+   * 開啟輸入對話框
+   */
+  openInput(config: InputDialogConfig): Observable<DialogResult<string>> {
+    // 預設配置
+    const defaultConfig: InputDialogConfig = {
+      title: '輸入',
+      confirmText: '確認',
+      cancelText: '取消',
+      type: 'info',
+      width: '480px',
+      disableClose: false,
+      hasBackdrop: true,
+    };
+
+    const finalConfig = { ...defaultConfig, ...config };
+
+    const dialogData: InputDialogData = {
+      title: finalConfig.title,
+      message: finalConfig.message,
+      inputLabel: finalConfig.inputLabel,
+      placeholder: finalConfig.placeholder,
+      confirmText: finalConfig.confirmText,
+      cancelText: finalConfig.cancelText,
+      type: finalConfig.type,
+      required: finalConfig.required,
+      defaultValue: finalConfig.defaultValue,
+      validator: finalConfig.validator
+    };
+
+    const dialogRef = this.dialog.open(InputDialog, {
+      data: dialogData,
+      width: finalConfig.width,
+      disableClose: finalConfig.disableClose,
+      hasBackdrop: finalConfig.hasBackdrop,
+      panelClass: finalConfig.panelClass
+    });
+
+    return dialogRef.closed.pipe(
+      map(result => ({ confirmed: !!result, data: result as string }))
+    );
   }
 
   /**

@@ -5,6 +5,7 @@ import { Button } from '@components/button/button';
 import { InputSelect } from '@components/form/input-select/input-select';
 import { InputText } from '@components/form/input-text/input-text';
 import { Skeleton } from '@components/skeleton/skeleton';
+import { MatIconModule } from '@angular/material/icon';
 import type { SelectOption } from '@components/form/input-select/input-select';
 import { ReservationManagementService } from '@app/api/generated/reservation-management/reservation-management.service';
 import { TeacherManagementService } from '@app/api/generated/teacher-management/teacher-management.service';
@@ -21,6 +22,7 @@ import { DialogService } from '@share/services/dialog.service';
     InputText,
     ReactiveFormsModule,
     Skeleton,
+    MatIconModule,
   ],
   templateUrl: './reservation.html',
   styles: ``,
@@ -231,17 +233,10 @@ export default class Reservation {
       .openInput({
         title: '取消預約',
         message: '請輸入取消原因，這將會通知學生並退還課程堂數',
-        inputLabel: '取消原因',
         placeholder: '請輸入取消原因...',
         required: true,
         type: 'warning',
         confirmText: '確認取消',
-        validator: (value: string) => {
-          if (value.trim().length < 5) {
-            return '取消原因至少需要5個字元';
-          }
-          return null;
-        },
       })
       .subscribe((result) => {
         if (result.confirmed) {

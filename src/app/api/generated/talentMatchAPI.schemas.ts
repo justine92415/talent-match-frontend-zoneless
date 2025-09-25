@@ -5552,6 +5552,12 @@ export interface ReservationDetail {
   /** 預約更新時間 */
   updated_at?: string;
   /**
+   * 拒絕原因（當狀態為 cancelled 時提供）
+   * @maxLength 500
+   * @nullable
+   */
+  rejection_reason?: string | null;
+  /**
    * 教師回應期限（僅限 pending 狀態）
    * @nullable
    */
@@ -5955,6 +5961,12 @@ export interface TeacherReservationItem {
   created_at?: string;
   /** 預約更新時間 */
   updated_at?: string;
+  /**
+   * 拒絕原因（當狀態為 cancelled 時提供）
+   * @maxLength 500
+   * @nullable
+   */
+  rejection_reason?: string | null;
   /**
    * 教師回應期限（僅 pending 狀態時顯示）
    * @nullable

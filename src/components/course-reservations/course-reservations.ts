@@ -4,7 +4,6 @@ import { Button } from '@components/button/button';
 import { ReservationStatusPipe } from './reservation-status.pipe';
 import { ReservationManagementService } from '@app/api/generated/reservation-management/reservation-management.service';
 import { rxResource } from '@angular/core/rxjs-interop';
-import type { GetApiReservationsRole } from '@app/api/generated/talentMatchAPI.schemas';
 import { Observable, merge, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { DialogService } from '@share/services/dialog.service';
@@ -46,8 +45,7 @@ export class CourseReservationsComponent {
         : of();
 
       return merge(initialLoad$, updateStream$).pipe(
-        switchMap(() => this.reservationService.getApiReservations({
-          role: 'student' as GetApiReservationsRole,
+        switchMap(() => this.reservationService.getApiReservationsMyReservations({
           course_id: params.courseId,
           page: params.page,
           per_page: this.perPage

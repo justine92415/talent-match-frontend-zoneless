@@ -6462,6 +6462,48 @@ export const GetApiReservationsStatus = {
   cancelled: 'cancelled',
 } as const;
 
+export type GetApiReservationsMyReservationsParams = {
+  /**
+   * 課程 ID，篩選特定課程的預約記錄
+   * @minimum 1
+   */
+  course_id?: number;
+  /**
+   * 頁數
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁筆數
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 預約狀態篩選
+   */
+  status?: GetApiReservationsMyReservationsStatus;
+  /**
+   * 查詢起始日期 (YYYY-MM-DD)
+   */
+  date_from?: string;
+  /**
+   * 查詢結束日期 (YYYY-MM-DD)
+   */
+  date_to?: string;
+};
+
+export type GetApiReservationsMyReservationsStatus =
+  (typeof GetApiReservationsMyReservationsStatus)[keyof typeof GetApiReservationsMyReservationsStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiReservationsMyReservationsStatus = {
+  pending: 'pending',
+  reserved: 'reserved',
+  completed: 'completed',
+  cancelled: 'cancelled',
+} as const;
+
 export type DeleteApiReservationsId400 =
   | ReservationValidationErrorResponse
   | ReservationBusinessErrorResponse;

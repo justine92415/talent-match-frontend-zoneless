@@ -42,6 +42,7 @@ import type {
   ConfirmReservationSuccessResponse,
   CreateReservationRequest,
   CreateReservationSuccessResponse,
+  GetApiReservationsMyReservationsParams,
   GetApiReservationsParams,
   RejectReservationRequest,
   RejectReservationSuccessResponse,
@@ -141,6 +142,41 @@ export class ReservationManagementService {
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.get<TData>(`/api/reservations`, {
+      ...options,
+      params: { ...params, ...options?.params },
+    });
+  }
+  /**
+ * 學生查詢自己的預約記錄，支援多種篩選條件。
+
+**業務邏輯**：
+- 僅限學生角色使用
+- 查詢登入學生的所有預約記錄
+- 支援依課程 ID 篩選（course_id）
+- 支援分頁查詢（page, per_page）
+- 支援狀態篩選（status）
+- 支援日期範圍篩選（date_from, date_to）
+- 回傳預約列表和分頁資訊
+
+ * @summary 學生查詢自己的預約記錄
+ */
+  getApiReservationsMyReservations<TData = ReservationListSuccessResponse>(
+    params?: DeepNonNullable<GetApiReservationsMyReservationsParams>,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  getApiReservationsMyReservations<TData = ReservationListSuccessResponse>(
+    params?: DeepNonNullable<GetApiReservationsMyReservationsParams>,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  getApiReservationsMyReservations<TData = ReservationListSuccessResponse>(
+    params?: DeepNonNullable<GetApiReservationsMyReservationsParams>,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  getApiReservationsMyReservations<TData = ReservationListSuccessResponse>(
+    params?: DeepNonNullable<GetApiReservationsMyReservationsParams>,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.get<TData>(`/api/reservations/my-reservations`, {
       ...options,
       params: { ...params, ...options?.params },
     });
@@ -255,6 +291,8 @@ export class ReservationManagementService {
 export type PostApiReservationsClientResult =
   NonNullable<CreateReservationSuccessResponse>;
 export type GetApiReservationsClientResult =
+  NonNullable<ReservationListSuccessResponse>;
+export type GetApiReservationsMyReservationsClientResult =
   NonNullable<ReservationListSuccessResponse>;
 export type DeleteApiReservationsIdClientResult =
   NonNullable<CancelReservationSuccessResponse>;

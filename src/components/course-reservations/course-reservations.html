@@ -25,15 +25,16 @@
                 <span
                   class="px-2 py-1 text-xs rounded-full"
                   [ngClass]="{
-                    'bg-green-95 text-green-55': (reservation.student_status || '') === 'reserved',
-                    'bg-blue-95 text-blue-50': (reservation.student_status || '') === 'completed',
-                    'bg-grey-f4 text-grey-66': (reservation.student_status || '') === 'cancelled' || !(reservation.student_status || '')
+                    'bg-green-95 text-green-55': reservation.teacher_status === 'reserved' && reservation.student_status === 'reserved',
+                    'bg-orange-95 text-orange-55': reservation.teacher_status === 'pending' && reservation.student_status === 'reserved',
+                    'bg-blue-95 text-blue-50': reservation.teacher_status === 'completed' && reservation.student_status === 'completed',
+                    'bg-grey-f4 text-grey-66': reservation.teacher_status === 'cancelled' || reservation.student_status === 'cancelled'
                   }">
-                  {{ (reservation.student_status || '') | reservationStatus }}
+                  {{ reservation.teacher_status | reservationStatus: reservation.student_status }}
                 </span>
               </div>
             </div>
-            @if (reservation.student_status === 'reserved') {
+            @if (reservation.student_status === 'reserved' && (reservation.teacher_status === 'reserved' || reservation.teacher_status === 'pending')) {
               <tmf-button
                 variant="tertiary"
                 size="sm"

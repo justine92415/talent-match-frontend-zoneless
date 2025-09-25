@@ -6313,6 +6313,11 @@ export type DeleteApiReservationsId400 =
   | ReservationValidationErrorResponse
   | ReservationBusinessErrorResponse;
 
+export type PostApiReservationsIdRejectBody = {
+  /** 拒絕原因（可選） */
+  reason?: string;
+};
+
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**
    * 統計資料時間範圍

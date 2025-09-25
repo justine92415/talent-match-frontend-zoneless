@@ -283,8 +283,8 @@ export class ReserveComponent {
 
           const reserve_datetime = `${this.getFormattedDate(currentDate)} ${currentTime}`;
           this.dialogService.openAlert({
-            title: '預約完成',
-            message: `預約成功，請於 ${reserve_datetime} 準時上課。`,
+            title: '預約提交成功',
+            message: `預約已提交 (${reserve_datetime})，請等待教師確認。`,
             type: 'success'
           }).subscribe();
         },

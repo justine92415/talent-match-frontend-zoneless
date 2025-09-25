@@ -1,4 +1,4 @@
-<div class="bg-white min-h-screen">
+<div class="bg-white">
   <div class="container mx-auto px-4 py-8">
     <!-- 頁面標題 -->
     <div class="mb-8">
@@ -118,8 +118,10 @@
 
         <!-- 空狀態 -->
         @if (purchases.length === 0) {
-          <div class="text-center py-12">
+          <div class="flex flex-col  items-center text-center py-12">
+            <img src="/assets/images/search_none.png" alt="暫無預約記錄" class="w-48 h-48 mx-auto opacity-60">
             <div class="text-grey-66 text-lg mb-4">尚未購買任何課程</div>
+            
             <tmf-button
               class="h-12 w-40"
               variant="primary">
@@ -127,18 +129,6 @@
             </tmf-button>
           </div>
         }
-      </div>
-    }
-
-    <!-- 資料為空時的狀態 -->
-    @if (purchasesResource.value()?.data?.purchases?.length === 0) {
-      <div class="text-center py-12">
-        <div class="text-grey-66 text-lg mb-4">尚未購買任何課程</div>
-        <tmf-button
-          class="h-12 w-40"
-          variant="primary">
-          探索課程
-        </tmf-button>
       </div>
     }
   </div>

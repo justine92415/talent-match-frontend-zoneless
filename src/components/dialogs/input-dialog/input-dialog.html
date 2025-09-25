@@ -50,13 +50,6 @@
       formControlName="inputValue"
       [placeholder]="data.placeholder || ''">
     </tmf-input-text>
-
-    <!-- 錯誤訊息 -->
-    @if (errorMessage()) {
-      <div class="text-sm text-red-50 mt-1">
-        {{ errorMessage() }}
-      </div>
-    }
   </form>
 
   <!-- 底部按鈕區 -->
@@ -68,7 +61,7 @@
     <tmf-button
       class="h-10"
       variant="primary"
-      [disabled]="!isValid()"
+      [disabled]="form.invalid"
       (click)="onConfirm()">
       {{ data.confirmText || "確認" }}
     </tmf-button>

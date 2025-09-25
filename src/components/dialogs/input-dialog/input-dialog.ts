@@ -27,7 +27,7 @@ export interface InputDialogData {
     :host {
       display: block;
     }
-  `
+  `,
 })
 export class InputDialog {
   private dialogRef = inject(DialogRef);
@@ -36,49 +36,13 @@ export class InputDialog {
 
   // 表單組
   form: FormGroup = this.fb.group({
-    inputValue: [this.data?.defaultValue || '']
-  });
-
-  // 錯誤訊息計算信號
-  errorMessage = computed(() => {
-    const value = this.form.get('inputValue')?.value?.trim() || '';
-
-    // 必填驗證
-    if (this.data?.required && !value) {
-      return '此欄位為必填';
-    }
-
-    // 自定義驗證器
-    if (this.data?.validator && value) {
-      return this.data.validator(value);
-    }
-
-    return '';
-  });
-
-  // 驗證是否有效
-  isValid = computed(() => {
-    const value = this.form.get('inputValue')?.value?.trim() || '';
-
-    // 必填檢查
-    if (this.data?.required && !value) {
-      return false;
-    }
-
-    // 自定義驗證器檢查
-    if (this.data?.validator && value) {
-      return !this.data.validator(value);
-    }
-
-    return true;
+    inputValue: [this.data?.defaultValue || ''],
   });
 
   // 確認按鈕
   onConfirm(): void {
-    if (this.isValid()) {
-      const value = this.form.get('inputValue')?.value?.trim() || '';
-      this.dialogRef.close(value);
-    }
+    const value = this.form.get('inputValue')?.value?.trim() || '';
+    this.dialogRef.close(value);
   }
 
   // 取消按鈕

@@ -5778,6 +5778,17 @@ export interface CancelReservationSuccessResponse {
   data?: CancelReservationSuccessResponseData;
 }
 
+/**
+ * 取消預約請求。教師取消預約時必須提供原因，學生取消時原因為可選。
+ */
+export interface CancelReservationRequest {
+  /**
+   * 取消預約的原因（教師取消時為必填，學生取消時可選，最多500字元）
+   * @maxLength 500
+   */
+  reason?: string;
+}
+
 export interface RejectReservationRequest {
   /**
    * 拒絕預約的原因 (可選，最多500字元)

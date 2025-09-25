@@ -237,11 +237,19 @@ export default class Reservation {
         required: true,
         type: 'warning',
         confirmText: '確認取消',
+        validator: (value: string) => {
+          if (value.trim().length < 5) {
+            return '取消原因至少需要5個字元';
+          }
+          return null;
+        },
       })
       .subscribe((result) => {
         if (result.confirmed) {
           this.reservationService
-            .deleteApiReservationsId(reservationId)
+            .deleteApiReservationsId(reservationId, {
+              reason: result.data || '教師取消預約',
+            })
             .subscribe({
               next: () => {
                 this.reservationsResource.reload();

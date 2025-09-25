@@ -38,6 +38,7 @@ type _DeepNonNullableObject<T> = {
 import { Observable } from 'rxjs';
 
 import type {
+  CancelReservationRequest,
   CancelReservationSuccessResponse,
   ConfirmReservationSuccessResponse,
   CreateReservationRequest,
@@ -233,9 +234,12 @@ export class ReservationManagementService {
 
 **業務邏輯**：
 - 驗證使用者身份認證和權限
-- 檢查預約是否存在且屬於該使用者
+- 檢查預約是否存在且屬於該使用者（學生或教師）
+- **教師取消預約時必須提供原因**
+- **學生取消預約時原因為可選**
 - 驗證取消條件（時間限制等）
 - 將教師和學生狀態都更新為 "cancelled"
+- 只有教師取消時才儲存拒絕原因
 - 退還一堂課程堂數給學生
 - 回傳取消後的預約資訊和退還堂數
 
@@ -243,21 +247,28 @@ export class ReservationManagementService {
  */
   deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
     id: number,
+    cancelReservationRequest?: CancelReservationRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
   deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
     id: number,
+    cancelReservationRequest?: CancelReservationRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
   deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
     id: number,
+    cancelReservationRequest?: CancelReservationRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
   deleteApiReservationsId<TData = CancelReservationSuccessResponse>(
     id: number,
+    cancelReservationRequest?: CancelReservationRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.delete<TData>(`/api/reservations/${id}`, options);
+    return this.http.delete<TData>(`/api/reservations/${id}`, {
+      body: cancelReservationRequest,
+      ...options,
+    });
   }
   /**
  * 教師確認學生的預約請求，將預約狀態從等待確認改為已確認。

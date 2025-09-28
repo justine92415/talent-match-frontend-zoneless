@@ -1,8 +1,10 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
+import { Dialog } from '@angular/cdk/dialog';
 import { SectionTitle } from '@components/section-title/section-title';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
+import { VideoViewerDialogComponent, VideoViewerDialogData } from '@components/dialogs/video-viewer/video-viewer-dialog';
 import { CourseCard, CourseCardData } from '@components/course-card/course-card';
 import { ReviewCard, ReviewData } from '@components/review-card/review-card';
 import { SwiperWapper, SwiperConfig } from '@components/swiper-wapper/swiper-wapper';
@@ -20,6 +22,7 @@ import { JsonPipe } from '@angular/common';
 })
 export default class Home {
   fb = inject(FormBuilder);
+  dialog = inject(Dialog);
 
   // Form for global search testing
   searchForm = this.fb.group({
@@ -85,38 +88,53 @@ export default class Home {
 
   videos: VideoCardData[] = [
     {
+      id: 'video-1',
       imageSrc: '/assets/images/reel_cooking_1.jpg',
       imageAlt: '烹飪教學影片',
       tag: '烹飪料理',
       description: '只要五分鐘，讓您彷彿擁有專業主廚的刀工！',
+      videoSrc: '/assets/videos/cooking-1.mp4', // 假設的影片路徑
+      duration: 45,
       isPlaying: true
     },
     {
+      id: 'video-2',
       imageSrc: '/assets/images/reel_art_1.jpg',
       imageAlt: '藝術創作影片',
       tag: '藝術創作',
       description: '放鬆身體，一切感官交給畫筆，帶領我們走向心海',
+      videoSrc: '/assets/videos/art-1.mp4',
+      duration: 62,
       isPlaying: false
     },
     {
+      id: 'video-3',
       imageSrc: '/assets/images/reel_cooking_2.jpg',
       imageAlt: '甜點教學影片',
       tag: '烹飪料理',
       description: '只要學會杯子蛋糕，任何甜點都難不了你，還在等什麼呢？',
+      videoSrc: '/assets/videos/cooking-2.mp4',
+      duration: 38,
       isPlaying: false
     },
     {
+      id: 'video-4',
       imageSrc: '/assets/images/reel_finance.jpg',
       imageAlt: '理財投資影片',
       tag: '理財投資',
       description: '存股加碼 009*0，月領 3 萬不是夢，讓大師來解密如何做好資產配置',
+      videoSrc: '/assets/videos/finance-1.mp4',
+      duration: 78,
       isPlaying: false
     },
     {
+      id: 'video-5',
       imageSrc: '/assets/images/reel_cooking_3.jpg',
       imageAlt: '泡麵教學影片',
       tag: '烹飪料理',
       description: '好驚人～～～教你如何煮出Q彈好吃的泡麵！',
+      videoSrc: '/assets/videos/cooking-3.mp4',
+      duration: 33,
       isPlaying: false
     }
   ];
@@ -290,5 +308,24 @@ export default class Home {
   onGlobalSearch(searchValue: GlobalSearchValue) {
     console.log('Global search submitted:', searchValue);
     // Handle search logic here
+  }
+
+  onVideoClick(video: VideoCardData) {
+    const videoIndex = this.videos.findIndex(v => v.id === video.id);
+    if (videoIndex >= 0) {
+      const dialogData: VideoViewerDialogData = {
+        videos: this.videos,
+        initialIndex: videoIndex
+      };
+
+      this.dialog.open(VideoViewerDialogComponent, {
+        data: dialogData,
+        panelClass: 'video-viewer-dialog-panel',
+        hasBackdrop: true,
+        disableClose: false,
+        autoFocus: false,
+        restoreFocus: false
+      });
+    }
   }
 }

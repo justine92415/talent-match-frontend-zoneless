@@ -126,9 +126,15 @@ export class DashboardSidebar implements OnInit {
           route: '/dashboard/teacher/videos'
         },
         {
+          id: 'schedule',
+          label: '時段管理',
+          icon: 'schedule',
+          route: '/dashboard/teacher/schedule'
+        },
+        {
           id: 'reservation',
           label: '預約管理',
-          icon: 'edit_calendar',
+          icon: 'event_note',
           route: '/dashboard/teacher/reservation'
         },
         {

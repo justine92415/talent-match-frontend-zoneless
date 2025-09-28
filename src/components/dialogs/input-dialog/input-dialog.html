@@ -1,0 +1,69 @@
+<div class="bg-white rounded-xl px-10 py-8 flex flex-col gap-6">
+  <!-- 標題區 -->
+  @if (data.title) {
+    <div class="flex justify-center items-center gap-2">
+      @if (data.type) {
+        @switch (data.type) {
+          @case ("warning") {
+            <mat-icon class="filled !w-5 !h-5 !text-xl !leading-5 !text-primary"
+              >warning</mat-icon
+            >
+          }
+          @case ("error") {
+            <mat-icon class="filled !w-5 !h-5 !text-xl !leading-5 !text-primary"
+              >error</mat-icon
+            >
+          }
+          @case ("success") {
+            <mat-icon class="filled !w-5 !h-5 !text-xl !leading-5 !text-primary"
+              >check_circle</mat-icon
+            >
+          }
+          @default {
+            <mat-icon class="filled !w-5 !h-5 !text-xl !leading-5 !text-primary"
+              >info</mat-icon
+            >
+          }
+        }
+      }
+      <h2 class="text-lg text-grey-33">{{ data.title }}</h2>
+    </div>
+  }
+
+  <!-- 內容區 -->
+  @if (data.message) {
+    <p class="text-sm text-grey-33 text-center">{{ data.message }}</p>
+  }
+
+  <!-- 輸入區域 -->
+  <form [formGroup]="form">
+    @if (data.inputLabel) {
+      <label class="block text-sm font-medium text-grey-33 mb-2">
+        {{ data.inputLabel }}
+        @if (data.required) {
+          <span class="text-red-50">*</span>
+        }
+      </label>
+    }
+
+    <tmf-input-text
+      formControlName="inputValue"
+      [placeholder]="data.placeholder || ''">
+    </tmf-input-text>
+  </form>
+
+  <!-- 底部按鈕區 -->
+  <div class="flex gap-3 justify-center">
+    <tmf-button class="h-10" variant="secondary" (click)="onCancel()">
+      {{ data.cancelText || "取消" }}
+    </tmf-button>
+
+    <tmf-button
+      class="h-10"
+      variant="primary"
+      [disabled]="form.invalid"
+      (click)="onConfirm()">
+      {{ data.confirmText || "確認" }}
+    </tmf-button>
+  </div>
+</div>

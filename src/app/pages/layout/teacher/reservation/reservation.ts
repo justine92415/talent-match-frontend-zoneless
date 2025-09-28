@@ -1,233 +1,330 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
-import { MatIcon } from '@angular/material/icon';
-import { EditableWeeklyCalendar } from '@components/editable-weekly-calendar/editable-weekly-calendar';
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Button } from '@components/button/button';
-import { TeachersService } from '@app/api/generated/teachers/teachers.service';
-import { WeeklyScheduleRequest } from '@app/api/generated/talentMatchAPI.schemas';
-import { firstValueFrom } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
-
-interface ScheduleData {
-  week_day: number;
-  available_times: string[];
-}
+import { InputSelect } from '@components/form/input-select/input-select';
+import { InputText } from '@components/form/input-text/input-text';
+import { Skeleton } from '@components/skeleton/skeleton';
+import { MatIconModule } from '@angular/material/icon';
+import type { SelectOption } from '@components/form/input-select/input-select';
+import { ReservationManagementService } from '@app/api/generated/reservation-management/reservation-management.service';
+import { TeacherManagementService } from '@app/api/generated/teacher-management/teacher-management.service';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
+import { DialogService } from '@share/services/dialog.service';
 
 @Component({
   selector: 'tmf-reservation',
-  imports: [EditableWeeklyCalendar, Button, MatIcon],
+  imports: [
+    CommonModule,
+    Button,
+    InputSelect,
+    InputText,
+    ReactiveFormsModule,
+    Skeleton,
+    MatIconModule,
+  ],
   templateUrl: './reservation.html',
-  styles: ``
+  styles: ``,
 })
-export default class Reservation implements OnInit {
-  private teachersService = inject(TeachersService);
+export default class Reservation {
+  private fb = new FormBuilder();
+  private reservationService = inject(ReservationManagementService);
+  private teacherService = inject(TeacherManagementService);
+  private dialogService = inject(DialogService);
 
-  // 當前的排程資料
-  scheduleData = signal<ScheduleData[]>([]);
+  // 分頁狀態
+  currentPage = signal(1);
+  perPage = 10;
 
-  // 備份的原始排程資料（用於取消編輯時還原）
-  originalScheduleData = signal<ScheduleData[]>([]);
+  // 搜尋觸發信號
+  searchTrigger = signal(0);
 
-  // 載入狀態
-  isLoading = signal(false);
-  loadError = signal<string | null>(null);
+  // 篩選表單
+  filterForm: FormGroup = this.fb.group({
+    course: ['all'],
+    timeRange: ['all'],
+    status: ['all'],
+    student: [''],
+  });
 
-  // 編輯狀態
-  isEditing = signal(false);
+  // 教師課程列表資源
+  teacherCoursesResource = rxResource({
+    stream: () =>
+      this.teacherService
+        .getApiTeachersMyCourses()
+        .pipe(map((response) => response.data || [])),
+  });
 
-  // 儲存狀態
-  isSaving = signal(false);
-  saveSuccess = signal(false);
-
-  async ngOnInit() {
-    await this.loadScheduleData();
+  // 課程選項 (動態生成)
+  get courseOptions(): SelectOption[] {
+    const courses = this.teacherCoursesResource.value() || [];
+    return [
+      { value: 'all', label: '全部課程' },
+      ...courses.map((course: any) => ({
+        value: course.value?.toString() || '',
+        label: course.label || '',
+      })),
+    ];
   }
 
-  // 載入排程資料
-  async loadScheduleData() {
-    this.isLoading.set(true);
-    this.loadError.set(null);
+  // 時間範圍選項
+  timeRangeOptions: SelectOption[] = [
+    { value: 'all', label: '全部時間' },
+    { value: 'today', label: '當日' },
+    { value: 'week', label: '近一週' },
+    { value: 'month', label: '近一個月' },
+  ];
 
-    try {
-      const response = await firstValueFrom(this.teachersService.getApiTeachersSchedule());
-      const scheduleData = this.transformApiResponseToScheduleData(response);
-      this.scheduleData.set(scheduleData);
-      // 同時更新備份資料
-      this.originalScheduleData.set([...scheduleData]);
-    } catch (error) {
-      console.error('載入排程資料失敗:', error);
+  // 預約狀態選項
+  statusOptions: SelectOption[] = [
+    { value: 'all', label: '全部狀態' },
+    { value: 'pending', label: '待確認' },
+    { value: 'reserved', label: '已預約' },
+    { value: 'completed', label: '已完成' },
+    { value: 'cancelled', label: '已取消' },
+  ];
 
-      let errorMessage = '載入排程資料失敗';
-      if (error instanceof HttpErrorResponse) {
-        switch (error.status) {
-          case 401:
-            errorMessage = '登入已過期，請重新登入';
-            break;
-          case 403:
-            errorMessage = '沒有權限查看排程';
-            break;
-          case 500:
-            errorMessage = '伺服器錯誤，請稍後再試';
-            break;
-          default:
-            errorMessage = `載入失敗：${error.message}`;
-        }
+  // 預約記錄資源
+  reservationsResource = rxResource({
+    params: () => ({
+      courseId: this.filterForm.get('course')?.value || 'all',
+      timeRange: this.filterForm.get('timeRange')?.value || 'all',
+      status: this.filterForm.get('status')?.value || 'all',
+      student: this.filterForm.get('student')?.value || '',
+      page: this.currentPage(),
+      trigger: this.searchTrigger(), // 添加觸發信號
+    }),
+    stream: ({ params }) => {
+      const apiParams: any = {
+        time_range: params.timeRange,
+        status: params.status,
+        page: params.page,
+        per_page: this.perPage,
+      };
+
+      // 只有當不是 'all' 時才添加 course_id
+      if (params.courseId !== 'all') {
+        apiParams.course_id = parseInt(params.courseId);
       }
 
-      this.loadError.set(errorMessage);
-    } finally {
-      this.isLoading.set(false);
+      // 只有當有搜尋內容時才添加 student_search
+      if (params.student && params.student.trim() !== '') {
+        apiParams.student_search = params.student.trim();
+      }
+
+      return this.reservationService.getApiReservationsCourseReservations(
+        apiParams,
+      );
+    },
+  });
+
+  // 搜尋篩選
+  onSearchFilter() {
+    this.currentPage.set(1);
+    this.searchTrigger.set(this.searchTrigger() + 1); // 觸發重新載入
+  }
+
+  // 重置篩選
+  onResetFilter() {
+    this.filterForm.reset({
+      course: 'all',
+      timeRange: 'all',
+      status: 'all',
+      student: '',
+    });
+    this.currentPage.set(1);
+    this.searchTrigger.set(this.searchTrigger() + 1); // 觸發重新載入
+  }
+
+  // 分頁切換
+  onPageChange(page: number) {
+    const totalPages =
+      this.reservationsResource.value()?.data?.pagination?.total_pages || 1;
+    if (page >= 1 && page <= totalPages) {
+      this.currentPage.set(page);
     }
   }
 
-  // 進入編輯模式
-  enterEditMode() {
-    // 備份當前資料
-    this.originalScheduleData.set([...this.scheduleData()]);
-    this.isEditing.set(true);
-    this.saveSuccess.set(false); // 重置儲存狀態
-  }
-
-  // 退出編輯模式
-  exitEditMode() {
-    this.isEditing.set(false);
-    // 還原備份的資料，放棄未儲存的變更
-    this.scheduleData.set([...this.originalScheduleData()]);
-  }
-
-  // 處理排程變更
-  onScheduleChange(newSchedule: ScheduleData[]) {
-    console.log('排程已變更:', newSchedule);
-    this.scheduleData.set(newSchedule);
-    this.saveSuccess.set(false); // 重置儲存狀態
-  }
-
-  // 轉換排程資料格式為API格式
-  private transformScheduleToApiFormat(scheduleData: ScheduleData[]): WeeklyScheduleRequest {
-    const weeklySchedule: { [key: string]: string[] } = {};
-
-    scheduleData.forEach(schedule => {
-      const dayKey = schedule.week_day.toString();
-      weeklySchedule[dayKey] = schedule.available_times;
-    });
-
-    return {
-      weekly_schedule: weeklySchedule
-    };
-  }
-
-  // 轉換API回應為本地格式
-  private transformApiResponseToScheduleData(apiResponse: any): ScheduleData[] {
-    const scheduleData: ScheduleData[] = [];
-
-    // 新的API回應格式有一個包裝結構，實際資料在 data.weekly_schedule 中
-    const weeklySchedule = apiResponse?.data?.weekly_schedule || apiResponse?.weekly_schedule;
-
-    if (weeklySchedule) {
-      Object.entries(weeklySchedule).forEach(([dayKey, times]) => {
-        const week_day = parseInt(dayKey);
-        if (Array.isArray(times) && times.length > 0) {
-          scheduleData.push({
-            week_day,
-            available_times: times as string[]
-          });
+  // 確認預約
+  onConfirmReservation(reservationId: number) {
+    this.dialogService
+      .openConfirm({
+        title: '確認預約',
+        message: '確定要確認這個預約嗎？',
+        type: 'warning',
+      })
+      .subscribe((result) => {
+        if (result.confirmed) {
+          this.reservationService
+            .postApiReservationsIdConfirm(reservationId)
+            .subscribe({
+              next: () => {
+                this.reservationsResource.reload();
+                this.dialogService
+                  .openAlert({
+                    title: '成功',
+                    message: '預約已確認',
+                    type: 'success',
+                  })
+                  .subscribe();
+              },
+              error: (error) => {
+                console.error('確認預約失敗:', error);
+                this.dialogService
+                  .openAlert({
+                    title: '錯誤',
+                    message: '確認預約失敗，請稍後再試',
+                    type: 'error',
+                  })
+                  .subscribe();
+              },
+            });
         }
       });
-    }
-
-    return scheduleData;
   }
 
-  // 儲存排程
-  async saveSchedule() {
-    this.isSaving.set(true);
-    this.saveSuccess.set(false);
-
-    try {
-      // 轉換資料格式
-      const requestData = this.transformScheduleToApiFormat(this.scheduleData());
-
-      console.log('準備發送給後端的資料:', requestData);
-
-      // 呼叫真實API
-      await firstValueFrom(this.teachersService.putApiTeachersSchedule(requestData));
-
-      // 儲存成功後更新備份資料
-      this.originalScheduleData.set([...this.scheduleData()]);
-      this.saveSuccess.set(true);
-      this.isEditing.set(false); // 儲存成功後退出編輯模式
-      setTimeout(() => this.saveSuccess.set(false), 3000); // 3秒後隱藏成功訊息
-
-    } catch (error) {
-      console.error('儲存失敗:', error);
-
-      let errorMessage = '儲存失敗，請稍後再試';
-
-      if (error instanceof HttpErrorResponse) {
-        switch (error.status) {
-          case 400:
-            errorMessage = '排程資料格式錯誤，請檢查時間設定';
-            break;
-          case 401:
-            errorMessage = '登入已過期，請重新登入';
-            break;
-          case 403:
-            errorMessage = '沒有權限修改排程';
-            break;
-          case 500:
-            errorMessage = '伺服器錯誤，請稍後再試';
-            break;
-          default:
-            errorMessage = `儲存失敗：${error.message}`;
+  // 拒絕預約
+  onRejectReservation(reservationId: number) {
+    this.dialogService
+      .openInput({
+        title: '拒絕預約',
+        message: '請輸入拒絕原因，這將會通知學生',
+        placeholder: '請輸入拒絕原因...',
+        required: true,
+        type: 'warning',
+        confirmText: '確認拒絕',
+      })
+      .subscribe((result) => {
+        if (result.confirmed) {
+          this.reservationService
+            .postApiReservationsIdReject(reservationId, {
+              reason: result.data || '教師拒絕預約',
+            })
+            .subscribe({
+              next: () => {
+                this.reservationsResource.reload();
+                this.dialogService
+                  .openAlert({
+                    title: '成功',
+                    message: '預約已拒絕，學生將收到通知',
+                    type: 'success',
+                  })
+                  .subscribe();
+              },
+              error: (error) => {
+                console.error('拒絕預約失敗:', error);
+                this.dialogService
+                  .openAlert({
+                    title: '錯誤',
+                    message: '拒絕預約失敗，請稍後再試',
+                    type: 'error',
+                  })
+                  .subscribe();
+              },
+            });
         }
-      }
-
-      alert(errorMessage);
-    } finally {
-      this.isSaving.set(false);
-    }
+      });
   }
 
+  // 取消預約
+  onCancelReservation(reservationId: number) {
+    this.dialogService
+      .openInput({
+        title: '取消預約',
+        message: '請輸入取消原因，這將會通知學生並退還課程堂數',
+        placeholder: '請輸入取消原因...',
+        required: true,
+        type: 'warning',
+        confirmText: '確認取消',
+        validator: (value: string) => {
+          if (value.trim().length < 5) {
+            return '取消原因至少需要5個字元';
+          }
+          return null;
+        },
+      })
+      .subscribe((result) => {
+        if (result.confirmed) {
+          this.reservationService
+            .deleteApiReservationsId(reservationId, {
+              reason: result.data || '教師取消預約',
+            })
+            .subscribe({
+              next: () => {
+                this.reservationsResource.reload();
+                this.dialogService
+                  .openAlert({
+                    title: '成功',
+                    message: '預約已取消，學生將收到通知並退還課程堂數',
+                    type: 'success',
+                  })
+                  .subscribe();
+              },
+              error: (error) => {
+                console.error('取消預約失敗:', error);
 
-  // 重置為預設排程
-  resetToDefault() {
-    if (confirm('確定要重置為預設排程嗎？')) {
-      this.scheduleData.set([
-        {
-          week_day: 1,
-          available_times: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-        },
-        {
-          week_day: 2,
-          available_times: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-        },
-        {
-          week_day: 3,
-          available_times: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-        },
-        {
-          week_day: 4,
-          available_times: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-        },
-        {
-          week_day: 5,
-          available_times: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-        },
-        {
-          week_day: 6,
-          available_times: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-        },
-        {
-          week_day: 7,
-          available_times: ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
+                // 處理特定錯誤碼
+                if (error?.error?.code === 'RESERVATION_CANCEL_TIME_LIMIT') {
+                  this.dialogService
+                    .openAlert({
+                      title: '無法取消預約',
+                      message: '預約時間太近，無法取消。請於預約24小時前取消。',
+                      type: 'error',
+                    })
+                    .subscribe();
+                } else {
+                  this.dialogService
+                    .openAlert({
+                      title: '錯誤',
+                      message: '取消預約失敗，請稍後再試',
+                      type: 'error',
+                    })
+                    .subscribe();
+                }
+              },
+            });
         }
-      ]);
-    }
+      });
   }
 
-  // 清空所有排程
-  clearAllSchedule() {
-    if (confirm('確定要清空所有排程嗎？')) {
-      this.scheduleData.set([]);
+  // 獲取狀態顯示文字
+  getStatusText(
+    teacherStatus: string | undefined,
+    studentStatus: string | undefined,
+  ): string {
+    if (teacherStatus === 'pending' && studentStatus === 'reserved') {
+      return '待確認';
     }
+    if (teacherStatus === 'reserved' && studentStatus === 'reserved') {
+      return '已確認';
+    }
+    if (teacherStatus === 'completed' && studentStatus === 'completed') {
+      return '已完成';
+    }
+    if (teacherStatus === 'cancelled' || studentStatus === 'cancelled') {
+      return '已取消';
+    }
+    return '未知';
+  }
+
+  // 獲取狀態樣式
+  getStatusClass(
+    teacherStatus: string | undefined,
+    studentStatus: string | undefined,
+  ): string {
+    if (teacherStatus === 'pending' && studentStatus === 'reserved') {
+      return 'bg-orange-95 text-orange-55';
+    }
+    if (teacherStatus === 'reserved' && studentStatus === 'reserved') {
+      return 'bg-green-95 text-green-55';
+    }
+    if (teacherStatus === 'completed' && studentStatus === 'completed') {
+      return 'bg-blue-95 text-blue-50';
+    }
+    if (teacherStatus === 'cancelled' || studentStatus === 'cancelled') {
+      return 'bg-grey-f4 text-grey-66';
+    }
+    return 'bg-grey-f4 text-grey-66';
   }
 }

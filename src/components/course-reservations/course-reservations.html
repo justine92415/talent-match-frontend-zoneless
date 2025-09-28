@@ -1,0 +1,90 @@
+@if (reservationsResource.isLoading()) {
+  <div class="flex items-center justify-center p-4">
+    <div class="text-grey-66">載入中...</div>
+  </div>
+} @else if (reservationsResource.error()) {
+  <div class="flex items-center justify-center p-4">
+    <div class="text-center">
+      <div class="text-red-600 mb-2">載入失敗</div>
+      <button
+        class="text-primary hover:underline"
+        (click)="reservationsResource.reload()">
+        重新載入
+      </button>
+    </div>
+  </div>
+} @else {
+  @if (reservationsResource.value()?.data?.reservations && reservationsResource.value()!.data!.reservations!.length > 0) {
+    <div class="space-y-3">
+      @for (reservation of reservationsResource.value()?.data?.reservations; track reservation.id) {
+        <div class="rounded-lg border border-grey-e5 bg-white p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-3">
+                <span class="font-medium">{{ reservation.reserve_time | date:'yyyy-MM-dd HH:mm':'UTC' }}</span>
+                <span
+                  class="px-2 py-1 text-xs rounded-full"
+                  [ngClass]="{
+                    'bg-green-95 text-green-55': reservation.teacher_status === 'reserved' && reservation.student_status === 'reserved',
+                    'bg-orange-95 text-orange-55': reservation.teacher_status === 'pending' && reservation.student_status === 'reserved',
+                    'bg-blue-95 text-blue-50': reservation.teacher_status === 'completed' && reservation.student_status === 'completed',
+                    'bg-grey-f4 text-grey-66': reservation.teacher_status === 'cancelled' || reservation.student_status === 'cancelled'
+                  }">
+                  {{ reservation.teacher_status | reservationStatus: reservation.student_status }}
+                </span>
+              </div>
+
+              <!-- 拒絕原因 (如果存在) -->
+              @if (reservation.rejection_reason) {
+                <div class="mt-2 text-xs text-red-500">
+                  {{ reservation.rejection_reason }}
+                </div>
+              }
+            </div>
+            @if (reservation.student_status === 'reserved' && (reservation.teacher_status === 'reserved' || reservation.teacher_status === 'pending')) {
+              <tmf-button
+                variant="tertiary"
+                size="sm"
+                (click)="onCancelReservation(reservation.id!)">
+                取消預約
+              </tmf-button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- 分頁控制 -->
+    @if (reservationsResource.value()?.data?.pagination && reservationsResource.value()!.data!.pagination!.total_pages! > 1) {
+      <div class="flex justify-center items-center gap-2 mt-4 pt-4 border-t border-grey-e5">
+        <!-- 上一頁 -->
+        <tmf-button
+          variant="tertiary"
+          size="sm"
+          [disabled]="currentPage() <= 1"
+          (click)="onPageChange(currentPage() - 1)">
+          上一頁
+        </tmf-button>
+
+        <!-- 頁碼顯示 -->
+        <span class="text-sm text-grey-66 mx-2">
+          第 {{ currentPage() }} 頁 / 共 {{ reservationsResource.value()?.data?.pagination?.total_pages }} 頁
+        </span>
+
+        <!-- 下一頁 -->
+        <tmf-button
+          variant="tertiary"
+          size="sm"
+          [disabled]="currentPage() >= (reservationsResource.value()?.data?.pagination?.total_pages || 1)"
+          (click)="onPageChange(currentPage() + 1)">
+          下一頁
+        </tmf-button>
+      </div>
+    }
+  } @else {
+    <div class="text-center p-8 text-grey-66">
+      <div class="mb-2">📅</div>
+      <div>尚無預約記錄</div>
+    </div>
+  }
+}

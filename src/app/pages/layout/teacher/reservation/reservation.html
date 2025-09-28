@@ -1,79 +1,207 @@
-<div class="container mx-auto px-4 py-6">
-  <!-- 頁面標題 -->
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-grey-33 mb-2">課程預約時段管理</h1>
-    <p class="text-grey-66">設定您每週的可預約時段，學生將可以在這些時段預約課程</p>
-  </div>
-
-  <!-- 載入錯誤訊息 -->
-  @if (loadError()) {
-    <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center">
-          <mat-icon class="text-red-500 mr-2">error</mat-icon>
-          <p class="text-red-800 font-medium">{{ loadError() }}</p>
+<div class="bg-white">
+  <div class="container mx-auto px-4 py-8">
+    <!-- 頁面標題 -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h1 class="text-3xl font-bold text-grey-33 mb-2">學生預約管理</h1>
+          <p class="text-grey-66">查看和管理學生的課程預約記錄</p>
         </div>
-        <tmf-button
-          variant="secondary"
-          size="sm"
-          (click)="loadScheduleData()">
-          重新載入
-        </tmf-button>
       </div>
     </div>
-  }
 
-  <!-- 操作按鈕區 -->
-  <div class="mb-6 flex flex-wrap gap-3">
-    @if (!isEditing()) {
-      <!-- 檢視模式按鈕 -->
-      <tmf-button
-        variant="primary"
-        class="h-10"
-        [disabled]="isLoading()"
-        (click)="enterEditMode()">
-        編輯排程
-      </tmf-button>
-    } @else {
-      <!-- 編輯模式按鈕 -->
-      <tmf-button
-        variant="primary"
-        class="h-10"
-        [disabled]="isSaving() || isLoading()"
-        (click)="saveSchedule()">
-        @if (isSaving()) {
-          儲存中...
-        } @else {
-          儲存排程
+    <!-- 篩選工具列 -->
+    <div class="bg-white rounded-lg border border-grey-d4 p-6 mb-6">
+      <form [formGroup]="filterForm">
+      <div class="flex flex-wrap gap-4 items-center">
+        <!-- 課程篩選 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">課程篩選</label>
+          <tmf-input-select
+            formControlName="course"
+            placeholder="全部課程"
+            [options]="courseOptions">
+          </tmf-input-select>
+        </div>
+
+        <!-- 時間範圍 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">時間範圍</label>
+          <tmf-input-select
+            formControlName="timeRange"
+            placeholder="全部時間"
+            [options]="timeRangeOptions">
+          </tmf-input-select>
+        </div>
+
+        <!-- 預約狀態 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">預約狀態</label>
+          <tmf-input-select
+            formControlName="status"
+            placeholder="全部狀態"
+            [options]="statusOptions">
+          </tmf-input-select>
+        </div>
+
+        <!-- 學生搜尋 -->
+        <div class="min-w-48">
+          <label class="block text-sm font-medium text-grey-33 mb-2">學生搜尋</label>
+          <tmf-input-text
+            formControlName="student"
+            placeholder="搜尋學生姓名或 ID">
+          </tmf-input-text>
+        </div>
+
+        <!-- 篩選按鈕 -->
+        <tmf-button variant="primary" class="h-10" (click)="onSearchFilter()">
+          搜尋篩選
+        </tmf-button>
+
+        <!-- 重置按鈕 -->
+        <tmf-button variant="secondary" class="h-10" (click)="onResetFilter()">
+          重置
+        </tmf-button>
+      </div>
+      </form>
+    </div>
+
+    <!-- 載入狀態 -->
+    @if (reservationsResource.isLoading()) {
+      <div class="space-y-4">
+        @for (item of [1,2,3]; track item) {
+          <div class="bg-white rounded-lg border border-grey-d4 p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div class="flex items-center gap-3">
+                <tmf-skeleton class="w-32 h-6 rounded"></tmf-skeleton>
+                <tmf-skeleton class="w-24 h-5 rounded"></tmf-skeleton>
+              </div>
+              <tmf-skeleton class="w-16 h-6 rounded-full"></tmf-skeleton>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <tmf-skeleton class="w-20 h-4 rounded mb-2"></tmf-skeleton>
+                <tmf-skeleton class="w-24 h-5 rounded mb-1"></tmf-skeleton>
+                <tmf-skeleton class="w-16 h-4 rounded"></tmf-skeleton>
+              </div>
+              <div>
+                <tmf-skeleton class="w-20 h-4 rounded mb-2"></tmf-skeleton>
+                <tmf-skeleton class="w-32 h-5 rounded mb-1"></tmf-skeleton>
+                <tmf-skeleton class="w-12 h-4 rounded"></tmf-skeleton>
+              </div>
+            </div>
+            <div class="flex gap-3 pt-4 border-t border-grey-d4">
+              <tmf-skeleton class="w-16 h-8 rounded"></tmf-skeleton>
+              <tmf-skeleton class="w-16 h-8 rounded"></tmf-skeleton>
+              <tmf-skeleton class="w-16 h-8 rounded"></tmf-skeleton>
+            </div>
+          </div>
         }
-      </tmf-button>
-
-      <tmf-button
-        variant="secondary"
-        class="h-10"
-        [disabled]="isLoading() || isSaving()"
-        (click)="exitEditMode()">
-        取消編輯
-      </tmf-button>
-    }
-  </div>
-
-  <!-- 可編輯週曆元件 -->
-  <div class="bg-white rounded-xl shadow-sm border border-grey-d4 p-6">
-    @if (isLoading()) {
-      <div class="flex items-center justify-center py-12">
+      </div>
+    } @else if (reservationsResource.error()) {
+      <div class="flex items-center justify-center p-8">
         <div class="text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto mb-4"></div>
-          <p class="text-grey-66">載入排程資料中...</p>
+          <div class="text-red-600 mb-2">載入失敗</div>
+          <button
+            class="text-primary hover:underline"
+            (click)="reservationsResource.reload()">
+            重新載入
+          </button>
         </div>
       </div>
     } @else {
-      <tmf-editable-weekly-calendar
-        [initialData]="scheduleData()"
-        [readonly]="!isEditing()"
-        (scheduleChange)="onScheduleChange($event)">
-      </tmf-editable-weekly-calendar>
+      <!-- 預約記錄列表 -->
+      @if (reservationsResource.value()?.data?.reservations && reservationsResource.value()!.data!.reservations!.length > 0) {
+        <div class="space-y-4">
+          @for (reservation of reservationsResource.value()?.data?.reservations; track reservation.id) {
+            <div class="bg-white rounded-lg border border-grey-d4 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+              <div class="p-6">
+                <!-- 預約時間與狀態 -->
+                <div class="flex justify-between items-start mb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2 text-xl font-bold text-grey-33">
+                      <mat-icon class="!w-5 !h-5 !text-xl !leading-5 !text-primary">event</mat-icon>
+                      {{ reservation.reserve_date | date:'yyyy-MM-dd' }}
+                    </div>
+                    <div class="text-lg text-grey-66">{{ reservation.reserve_start_time }} - {{ reservation.reserve_end_time }}</div>
+                  </div>
+                  <span class="px-3 py-1 text-sm rounded-full" [ngClass]="getStatusClass(reservation.teacher_status, reservation.student_status)">
+                    {{ getStatusText(reservation.teacher_status, reservation.student_status) }}
+                  </span>
+                </div>
+
+                <!-- 學生與課程資訊 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <div class="flex items-center gap-2 mb-2">
+                      <mat-icon class="!w-4 !h-4 !text-base !leading-4 text-grey-33">person</mat-icon>
+                      <span class="text-sm font-medium text-grey-33">學生資訊</span>
+                    </div>
+                    <div class="text-base font-medium text-grey-33">{{ reservation.student?.nick_name || '未知學生' }}</div>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2 mb-2">
+                      <mat-icon class="!w-4 !h-4 !text-base !leading-4 text-grey-33">school</mat-icon>
+                      <span class="text-sm font-medium text-grey-33">預約課程</span>
+                    </div>
+                    <div class="text-base font-medium text-grey-33">{{ reservation.course?.name || '未知課程' }}</div>
+                  </div>
+                </div>
+
+                <!-- 操作按鈕或拒絕原因 -->
+                <div class="flex gap-3 pt-4 border-t border-grey-d4">
+                  @if (reservation.rejection_reason) {
+                    <div class="text-sm text-red-500">
+                      {{ reservation.rejection_reason }}
+                    </div>
+                  } @else if (reservation.teacher_status === 'pending' && reservation.student_status === 'reserved') {
+                    <tmf-button variant="primary" size="sm" (click)="onConfirmReservation(reservation.id!)">
+                      確認預約
+                    </tmf-button>
+                    <tmf-button variant="tertiary" size="sm" class="text-red-50" (click)="onRejectReservation(reservation.id!)">
+                      拒絕預約
+                    </tmf-button>
+                  } @else if (reservation.teacher_status === 'reserved' && reservation.student_status === 'reserved') {
+                    <tmf-button variant="tertiary" size="sm" class="text-red-50" (click)="onCancelReservation(reservation.id!)">
+                      取消預約
+                    </tmf-button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- 空狀態 -->
+        <div class="text-center py-12">
+          <img src="/assets/images/search_none.png" alt="暫無預約記錄" class="w-48 h-48 mx-auto mb-6 opacity-60">
+          <div class="text-grey-66 text-lg mb-4">暫無預約記錄</div>
+          <div class="text-sm text-grey-66">當學生預約您的課程時，記錄會顯示在這裡</div>
+        </div>
+      }
+    }
+
+    <!-- 分頁控制 -->
+    @if (reservationsResource.value()?.data?.pagination && reservationsResource.value()!.data!.pagination!.total_pages! > 1) {
+      <div class="flex justify-center items-center gap-2 mt-8">
+        <tmf-button
+          variant="tertiary"
+          size="sm"
+          [disabled]="currentPage() <= 1"
+          (click)="onPageChange(currentPage() - 1)">
+          上一頁
+        </tmf-button>
+        <span class="text-sm text-grey-66 mx-4">
+          第 {{ currentPage() }} 頁 / 共 {{ reservationsResource.value()?.data?.pagination?.total_pages }} 頁
+        </span>
+        <tmf-button
+          variant="tertiary"
+          size="sm"
+          [disabled]="currentPage() >= (reservationsResource.value()?.data?.pagination?.total_pages || 1)"
+          (click)="onPageChange(currentPage() + 1)">
+          下一頁
+        </tmf-button>
+      </div>
     }
   </div>
-  
 </div>

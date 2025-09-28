@@ -1,0 +1,194 @@
+<div class="rounded-md bg-white px-8 py-4">
+  <div class="mb-4 flex items-center justify-between text-xl">
+    <p>預約 {{data.course_name}}</p>
+    <span class="material-icons-outlined cursor-pointer" (click)="close()"
+      >close</span
+    >
+  </div>
+  <div class="rounded-lg bg-white max-h-[65vh] overflow-y-auto">
+    <div class="flex items-center justify-between border-b p-4">
+      <mat-icon
+        class="cursor-pointer text-lg text-grey-66"
+        (click)="previousMonth()"
+      >
+        arrow_back</mat-icon>
+      <div class="text-lg font-bold">
+        {{ currentYear() + ' 年 ' + (currentMonth() + 1) + ' 月 ' }}
+      </div>
+      <mat-icon
+        class="cursor-pointer text-lg text-grey-66"
+        (click)="nextMonth()"
+      >
+        arrow_forward</mat-icon>
+    </div>
+    <div class="p-4">
+      <div class="mb-4 grid grid-cols-7 text-center text-grey-66">
+        <div>週日</div>
+        <div>週一</div>
+        <div>週二</div>
+        <div>週三</div>
+        <div>週四</div>
+        <div>週五</div>
+        <div>週六</div>
+      </div>
+      <div class="grid grid-cols-7 text-center text-grey-66">
+        @for (day of days(); track $index) {
+          <div (click)="selectDate(day)">
+            <div
+              class="cursor-pointer rounded-md p-1"
+              [ngClass]="{
+                'text-grey-9f': !day.currentMonth,
+                'bg-primary text-white':
+                  day.year === currentDate()?.year &&
+                  day.month === currentDate()?.month &&
+                  day.date === currentDate()?.date,
+                'cursor-not-allowed text-grey-d4': day.disabled,
+                'rounded-md hover:bg-primary hover:text-white':
+                  !day.disabled
+              }"
+            >
+              {{ day.date }}
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+    @if (!!currentDate()) {
+      <div class="border-y p-4">
+        <div class="mb-4 grid grid-cols-3 text-center text-grey-66">
+          <div>早上</div>
+          <div>下午</div>
+          <div>晚上</div>
+        </div>
+        <div
+          class="relative grid min-h-[192px] grid-cols-3 text-center text-grey-66"
+        >
+          @if (timeSlotsResource.isLoading()) {
+            <div
+              class="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-white"
+            >
+              <div class="flex items-center justify-center space-x-2">
+                <div class="relative">
+                  <div
+                    class="spin h-8 w-8 rounded-full border-4 border-solid border-primary"
+                  ></div>
+                  <div
+                    class="spin afterimage absolute left-0 top-0 h-8 w-8 rounded-full border-4 border-solid border-primary"
+                  ></div>
+                </div>
+                <div class="text-xl text-primary">Loading...</div>
+              </div>
+            </div>
+          }
+
+          @if (timeSlotsResource.error()) {
+            <div
+              class="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-white"
+            >
+              <div class="text-center">
+                <div class="text-red-600 mb-2">載入失敗</div>
+                <button
+                  class="text-primary hover:underline"
+                  (click)="timeSlotsResource.reload()">
+                  重新載入
+                </button>
+              </div>
+            </div>
+          }
+          <div class="flex flex-col gap-2">
+            @for (slot of morningTimes(); track slot.slot_id) {
+              <div
+                class="time-slot"
+                [ngClass]="{
+                  'available': slot.status === 'available' && slot.start_time !== currentTime(),
+                  'unavailable': slot.status === 'unavailable',
+                  'selected': slot.start_time === currentTime()
+                }"
+                (click)="selectTime(slot)"
+              >
+                {{ slot.start_time }}
+              </div>
+            } @empty {
+              <div class="text-grey-9f">-</div>
+            }
+          </div>
+          <div class="flex flex-col gap-2">
+            @for (slot of afternoonTimes(); track slot.slot_id) {
+              <div
+                class="time-slot"
+                [ngClass]="{
+                  'available': slot.status === 'available' && slot.start_time !== currentTime(),
+                  'unavailable': slot.status === 'unavailable',
+                  'selected': slot.start_time === currentTime()
+                }"
+                (click)="selectTime(slot)"
+              >
+                {{ slot.start_time }}
+              </div>
+            } @empty {
+              <div class="text-grey-9f">-</div>
+            }
+          </div>
+          <div class="flex flex-col gap-2">
+            @for (slot of eveningTimes(); track slot.slot_id) {
+              <div
+                class="time-slot"
+                [ngClass]="{
+                  'available': slot.status === 'available' && slot.start_time !== currentTime(),
+                  'unavailable': slot.status === 'unavailable',
+                  'selected': slot.start_time === currentTime()
+                }"
+                (click)="selectTime(slot)"
+              >
+                {{ slot.start_time }}
+              </div>
+            } @empty {
+              <div class="text-grey-9f">-</div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <p>已選取時段</p>
+      @if (currentYear() && currentMonth() && currentDate()) {
+        <p>
+          {{
+            currentYear() +
+              '-' +
+              (currentMonth() + 1 < 10
+                ? '0' + (currentMonth() + 1)
+                : currentMonth() + 1) +
+              '-' +
+              (currentDate()!.date < 10
+                ? '0' + currentDate()?.date
+                : currentDate()?.date)
+          }}
+          {{ currentTime() }}
+        </p>
+      }
+    </div>
+    <div class="flex items-center justify-center gap-4 p-4">
+      <tmf-button
+        variant="primary"
+        [disabled]="btnDisabled()"
+        (click)="bookNow()"
+        class="flex items-center gap-2 h-10"
+      >
+        @if (inProgress()) {
+          <div class="flex items-center justify-center space-x-2">
+            <div class="relative">
+              <div
+                class="spin h-4 w-4 rounded-full border-2 border-solid border-white"
+              ></div>
+            </div>
+          </div>
+        } @else {
+          確認預約
+        }
+      </tmf-button>
+    </div>
+  </div>
+</div>

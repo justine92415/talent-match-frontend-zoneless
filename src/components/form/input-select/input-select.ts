@@ -28,6 +28,10 @@ export interface SelectOption {
   imports: [MatIconModule],
   templateUrl: './input-select.html',
   styles: `
+    :host {
+      display: block;
+      width: 100%;
+    }
     :host ::ng-deep .cdk-overlay-pane {
       background: white !important;
       border: 1px solid #F97316 !important;
@@ -115,6 +119,7 @@ export class InputSelect implements ControlValueAccessor, OnDestroy {
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-transparent-backdrop',
       scrollStrategy: this.overlay.scrollStrategies.close(),
+      width: this.trigger.nativeElement.offsetWidth,
       positionStrategy: this.overlay.position()
         .flexibleConnectedTo(this.trigger)
         .withPositions([

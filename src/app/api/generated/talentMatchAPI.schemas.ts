@@ -4499,6 +4499,14 @@ export type VideoUploadFailedErrorResponseAllOf = {
 export type VideoUploadFailedErrorResponse = ServerErrorResponse &
   VideoUploadFailedErrorResponseAllOf;
 
+export type VideoUpdateFailedErrorResponseAllOf = {
+  message?: unknown;
+  code?: unknown;
+};
+
+export type VideoUpdateFailedErrorResponse = ServerErrorResponse &
+  VideoUpdateFailedErrorResponseAllOf;
+
 export interface PriceOption {
   /** 價格方案 ID */
   id: number;
@@ -7306,6 +7314,29 @@ export type GetApiVideosParams = {
    * @maxLength 200
    */
   search?: string;
+};
+
+export type PutApiVideosIdBody = {
+  /**
+   * 影片名稱（可選）
+   * @minLength 1
+   * @maxLength 200
+   */
+  name?: string;
+  /**
+   * 影片分類（可選）
+   * @minLength 1
+   * @maxLength 100
+   */
+  category?: string;
+  /**
+   * 影片介紹（可選）
+   * @minLength 1
+   * @maxLength 2000
+   */
+  intro?: string;
+  /** 影片檔案（可選） */
+  videoFile?: Blob;
 };
 
 export type GetApiPing200 = {

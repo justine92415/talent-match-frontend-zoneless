@@ -2,18 +2,20 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { VideoManagementService } from '@app/api/generated/video-management/video-management.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
-import { VideoBasicInfo, VideoDetailSuccessResponseData } from '@app/api/generated/talentMatchAPI.schemas';
+import { VideoBasicInfo, VideoDetailSuccessResponseData, PutApiVideosIdBody } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-video-edit',
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    MatIcon,
     Button,
     InputText,
     InputSelect
@@ -40,6 +42,12 @@ export default class VideoEdit implements OnInit {
 
   // 影片資料
   videoData = signal<VideoBasicInfo | null>(null);
+
+  // 影片檔案相關
+  videoFile = signal<File | null>(null);
+  videoPreview = signal<string | null>(null);
+  uploadProgress = signal(0);
+  keepOriginalVideo = signal(true); // 是否保留原影片
 
   // 主類別選項 (從 API 動態載入)
   mainCategories = signal<SelectOption[]>([]);
@@ -130,28 +138,45 @@ export default class VideoEdit implements OnInit {
 
   // 儲存影片
   saveVideo(): void {
+    console.log('saveVideo 被調用');
+    console.log('表單狀態:', this.videoForm.valid);
+    console.log('影片 ID:', this.videoId());
+
     if (this.videoForm.valid) {
       const videoId = this.videoId();
-      if (!videoId) return;
+      if (!videoId) {
+        console.error('影片 ID 不存在');
+        return;
+      }
 
-      const formData = this.videoForm.value;
+      this.isLoading.set(true);
+      this.error.set(null);
 
-      // TODO: 實作影片更新 API 呼叫
-      // this.videoService.putApiVideosId(videoId, formData).subscribe({
-      //   next: (response) => {
-      //     console.log('影片更新成功:', response);
-      //     alert('影片更新成功！');
-      //     this.goBack();
-      //   },
-      //   error: (error) => {
-      //     console.error('影片更新失敗:', error);
-      //     this.handleSaveError(error);
-      //   }
-      // });
+      const formValues = this.videoForm.value;
 
-      // 暫時顯示成功訊息
-      alert('影片更新成功！（模擬）');
-      this.goBack();
+      // 準備更新資料（API service 會自動處理 FormData）
+      const updateData: PutApiVideosIdBody = {
+        name: formValues.name,
+        category: formValues.category,
+        intro: formValues.intro,
+        videoFile: this.videoFile() || undefined  // 可選的檔案
+      };
+
+      console.log('更新影片資料:', updateData);
+
+      this.videoService.putApiVideosId(videoId, updateData).subscribe({
+        next: (response) => {
+          console.log('影片更新成功:', response);
+          this.isLoading.set(false);
+          alert('影片更新成功！');
+          this.goBack();
+        },
+        error: (error) => {
+          console.error('影片更新失敗:', error);
+          this.isLoading.set(false);
+          this.handleSaveError(error);
+        }
+      });
     } else {
       alert('請填寫所有必填欄位');
     }
@@ -191,5 +216,52 @@ export default class VideoEdit implements OnInit {
   // 重新載入資料
   refresh(): void {
     this.loadVideoData();
+  }
+
+  // 處理影片選擇
+  onVideoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      // 檢查檔案類型
+      if (!['video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/quicktime'].includes(file.type)) {
+        alert('請選擇支援的影片格式 (MP4、AVI、MOV、WMV)');
+        return;
+      }
+
+      // 檢查檔案大小 (500MB)
+      if (file.size > 500 * 1024 * 1024) {
+        alert('影片檔案大小不能超過 500MB');
+        return;
+      }
+
+      this.videoFile.set(file);
+
+      // 產生預覽
+      const url = URL.createObjectURL(file);
+      this.videoPreview.set(url);
+    }
+  }
+
+  // 移除影片（包括原影片）
+  removeVideo(): void {
+    this.videoFile.set(null);
+    this.keepOriginalVideo.set(false);
+    if (this.videoPreview()) {
+      URL.revokeObjectURL(this.videoPreview()!);
+      this.videoPreview.set(null);
+    }
+    // 清空 input
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (input) input.value = '';
+  }
+
+  // 取得檔案大小文字
+  getFileSizeText(size: number): string {
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+    if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`;
   }
 }

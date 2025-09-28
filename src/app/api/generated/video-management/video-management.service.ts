@@ -39,9 +39,9 @@ import { Observable } from 'rxjs';
 
 import type {
   GetApiVideosParams,
+  PutApiVideosIdBody,
   VideoDetailSuccessResponse,
   VideoListSuccessResponse,
-  VideoUpdateRequest,
   VideoUpdateSuccessResponse,
   VideoUploadRequest,
   VideoUploadSuccessResponse,
@@ -197,53 +197,74 @@ export class VideoManagementService {
     return this.http.get<TData>(`/api/videos/${id}`, options);
   }
   /**
- * 更新指定影片的基本資訊。支援部分欄位更新，只能更新自己上傳的影片。
+ * 更新指定影片的基本資訊和檔案。支援部分欄位更新和檔案替換，只能更新自己上傳的影片。
 
 **業務邏輯**：
 - 驗證教師身份和權限
-- 驗證影片 ID 和更新資料格式
-- 查詢現有影片記錄
-- 驗證影片所有權（只能更新自己的影片）
-- 更新指定欄位到資料庫
-- 回傳更新後的影片資訊
+- 解析 multipart/form-data 表單資料（支援檔案替換）
+- 驗證影片檔案格式和大小（如有提供新檔案）
+- 查詢現有影片記錄並驗證所有權
+- 上傳新檔案到 Firebase Storage（如有提供）
+- 更新影片資訊到資料庫
+- 清理舊影片檔案（如有替換檔案）
+- 自動清理暫存檔案
 
 **可更新欄位**：
 - `name`: 影片名稱（1-200字元）
-- `category`: 影片分類（1-100字元）
+- `category`: 影片分類（1-100字元） 
 - `intro`: 影片介紹（1-2000字元）
+- `videoFile`: 影片檔案（可選，支援 MP4, AVI, MOV, WMV，最大 500MB）
+
+**檔案替換功能**：
+- 支援可選影片檔案上傳
+- 上傳新檔案時自動刪除舊檔案
+- 檔案上傳失敗時自動回滾
+- 支援與課程編輯相同的檔案替換邏輯
 
 **注意事項**：
-- 不支援更新影片檔案，如需更換請重新上傳
-- 至少需要提供一個欄位進行更新
+- 所有欄位均為可選（至少需要提供一個欄位）
+- 檔案為可選，不提供時保持原有檔案
+- 檔案格式限制：MP4, AVI, MOV, WMV, QuickTime
+- 檔案大小限制：最大 500MB
 - 無法更新已刪除的影片
 
  * @summary 更新影片資訊
  */
   putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
   putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
   putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
   putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.put<TData>(
-      `/api/videos/${id}`,
-      videoUpdateRequest,
-      options,
-    );
+    const formData = new FormData();
+    if (putApiVideosIdBody.name !== undefined) {
+      formData.append(`name`, putApiVideosIdBody.name);
+    }
+    if (putApiVideosIdBody.category !== undefined) {
+      formData.append(`category`, putApiVideosIdBody.category);
+    }
+    if (putApiVideosIdBody.intro !== undefined) {
+      formData.append(`intro`, putApiVideosIdBody.intro);
+    }
+    if (putApiVideosIdBody.videoFile !== undefined) {
+      formData.append(`videoFile`, putApiVideosIdBody.videoFile);
+    }
+
+    return this.http.put<TData>(`/api/videos/${id}`, formData, options);
   }
 }
 

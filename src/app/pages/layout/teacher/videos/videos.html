@@ -67,8 +67,6 @@
               <tmf-video-card
                 [video]="{
                   id: video.id?.toString() || video.uuid || '',
-                  imageSrc: video.url || '/assets/videos/default-thumb.jpg',
-                  imageAlt: video.name || '影片',
                   tag: video.category || '未分類',
                   description: video.intro || video.name || '無描述',
                   videoSrc: video.url
@@ -128,8 +126,6 @@
               class="relative w-20 h-16 bg-grey-f7 rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 flex-shrink-0"
               (click)="onVideoCardClick({
                 id: video.id?.toString() || video.uuid || '',
-                imageSrc: video.url || '/assets/videos/default-thumb.jpg',
-                imageAlt: video.name || '影片',
                 tag: video.category || '未分類',
                 description: video.intro || video.name || '無描述',
                 videoSrc: video.url

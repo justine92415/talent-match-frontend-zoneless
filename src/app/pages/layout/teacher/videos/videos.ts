@@ -56,8 +56,6 @@ export default class Videos {
     return videos.map((video: VideoBasicInfo) => {
       const cardData = {
         id: video.id?.toString() || video.uuid || '',
-        imageSrc: video.url || '/assets/videos/default-thumb.jpg', // 如果有影片URL就用影片，否則用預設圖
-        imageAlt: video.name || '影片',
         tag: video.category || '未分類',
         description: video.intro || video.name || '無描述',
         videoSrc: video.url

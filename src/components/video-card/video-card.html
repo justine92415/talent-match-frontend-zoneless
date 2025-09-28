@@ -5,31 +5,29 @@
 >
   <!-- Video Background -->
   <div class="absolute inset-0">
-    @if (video.videoSrc) {
+    @if (video().videoSrc) {
       <video
-        [src]="video.videoSrc"
+        [src]="video().videoSrc"
         class="w-full h-full object-cover"
         muted
         loop
         playsinline
-        [poster]="video.imageSrc"
+        preload="metadata"
         #videoElement
         (mouseenter)="onMouseEnter(videoElement)"
         (mouseleave)="onMouseLeave(videoElement)"
       ></video>
     } @else {
-      <img
-        [src]="video.imageSrc"
-        [alt]="video.imageAlt"
-        class="w-full h-full object-cover"
-      />
+      <div class="w-full h-full bg-grey-f7 flex items-center justify-center">
+        <span class="material-symbols-outlined text-grey-9f text-4xl">video_library</span>
+      </div>
     }
   </div>
 
   <!-- Tag -->
   <div class="absolute top-3 left-3 px-3 py-1 bg-yellow rounded-lg">
     <span class="text-sm-bold text-black font-noto-sans-tc">{{
-      video.tag
+      video().tag
     }}</span>
   </div>
 
@@ -38,12 +36,12 @@
     class="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-black/60 via-black/30 to-transparent"
   >
     <p class="text-base text-white font-noto-sans-tc leading-relaxed">
-      {{ video.description }}
+      {{ video().description }}
     </p>
   </div>
 
   <!-- Playing Indicator -->
-  @if (video.isPlaying) {
+  @if (video().isPlaying) {
   <div class="absolute bottom-1 left-0 w-50 h-1 bg-primary"></div>
   }
 </div>

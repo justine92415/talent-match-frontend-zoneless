@@ -39,7 +39,10 @@ import { Observable } from 'rxjs';
 
 import type {
   GetApiVideosParams,
+  VideoDetailSuccessResponse,
   VideoListSuccessResponse,
+  VideoUpdateRequest,
+  VideoUpdateSuccessResponse,
   VideoUploadRequest,
   VideoUploadSuccessResponse,
 } from '../talentMatchAPI.schemas';
@@ -157,7 +160,96 @@ export class VideoManagementService {
       params: { ...params, ...options?.params },
     });
   }
+  /**
+ * 取得指定影片的詳細資訊和使用統計。只能查看自己上傳的影片。
+
+**業務邏輯**：
+- 驗證教師身份和權限
+- 驗證影片 ID 格式
+- 查詢影片基本資訊
+- 驗證影片所有權（只能查看自己的影片）
+- 取得影片使用統計資訊
+- 排除已軟刪除的影片
+
+**權限控制**：
+- 需要教師身份認證
+- 只能查看自己上傳的影片
+- 無法查看已刪除的影片
+
+ * @summary 取得影片詳細資訊
+ */
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.get<TData>(`/api/videos/${id}`, options);
+  }
+  /**
+ * 更新指定影片的基本資訊。支援部分欄位更新，只能更新自己上傳的影片。
+
+**業務邏輯**：
+- 驗證教師身份和權限
+- 驗證影片 ID 和更新資料格式
+- 查詢現有影片記錄
+- 驗證影片所有權（只能更新自己的影片）
+- 更新指定欄位到資料庫
+- 回傳更新後的影片資訊
+
+**可更新欄位**：
+- `name`: 影片名稱（1-200字元）
+- `category`: 影片分類（1-100字元）
+- `intro`: 影片介紹（1-2000字元）
+
+**注意事項**：
+- 不支援更新影片檔案，如需更換請重新上傳
+- 至少需要提供一個欄位進行更新
+- 無法更新已刪除的影片
+
+ * @summary 更新影片資訊
+ */
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
+    id: number,
+    videoUpdateRequest: VideoUpdateRequest,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
+    id: number,
+    videoUpdateRequest: VideoUpdateRequest,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
+    id: number,
+    videoUpdateRequest: VideoUpdateRequest,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
+    id: number,
+    videoUpdateRequest: VideoUpdateRequest,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.put<TData>(
+      `/api/videos/${id}`,
+      videoUpdateRequest,
+      options,
+    );
+  }
 }
 
 export type PostApiVideosClientResult = NonNullable<VideoUploadSuccessResponse>;
 export type GetApiVideosClientResult = NonNullable<VideoListSuccessResponse>;
+export type GetApiVideosIdClientResult =
+  NonNullable<VideoDetailSuccessResponse>;
+export type PutApiVideosIdClientResult =
+  NonNullable<VideoUpdateSuccessResponse>;

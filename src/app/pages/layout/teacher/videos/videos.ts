@@ -113,7 +113,7 @@ export default class Videos {
   // 編輯影片
   editVideo(videoId: string): void {
     console.log('編輯影片 ID:', videoId);
-    // TODO: 導航到編輯影片頁面
+    this.router.navigate(['/dashboard/teacher/videos/edit', videoId]);
   }
 
   // 刪除影片

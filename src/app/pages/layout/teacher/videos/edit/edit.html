@@ -1,0 +1,134 @@
+<div>
+  <!-- 頁面標題 -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-grey-33 mb-2">編輯短影音</h1>
+    <p class="text-grey-66">編輯影片的基本資訊</p>
+  </div>
+
+  <!-- 載入狀態 -->
+  @if (isLoading()) {
+    <div class="flex items-center justify-center h-64">
+      <div class="text-center">
+        <div class="mb-4">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+        <p class="text-grey-66">載入中...</p>
+      </div>
+    </div>
+  }
+
+  <!-- 錯誤狀態 -->
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+      <p class="text-red-600 mb-4">{{ error() }}</p>
+      <div class="flex gap-4 justify-center">
+        <tmf-button variant="secondary" (click)="refresh()">重新載入</tmf-button>
+        <tmf-button variant="secondary" (click)="cancel()">返回列表</tmf-button>
+      </div>
+    </div>
+  }
+
+  <!-- 編輯表單 -->
+  @if (!isLoading() && !error()) {
+    <form [formGroup]="videoForm" (ngSubmit)="saveVideo()" class="space-y-8">
+      <!-- 影片預覽區域 -->
+      @if (videoData()?.url) {
+        <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+          <h2 class="text-xl font-semibold text-grey-33 mb-4">影片預覽</h2>
+          <div class="flex justify-center">
+            <video
+              [src]="videoData()?.url"
+              controls
+              class="w-full max-w-md rounded-lg"
+              style="max-height: 400px;"
+            ></video>
+          </div>
+        </div>
+      }
+
+      <!-- 影片基本資訊 -->
+      <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-grey-33 mb-6">影片基本資訊</h2>
+
+        <div class="space-y-6">
+          <!-- 影片名稱 -->
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">影片名稱 <span class="text-red-500">*</span></label>
+            <tmf-input-text
+              formControlName="name"
+              placeholder="請輸入影片名稱 (1-200字元)">
+            </tmf-input-text>
+            @if (videoForm.get('name')?.invalid && videoForm.get('name')?.touched) {
+              <p class="text-sm text-red-500 mt-1">
+                @if (videoForm.get('name')?.errors?.['required']) {
+                  請輸入影片名稱
+                } @else if (videoForm.get('name')?.errors?.['maxlength']) {
+                  影片名稱不能超過 200 個字元
+                }
+              </p>
+            }
+          </div>
+
+          <!-- 影片分類 -->
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">影片分類 <span class="text-red-500">*</span></label>
+            <tmf-input-select
+              formControlName="category"
+              placeholder="請選擇影片分類"
+              [options]="mainCategories()">
+            </tmf-input-select>
+            @if (videoForm.get('category')?.invalid && videoForm.get('category')?.touched) {
+              <p class="text-sm text-red-500 mt-1">
+                @if (videoForm.get('category')?.errors?.['required']) {
+                  請選擇影片分類
+                }
+              </p>
+            }
+          </div>
+
+          <!-- 影片介紹 -->
+          <div>
+            <label class="block text-sm font-medium text-grey-33 mb-2">影片介紹 <span class="text-red-500">*</span></label>
+            <textarea
+              formControlName="intro"
+              rows="4"
+              placeholder="請詳細描述影片內容和教學重點"
+              class="w-full px-3 py-2 border border-grey-d4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              [class.border-red-500]="videoForm.get('intro')?.invalid && videoForm.get('intro')?.touched">
+            </textarea>
+            @if (videoForm.get('intro')?.invalid && videoForm.get('intro')?.touched) {
+              <p class="text-sm text-red-500 mt-1">
+                @if (videoForm.get('intro')?.errors?.['required']) {
+                  請輸入影片介紹
+                } @else if (videoForm.get('intro')?.errors?.['maxlength']) {
+                  影片介紹不能超過 2000 個字元
+                }
+              </p>
+            }
+            <p class="text-sm text-grey-66 mt-1">
+              {{ videoForm.get('intro')?.value?.length || 0 }} / 2000
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作按鈕 -->
+      <div class="flex gap-4 pt-6">
+        <tmf-button
+          type="submit"
+          class="flex-1 h-10"
+          [disabled]="!videoForm.valid">
+          更新影片
+        </tmf-button>
+
+        <tmf-button
+          type="button"
+          class="h-10"
+          variant="secondary"
+          (click)="cancel()">
+          取消
+        </tmf-button>
+      </div>
+    </form>
+  }
+</div>

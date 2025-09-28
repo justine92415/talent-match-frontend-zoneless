@@ -4338,6 +4338,72 @@ export interface VideoUpdateRequest {
 }
 
 /**
+ * 回應狀態
+ */
+export type VideoUpdateSuccessResponseStatus =
+  (typeof VideoUpdateSuccessResponseStatus)[keyof typeof VideoUpdateSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 更新後的影片資料
+ */
+export type VideoUpdateSuccessResponseData = {
+  video?: VideoBasicInfo;
+};
+
+export interface VideoUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 更新後的影片資料 */
+  data?: VideoUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type VideoDetailSuccessResponseStatus =
+  (typeof VideoDetailSuccessResponseStatus)[keyof typeof VideoDetailSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoDetailSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 影片使用統計資訊
+ */
+export type VideoDetailSuccessResponseDataUsageStats = {
+  /** 被多少課程使用 */
+  used_in_courses?: number;
+  /** 總觀看次數 */
+  total_views?: number;
+};
+
+/**
+ * 影片詳細資料和使用統計
+ */
+export type VideoDetailSuccessResponseData = {
+  video?: VideoBasicInfo;
+  /** 影片使用統計資訊 */
+  usage_stats?: VideoDetailSuccessResponseDataUsageStats;
+};
+
+export interface VideoDetailSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoDetailSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 影片詳細資料和使用統計 */
+  data?: VideoDetailSuccessResponseData;
+}
+
+/**
  * 影片類型 (統一為 storage 本地儲存)
  */
 export type VideoBasicInfoVideoType =
@@ -4410,6 +4476,21 @@ export type VideoPermissionErrorResponseAllOf = {
 
 export type VideoPermissionErrorResponse = ForbiddenErrorResponse &
   VideoPermissionErrorResponseAllOf;
+
+export type VideoUpdateValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type VideoUpdateValidationErrorResponse = ValidationErrorResponse &
+  VideoUpdateValidationErrorResponseAllOf;
+
+export type VideoNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type VideoNotFoundErrorResponse = NotFoundErrorResponse &
+  VideoNotFoundErrorResponseAllOf;
 
 export type VideoUploadFailedErrorResponseAllOf = {
   message?: unknown;

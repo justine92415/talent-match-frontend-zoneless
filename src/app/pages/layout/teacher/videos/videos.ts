@@ -1,5 +1,6 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
 import { Button } from '@components/button/button';
 import { Table } from '@components/table/table';
@@ -52,6 +53,8 @@ export default class Videos {
       videoSrc: video.videoUrl
     } as VideoCardData));
   });
+
+  private router = inject(Router);
 
   constructor(private dialog: Dialog) {
     this.loadVideos();
@@ -109,8 +112,7 @@ export default class Videos {
 
   // 新增影片
   goToCreateVideo(): void {
-    console.log('導航到新增影片頁面');
-    // TODO: 實作導航邏輯
+    this.router.navigate(['/dashboard/teacher/videos/create']);
   }
 
   // 播放影片

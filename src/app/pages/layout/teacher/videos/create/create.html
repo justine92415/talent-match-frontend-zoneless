@@ -1,0 +1,177 @@
+<div>
+  <!-- 頁面標題 -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-grey-33 mb-2">新增短影音</h1>
+    <p class="text-grey-66">上傳新的短影音內容，與學生分享您的教學精華</p>
+  </div>
+
+  <!-- 短影音建立表單 -->
+  <form [formGroup]="videoForm" (ngSubmit)="submitVideo()" class="space-y-8">
+    <!-- 影片檔案上傳區域 -->
+    <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-semibold text-grey-33 mb-4">影片檔案</h2>
+
+      <!-- 檔案上傳區域 -->
+      <div class="space-y-4">
+        <input
+          type="file"
+          accept="video/mp4,video/avi,video/mov,video/wmv,video/quicktime"
+          (change)="onVideoSelected($event)"
+          class="hidden"
+          #fileInput>
+
+        @if (!videoFile()) {
+          <!-- 上傳區域 -->
+          <div
+            class="border-2 border-dashed border-grey-d4 rounded-lg p-8 text-center cursor-pointer hover:border-primary hover:bg-grey-f7 transition-colors"
+            (click)="fileInput.click()">
+            <mat-icon class="text-grey-9f mb-4" style="font-size: 3rem; width: 3rem; height: 3rem;">video_library</mat-icon>
+            <p class="text-grey-66 mb-2">點擊選擇影片檔案或拖拽影片至此</p>
+            <p class="text-sm text-grey-9f">支援 MP4、AVI、MOV、WMV 格式，檔案大小不超過 500MB</p>
+          </div>
+        } @else {
+          <!-- 影片預覽 -->
+          <div class="space-y-4">
+            <div class="relative inline-block">
+              <div class="border border-grey-d4 rounded-lg p-4 cursor-pointer hover:bg-grey-f7 transition-colors" (click)="fileInput.click()">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <mat-icon class="text-primary">video_file</mat-icon>
+                  </div>
+                  <div>
+                    <p class="text-base font-medium text-grey-33">{{ videoFile()?.name }}</p>
+                    <p class="text-sm text-grey-66">{{ getFileSizeText(videoFile()?.size || 0) }}</p>
+                  </div>
+                </div>
+
+                <!-- 影片預覽 -->
+                @if (videoPreview()) {
+                  <div class="mt-4">
+                    <video
+                      [src]="videoPreview()"
+                      controls
+                      class="w-full max-w-md rounded-lg"
+                      style="max-height: 300px;"
+                    ></video>
+                  </div>
+                }
+              </div>
+              <button
+                type="button"
+                (click)="removeVideo()"
+                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm hover:bg-red-600 transition-colors">
+                ×
+              </button>
+            </div>
+            <p class="text-sm text-grey-66">點擊檔案可更換影片</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- 影片基本資訊 -->
+    <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-semibold text-grey-33 mb-6">影片基本資訊</h2>
+
+      <div class="space-y-6">
+        <!-- 影片名稱 -->
+        <div>
+          <label class="block text-sm font-medium text-grey-33 mb-2">影片名稱 <span class="text-red-500">*</span></label>
+          <tmf-input-text
+            formControlName="name"
+            placeholder="請輸入影片名稱 (1-200字元)">
+          </tmf-input-text>
+          @if (videoForm.get('name')?.invalid && videoForm.get('name')?.touched) {
+            <p class="text-sm text-red-500 mt-1">
+              @if (videoForm.get('name')?.errors?.['required']) {
+                請輸入影片名稱
+              } @else if (videoForm.get('name')?.errors?.['maxlength']) {
+                影片名稱不能超過 200 個字元
+              }
+            </p>
+          }
+        </div>
+
+        <!-- 影片分類 -->
+        <div>
+          <label class="block text-sm font-medium text-grey-33 mb-2">影片分類 <span class="text-red-500">*</span></label>
+          <tmf-input-select
+            formControlName="category"
+            placeholder="請選擇影片分類"
+            [options]="mainCategories()">
+          </tmf-input-select>
+          @if (videoForm.get('category')?.invalid && videoForm.get('category')?.touched) {
+            <p class="text-sm text-red-500 mt-1">
+              @if (videoForm.get('category')?.errors?.['required']) {
+                請選擇影片分類
+              }
+            </p>
+          }
+        </div>
+
+        <!-- 影片介紹 -->
+        <div>
+          <label class="block text-sm font-medium text-grey-33 mb-2">影片介紹 <span class="text-red-500">*</span></label>
+          <textarea
+            formControlName="intro"
+            rows="4"
+            placeholder="請詳細描述影片內容和教學重點"
+            class="w-full px-3 py-2 border border-grey-d4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+            [class.border-red-500]="videoForm.get('intro')?.invalid && videoForm.get('intro')?.touched">
+          </textarea>
+          @if (videoForm.get('intro')?.invalid && videoForm.get('intro')?.touched) {
+            <p class="text-sm text-red-500 mt-1">
+              @if (videoForm.get('intro')?.errors?.['required']) {
+                請輸入影片介紹
+              } @else if (videoForm.get('intro')?.errors?.['maxlength']) {
+                影片介紹不能超過 2000 個字元
+              }
+            </p>
+          }
+          <p class="text-sm text-grey-66 mt-1">
+            {{ videoForm.get('intro')?.value?.length || 0 }} / 2000
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 上傳進度條 (上傳中時顯示) -->
+    @if (isLoading()) {
+      <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-grey-33 mb-4">上傳進度</h2>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium text-grey-33">上傳中...</span>
+            <span class="text-sm text-grey-66">{{ uploadProgress() }}%</span>
+          </div>
+          <div class="w-full bg-grey-e9 rounded-full h-2">
+            <div
+              class="bg-primary h-2 rounded-full transition-all duration-300"
+              [style.width.%]="uploadProgress()"
+            ></div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- 操作按鈕 -->
+    <div class="flex gap-4 pt-6">
+      <tmf-button
+        type="submit"
+        class="flex-1 h-10"
+        [disabled]="!videoForm.valid || !videoFile() || isLoading()"
+        [loading]="isLoading()">
+        {{ isLoading() ? '上傳中...' : '上傳影片' }}
+      </tmf-button>
+
+      <tmf-button
+        type="button"
+        class="h-10"
+        variant="secondary"
+        (click)="cancel()"
+        [disabled]="isLoading()">
+        取消
+      </tmf-button>
+    </div>
+  </form>
+</div>

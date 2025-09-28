@@ -53,6 +53,13 @@ const routes: Routes = [
     data: { state: 'teacher' },
   },
   {
+    // 新增短影音頁
+    path: 'videos/create',
+    loadComponent: () => import('./videos/create/create'),
+    canActivate: [teacherOnlyGuard],
+    data: { state: 'teacher' },
+  },
+  {
     // 可預約時段管理頁
     path: 'schedule',
     loadComponent: () => import('./schedule/schedule'),

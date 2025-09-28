@@ -8,8 +8,6 @@ import {
   signal,
   computed,
   OnDestroy,
-  Renderer2,
-  DOCUMENT,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { ControlValueAccessor, NgControl } from '@angular/forms';

@@ -4214,131 +4214,209 @@ export type PublicCourseNotFoundErrorResponseAllOf = {
 export type PublicCourseNotFoundErrorResponse = NotFoundErrorResponse &
   PublicCourseNotFoundErrorResponseAllOf;
 
-/**
- * 影片類型 (local: 本地上傳, youtube: YouTube連結)
- */
-export type VideoUploadRequestType =
-  (typeof VideoUploadRequestType)[keyof typeof VideoUploadRequestType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const VideoUploadRequestType = {
-  local: 'local',
-  youtube: 'youtube',
-} as const;
-
 export interface VideoUploadRequest {
   /**
-   * 影片名稱 (必填，1-255字元)
+   * 影片名稱 (必填，1-200字元)
    * @minLength 1
-   * @maxLength 255
+   * @maxLength 200
    */
   name: string;
   /**
-   * 影片分類 (必填)
+   * 影片分類 (必填，1-100字元)
    * @minLength 1
    * @maxLength 100
    */
   category: string;
   /**
-   * 影片簡介 (必填)
+   * 影片介紹 (必填，1-2000字元)
    * @minLength 1
-   * @maxLength 1000
+   * @maxLength 2000
    */
   intro: string;
-  /** 影片類型 (local: 本地上傳, youtube: YouTube連結) */
-  type: VideoUploadRequestType;
-  /** YouTube 影片網址 (當 type 為 youtube 時必填) */
-  youtube_url?: string;
+  /** 影片檔案 (必填，支援 MP4, AVI, MOV, WMV 格式，最大 500MB) */
+  videoFile?: Blob;
+}
+
+/**
+ * 回應狀態
+ */
+export type VideoUploadSuccessResponseStatus =
+  (typeof VideoUploadSuccessResponseStatus)[keyof typeof VideoUploadSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoUploadSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 上傳成功的影片資料
+ */
+export type VideoUploadSuccessResponseData = {
+  video?: VideoBasicInfo;
+};
+
+export interface VideoUploadSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoUploadSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 上傳成功的影片資料 */
+  data?: VideoUploadSuccessResponseData;
+}
+
+export interface VideoListQueryParams {
+  /**
+   * 頁碼 (選填，預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁數量 (選填，預設為 20，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 影片分類篩選 (選填，模糊搜尋)
+   * @maxLength 100
+   */
+  category?: string;
+  /**
+   * 搜尋關鍵字 (選填，搜尋影片標題和介紹)
+   * @maxLength 200
+   */
+  search?: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type VideoListSuccessResponseStatus =
+  (typeof VideoListSuccessResponseStatus)[keyof typeof VideoListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 影片列表資料
+ */
+export type VideoListSuccessResponseData = {
+  /** 影片列表 */
+  videos?: VideoBasicInfo[];
+};
+
+export interface VideoListSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 影片列表資料 */
+  data?: VideoListSuccessResponseData;
 }
 
 export interface VideoUpdateRequest {
   /**
-   * 影片名稱 (選填，1-255字元)
+   * 影片名稱 (選填，1-200字元)
    * @minLength 1
-   * @maxLength 255
+   * @maxLength 200
    */
   name?: string;
   /**
-   * 影片分類 (選填)
+   * 影片分類 (選填，1-100字元)
    * @minLength 1
    * @maxLength 100
    */
   category?: string;
   /**
-   * 影片簡介 (選填)
+   * 影片介紹 (選填，1-2000字元)
    * @minLength 1
-   * @maxLength 1000
+   * @maxLength 2000
    */
   intro?: string;
-  /**
-   * YouTube 影片網址 (選填)
-   * @nullable
-   */
-  youtube_url?: string | null;
 }
 
 /**
- * 影片類型
+ * 影片類型 (統一為 storage 本地儲存)
  */
-export type VideoBasicInfoType =
-  (typeof VideoBasicInfoType)[keyof typeof VideoBasicInfoType];
+export type VideoBasicInfoVideoType =
+  (typeof VideoBasicInfoVideoType)[keyof typeof VideoBasicInfoVideoType];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const VideoBasicInfoType = {
-  local: 'local',
-  youtube: 'youtube',
+export const VideoBasicInfoVideoType = {
+  storage: 'storage',
 } as const;
 
 export interface VideoBasicInfo {
   /** 影片 ID */
   id?: number;
-  /** 影片 UUID */
+  /** 影片 UUID (系統生成的唯一識別碼) */
   uuid?: string;
+  /** 教師 ID */
+  teacher_id?: number;
   /** 影片名稱 */
   name?: string;
-  /** 影片分類 */
-  category?: string;
-  /** 影片簡介 */
-  intro?: string;
-  /** 影片類型 */
-  type?: VideoBasicInfoType;
   /**
-   * 影片長度 (秒)
+   * 影片分類
    * @nullable
    */
-  duration?: number | null;
+  category?: string | null;
   /**
-   * 縮圖 URL
+   * 影片介紹
    * @nullable
    */
-  thumbnail_url?: string | null;
+  intro?: string | null;
+  /**
+   * 影片檔案 URL
+   * @nullable
+   */
+  url?: string | null;
+  /** 影片類型 (統一為 storage 本地儲存) */
+  video_type?: VideoBasicInfoVideoType;
   /** 建立時間 */
   created_at?: string;
   /** 更新時間 */
   updated_at?: string;
 }
 
-export type VideoDetailInfoAllOf = {
-  /**
-   * 影片檔案 URL (本地上傳)
-   * @nullable
-   */
-  file_url?: string | null;
-  /**
-   * YouTube 影片 URL
-   * @nullable
-   */
-  youtube_url?: string | null;
-  /**
-   * 檔案大小 (bytes)
-   * @nullable
-   */
-  file_size?: number | null;
+export type VideoUploadValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
 };
 
-export type VideoDetailInfo = VideoBasicInfo & VideoDetailInfoAllOf;
+export type VideoUploadValidationErrorResponse = ValidationErrorResponse &
+  VideoUploadValidationErrorResponseAllOf;
 
-export type VideoInfo = VideoDetailInfo;
+export type VideoFileFormatErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type VideoFileFormatErrorResponse = ValidationErrorResponse &
+  VideoFileFormatErrorResponseAllOf;
+
+export type VideoFileSizeErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type VideoFileSizeErrorResponse = ValidationErrorResponse &
+  VideoFileSizeErrorResponseAllOf;
+
+export type VideoPermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type VideoPermissionErrorResponse = ForbiddenErrorResponse &
+  VideoPermissionErrorResponseAllOf;
+
+export type VideoUploadFailedErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type VideoUploadFailedErrorResponse = ServerErrorResponse &
+  VideoUploadFailedErrorResponseAllOf;
 
 export interface PriceOption {
   /** 價格方案 ID */
@@ -7120,96 +7198,34 @@ export type PostApiUploadAvatar400 =
   | AvatarValidationErrorResponse
   | AvatarBusinessErrorResponse;
 
-/**
- * 影片類型
- */
-export type PostApiVideosBodyOneVideoType =
-  (typeof PostApiVideosBodyOneVideoType)[keyof typeof PostApiVideosBodyOneVideoType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiVideosBodyOneVideoType = {
-  youtube: 'youtube',
-  storage: 'storage',
-} as const;
-
-export type PostApiVideosBodyOne = {
-  /**
-   * 影片名稱
-   * @maxLength 200
-   */
-  name: string;
-  /**
-   * 影片分類
-   * @maxLength 100
-   */
-  category: string;
-  /**
-   * 影片介紹
-   * @maxLength 2000
-   */
-  intro: string;
-  /** 影片類型 */
-  video_type: PostApiVideosBodyOneVideoType;
-  /** YouTube 影片 URL（當 video_type 為 youtube 時必填） */
-  youtube_url?: string;
-  /** 影片檔案（當 video_type 為 storage 時必填） */
-  video_file?: Blob;
-  /** 影片縮圖（選填） */
-  thumbnail?: Blob;
-};
-
-export type PostApiVideos201AllOf = {
-  data?: VideoDetailInfo;
-};
-
-export type PostApiVideos201 = SuccessResponse & PostApiVideos201AllOf;
+export type PostApiVideos400 =
+  | VideoUploadValidationErrorResponse
+  | VideoFileFormatErrorResponse
+  | VideoFileSizeErrorResponse;
 
 export type GetApiVideosParams = {
   /**
-   * 頁碼
+   * 頁碼 (預設 1)
    * @minimum 1
    */
   page?: number;
   /**
-   * 每頁顯示數量
+   * 每頁數量 (預設 20，最大 100)
    * @minimum 1
    * @maximum 100
    */
   per_page?: number;
   /**
-   * 依分類篩選（空字串或不提供表示不篩選）
+   * 分類篩選 (模糊搜尋)
    * @maxLength 100
    */
   category?: string;
   /**
-   * 搜索關鍵字，在影片名稱中搜索
+   * 搜尋關鍵字 (搜尋標題和介紹)
    * @maxLength 200
    */
   search?: string;
 };
-
-export type GetApiVideos200AllOfData = {
-  videos?: VideoBasicInfo[];
-  pagination?: PaginationInfo;
-};
-
-export type GetApiVideos200AllOf = {
-  data?: GetApiVideos200AllOfData;
-};
-
-export type GetApiVideos200 = SuccessResponse & GetApiVideos200AllOf;
-
-export type GetApiVideosId200AllOf = {
-  data?: VideoDetailInfo;
-};
-
-export type GetApiVideosId200 = SuccessResponse & GetApiVideosId200AllOf;
-
-export type PutApiVideosId200AllOf = {
-  data?: VideoDetailInfo;
-};
-
-export type PutApiVideosId200 = SuccessResponse & PutApiVideosId200AllOf;
 
 export type GetApiPing200 = {
   message?: string;

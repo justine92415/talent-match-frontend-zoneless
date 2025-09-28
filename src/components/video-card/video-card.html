@@ -5,11 +5,25 @@
 >
   <!-- Video Background -->
   <div class="absolute inset-0">
-    <img
-      [src]="video.imageSrc"
-      [alt]="video.imageAlt"
-      class="w-full h-full object-cover"
-    />
+    @if (video.videoSrc) {
+      <video
+        [src]="video.videoSrc"
+        class="w-full h-full object-cover"
+        muted
+        loop
+        playsinline
+        [poster]="video.imageSrc"
+        #videoElement
+        (mouseenter)="onMouseEnter(videoElement)"
+        (mouseleave)="onMouseLeave(videoElement)"
+      ></video>
+    } @else {
+      <img
+        [src]="video.imageSrc"
+        [alt]="video.imageAlt"
+        class="w-full h-full object-cover"
+      />
+    }
   </div>
 
   <!-- Tag -->

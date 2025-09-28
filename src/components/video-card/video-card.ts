@@ -34,4 +34,24 @@ export class VideoCard {
   onVideoClick() {
     this.videoClick.emit(this.video);
   }
+
+  // 滑鼠進入時播放預覽
+  onMouseEnter(videoElement: HTMLVideoElement) {
+    console.log('Mouse enter - video data:', this.video); // 除錯用
+    console.log('Video element:', videoElement); // 除錯用
+    if (videoElement && this.video.videoSrc) {
+      videoElement.currentTime = 0;
+      videoElement.play().catch((error) => {
+        console.error('Video play failed:', error); // 除錯用
+      });
+    }
+  }
+
+  // 滑鼠離開時暫停預覽
+  onMouseLeave(videoElement: HTMLVideoElement) {
+    if (videoElement) {
+      videoElement.pause();
+      videoElement.currentTime = 0;
+    }
+  }
 }

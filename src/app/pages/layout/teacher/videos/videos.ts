@@ -2,22 +2,14 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { Button } from '@components/button/button';
 import { Table } from '@components/table/table';
 import Pagination from '@components/pagination/pagination';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { VideoViewerDialogComponent, VideoViewerDialogData } from '@components/dialogs/video-viewer/video-viewer-dialog';
-
-export interface Video {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  thumbnailUrl?: string;
-  videoUrl?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { VideoManagementService } from '@app/api/generated/video-management/video-management.service';
+import { VideoBasicInfo, GetApiVideosParams } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-videos',
@@ -26,88 +18,60 @@ export interface Video {
   styles: ``
 })
 export default class Videos {
-  // 狀態信號
-  private _isLoading = signal(false);
-  private _loadError = signal<string | null>(null);
-  private _videos = signal<Video[]>([]);
-  private _currentPage = signal(1);
-  private _totalResults = signal(0);
-  private _itemsPerPage = signal(10);
+  private router = inject(Router);
+  private videoService = inject(VideoManagementService);
+
+  // 分頁參數
+  currentPage = signal(1);
+  itemsPerPage = signal(10);
+
+  // rxResource 用於載入影片資料
+  videosResource = rxResource({
+    params: () => ({
+      page: this.currentPage(),
+      per_page: this.itemsPerPage()
+    }),
+    stream: ({ params }) => this.videoService.getApiVideos({
+      page: params.page,
+      per_page: params.per_page
+    } as any)
+  });
 
   // 計算屬性
-  isLoading = computed(() => this._isLoading());
-  loadError = computed(() => this._loadError());
-  videos = computed(() => this._videos());
-  currentPage = computed(() => this._currentPage());
-  totalResults = computed(() => this._totalResults());
-  itemsPerPage = computed(() => this._itemsPerPage());
+  isLoading = computed(() => this.videosResource.isLoading());
+  loadError = computed(() => this.videosResource.error()?.message || null);
+  videos = computed(() => {
+    const response = this.videosResource.value();
+    return (response as any)?.data?.videos || [];
+  });
+  totalResults = computed(() => {
+    const response = this.videosResource.value();
+    return (response as any)?.data?.videos?.length || 0;
+  });
 
   // 轉換為 VideoCardData 格式
   videoCards = computed(() => {
-    return this.videos().map(video => ({
-      id: video.id,
-      imageSrc: video.thumbnailUrl || '/assets/videos/default-thumb.jpg',
-      imageAlt: video.title,
-      tag: video.category,
-      description: video.description,
-      videoSrc: video.videoUrl
-    } as VideoCardData));
+    const videos = this.videos();
+    console.log('Videos data:', videos); // 除錯用
+    return videos.map((video: VideoBasicInfo) => {
+      const cardData = {
+        id: video.id?.toString() || video.uuid || '',
+        imageSrc: video.url || '/assets/videos/default-thumb.jpg', // 如果有影片URL就用影片，否則用預設圖
+        imageAlt: video.name || '影片',
+        tag: video.category || '未分類',
+        description: video.intro || video.name || '無描述',
+        videoSrc: video.url
+      } as VideoCardData;
+      console.log('Video card data:', cardData); // 除錯用
+      return cardData;
+    });
   });
 
-  private router = inject(Router);
-
-  constructor(private dialog: Dialog) {
-    this.loadVideos();
-  }
-
-  // 載入影片資料
-  private loadVideos(): void {
-    this._isLoading.set(true);
-    this._loadError.set(null);
-
-    // 模擬 API 呼叫
-    setTimeout(() => {
-      const mockVideos: Video[] = [
-        {
-          id: '1',
-          title: '鋼琴基礎教學 - 音階練習',
-          category: '音樂',
-          description: '適合初學者的鋼琴音階練習教學，從 C 大調開始學習基本指法和音階排列。',
-          thumbnailUrl: '/assets/videos/piano-basics-thumb.jpg',
-          videoUrl: '/assets/videos/piano-basics.mp4',
-          createdAt: new Date('2024-01-15'),
-          updatedAt: new Date('2024-01-15')
-        },
-        {
-          id: '2',
-          title: '水彩畫風景技巧',
-          category: '美術',
-          description: '學習水彩畫的基本技巧，包括調色、暈染和風景構圖的要點。',
-          thumbnailUrl: '/assets/videos/watercolor-thumb.jpg',
-          videoUrl: '/assets/videos/watercolor.mp4',
-          createdAt: new Date('2024-01-20'),
-          updatedAt: new Date('2024-01-20')
-        },
-        {
-          id: '3',
-          title: '基礎舞蹈動作教學',
-          category: '舞蹈',
-          description: '適合零基礎學員的舞蹈教學，從基本步伐開始練習身體協調性。',
-          createdAt: new Date('2024-01-25'),
-          updatedAt: new Date('2024-01-25')
-        }
-      ];
-
-      this._videos.set(mockVideos);
-      this._totalResults.set(mockVideos.length);
-      this._isLoading.set(false);
-    }, 1000);
-  }
+  constructor(private dialog: Dialog) {}
 
   // 頁面切換
   onPageChange(page: number): void {
-    this._currentPage.set(page);
-    this.loadVideos();
+    this.currentPage.set(page);
   }
 
   // 新增影片
@@ -116,14 +80,14 @@ export default class Videos {
   }
 
   // 播放影片
-  playVideo(video: Video): void {
-    const videoIndex = this.videos().findIndex(v => v.id === video.id);
+  playVideo(video: VideoBasicInfo): void {
+    const videoIndex = this.videos().findIndex((v: VideoBasicInfo) => v.id === video.id);
     this.openVideoViewer(videoIndex);
   }
 
   // 當 video-card 被點擊時
   onVideoCardClick(videoCard: VideoCardData): void {
-    const videoIndex = this.videoCards().findIndex(v => v.id === videoCard.id);
+    const videoIndex = this.videoCards().findIndex((v: VideoCardData) => v.id === videoCard.id);
     this.openVideoViewer(videoIndex);
   }
 
@@ -158,11 +122,23 @@ export default class Videos {
   deleteVideo(videoId: string): void {
     console.log('刪除影片 ID:', videoId);
     // TODO: 顯示確認對話框並執行刪除
+    // TODO: 呼叫刪除 API 並重新載入資料
+  }
 
-    // 模擬刪除操作
-    const currentVideos = this._videos();
-    const updatedVideos = currentVideos.filter(video => video.id !== videoId);
-    this._videos.set(updatedVideos);
-    this._totalResults.set(updatedVideos.length);
+  // 影片預覽 hover 事件
+  onVideoPreviewEnter(videoElement: HTMLVideoElement): void {
+    if (videoElement) {
+      videoElement.currentTime = 0;
+      videoElement.play().catch(() => {
+        // 播放失敗時靜默處理
+      });
+    }
+  }
+
+  onVideoPreviewLeave(videoElement: HTMLVideoElement): void {
+    if (videoElement) {
+      videoElement.pause();
+      videoElement.currentTime = 0;
+    }
   }
 }

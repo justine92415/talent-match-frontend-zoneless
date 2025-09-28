@@ -66,12 +66,12 @@
             <div class="w-80 px-4 flex items-center justify-center py-2">
               <tmf-video-card
                 [video]="{
-                  id: video.id,
-                  imageSrc: video.thumbnailUrl || '/assets/videos/default-thumb.jpg',
-                  imageAlt: video.title,
-                  tag: video.category,
-                  description: video.title,
-                  videoSrc: video.videoUrl
+                  id: video.id?.toString() || video.uuid || '',
+                  imageSrc: video.url || '/assets/videos/default-thumb.jpg',
+                  imageAlt: video.name || '影片',
+                  tag: video.category || '未分類',
+                  description: video.intro || video.name || '無描述',
+                  videoSrc: video.url
                 }"
                 (videoClick)="onVideoCardClick($event)"
               ></tmf-video-card>
@@ -80,21 +80,21 @@
             <!-- 影片標題 -->
             <div class="flex-1 px-4 flex items-center">
               <h3 class="text-base text-grey-33 line-clamp-2 font-medium">
-                {{ video.title }}
+                {{ video.name || '未命名影片' }}
               </h3>
             </div>
 
             <!-- 影片類別 -->
             <div class="w-32 px-4 flex items-center">
               <span class="px-2 py-1 bg-yellow rounded-lg text-sm-bold text-black">
-                {{ video.category }}
+                {{ video.category || '未分類' }}
               </span>
             </div>
 
             <!-- 影片簡介 -->
             <div class="flex-1 px-4 flex items-center">
               <p class="text-sm text-grey-66 line-clamp-2">
-                {{ video.description }}
+                {{ video.intro || '無簡介' }}
               </p>
             </div>
 
@@ -102,13 +102,13 @@
             <div class="w-40 px-4 flex flex-col items-center justify-center gap-2">
               <button
                 class="px-2 flex items-center w-12 h-7 box-border border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
-                (click)="editVideo(video.id)"
+                (click)="editVideo(video.id?.toString() || video.uuid || '')"
               >
                 編輯
               </button>
               <button
                 class="px-2 flex items-center w-12 h-7 box-border border border-red-500 text-red-500 hover:text-white hover:bg-red-500 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
-                (click)="deleteVideo(video.id)"
+                (click)="deleteVideo(video.id?.toString() || video.uuid || '')"
               >
                 刪除
               </button>
@@ -127,24 +127,35 @@
             <div
               class="relative w-20 h-16 bg-grey-f7 rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 flex-shrink-0"
               (click)="onVideoCardClick({
-                id: video.id,
-                imageSrc: video.thumbnailUrl || '/assets/videos/default-thumb.jpg',
-                imageAlt: video.title,
-                tag: video.category,
-                description: video.description,
-                videoSrc: video.videoUrl
+                id: video.id?.toString() || video.uuid || '',
+                imageSrc: video.url || '/assets/videos/default-thumb.jpg',
+                imageAlt: video.name || '影片',
+                tag: video.category || '未分類',
+                description: video.intro || video.name || '無描述',
+                videoSrc: video.url
               })"
             >
-              <!-- 背景圖片 -->
-              <img
-                [src]="video.thumbnailUrl || '/assets/videos/default-thumb.jpg'"
-                [alt]="video.title"
-                class="w-full h-full object-cover"
-              />
+              <!-- 背景影片 -->
+              @if (video.url) {
+                <video
+                  [src]="video.url"
+                  class="w-full h-full object-cover"
+                  muted
+                  loop
+                  playsinline
+                  #videoElement
+                  (mouseenter)="onVideoPreviewEnter(videoElement)"
+                  (mouseleave)="onVideoPreviewLeave(videoElement)"
+                ></video>
+              } @else {
+                <div class="w-full h-full bg-grey-f7 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-grey-9f">video_library</span>
+                </div>
+              }
 
               <!-- 類別標籤 -->
               <div class="absolute top-1 left-1 px-1 py-0.5 bg-yellow rounded text-xs font-bold text-black">
-                {{ video.category }}
+                {{ video.category || '未分類' }}
               </div>
 
               <!-- 播放提示 -->
@@ -157,27 +168,27 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between mb-2">
                 <h3 class="text-base text-grey-33 font-medium line-clamp-1">
-                  {{ video.title }}
+                  {{ video.name || '未命名影片' }}
                 </h3>
                 <span class="px-2 py-1 bg-yellow rounded-lg text-xs-bold text-black ml-2 flex-shrink-0">
-                  {{ video.category }}
+                  {{ video.category || '未分類' }}
                 </span>
               </div>
               <p class="text-sm text-grey-66 line-clamp-2 mb-3">
-                {{ video.description }}
+                {{ video.intro || '無簡介' }}
               </p>
 
               <!-- 操作按鈕 -->
               <div class="flex gap-2">
                 <button
                   class="px-3 py-1 border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm"
-                  (click)="editVideo(video.id)"
+                  (click)="editVideo(video.id?.toString() || video.uuid || '')"
                 >
                   編輯
                 </button>
                 <button
                   class="px-3 py-1 border border-red-500 text-red-500 hover:text-white hover:bg-red-500 transition-colors duration-75 text-sm rounded-sm"
-                  (click)="deleteVideo(video.id)"
+                  (click)="deleteVideo(video.id?.toString() || video.uuid || '')"
                 >
                   刪除
                 </button>

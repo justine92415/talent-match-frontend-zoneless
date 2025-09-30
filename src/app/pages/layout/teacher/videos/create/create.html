@@ -1,0 +1,164 @@
+<div>
+  <!-- 頁面標題 -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-grey-33 mb-2">新增短影音</h1>
+    <p class="text-grey-66">上傳新的短影音內容，與學生分享您的教學精華</p>
+  </div>
+
+  <!-- 短影音建立表單 -->
+  <form [formGroup]="videoForm" (ngSubmit)="submitVideo()" class="space-y-6">
+    <!-- 隱藏的檔案輸入 -->
+    <input
+      type="file"
+      accept="video/mp4,video/avi,video/mov,video/wmv,video/quicktime"
+      (change)="onVideoSelected($event)"
+      class="hidden"
+      #fileInput>
+
+    <!-- 左右佈局容器 -->
+    <div class="flex gap-8">
+      <!-- 左側：影片上傳區塊 (video-card 樣式) -->
+      <div class="flex-shrink-0">
+        @if (videoFile() && videoPreview()) {
+          <!-- 已選擇影片時 -->
+          <div
+            class="flex-shrink-0 w-75.5 h-135 relative bg-grey-f7 rounded-3xl overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200"
+            (click)="fileInput.click()">
+
+            <!-- 影片背景 -->
+            <div class="absolute inset-0">
+              <video
+                [src]="videoPreview()"
+                class="w-full h-full object-cover"
+                muted
+                loop
+                playsinline
+                preload="metadata"
+                #videoElement
+                (mouseenter)="onVideoPreviewEnter(videoElement)"
+                (mouseleave)="onVideoPreviewLeave(videoElement)">
+              </video>
+            </div>
+
+            <!-- 標籤 -->
+            @if (videoForm.get('category')?.value) {
+              <div class="absolute top-3 left-3 px-3 py-1 bg-black rounded-lg">
+                <span class="text-sm-bold text-yellow font-noto-sans-tc">{{ videoForm.get('category')?.value }}</span>
+              </div>
+            }
+
+            <!-- 底部內容 -->
+            <div class="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-black/60 via-black/30 to-transparent">
+              <p class="text-base text-white font-noto-sans-tc leading-relaxed">
+                {{ videoForm.get('intro')?.value || '請輸入影片介紹' }}
+              </p>
+            </div>
+
+            <!-- 移除按鈕 -->
+            <button
+              type="button"
+              (click)="removeVideo(); $event.stopPropagation()"
+              class="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-10">
+              ×
+            </button>
+          </div>
+        } @else {
+          <!-- 無影片時的上傳區域 -->
+          <div
+            class="flex-shrink-0 w-75.5 h-135 relative bg-grey-f7 rounded-3xl overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 border-2 border-dashed border-grey-d4"
+            (click)="fileInput.click()">
+
+            <!-- 上傳提示 -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="material-symbols-outlined text-grey-9f text-6xl mb-4">video_library</span>
+              <p class="text-grey-66 mb-2 text-center px-4">點擊上傳影片</p>
+              <p class="text-sm text-grey-9f text-center px-4">支援 MP4、AVI、MOV、WMV</p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- 右側：影片資訊表單 -->
+      <div class="flex-1 space-y-6">
+        <!-- 影片名稱 -->
+        <div>
+          <label class="block text-sm font-medium text-grey-33 mb-2">影片名稱 <span class="text-red-500">*</span></label>
+          <tmf-input-text
+            formControlName="name"
+            placeholder="請輸入影片名稱 (1-200字元)">
+          </tmf-input-text>
+          @if (videoForm.get('name')?.invalid && videoForm.get('name')?.touched) {
+            <p class="text-sm text-red-500 mt-1">
+              @if (videoForm.get('name')?.errors?.['required']) {
+                請輸入影片名稱
+              } @else if (videoForm.get('name')?.errors?.['maxlength']) {
+                影片名稱不能超過 200 個字元
+              }
+            </p>
+          }
+        </div>
+
+        <!-- 影片分類 -->
+        <div>
+          <label class="block text-sm font-medium text-grey-33 mb-2">影片分類 <span class="text-red-500">*</span></label>
+          <tmf-input-select
+            formControlName="category"
+            placeholder="請選擇影片分類"
+            [options]="mainCategories()">
+          </tmf-input-select>
+          @if (videoForm.get('category')?.invalid && videoForm.get('category')?.touched) {
+            <p class="text-sm text-red-500 mt-1">
+              @if (videoForm.get('category')?.errors?.['required']) {
+                請選擇影片分類
+              }
+            </p>
+          }
+        </div>
+
+        <!-- 影片介紹 -->
+        <div>
+          <label class="block text-sm font-medium text-grey-33 mb-2">影片介紹 <span class="text-red-500">*</span></label>
+          <textarea
+            formControlName="intro"
+            rows="12"
+            placeholder="請詳細描述影片內容和教學重點"
+            class="w-full px-3 py-2 border border-grey-d4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+            [class.border-red-500]="videoForm.get('intro')?.invalid && videoForm.get('intro')?.touched">
+          </textarea>
+          @if (videoForm.get('intro')?.invalid && videoForm.get('intro')?.touched) {
+            <p class="text-sm text-red-500 mt-1">
+              @if (videoForm.get('intro')?.errors?.['required']) {
+                請輸入影片介紹
+              } @else if (videoForm.get('intro')?.errors?.['maxlength']) {
+                影片介紹不能超過 2000 個字元
+              }
+            </p>
+          }
+          <p class="text-sm text-grey-66 mt-1">
+            {{ videoForm.get('intro')?.value?.length || 0 }} / 2000
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="flex gap-4 pt-6">
+      <tmf-button
+        type="submit"
+        class="flex-1 h-10"
+        [disabled]="!videoForm.valid || !videoFile() || isLoading()"
+        [loading]="isLoading()">
+        {{ isLoading() ? '上傳中...' : '上傳影片' }}
+      </tmf-button>
+
+      <tmf-button
+        type="button"
+        class="h-10"
+        variant="secondary"
+        (click)="cancel()"
+        [disabled]="isLoading()">
+        取消
+      </tmf-button>
+    </div>
+  </form>
+</div>

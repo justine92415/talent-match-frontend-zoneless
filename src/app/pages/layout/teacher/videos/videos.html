@@ -1,1 +1,208 @@
-<p>videos works!</p>
+<div>
+  <!-- 頁面標題和新增按鈕 -->
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl-bold text-grey-33">短影音管理</h1>
+    <tmf-button class="h-10" iconPosition="left" iconName="add" (click)="goToCreateVideo()">
+      新增短影音
+    </tmf-button>
+  </div>
+
+  <!-- 短影音表格容器 -->
+  <div class="bg-white">
+    <!-- 桌面版表格 -->
+    <div class="hidden lg:block">
+      <tmf-table>
+        <!-- 表格標題 -->
+        <div thead class="flex w-full h-10">
+          <div class="w-80 px-4 flex items-center">
+            <span class="text-white">影片預覽</span>
+          </div>
+          <div class="flex-1 px-4 flex items-center gap-1">
+            <span class="text-white">標題</span>
+            <span class="material-symbols-outlined text-base text-white">swap_vert</span>
+          </div>
+          <div class="w-32 px-4 flex items-center">
+            <span class="text-white">類別</span>
+          </div>
+          <div class="flex-1 px-4 flex items-center">
+            <span class="text-white">簡介</span>
+          </div>
+          <div class="w-40 px-4 flex items-center justify-center">
+            <span class="text-white">操作</span>
+          </div>
+        </div>
+
+        <!-- 載入狀態 -->
+        @if (isLoading()) {
+          <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+            <div class="flex items-center justify-center w-full h-full">
+              <span class="text-grey-66">載入中...</span>
+            </div>
+          </div>
+        }
+
+        <!-- 錯誤狀態 -->
+        @if (loadError()) {
+          <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+            <div class="flex items-center justify-center w-full h-full">
+              <span class="text-red-500">{{ loadError() }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- 空狀態 -->
+        @if (!isLoading() && !loadError() && videos().length === 0) {
+          <div tbody class="h-36 flex border-b border-grey-d4 bg-white">
+            <div class="flex items-center justify-center w-full h-full">
+              <span class="text-grey-66">目前沒有短影音</span>
+            </div>
+          </div>
+        }
+
+        <!-- 短影音列表 -->
+        @for (video of videos(); track video.id; let i = $index) {
+          <div tbody class="flex border-b border-grey-d4 bg-white p-4 transition-colors hover:bg-grey-f7 min-h-fit">
+            <!-- 影片預覽 -->
+            <div class="w-80 px-4 flex items-center justify-center py-2">
+              <tmf-video-card
+                [video]="{
+                  id: video.id?.toString() || video.uuid || '',
+                  tag: video.category || '未分類',
+                  description: video.intro || video.name || '無描述',
+                  videoSrc: video.url
+                }"
+                (videoClick)="onVideoCardClick($event)"
+              ></tmf-video-card>
+            </div>
+
+            <!-- 影片標題 -->
+            <div class="flex-1 px-4 flex items-center">
+              <h3 class="text-base text-grey-33 line-clamp-2 font-medium">
+                {{ video.name || '未命名影片' }}
+              </h3>
+            </div>
+
+            <!-- 影片類別 -->
+            <div class="w-32 px-4 flex items-center">
+              <span class="px-2 py-1 text-yellow rounded-lg text-sm-bold bg-black">
+                {{ video.category || '未分類' }}
+              </span>
+            </div>
+
+            <!-- 影片簡介 -->
+            <div class="flex-1 px-4 flex items-center">
+              <p class="text-sm text-grey-66 line-clamp-2">
+                {{ video.intro || '無簡介' }}
+              </p>
+            </div>
+
+            <!-- 操作按鈕 -->
+            <div class="w-40 px-4 flex flex-col items-center justify-center gap-2">
+              <button
+                class="px-2 flex items-center w-12 h-7 box-border border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
+                (click)="editVideo(video.id?.toString() || video.uuid || '')"
+              >
+                編輯
+              </button>
+              <button
+                class="px-2 flex items-center w-12 h-7 box-border border border-red-500 text-red-500 hover:text-white hover:bg-red-500 transition-colors duration-75 text-sm rounded-sm cursor-pointer align-middle"
+                (click)="deleteVideo(video.id?.toString() || video.uuid || '')"
+              >
+                刪除
+              </button>
+            </div>
+          </div>
+        }
+      </tmf-table>
+    </div>
+
+    <!-- 手機版卡片列表 -->
+    <div class="lg:hidden space-y-4">
+      @for (video of videos(); track video.id) {
+        <div class="bg-white border border-grey-d4 rounded-lg p-4">
+          <div class="flex gap-4">
+            <!-- 影片預覽 -->
+            <div
+              class="relative w-20 h-16 bg-grey-f7 rounded-lg overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 flex-shrink-0"
+              (click)="onVideoCardClick({
+                id: video.id?.toString() || video.uuid || '',
+                tag: video.category || '未分類',
+                description: video.intro || video.name || '無描述',
+                videoSrc: video.url
+              })"
+            >
+              <!-- 背景影片 -->
+              @if (video.url) {
+                <video
+                  [src]="video.url"
+                  class="w-full h-full object-cover"
+                  muted
+                  loop
+                  playsinline
+                  #videoElement
+                  (mouseenter)="onVideoPreviewEnter(videoElement)"
+                  (mouseleave)="onVideoPreviewLeave(videoElement)"
+                ></video>
+              } @else {
+                <div class="w-full h-full bg-grey-f7 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-grey-9f">video_library</span>
+                </div>
+              }
+
+              <!-- 類別標籤 -->
+              <div class="absolute top-1 left-1 px-1 py-0.5 text-yellow rounded text-xs font-bold bg-black">
+                {{ video.category || '未分類' }}
+              </div>
+
+              <!-- 播放提示 -->
+              <div class="absolute bottom-0 right-0 p-1">
+                <span class="material-symbols-outlined text-white text-sm drop-shadow-md">play_arrow</span>
+              </div>
+            </div>
+
+            <!-- 影片資訊 -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between mb-2">
+                <h3 class="text-base text-grey-33 font-medium line-clamp-1">
+                  {{ video.name || '未命名影片' }}
+                </h3>
+                <span class="px-2 py-1 text-yellow rounded-lg text-xs-bold bg-black ml-2 flex-shrink-0">
+                  {{ video.category || '未分類' }}
+                </span>
+              </div>
+              <p class="text-sm text-grey-66 line-clamp-2 mb-3">
+                {{ video.intro || '無簡介' }}
+              </p>
+
+              <!-- 操作按鈕 -->
+              <div class="flex gap-2">
+                <button
+                  class="px-3 py-1 border border-grey-66 text-grey-66 hover:text-white hover:bg-grey-66 transition-colors duration-75 text-sm rounded-sm"
+                  (click)="editVideo(video.id?.toString() || video.uuid || '')"
+                >
+                  編輯
+                </button>
+                <button
+                  class="px-3 py-1 border border-red-500 text-red-500 hover:text-white hover:bg-red-500 transition-colors duration-75 text-sm rounded-sm"
+                  (click)="deleteVideo(video.id?.toString() || video.uuid || '')"
+                >
+                  刪除
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- 分頁組件 -->
+  <div class="mt-6 md:mt-8">
+    <tmf-pagination
+      [currentPage]="currentPage()"
+      [totalResults]="totalResults()"
+      [itemsPerPage]="itemsPerPage()"
+      (pageChange)="onPageChange($event)"
+    ></tmf-pagination>
+  </div>
+</div>

@@ -1,0 +1,139 @@
+<!-- Global Close Button -->
+<button
+  class="absolute top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-black bg-opacity-50 backdrop-blur-sm text-white hover:bg-opacity-70 transition-all cursor-pointer"
+  (click)="close()"
+>
+  <mat-icon class="!w-6 !h-6 !text-2xl !leading-6">close</mat-icon>
+</button>
+
+<!-- Swiper Container -->
+<div class="swiper" #swiperContainer>
+  <div class="swiper-wrapper">
+    @for (video of data.videos; track video.id; let i = $index) {
+      <div class="swiper-slide">
+        <div
+          class="relative flex h-screen w-full max-w-[375px] items-center justify-between xl:h-[712px] xl:w-[472px]"
+        >
+          <div
+            class="relative h-full w-full cursor-pointer overflow-hidden rounded-xl"
+          >
+            <!-- Category Tag -->
+            <div
+              class="absolute left-3 top-3 z-10 rounded-lg bg-yellow px-3 py-1 text-sm font-bold text-black"
+            >
+              {{ video.tag }}
+            </div>
+
+            <!-- Video Element -->
+            <video
+              class="video-viewer-video h-full w-full object-cover"
+              [src]="video.videoSrc || ''"
+              muted
+              loop
+              playsinline
+              (click)="onVideoClick($event)"
+              (timeupdate)="updateProgress($event, i)"
+            ></video>
+
+            <!-- Bottom Gradient Mask -->
+            <div class="mask absolute bottom-0 h-[168px] w-full">
+              <div class="flex h-full items-end">
+                <div class="flex w-full flex-col gap-4 px-4 pb-6">
+                  <!-- Description -->
+                  <p class="pr-10 text-base text-white">
+                    {{ video.description }}
+                  </p>
+
+                  <!-- Duration (if available) -->
+                  @if (video.duration) {
+                    <div class="text-xs text-white text-opacity-75">
+                      {{ formatDuration(video.duration) }}
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              @if (isPlaying() && i === currentVideoIndex()) {
+                <div class="progress-container">
+                  <div
+                    class="h-full w-0 bg-primary transition-all duration-100"
+                    [style.width.%]="progress()"
+                  ></div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Right Side Controls -->
+          <div class="absolute bottom-0 right-0 h-full">
+            <div class="flex h-full flex-col items-end justify-end">
+              <!-- Action Buttons -->
+              <div
+                class="relative z-10 flex flex-col gap-6 pb-[60px] pr-2 xl:pb-2 xl:pr-2"
+              >
+                <!-- Share Button -->
+                <div
+                  class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white text-primary xl:h-12 xl:w-12"
+                >
+                  <mat-icon
+                    class="!text-xl !leading-5 xl:!text-[24px] xl:!leading-6"
+                  >
+                    share
+                  </mat-icon>
+                </div>
+
+                <!-- Bookmark Button -->
+                <div
+                  class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white text-primary xl:h-12 xl:w-12"
+                >
+                  <mat-icon
+                    class="!text-xl !leading-5 xl:!text-[24px] xl:!leading-6"
+                  >
+                    bookmark
+                  </mat-icon>
+                </div>
+              </div>
+
+              <!-- Swipe Hints - only show on first video -->
+              @if (i === 0 && data.videos.length > 1) {
+                <div
+                  class="absolute right-14 top-1/2 transform -translate-y-1/2 text-white text-opacity-50 animate-bounce"
+                >
+                  <div class="flex flex-col items-center gap-2">
+                    <mat-icon class="!w-6 !h-6">keyboard_arrow_up</mat-icon>
+                    <span class="text-xs">滑動切換</span>
+                    <mat-icon class="!w-6 !h-6">keyboard_arrow_down</mat-icon>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Video Counter -->
+@if (data.videos.length > 1) {
+  <div
+    class="absolute top-4 left-4 bg-black bg-opacity-50 backdrop-blur-sm rounded-full px-3 py-1 text-white text-sm z-20"
+  >
+    {{ currentVideoIndex() + 1 }} / {{ data.videos.length }}
+  </div>
+}
+
+<!-- Loading State -->
+@if (data.videos.length === 0) {
+  <div
+    class="absolute inset-0 flex items-center justify-center text-white z-10"
+  >
+    <div class="text-center">
+      <mat-icon class="!w-12 !h-12 !text-5xl text-grey-66 mb-4"
+        >video_library</mat-icon
+      >
+      <p class="text-grey-66">載入影片中...</p>
+    </div>
+  </div>
+}

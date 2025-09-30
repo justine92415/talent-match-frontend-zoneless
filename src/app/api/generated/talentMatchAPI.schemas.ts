@@ -3011,9 +3011,52 @@ export interface CourseBasicInfo {
   updated_at?: string;
 }
 
+/**
+ * 短影音詳細資訊
+ */
+export type CourseWithPriceOptionsAllOfSelectedVideosItemVideoInfo = {
+  /** 短影音 ID */
+  id?: number;
+  /** 短影音 UUID */
+  uuid?: string;
+  /** 短影音名稱 */
+  name?: string;
+  /**
+   * 短影音分類
+   * @nullable
+   */
+  category?: string | null;
+  /**
+   * 短影音簡介
+   * @nullable
+   */
+  intro?: string | null;
+  /**
+   * 短影音 URL
+   * @nullable
+   */
+  url?: string | null;
+  /** 短影音建立時間 */
+  created_at?: string;
+};
+
+/**
+ * 關聯的短影音資訊
+ */
+export type CourseWithPriceOptionsAllOfSelectedVideosItem = {
+  /** 短影音 ID */
+  video_id?: number;
+  /** 顯示順序 */
+  display_order?: number;
+  /** 短影音詳細資訊 */
+  video_info?: CourseWithPriceOptionsAllOfSelectedVideosItemVideoInfo;
+};
+
 export type CourseWithPriceOptionsAllOf = {
   /** 課程價格方案列表 */
   price_options?: PriceOption[];
+  /** 課程關聯的短影音列表 (最多3支，按顯示順序排列) */
+  selected_videos?: CourseWithPriceOptionsAllOfSelectedVideosItem[];
 };
 
 export type CourseWithPriceOptions = CourseBasicInfo &
@@ -3085,10 +3128,10 @@ export const GetCourseSuccessResponseStatus = {
 } as const;
 
 /**
- * 課程詳細資料
+ * 完整課程詳細資料，包含價格方案和短影音
  */
 export type GetCourseSuccessResponseData = {
-  course?: CourseBasicInfo;
+  course?: CourseWithPriceOptions;
 };
 
 export interface GetCourseSuccessResponse {
@@ -3099,7 +3142,7 @@ export interface GetCourseSuccessResponse {
    * @nullable
    */
   message?: string | null;
-  /** 課程詳細資料 */
+  /** 完整課程詳細資料，包含價格方案和短影音 */
   data?: GetCourseSuccessResponseData;
 }
 
@@ -3833,9 +3876,9 @@ export interface PublicCourseQueryParams {
  */
 export type PublicCourseListItemMainCategory = {
   /** 主分類 ID */
-  id?: number;
+  id: number;
   /** 主分類名稱 */
-  name?: string;
+  name: string;
 };
 
 /**
@@ -3843,9 +3886,9 @@ export type PublicCourseListItemMainCategory = {
  */
 export type PublicCourseListItemSubCategory = {
   /** 次分類 ID */
-  id?: number;
+  id: number;
   /** 次分類名稱 */
-  name?: string;
+  name: string;
 };
 
 /**
@@ -3853,11 +3896,11 @@ export type PublicCourseListItemSubCategory = {
  */
 export type PublicCourseListItemTeacherUser = {
   /** 教師姓名 */
-  name?: string;
+  name: string;
   /** 教師暱稱 */
-  nick_name?: string;
+  nick_name: string;
   /** 教師頭像 URL */
-  avatar_image?: string;
+  avatar_image: string;
 };
 
 /**
@@ -3865,33 +3908,33 @@ export type PublicCourseListItemTeacherUser = {
  */
 export type PublicCourseListItemTeacher = {
   /** 教師 ID */
-  id?: number;
+  id: number;
   /** 教師使用者資訊 */
-  user?: PublicCourseListItemTeacherUser;
+  user: PublicCourseListItemTeacherUser;
 };
 
 export interface PublicCourseListItem {
   /** 課程 ID */
-  id?: number;
+  id: number;
   /** 課程 UUID (系統生成的唯一識別碼) */
-  uuid?: string;
+  uuid: string;
   /** 課程名稱 */
-  name?: string;
+  name: string;
   /**
    * 課程主圖 URL
    * @nullable
    */
   main_image?: string | null;
   /** 最低價格 */
-  min_price?: number;
+  min_price: number;
   /** 最高價格 */
-  max_price?: number;
+  max_price: number;
   /** 課程評分 (字串格式的數字) */
-  rate?: string;
+  rate: string;
   /** 評價數量 */
-  review_count?: number;
+  review_count: number;
   /** 學生人數 */
-  student_count?: number;
+  student_count: number;
   /**
    * 城市
    * @nullable
@@ -3908,15 +3951,15 @@ export interface PublicCourseListItem {
    */
   address?: string | null;
   /** 主分類資訊 */
-  main_category?: PublicCourseListItemMainCategory;
+  main_category: PublicCourseListItemMainCategory;
   /** 次分類資訊 */
-  sub_category?: PublicCourseListItemSubCategory;
+  sub_category: PublicCourseListItemSubCategory;
   /** 教師資訊 */
-  teacher?: PublicCourseListItemTeacher;
+  teacher: PublicCourseListItemTeacher;
   /** 建立時間 */
-  created_at?: string;
+  created_at: string;
   /** 更新時間 */
-  updated_at?: string;
+  updated_at: string;
 }
 
 export interface PublicCoursePaginationInfo {
@@ -3990,9 +4033,9 @@ export interface PublicCourseListSuccessResponse {
  */
 export type PublicCourseDetailMainCategory = {
   /** 主分類 ID */
-  id?: number;
+  id: number;
   /** 主分類名稱 */
-  name?: string;
+  name: string;
 };
 
 /**
@@ -4000,18 +4043,18 @@ export type PublicCourseDetailMainCategory = {
  */
 export type PublicCourseDetailSubCategory = {
   /** 次分類 ID */
-  id?: number;
+  id: number;
   /** 次分類名稱 */
-  name?: string;
+  name: string;
 };
 
 export interface PublicCourseDetail {
   /** 課程 ID */
-  id?: number;
+  id: number;
   /** 課程 UUID (系統生成的唯一識別碼) */
-  uuid?: string;
+  uuid: string;
   /** 課程名稱 */
-  name?: string;
+  name: string;
   /**
    * 課程內容描述
    * @nullable
@@ -4023,13 +4066,13 @@ export interface PublicCourseDetail {
    */
   main_image?: string | null;
   /** 課程評分 (字串格式的數字) */
-  rate?: string;
+  rate: string;
   /** 評價數量 */
-  review_count?: number;
+  review_count: number;
   /** 學生人數 */
-  student_count?: number;
+  student_count: number;
   /** 購買次數 */
-  purchase_count?: number;
+  purchase_count: number;
   /**
    * 問卷調查連結
    * @nullable
@@ -4056,11 +4099,11 @@ export interface PublicCourseDetail {
    */
   address?: string | null;
   /** 主分類資訊 */
-  main_category?: PublicCourseDetailMainCategory;
+  main_category: PublicCourseDetailMainCategory;
   /** 次分類資訊 */
-  sub_category?: PublicCourseDetailSubCategory;
+  sub_category: PublicCourseDetailSubCategory;
   /** 建立時間 */
-  created_at?: string;
+  created_at: string;
 }
 
 /**
@@ -4068,18 +4111,18 @@ export interface PublicCourseDetail {
  */
 export type PublicCourseTeacherInfoUser = {
   /** 教師姓名 */
-  name?: string;
+  name: string;
   /** 教師暱稱 */
-  nick_name?: string;
+  nick_name: string;
   /** 教師頭像 URL */
-  avatar_image?: string;
+  avatar_image: string;
 };
 
 export interface PublicCourseTeacherInfo {
   /** 教師 ID */
-  id?: number;
+  id: number;
   /** 教師使用者資訊 */
-  user?: PublicCourseTeacherInfoUser;
+  user: PublicCourseTeacherInfoUser;
   /**
    * 教師所在城市
    * @nullable
@@ -4101,22 +4144,136 @@ export interface PublicCourseTeacherInfo {
    */
   introduction?: string | null;
   /** 教師總學生數 */
-  total_students?: number;
+  total_students: number;
   /** 教師總課程數 */
-  total_courses?: number;
+  total_courses: number;
   /** 教師平均評分 */
-  average_rating?: number;
+  average_rating: number;
 }
 
 export interface PublicCoursePriceOption {
   /** 價格方案 ID */
-  id?: number;
+  id: number;
   /** 價格方案 UUID */
-  uuid?: string;
+  uuid: string;
   /** 價格 */
-  price?: number;
+  price: number;
   /** 堂數 */
-  quantity?: number;
+  quantity: number;
+}
+
+/**
+ * 影片類型 (storage: 儲存類型, youtube: YouTube 連結)
+ */
+export type PublicCourseVideoVideoType =
+  (typeof PublicCourseVideoVideoType)[keyof typeof PublicCourseVideoVideoType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseVideoVideoType = {
+  storage: 'storage',
+  youtube: 'youtube',
+} as const;
+
+/**
+ * 公開課程影片資訊
+ */
+export interface PublicCourseVideo {
+  /** 影片 ID */
+  id: number;
+  /** 影片名稱 */
+  name: string;
+  /**
+   * 影片分類
+   * @nullable
+   */
+  category?: string | null;
+  /** 影片簡介 */
+  intro: string;
+  /** 影片 URL */
+  url: string;
+  /** 影片類型 (storage: 儲存類型, youtube: YouTube 連結) */
+  video_type: PublicCourseVideoVideoType;
+  /** 是否為預覽影片 */
+  is_preview: boolean;
+}
+
+/**
+ * 公開課程檔案資訊
+ */
+export interface PublicCourseFile {
+  /** 檔案 ID */
+  id: number;
+  /** 檔案名稱 */
+  name: string;
+  /** 檔案下載 URL */
+  url: string;
+}
+
+/**
+ * 評價者資訊
+ */
+export type PublicCourseReviewUser = {
+  /** 評價者暱稱 */
+  nick_name: string;
+};
+
+/**
+ * 公開課程評價資訊
+ */
+export interface PublicCourseReview {
+  /** 評價 ID */
+  id: number;
+  /**
+   * 評分 (1-5星)
+   * @minimum 1
+   * @maximum 5
+   */
+  rate: number;
+  /** 評價內容 */
+  comment: string;
+  /** 評價者資訊 */
+  user: PublicCourseReviewUser;
+  /** 評價建立時間 */
+  created_at: string;
+}
+
+/**
+ * 推薦課程教師使用者資訊
+ */
+export type PublicRecommendedCourseTeacherUser = {
+  /** 推薦課程教師暱稱 */
+  nick_name: string;
+};
+
+/**
+ * 推薦課程教師資訊
+ */
+export type PublicRecommendedCourseTeacher = {
+  /** 推薦課程教師使用者資訊 */
+  user: PublicRecommendedCourseTeacherUser;
+};
+
+/**
+ * 推薦課程資訊
+ */
+export interface PublicRecommendedCourse {
+  /** 推薦課程 ID */
+  id: number;
+  /** 推薦課程 UUID */
+  uuid: string;
+  /** 推薦課程名稱 */
+  name: string;
+  /**
+   * 推薦課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 推薦課程評分 */
+  rate: number;
+  /** 推薦課程最低價格 */
+  min_price: number;
+  /** 推薦課程教師資訊 */
+  teacher: PublicRecommendedCourseTeacher;
 }
 
 export interface PublicTeacherCertificate {
@@ -4179,16 +4336,16 @@ export type PublicCourseDetailSuccessResponseData = {
   teacher?: PublicCourseTeacherInfo;
   /** 課程價格方案列表 */
   price_options?: PublicCoursePriceOption[];
-  /** 課程影片列表 (目前為空陣列) */
-  videos?: unknown[];
-  /** 課程檔案列表 (目前為空陣列) */
-  files?: unknown[];
+  /** 課程影片列表 (關聯的短影音，按顯示順序排列) */
+  videos?: PublicCourseVideo[];
+  /** 課程檔案列表 (課程相關文件和資料) */
+  files?: PublicCourseFile[];
   /** 7天課程表 (從明天開始的連續7天，顯示每日時段狀態) */
   schedule?: DaySchedule[];
-  /** 最近評價列表 (目前為空陣列) */
-  recent_reviews?: unknown[];
-  /** 推薦課程列表 (目前為空陣列) */
-  recommended_courses?: unknown[];
+  /** 最近評價列表 (顯示最新的課程評價) */
+  recent_reviews?: PublicCourseReview[];
+  /** 推薦課程列表 (相關或相似的課程推薦) */
+  recommended_courses?: PublicRecommendedCourse[];
   /** 教師證書列表 */
   teacher_certificates?: PublicTeacherCertificate[];
   /** 教師工作經驗列表 */
@@ -4214,131 +4371,335 @@ export type PublicCourseNotFoundErrorResponseAllOf = {
 export type PublicCourseNotFoundErrorResponse = NotFoundErrorResponse &
   PublicCourseNotFoundErrorResponseAllOf;
 
-/**
- * 影片類型 (local: 本地上傳, youtube: YouTube連結)
- */
-export type VideoUploadRequestType =
-  (typeof VideoUploadRequestType)[keyof typeof VideoUploadRequestType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const VideoUploadRequestType = {
-  local: 'local',
-  youtube: 'youtube',
-} as const;
-
 export interface VideoUploadRequest {
   /**
-   * 影片名稱 (必填，1-255字元)
+   * 影片名稱 (必填，1-200字元)
    * @minLength 1
-   * @maxLength 255
+   * @maxLength 200
    */
   name: string;
   /**
-   * 影片分類 (必填)
+   * 影片分類 (必填，1-100字元)
    * @minLength 1
    * @maxLength 100
    */
   category: string;
   /**
-   * 影片簡介 (必填)
+   * 影片介紹 (必填，1-2000字元)
    * @minLength 1
-   * @maxLength 1000
+   * @maxLength 2000
    */
   intro: string;
-  /** 影片類型 (local: 本地上傳, youtube: YouTube連結) */
-  type: VideoUploadRequestType;
-  /** YouTube 影片網址 (當 type 為 youtube 時必填) */
-  youtube_url?: string;
+  /** 影片檔案 (必填，支援 MP4, AVI, MOV, WMV 格式，最大 500MB) */
+  videoFile?: Blob;
+}
+
+/**
+ * 回應狀態
+ */
+export type VideoUploadSuccessResponseStatus =
+  (typeof VideoUploadSuccessResponseStatus)[keyof typeof VideoUploadSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoUploadSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 上傳成功的影片資料
+ */
+export type VideoUploadSuccessResponseData = {
+  video?: VideoBasicInfo;
+};
+
+export interface VideoUploadSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoUploadSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 上傳成功的影片資料 */
+  data?: VideoUploadSuccessResponseData;
+}
+
+export interface VideoListQueryParams {
+  /**
+   * 頁碼 (選填，預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁數量 (選填，預設為 20，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  per_page?: number;
+  /**
+   * 影片分類篩選 (選填，模糊搜尋)
+   * @maxLength 100
+   */
+  category?: string;
+  /**
+   * 搜尋關鍵字 (選填，搜尋影片標題和介紹)
+   * @maxLength 200
+   */
+  search?: string;
+}
+
+/**
+ * 回應狀態
+ */
+export type VideoListSuccessResponseStatus =
+  (typeof VideoListSuccessResponseStatus)[keyof typeof VideoListSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoListSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 影片列表資料
+ */
+export type VideoListSuccessResponseData = {
+  /** 影片列表 */
+  videos?: VideoBasicInfo[];
+};
+
+export interface VideoListSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoListSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 影片列表資料 */
+  data?: VideoListSuccessResponseData;
 }
 
 export interface VideoUpdateRequest {
   /**
-   * 影片名稱 (選填，1-255字元)
+   * 影片名稱 (選填，1-200字元)
    * @minLength 1
-   * @maxLength 255
+   * @maxLength 200
    */
   name?: string;
   /**
-   * 影片分類 (選填)
+   * 影片分類 (選填，1-100字元)
    * @minLength 1
    * @maxLength 100
    */
   category?: string;
   /**
-   * 影片簡介 (選填)
+   * 影片介紹 (選填，1-2000字元)
    * @minLength 1
-   * @maxLength 1000
+   * @maxLength 2000
    */
   intro?: string;
-  /**
-   * YouTube 影片網址 (選填)
-   * @nullable
-   */
-  youtube_url?: string | null;
 }
 
 /**
- * 影片類型
+ * 回應狀態
  */
-export type VideoBasicInfoType =
-  (typeof VideoBasicInfoType)[keyof typeof VideoBasicInfoType];
+export type VideoUpdateSuccessResponseStatus =
+  (typeof VideoUpdateSuccessResponseStatus)[keyof typeof VideoUpdateSuccessResponseStatus];
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const VideoBasicInfoType = {
-  local: 'local',
-  youtube: 'youtube',
+export const VideoUpdateSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 更新後的影片資料
+ */
+export type VideoUpdateSuccessResponseData = {
+  video?: VideoBasicInfo;
+};
+
+export interface VideoUpdateSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoUpdateSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 更新後的影片資料 */
+  data?: VideoUpdateSuccessResponseData;
+}
+
+/**
+ * 回應狀態
+ */
+export type VideoDetailSuccessResponseStatus =
+  (typeof VideoDetailSuccessResponseStatus)[keyof typeof VideoDetailSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoDetailSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 影片使用統計資訊
+ */
+export type VideoDetailSuccessResponseDataUsageStats = {
+  /** 被多少課程使用 */
+  used_in_courses?: number;
+  /** 總觀看次數 */
+  total_views?: number;
+};
+
+/**
+ * 影片詳細資料和使用統計
+ */
+export type VideoDetailSuccessResponseData = {
+  video?: VideoBasicInfo;
+  /** 影片使用統計資訊 */
+  usage_stats?: VideoDetailSuccessResponseDataUsageStats;
+};
+
+export interface VideoDetailSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoDetailSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 影片詳細資料和使用統計 */
+  data?: VideoDetailSuccessResponseData;
+}
+
+/**
+ * 影片類型 (統一為 storage 本地儲存)
+ */
+export type VideoBasicInfoVideoType =
+  (typeof VideoBasicInfoVideoType)[keyof typeof VideoBasicInfoVideoType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoBasicInfoVideoType = {
+  storage: 'storage',
 } as const;
 
 export interface VideoBasicInfo {
   /** 影片 ID */
   id?: number;
-  /** 影片 UUID */
+  /** 影片 UUID (系統生成的唯一識別碼) */
   uuid?: string;
+  /** 教師 ID */
+  teacher_id?: number;
   /** 影片名稱 */
   name?: string;
-  /** 影片分類 */
-  category?: string;
-  /** 影片簡介 */
-  intro?: string;
-  /** 影片類型 */
-  type?: VideoBasicInfoType;
   /**
-   * 影片長度 (秒)
+   * 影片分類
    * @nullable
    */
-  duration?: number | null;
+  category?: string | null;
   /**
-   * 縮圖 URL
+   * 影片介紹
    * @nullable
    */
-  thumbnail_url?: string | null;
+  intro?: string | null;
+  /**
+   * 影片檔案 URL
+   * @nullable
+   */
+  url?: string | null;
+  /** 影片類型 (統一為 storage 本地儲存) */
+  video_type?: VideoBasicInfoVideoType;
   /** 建立時間 */
   created_at?: string;
   /** 更新時間 */
   updated_at?: string;
 }
 
-export type VideoDetailInfoAllOf = {
-  /**
-   * 影片檔案 URL (本地上傳)
-   * @nullable
-   */
-  file_url?: string | null;
-  /**
-   * YouTube 影片 URL
-   * @nullable
-   */
-  youtube_url?: string | null;
-  /**
-   * 檔案大小 (bytes)
-   * @nullable
-   */
-  file_size?: number | null;
+export type VideoUploadValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
 };
 
-export type VideoDetailInfo = VideoBasicInfo & VideoDetailInfoAllOf;
+export type VideoUploadValidationErrorResponse = ValidationErrorResponse &
+  VideoUploadValidationErrorResponseAllOf;
 
-export type VideoInfo = VideoDetailInfo;
+export type VideoFileFormatErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type VideoFileFormatErrorResponse = ValidationErrorResponse &
+  VideoFileFormatErrorResponseAllOf;
+
+export type VideoFileSizeErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type VideoFileSizeErrorResponse = ValidationErrorResponse &
+  VideoFileSizeErrorResponseAllOf;
+
+export type VideoPermissionErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type VideoPermissionErrorResponse = ForbiddenErrorResponse &
+  VideoPermissionErrorResponseAllOf;
+
+export type VideoUpdateValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type VideoUpdateValidationErrorResponse = ValidationErrorResponse &
+  VideoUpdateValidationErrorResponseAllOf;
+
+export type VideoNotFoundErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type VideoNotFoundErrorResponse = NotFoundErrorResponse &
+  VideoNotFoundErrorResponseAllOf;
+
+export type VideoUploadFailedErrorResponseAllOf = {
+  message?: unknown;
+};
+
+export type VideoUploadFailedErrorResponse = ServerErrorResponse &
+  VideoUploadFailedErrorResponseAllOf;
+
+export type VideoUpdateFailedErrorResponseAllOf = {
+  message?: unknown;
+  code?: unknown;
+};
+
+export type VideoUpdateFailedErrorResponse = ServerErrorResponse &
+  VideoUpdateFailedErrorResponseAllOf;
+
+/**
+ * 回應狀態
+ */
+export type VideoDeleteSuccessResponseStatus =
+  (typeof VideoDeleteSuccessResponseStatus)[keyof typeof VideoDeleteSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoDeleteSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 回應資料（刪除操作無回傳資料）
+ * @nullable
+ */
+export type VideoDeleteSuccessResponseData = unknown | null;
+
+export interface VideoDeleteSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoDeleteSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 回應資料（刪除操作無回傳資料）
+   * @nullable
+   */
+  data?: VideoDeleteSuccessResponseData;
+}
+
+export type VideoCannotDeleteErrorResponseAllOf = {
+  message?: unknown;
+  code?: unknown;
+};
+
+export type VideoCannotDeleteErrorResponse = BusinessErrorResponse &
+  VideoCannotDeleteErrorResponseAllOf;
 
 export interface PriceOption {
   /** 價格方案 ID */
@@ -6327,7 +6688,7 @@ export type PostApiCartItems400 =
   | CartBusinessErrorResponse;
 
 export type PostApiCoursesBody = {
-  /** 課程基本資料 (JSON 字串格式) */
+  /** 課程基本資料 (JSON 字串格式，可包含短影音關聯) */
   courseData: string;
   /** 價格方案陣列 (JSON 字串格式) */
   priceOptions: string;
@@ -7120,96 +7481,57 @@ export type PostApiUploadAvatar400 =
   | AvatarValidationErrorResponse
   | AvatarBusinessErrorResponse;
 
-/**
- * 影片類型
- */
-export type PostApiVideosBodyOneVideoType =
-  (typeof PostApiVideosBodyOneVideoType)[keyof typeof PostApiVideosBodyOneVideoType];
-
-// eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PostApiVideosBodyOneVideoType = {
-  youtube: 'youtube',
-  storage: 'storage',
-} as const;
-
-export type PostApiVideosBodyOne = {
-  /**
-   * 影片名稱
-   * @maxLength 200
-   */
-  name: string;
-  /**
-   * 影片分類
-   * @maxLength 100
-   */
-  category: string;
-  /**
-   * 影片介紹
-   * @maxLength 2000
-   */
-  intro: string;
-  /** 影片類型 */
-  video_type: PostApiVideosBodyOneVideoType;
-  /** YouTube 影片 URL（當 video_type 為 youtube 時必填） */
-  youtube_url?: string;
-  /** 影片檔案（當 video_type 為 storage 時必填） */
-  video_file?: Blob;
-  /** 影片縮圖（選填） */
-  thumbnail?: Blob;
-};
-
-export type PostApiVideos201AllOf = {
-  data?: VideoDetailInfo;
-};
-
-export type PostApiVideos201 = SuccessResponse & PostApiVideos201AllOf;
+export type PostApiVideos400 =
+  | VideoUploadValidationErrorResponse
+  | VideoFileFormatErrorResponse
+  | VideoFileSizeErrorResponse;
 
 export type GetApiVideosParams = {
   /**
-   * 頁碼
+   * 頁碼 (預設 1)
    * @minimum 1
    */
   page?: number;
   /**
-   * 每頁顯示數量
+   * 每頁數量 (預設 20，最大 100)
    * @minimum 1
    * @maximum 100
    */
   per_page?: number;
   /**
-   * 依分類篩選（空字串或不提供表示不篩選）
+   * 分類篩選 (模糊搜尋)
    * @maxLength 100
    */
   category?: string;
   /**
-   * 搜索關鍵字，在影片名稱中搜索
+   * 搜尋關鍵字 (搜尋標題和介紹)
    * @maxLength 200
    */
   search?: string;
 };
 
-export type GetApiVideos200AllOfData = {
-  videos?: VideoBasicInfo[];
-  pagination?: PaginationInfo;
+export type PutApiVideosIdBody = {
+  /**
+   * 影片名稱（可選）
+   * @minLength 1
+   * @maxLength 200
+   */
+  name?: string;
+  /**
+   * 影片分類（可選）
+   * @minLength 1
+   * @maxLength 100
+   */
+  category?: string;
+  /**
+   * 影片介紹（可選）
+   * @minLength 1
+   * @maxLength 2000
+   */
+  intro?: string;
+  /** 影片檔案（可選） */
+  videoFile?: Blob;
 };
-
-export type GetApiVideos200AllOf = {
-  data?: GetApiVideos200AllOfData;
-};
-
-export type GetApiVideos200 = SuccessResponse & GetApiVideos200AllOf;
-
-export type GetApiVideosId200AllOf = {
-  data?: VideoDetailInfo;
-};
-
-export type GetApiVideosId200 = SuccessResponse & GetApiVideosId200AllOf;
-
-export type PutApiVideosId200AllOf = {
-  data?: VideoDetailInfo;
-};
-
-export type PutApiVideosId200 = SuccessResponse & PutApiVideosId200AllOf;
 
 export type GetApiPing200 = {
   message?: string;

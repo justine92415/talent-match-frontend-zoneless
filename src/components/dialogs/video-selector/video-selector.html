@@ -1,0 +1,133 @@
+<div class="bg-white rounded-2xl max-w-6xl max-h-[90vh] flex flex-col">
+  <!-- Dialog 標題 -->
+  <div class="flex items-center justify-between p-6 border-b border-grey-d4">
+    <h2 class="text-2xl font-bold text-grey-33">選擇短影音</h2>
+    <button
+      type="button"
+      (click)="onCancel()"
+      class="text-grey-66 hover:text-grey-33 transition-colors">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Dialog 內容 -->
+  <div class="flex-1 overflow-y-auto p-6">
+    <!-- 載入狀態 -->
+    @if (isLoading()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
+          <p class="text-grey-66">載入中...</p>
+        </div>
+      </div>
+    }
+
+    <!-- 錯誤狀態 -->
+    @else if (error()) {
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+          <mat-icon class="text-red-50 text-4xl mb-4">error</mat-icon>
+          <p class="text-red-50 mb-4">{{ error() }}</p>
+          <tmf-button variant="secondary" (click)="loadVideos()">重新載入</tmf-button>
+        </div>
+      </div>
+    }
+
+    <!-- 影片列表 -->
+    @else if (videos().length === 0) {
+      <div class="flex items-center justify-center h-64">
+        <div class="text-center">
+          <mat-icon class="text-grey-9f text-4xl mb-4">video_library</mat-icon>
+          <p class="text-grey-66">尚無短影音</p>
+          <p class="text-sm text-grey-9f mt-2">請先上傳短影音</p>
+        </div>
+      </div>
+    }
+
+    @else {
+      <div>
+        <!-- 選擇提示 -->
+        <div class="mb-6 p-4 bg-orange-95 rounded-lg">
+          <p class="text-grey-33">
+            <span class="font-medium">已選擇：{{ selectedVideoIds().length }} / {{ maxSelection }}</span>
+            <span class="text-sm text-grey-66 ml-2">(最多可選擇 {{ maxSelection }} 部影片)</span>
+          </p>
+        </div>
+
+        <!-- 影片網格 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (video of videos(); track video.id) {
+            <div
+              class="relative cursor-pointer group"
+              (click)="toggleVideo(video.id!)">
+              <!-- Video Card -->
+              <div
+                class="flex-shrink-0 w-full h-135 relative bg-grey-f7 rounded-3xl overflow-hidden transition-all duration-200"
+                [class.ring-4]="isVideoSelected(video.id!)"
+                [class.ring-primary]="isVideoSelected(video.id!)"
+                [class.hover:scale-105]="!isVideoSelected(video.id!)">
+
+                <!-- 影片背景 -->
+                <div class="absolute inset-0">
+                  @if (video.url) {
+                    <video
+                      [src]="video.url"
+                      class="w-full h-full object-cover"
+                      muted
+                      loop
+                      playsinline
+                      preload="metadata">
+                    </video>
+                  } @else {
+                    <div class="w-full h-full bg-grey-f7 flex items-center justify-center">
+                      <span class="material-symbols-outlined text-grey-9f text-4xl">video_library</span>
+                    </div>
+                  }
+                </div>
+
+                <!-- 標籤 -->
+                <div class="absolute top-3 left-3 px-3 py-1 bg-yellow rounded-lg">
+                  <span class="text-sm-bold text-black font-noto-sans-tc">{{ video.category || '未分類' }}</span>
+                </div>
+
+                <!-- 選擇狀態 -->
+                @if (isVideoSelected(video.id!)) {
+                  <div class="absolute top-3 right-3 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center">
+                    <mat-icon class="text-base">check</mat-icon>
+                  </div>
+                }
+
+                <!-- 底部內容 -->
+                <div class="absolute bottom-0 left-0 right-0 p-4 pb-6 bg-gradient-to-t from-black/60 via-black/30 to-transparent">
+                  <p class="text-base text-white font-noto-sans-tc leading-relaxed line-clamp-2">
+                    {{ video.intro || video.name || '無描述' }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Hover 提示 -->
+              <div class="mt-2 text-center">
+                <p class="text-sm font-medium text-grey-33">{{ video.name }}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Dialog 操作按鈕 -->
+  <div class="flex gap-4 p-6 border-t border-grey-d4">
+    <tmf-button
+      class="flex-1"
+      (click)="onConfirm()"
+      [disabled]="selectedVideoIds().length === 0 || isLoading()">
+      確認選擇 ({{ selectedVideoIds().length }})
+    </tmf-button>
+    <tmf-button
+      variant="secondary"
+      (click)="onCancel()">
+      取消
+    </tmf-button>
+  </div>
+</div>

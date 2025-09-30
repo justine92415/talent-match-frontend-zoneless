@@ -4507,6 +4507,43 @@ export type VideoUpdateFailedErrorResponseAllOf = {
 export type VideoUpdateFailedErrorResponse = ServerErrorResponse &
   VideoUpdateFailedErrorResponseAllOf;
 
+/**
+ * 回應狀態
+ */
+export type VideoDeleteSuccessResponseStatus =
+  (typeof VideoDeleteSuccessResponseStatus)[keyof typeof VideoDeleteSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const VideoDeleteSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 回應資料（刪除操作無回傳資料）
+ * @nullable
+ */
+export type VideoDeleteSuccessResponseData = unknown | null;
+
+export interface VideoDeleteSuccessResponse {
+  /** 回應狀態 */
+  status?: VideoDeleteSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /**
+   * 回應資料（刪除操作無回傳資料）
+   * @nullable
+   */
+  data?: VideoDeleteSuccessResponseData;
+}
+
+export type VideoCannotDeleteErrorResponseAllOf = {
+  message?: unknown;
+  code?: unknown;
+};
+
+export type VideoCannotDeleteErrorResponse = BusinessErrorResponse &
+  VideoCannotDeleteErrorResponseAllOf;
+
 export interface PriceOption {
   /** 價格方案 ID */
   id: number;
@@ -6494,7 +6531,7 @@ export type PostApiCartItems400 =
   | CartBusinessErrorResponse;
 
 export type PostApiCoursesBody = {
-  /** 課程基本資料 (JSON 字串格式) */
+  /** 課程基本資料 (JSON 字串格式，可包含短影音關聯) */
   courseData: string;
   /** 價格方案陣列 (JSON 字串格式) */
   priceOptions: string;

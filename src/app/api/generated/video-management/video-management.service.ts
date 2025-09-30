@@ -40,6 +40,7 @@ import { Observable } from 'rxjs';
 import type {
   GetApiVideosParams,
   PutApiVideosIdBody,
+  VideoDeleteSuccessResponse,
   VideoDetailSuccessResponse,
   VideoListSuccessResponse,
   VideoUpdateSuccessResponse,
@@ -266,6 +267,49 @@ export class VideoManagementService {
 
     return this.http.put<TData>(`/api/videos/${id}`, formData, options);
   }
+  /**
+ * 刪除指定的影片記錄和檔案。這是軟刪除操作，會同時清理 Firebase Storage 中的影片檔案。
+
+**業務邏輯**：
+- 驗證教師身份和權限
+- 驗證影片 ID 格式
+- 查詢影片記錄並驗證所有權
+- 檢查影片是否正在被課程使用
+- 執行軟刪除操作（設定 deleted_at 時間戳）
+- 刪除 Firebase Storage 中的影片檔案
+- 檔案刪除失敗不影響軟刪除操作
+
+**權限控制**：
+- 需要教師身份認證
+- 只能刪除自己上傳的影片
+- 無法刪除已被軟刪除的影片
+
+**注意事項**：
+- 這是軟刪除，不會真正刪除資料庫記錄
+- 正在被課程使用的影片無法刪除
+- Firebase Storage 檔案會同步刪除
+- 檔案刪除失敗僅記錄錯誤，不影響主要操作
+
+ * @summary 刪除影片
+ */
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
+    id: number,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.delete<TData>(`/api/videos/${id}`, options);
+  }
 }
 
 export type PostApiVideosClientResult = NonNullable<VideoUploadSuccessResponse>;
@@ -274,3 +318,5 @@ export type GetApiVideosIdClientResult =
   NonNullable<VideoDetailSuccessResponse>;
 export type PutApiVideosIdClientResult =
   NonNullable<VideoUpdateSuccessResponse>;
+export type DeleteApiVideosIdClientResult =
+  NonNullable<VideoDeleteSuccessResponse>;

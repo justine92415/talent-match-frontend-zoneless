@@ -269,6 +269,16 @@ export default class CourseEdit implements OnInit {
     if (courseData.main_image) {
       this.imagePreview.set(courseData.main_image);
     }
+
+    // 載入選擇的短影音
+    if (courseData.selected_videos && Array.isArray(courseData.selected_videos)) {
+      const videos: VideoBasicInfo[] = courseData.selected_videos
+        .sort((a: any, b: any) => a.display_order - b.display_order)
+        .map((item: any) => item.video_info)
+        .filter((video: any) => video !== null && video !== undefined);
+      this.selectedVideos.set(videos);
+      console.log('載入選擇的短影音:', videos);
+    }
   }
 
   // 建立課程計劃表單群組

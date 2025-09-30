@@ -5,18 +5,6 @@
     <p class="text-grey-66">編輯影片的基本資訊</p>
   </div>
 
-  <!-- 載入狀態 -->
-  @if (isLoading()) {
-    <div class="flex items-center justify-center h-64">
-      <div class="text-center">
-        <div class="mb-4">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-        <p class="text-grey-66">載入中...</p>
-      </div>
-    </div>
-  }
-
   <!-- 錯誤狀態 -->
   @if (error()) {
     <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -29,7 +17,7 @@
   }
 
   <!-- 編輯表單 -->
-  @if (!isLoading() && !error()) {
+  @if (!error()) {
     <form [formGroup]="videoForm" (ngSubmit)="saveVideo()" class="space-y-6">
       <!-- 隱藏的檔案輸入 -->
       <input
@@ -197,25 +185,6 @@
           </div>
         </div>
       </div>
-
-      <!-- 上傳進度條 (上傳中時顯示) -->
-      @if (isLoading()) {
-        <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
-          <h2 class="text-xl font-semibold text-grey-33 mb-4">更新進度</h2>
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-medium text-grey-33">更新中...</span>
-              <span class="text-sm text-grey-66">請稍候</span>
-            </div>
-            <div class="w-full bg-grey-e9 rounded-full h-2">
-              <div
-                class="bg-primary h-2 rounded-full transition-all duration-300 animate-pulse"
-                style="width: 100%"
-              ></div>
-            </div>
-          </div>
-        </div>
-      }
 
       <!-- 操作按鈕 -->
       <div class="flex gap-4 pt-6">

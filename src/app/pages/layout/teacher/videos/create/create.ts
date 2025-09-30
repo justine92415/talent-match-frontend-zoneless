@@ -209,4 +209,21 @@ export default class VideoCreate implements OnInit {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
+
+  // 影片預覽 hover 事件
+  onVideoPreviewEnter(videoElement: HTMLVideoElement): void {
+    if (videoElement) {
+      videoElement.currentTime = 0;
+      videoElement.play().catch(() => {
+        // 播放失敗時靜默處理
+      });
+    }
+  }
+
+  onVideoPreviewLeave(videoElement: HTMLVideoElement): void {
+    if (videoElement) {
+      videoElement.pause();
+      videoElement.currentTime = 0;
+    }
+  }
 }

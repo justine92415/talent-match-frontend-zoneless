@@ -1,21 +1,19 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { MatIcon } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { VideoManagementService } from '@app/api/generated/video-management/video-management.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
-import { VideoBasicInfo, VideoDetailSuccessResponseData, PutApiVideosIdBody } from '@app/api/generated/talentMatchAPI.schemas';
+import { VideoBasicInfo, PutApiVideosIdBody } from '@app/api/generated/talentMatchAPI.schemas';
 
 @Component({
   selector: 'tmf-video-edit',
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatIcon,
     Button,
     InputText,
     InputSelect
@@ -263,5 +261,22 @@ export default class VideoEdit implements OnInit {
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
     if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
     return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+  }
+
+  // 影片預覽 hover 事件
+  onVideoPreviewEnter(videoElement: HTMLVideoElement): void {
+    if (videoElement) {
+      videoElement.currentTime = 0;
+      videoElement.play().catch(() => {
+        // 播放失敗時靜默處理
+      });
+    }
+  }
+
+  onVideoPreviewLeave(videoElement: HTMLVideoElement): void {
+    if (videoElement) {
+      videoElement.pause();
+      videoElement.currentTime = 0;
+    }
   }
 }

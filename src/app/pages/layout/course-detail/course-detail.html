@@ -209,9 +209,18 @@
             {{ course().content || "課程介紹資訊暫無提供" }}
           </p>
           <!-- 影片區塊 -->
-          <div
-            class="custom-scrollbar flex w-full items-center justify-between gap-3.75 overflow-x-auto pb-8"
-          ></div>
+          @if (videos().length > 0) {
+            <div
+              class="custom-scrollbar flex w-full items-center gap-6 overflow-x-auto pb-8"
+            >
+              @for (video of videos(); track video.id; let i = $index) {
+                <div class="cursor-pointer" (click)="openVideoViewer(i)">
+                  <tmf-video-card [video]="convertToVideoCardData(video)">
+                  </tmf-video-card>
+                </div>
+              }
+            </div>
+          }
         </section>
 
         <!-- 授課時間 -->
@@ -361,7 +370,7 @@
                   formControlName="purchase_item_id"
                   [title]="option.quantity + ' 堂課程'"
                   [price]="option.price || 0"
-                  [value]="option.id?.toString() || ''"
+                  [value]="option.id.toString()"
                   name="purchase_item_id"
                 >
                 </tmf-input-plan>

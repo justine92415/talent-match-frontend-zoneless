@@ -3876,9 +3876,9 @@ export interface PublicCourseQueryParams {
  */
 export type PublicCourseListItemMainCategory = {
   /** 主分類 ID */
-  id?: number;
+  id: number;
   /** 主分類名稱 */
-  name?: string;
+  name: string;
 };
 
 /**
@@ -3886,9 +3886,9 @@ export type PublicCourseListItemMainCategory = {
  */
 export type PublicCourseListItemSubCategory = {
   /** 次分類 ID */
-  id?: number;
+  id: number;
   /** 次分類名稱 */
-  name?: string;
+  name: string;
 };
 
 /**
@@ -3896,11 +3896,11 @@ export type PublicCourseListItemSubCategory = {
  */
 export type PublicCourseListItemTeacherUser = {
   /** 教師姓名 */
-  name?: string;
+  name: string;
   /** 教師暱稱 */
-  nick_name?: string;
+  nick_name: string;
   /** 教師頭像 URL */
-  avatar_image?: string;
+  avatar_image: string;
 };
 
 /**
@@ -3908,33 +3908,33 @@ export type PublicCourseListItemTeacherUser = {
  */
 export type PublicCourseListItemTeacher = {
   /** 教師 ID */
-  id?: number;
+  id: number;
   /** 教師使用者資訊 */
-  user?: PublicCourseListItemTeacherUser;
+  user: PublicCourseListItemTeacherUser;
 };
 
 export interface PublicCourseListItem {
   /** 課程 ID */
-  id?: number;
+  id: number;
   /** 課程 UUID (系統生成的唯一識別碼) */
-  uuid?: string;
+  uuid: string;
   /** 課程名稱 */
-  name?: string;
+  name: string;
   /**
    * 課程主圖 URL
    * @nullable
    */
   main_image?: string | null;
   /** 最低價格 */
-  min_price?: number;
+  min_price: number;
   /** 最高價格 */
-  max_price?: number;
+  max_price: number;
   /** 課程評分 (字串格式的數字) */
-  rate?: string;
+  rate: string;
   /** 評價數量 */
-  review_count?: number;
+  review_count: number;
   /** 學生人數 */
-  student_count?: number;
+  student_count: number;
   /**
    * 城市
    * @nullable
@@ -3951,15 +3951,15 @@ export interface PublicCourseListItem {
    */
   address?: string | null;
   /** 主分類資訊 */
-  main_category?: PublicCourseListItemMainCategory;
+  main_category: PublicCourseListItemMainCategory;
   /** 次分類資訊 */
-  sub_category?: PublicCourseListItemSubCategory;
+  sub_category: PublicCourseListItemSubCategory;
   /** 教師資訊 */
-  teacher?: PublicCourseListItemTeacher;
+  teacher: PublicCourseListItemTeacher;
   /** 建立時間 */
-  created_at?: string;
+  created_at: string;
   /** 更新時間 */
-  updated_at?: string;
+  updated_at: string;
 }
 
 export interface PublicCoursePaginationInfo {
@@ -4033,9 +4033,9 @@ export interface PublicCourseListSuccessResponse {
  */
 export type PublicCourseDetailMainCategory = {
   /** 主分類 ID */
-  id?: number;
+  id: number;
   /** 主分類名稱 */
-  name?: string;
+  name: string;
 };
 
 /**
@@ -4043,18 +4043,18 @@ export type PublicCourseDetailMainCategory = {
  */
 export type PublicCourseDetailSubCategory = {
   /** 次分類 ID */
-  id?: number;
+  id: number;
   /** 次分類名稱 */
-  name?: string;
+  name: string;
 };
 
 export interface PublicCourseDetail {
   /** 課程 ID */
-  id?: number;
+  id: number;
   /** 課程 UUID (系統生成的唯一識別碼) */
-  uuid?: string;
+  uuid: string;
   /** 課程名稱 */
-  name?: string;
+  name: string;
   /**
    * 課程內容描述
    * @nullable
@@ -4066,13 +4066,13 @@ export interface PublicCourseDetail {
    */
   main_image?: string | null;
   /** 課程評分 (字串格式的數字) */
-  rate?: string;
+  rate: string;
   /** 評價數量 */
-  review_count?: number;
+  review_count: number;
   /** 學生人數 */
-  student_count?: number;
+  student_count: number;
   /** 購買次數 */
-  purchase_count?: number;
+  purchase_count: number;
   /**
    * 問卷調查連結
    * @nullable
@@ -4099,11 +4099,11 @@ export interface PublicCourseDetail {
    */
   address?: string | null;
   /** 主分類資訊 */
-  main_category?: PublicCourseDetailMainCategory;
+  main_category: PublicCourseDetailMainCategory;
   /** 次分類資訊 */
-  sub_category?: PublicCourseDetailSubCategory;
+  sub_category: PublicCourseDetailSubCategory;
   /** 建立時間 */
-  created_at?: string;
+  created_at: string;
 }
 
 /**
@@ -4111,18 +4111,18 @@ export interface PublicCourseDetail {
  */
 export type PublicCourseTeacherInfoUser = {
   /** 教師姓名 */
-  name?: string;
+  name: string;
   /** 教師暱稱 */
-  nick_name?: string;
+  nick_name: string;
   /** 教師頭像 URL */
-  avatar_image?: string;
+  avatar_image: string;
 };
 
 export interface PublicCourseTeacherInfo {
   /** 教師 ID */
-  id?: number;
+  id: number;
   /** 教師使用者資訊 */
-  user?: PublicCourseTeacherInfoUser;
+  user: PublicCourseTeacherInfoUser;
   /**
    * 教師所在城市
    * @nullable
@@ -4144,22 +4144,131 @@ export interface PublicCourseTeacherInfo {
    */
   introduction?: string | null;
   /** 教師總學生數 */
-  total_students?: number;
+  total_students: number;
   /** 教師總課程數 */
-  total_courses?: number;
+  total_courses: number;
   /** 教師平均評分 */
-  average_rating?: number;
+  average_rating: number;
 }
 
 export interface PublicCoursePriceOption {
   /** 價格方案 ID */
-  id?: number;
+  id: number;
   /** 價格方案 UUID */
-  uuid?: string;
+  uuid: string;
   /** 價格 */
-  price?: number;
+  price: number;
   /** 堂數 */
-  quantity?: number;
+  quantity: number;
+}
+
+/**
+ * 影片類型 (storage: 儲存類型, youtube: YouTube 連結)
+ */
+export type PublicCourseVideoVideoType =
+  (typeof PublicCourseVideoVideoType)[keyof typeof PublicCourseVideoVideoType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PublicCourseVideoVideoType = {
+  storage: 'storage',
+  youtube: 'youtube',
+} as const;
+
+/**
+ * 公開課程影片資訊
+ */
+export interface PublicCourseVideo {
+  /** 影片 ID */
+  id: number;
+  /** 影片名稱 */
+  name: string;
+  /** 影片簡介 */
+  intro: string;
+  /** 影片 URL */
+  url: string;
+  /** 影片類型 (storage: 儲存類型, youtube: YouTube 連結) */
+  video_type: PublicCourseVideoVideoType;
+  /** 是否為預覽影片 */
+  is_preview: boolean;
+}
+
+/**
+ * 公開課程檔案資訊
+ */
+export interface PublicCourseFile {
+  /** 檔案 ID */
+  id: number;
+  /** 檔案名稱 */
+  name: string;
+  /** 檔案下載 URL */
+  url: string;
+}
+
+/**
+ * 評價者資訊
+ */
+export type PublicCourseReviewUser = {
+  /** 評價者暱稱 */
+  nick_name: string;
+};
+
+/**
+ * 公開課程評價資訊
+ */
+export interface PublicCourseReview {
+  /** 評價 ID */
+  id: number;
+  /**
+   * 評分 (1-5星)
+   * @minimum 1
+   * @maximum 5
+   */
+  rate: number;
+  /** 評價內容 */
+  comment: string;
+  /** 評價者資訊 */
+  user: PublicCourseReviewUser;
+  /** 評價建立時間 */
+  created_at: string;
+}
+
+/**
+ * 推薦課程教師使用者資訊
+ */
+export type PublicRecommendedCourseTeacherUser = {
+  /** 推薦課程教師暱稱 */
+  nick_name: string;
+};
+
+/**
+ * 推薦課程教師資訊
+ */
+export type PublicRecommendedCourseTeacher = {
+  /** 推薦課程教師使用者資訊 */
+  user: PublicRecommendedCourseTeacherUser;
+};
+
+/**
+ * 推薦課程資訊
+ */
+export interface PublicRecommendedCourse {
+  /** 推薦課程 ID */
+  id: number;
+  /** 推薦課程 UUID */
+  uuid: string;
+  /** 推薦課程名稱 */
+  name: string;
+  /**
+   * 推薦課程主圖 URL
+   * @nullable
+   */
+  main_image?: string | null;
+  /** 推薦課程評分 */
+  rate: number;
+  /** 推薦課程最低價格 */
+  min_price: number;
+  /** 推薦課程教師資訊 */
+  teacher: PublicRecommendedCourseTeacher;
 }
 
 export interface PublicTeacherCertificate {
@@ -4222,16 +4331,16 @@ export type PublicCourseDetailSuccessResponseData = {
   teacher?: PublicCourseTeacherInfo;
   /** 課程價格方案列表 */
   price_options?: PublicCoursePriceOption[];
-  /** 課程影片列表 (目前為空陣列) */
-  videos?: unknown[];
-  /** 課程檔案列表 (目前為空陣列) */
-  files?: unknown[];
+  /** 課程影片列表 (關聯的短影音，按顯示順序排列) */
+  videos?: PublicCourseVideo[];
+  /** 課程檔案列表 (課程相關文件和資料) */
+  files?: PublicCourseFile[];
   /** 7天課程表 (從明天開始的連續7天，顯示每日時段狀態) */
   schedule?: DaySchedule[];
-  /** 最近評價列表 (目前為空陣列) */
-  recent_reviews?: unknown[];
-  /** 推薦課程列表 (目前為空陣列) */
-  recommended_courses?: unknown[];
+  /** 最近評價列表 (顯示最新的課程評價) */
+  recent_reviews?: PublicCourseReview[];
+  /** 推薦課程列表 (相關或相似的課程推薦) */
+  recommended_courses?: PublicRecommendedCourse[];
   /** 教師證書列表 */
   teacher_certificates?: PublicTeacherCertificate[];
   /** 教師工作經驗列表 */

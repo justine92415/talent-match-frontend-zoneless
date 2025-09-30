@@ -3,6 +3,7 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink, ActivatedRoute } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { CourseDetailSectionTitle } from '@components/course-detail-section-title/course-detail-section-title';
 import { Button } from '@components/button/button';
 import { StarRating } from '@components/star-rating/star-rating';
@@ -10,8 +11,10 @@ import { ReviewCard } from '@components/review-card/review-card';
 import { WeeklyCalendar } from '@components/weekly-calendar/weekly-calendar';
 import { InputPlan } from '@components/form/input-plan/input-plan';
 import { PublicCoursesService } from '@app/api/generated/public-courses/public-courses.service';
-import { PublicCourseDetailSuccessResponseData } from '@app/api/generated/talentMatchAPI.schemas';
+import { PublicCourseDetailSuccessResponseData, PublicCourseVideo } from '@app/api/generated/talentMatchAPI.schemas';
 import { CartService } from '@app/services/cart.service';
+import { VideoCard, VideoCardData } from '@components/video-card/video-card';
+import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/video-viewer-dialog';
 
 @Component({
   selector: 'tmf-course-detail',
@@ -26,6 +29,7 @@ import { CartService } from '@app/services/cart.service';
     ReviewCard,
     WeeklyCalendar,
     InputPlan,
+    VideoCard,
   ],
   templateUrl: './course-detail.html',
   styles: ``,
@@ -33,6 +37,7 @@ import { CartService } from '@app/services/cart.service';
 export default class CourseDetail implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
+  private dialog = inject(Dialog);
   private publicCoursesService = inject(PublicCoursesService);
   private cartService = inject(CartService);
 
@@ -61,6 +66,8 @@ export default class CourseDetail implements OnInit {
   certificates = computed(
     () => this.courseDetail()?.teacher_certificates || [],
   );
+  // 短影音
+  videos = computed(() => this.courseDetail()?.videos || []);
   // UI 狀態
   activeSection = signal('sectionA');
   isAddingToCart = signal<boolean>(false);
@@ -183,4 +190,31 @@ export default class CourseDetail implements OnInit {
   }
 
   openSurvey() {}
+
+  // 將 PublicCourseVideo 轉換為 VideoCardData
+  convertToVideoCardData(video: PublicCourseVideo): VideoCardData {
+    return {
+      id: video.id.toString(),
+      tag: '', // PublicCourseVideo 沒有 category 欄位
+      description: video.intro,
+      videoSrc: video.url,
+      isPlaying: false
+    };
+  }
+
+  // 開啟影片預覽
+  openVideoViewer(index: number): void {
+    const videoCards = this.videos().map(v => this.convertToVideoCardData(v));
+
+    this.dialog.open(VideoViewerDialogComponent, {
+      data: {
+        videos: videoCards,
+        initialIndex: index
+      },
+      panelClass: 'video-viewer-dialog-panel',
+      backdropClass: 'video-viewer-backdrop',
+      hasBackdrop: true,
+      disableClose: false
+    });
+  }
 }

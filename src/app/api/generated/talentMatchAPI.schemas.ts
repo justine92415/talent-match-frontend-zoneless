@@ -5873,6 +5873,7 @@ export type ReservationDetailTeacherStatus =
 export const ReservationDetailTeacherStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -5887,6 +5888,7 @@ export type ReservationDetailStudentStatus =
 export const ReservationDetailStudentStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -5959,6 +5961,7 @@ export type CancelReservationResponseReservationTeacherStatus =
 export const CancelReservationResponseReservationTeacherStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -5973,6 +5976,7 @@ export type CancelReservationResponseReservationStudentStatus =
 export const CancelReservationResponseReservationStudentStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -6263,6 +6267,7 @@ export type TeacherReservationItemTeacherStatus =
 export const TeacherReservationItemTeacherStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -6277,6 +6282,7 @@ export type TeacherReservationItemStudentStatus =
 export const TeacherReservationItemStudentStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -6291,6 +6297,7 @@ export type TeacherReservationItemOverallStatus =
 export const TeacherReservationItemOverallStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -7021,6 +7028,7 @@ export type GetApiReservationsMyReservationsStatus =
 export const GetApiReservationsMyReservationsStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -7084,6 +7092,7 @@ export const GetApiReservationsCourseReservationsStatus = {
   all: 'all',
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;

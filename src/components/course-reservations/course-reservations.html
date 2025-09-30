@@ -28,7 +28,8 @@
                     'bg-green-95 text-green-55': reservation.teacher_status === 'reserved' && reservation.student_status === 'reserved',
                     'bg-orange-95 text-orange-55': reservation.teacher_status === 'pending' && reservation.student_status === 'reserved',
                     'bg-blue-95 text-blue-50': reservation.teacher_status === 'completed' && reservation.student_status === 'completed',
-                    'bg-grey-f4 text-grey-66': reservation.teacher_status === 'cancelled' || reservation.student_status === 'cancelled'
+                    'bg-grey-f4 text-grey-66': reservation.teacher_status === 'overdue' || reservation.student_status === 'overdue',
+                    'bg-grey-d4 text-grey-66': reservation.teacher_status === 'cancelled' || reservation.student_status === 'cancelled'
                   }">
                   {{ reservation.teacher_status | reservationStatus: reservation.student_status }}
                 </span>

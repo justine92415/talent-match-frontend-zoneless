@@ -114,8 +114,7 @@
           <tmf-input-select
             formControlName="district"
             placeholder="請選擇區域"
-            [options]="districts()"
-            [disabled]="!courseForm.get('city')?.value">
+            [options]="districts()">
           </tmf-input-select>
         </div>
 
@@ -147,6 +146,49 @@
             class="w-full px-3 py-2 border border-grey-d4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none">
           </textarea>
         </div>
+      </div>
+    </div>
+
+    <!-- 課程短影音 -->
+    <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-semibold text-grey-33 mb-4">課程短影音</h2>
+      <p class="text-sm text-grey-66 mb-6">選擇最多 3 部短影音來展示您的課程特色（選填）</p>
+
+      <!-- 短影音選擇區域 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (video of selectedVideos(); track video.id; let i = $index) {
+          <!-- 已選擇的短影音卡片 -->
+          <div class="relative">
+            <div (click)="openVideoViewer(video, i)">
+              <tmf-video-card
+                [video]="convertToVideoCardData(video)">
+              </tmf-video-card>
+            </div>
+
+            <!-- 移除按鈕 -->
+            <button
+              type="button"
+              (click)="removeVideo(video.id!, $event)"
+              class="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors z-10">
+              ×
+            </button>
+          </div>
+        }
+
+        <!-- 新增短影音按鈕 -->
+        @if (selectedVideos().length < 3) {
+          <div
+            class="flex-shrink-0 w-75.5 h-135 relative bg-grey-f7 rounded-3xl overflow-hidden cursor-pointer hover:scale-105 transition-transform duration-200 border-2 border-dashed border-grey-d4"
+            (click)="openVideoSelector()">
+
+            <!-- 上傳提示 -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <span class="material-symbols-outlined text-grey-9f text-6xl mb-4">add_circle</span>
+              <p class="text-grey-66 mb-2 text-center px-4">點擊選擇短影音</p>
+              <p class="text-sm text-grey-9f text-center px-4">最多可選擇 3 部</p>
+            </div>
+          </div>
+        }
       </div>
     </div>
 

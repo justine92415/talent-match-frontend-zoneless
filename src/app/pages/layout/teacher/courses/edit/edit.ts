@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { MatIcon } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { InputText } from '@components/form/input-text/input-text';
@@ -8,8 +9,11 @@ import { InputNumber } from '@components/form/input-number/input-number';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { CourseManagementService } from '@app/api/generated/course-management/course-management.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
-import { TagItem } from '@app/api/generated/talentMatchAPI.schemas';
+import { TagItem, VideoBasicInfo } from '@app/api/generated/talentMatchAPI.schemas';
 import { Cities } from '@share/cities';
+import { VideoSelectorDialog } from '@components/dialogs/video-selector/video-selector';
+import { VideoCard, VideoCardData } from '@components/video-card/video-card';
+import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/video-viewer-dialog';
 
 
 @Component({
@@ -20,7 +24,8 @@ import { Cities } from '@share/cities';
     Button,
     InputText,
     InputNumber,
-    InputSelect
+    InputSelect,
+    VideoCard
   ],
   templateUrl: './edit.html',
   styles: ``
@@ -29,6 +34,7 @@ export default class CourseEdit implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private dialog = inject(Dialog);
   private courseService = inject(CourseManagementService);
   private tagsService = inject(TagsService);
 
@@ -45,6 +51,9 @@ export default class CourseEdit implements OnInit {
   // 圖片預覽
   imagePreview = signal<string | null>(null);
   imageFile = signal<File | null>(null);
+
+  // 短影音
+  selectedVideos = signal<VideoBasicInfo[]>([]);
 
   // 城市選項 (值改為字串)
   cities = signal<SelectOption[]>([
@@ -91,17 +100,24 @@ export default class CourseEdit implements OnInit {
       main_category_id: [null, Validators.required],
       sub_category_id: [null, Validators.required],
       city: [null, Validators.required],
-      district: ['', Validators.maxLength(50)],
+      district: [{ value: '', disabled: true }, Validators.maxLength(50)],
       address: ['', Validators.maxLength(200)],
       survey_url: [''],
       purchase_message: ['', Validators.maxLength(500)],
       course_plans: this.fb.array([this.createCoursePlanGroup(true)])
     });
 
-    // 監聽城市變更，更新區域選項並清空區域選擇
+    // 監聽城市變更，更新區域選項並啟用/停用區域選擇
     this.courseForm.get('city')?.valueChanges.subscribe((city: string | null) => {
       this.updateDistrictOptions(city);
       this.courseForm.get('district')?.setValue('');
+
+      // 根據城市是否有值來啟用或停用區域欄位
+      if (city) {
+        this.courseForm.get('district')?.enable();
+      } else {
+        this.courseForm.get('district')?.disable();
+      }
     });
   }
 
@@ -225,9 +241,10 @@ export default class CourseEdit implements OnInit {
       purchase_message: courseData.purchase_message
     });
 
-    // 如果有城市資料，更新區域選項
+    // 如果有城市資料，更新區域選項並啟用區域欄位
     if (courseData.city) {
       this.updateDistrictOptions(courseData.city);
+      this.courseForm.get('district')?.enable();
     }
 
     // 設定主類別選中狀態
@@ -251,6 +268,16 @@ export default class CourseEdit implements OnInit {
     // 設定圖片預覽
     if (courseData.main_image) {
       this.imagePreview.set(courseData.main_image);
+    }
+
+    // 載入選擇的短影音
+    if (courseData.selected_videos && Array.isArray(courseData.selected_videos)) {
+      const videos: VideoBasicInfo[] = courseData.selected_videos
+        .sort((a: any, b: any) => a.display_order - b.display_order)
+        .map((item: any) => item.video_info)
+        .filter((video: any) => video !== null && video !== undefined);
+      this.selectedVideos.set(videos);
+      console.log('載入選擇的短影音:', videos);
     }
   }
 
@@ -343,6 +370,58 @@ export default class CourseEdit implements OnInit {
     if (input) input.value = '';
   }
 
+  // 開啟短影音選擇 dialog
+  openVideoSelector(): void {
+    const dialogRef = this.dialog.open(VideoSelectorDialog, {
+      data: {
+        selectedVideoIds: this.selectedVideos().map(v => v.id).filter(Boolean),
+        maxSelection: 3
+      },
+      width: '90vw',
+      maxWidth: '1200px',
+    });
+
+    dialogRef.closed.subscribe((result) => {
+      if (result) {
+        this.selectedVideos.set(result as VideoBasicInfo[]);
+      }
+    });
+  }
+
+  // 移除選擇的短影音
+  removeVideo(videoId: number, event: Event): void {
+    event.stopPropagation();
+    this.selectedVideos.set(
+      this.selectedVideos().filter(v => v.id !== videoId)
+    );
+  }
+
+  // 將 VideoBasicInfo 轉換為 VideoCardData
+  convertToVideoCardData(video: VideoBasicInfo): VideoCardData {
+    return {
+      id: video.id?.toString() || '',
+      tag: video.category || '未分類',
+      description: video.intro || video.name || '',
+      videoSrc: video.url || undefined,
+      isPlaying: false
+    };
+  }
+
+  // 開啟影片預覽
+  openVideoViewer(video: VideoBasicInfo, index: number): void {
+    const videoCards = this.selectedVideos().map(v => this.convertToVideoCardData(v));
+
+    this.dialog.open(VideoViewerDialogComponent, {
+      data: {
+        videos: videoCards,
+        initialIndex: index
+      },
+      panelClass: 'video-viewer-dialog-panel',
+      backdropClass: 'video-viewer-backdrop',
+      hasBackdrop: true,
+      disableClose: false
+    });
+  }
 
   // 儲存課程
   saveCourse(): void {
@@ -352,7 +431,7 @@ export default class CourseEdit implements OnInit {
 
       const formData = this.courseForm.getRawValue();
 
-      // 準備課程基本資料
+      // 準備課程基本資料（包含短影音）
       const courseData = {
         name: formData.name,
         content: formData.content,
@@ -362,7 +441,13 @@ export default class CourseEdit implements OnInit {
         district: formData.district || null,
         address: formData.address || null,
         survey_url: formData.survey_url || null,
-        purchase_message: formData.purchase_message || null
+        purchase_message: formData.purchase_message || null,
+        selectedVideos: this.selectedVideos()
+          .filter(v => v.id)
+          .map((v, index) => ({
+            video_id: v.id!,
+            display_order: index + 1
+          }))
       };
 
       // 準備價格方案資料
@@ -379,6 +464,8 @@ export default class CourseEdit implements OnInit {
       };
 
       console.log('更新課程資料:', requestData);
+      console.log('選擇的短影音:', courseData.selectedVideos);
+      console.log('courseData 包含 selectedVideos:', courseData);
 
       this.courseService.putApiCoursesId(courseId, requestData).subscribe({
         next: (response) => {

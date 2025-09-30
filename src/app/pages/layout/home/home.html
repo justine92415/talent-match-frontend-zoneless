@@ -89,9 +89,9 @@
 
     <!-- Video Grid with Navigation -->
     <tmf-swiper-wapper [config]="videoSwiperConfig">
-      @for (video of videos; track video.imageSrc) {
+      @for (video of videos; track video.id) {
       <div class="swiper-slide">
-        <tmf-video-card [video]="video"></tmf-video-card>
+        <tmf-video-card [video]="video" (videoClick)="onVideoClick($event)"></tmf-video-card>
       </div>
       }
     </tmf-swiper-wapper>
@@ -453,3 +453,4 @@
     </div>
   </div>
 </section>
+

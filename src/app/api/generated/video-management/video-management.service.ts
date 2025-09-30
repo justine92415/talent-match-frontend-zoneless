@@ -38,15 +38,14 @@ type _DeepNonNullableObject<T> = {
 import { Observable } from 'rxjs';
 
 import type {
-  GetApiVideos200,
-  GetApiVideosId200,
   GetApiVideosParams,
-  PostApiVideos201,
-  PostApiVideosBodyOne,
-  PutApiVideosId200,
-  SuccessResponse,
-  VideoUpdateRequest,
+  PutApiVideosIdBody,
+  VideoDeleteSuccessResponse,
+  VideoDetailSuccessResponse,
+  VideoListSuccessResponse,
+  VideoUpdateSuccessResponse,
   VideoUploadRequest,
+  VideoUploadSuccessResponse,
 } from '../talentMatchAPI.schemas';
 
 interface HttpClientOptions {
@@ -76,71 +75,84 @@ interface HttpClientOptions {
 export class VideoManagementService {
   private readonly http = inject(HttpClient);
   /**
- * 上傳新的課程影片，支援兩種上傳方式：
-1. **YouTube 影片**：提供 YouTube URL 連結
-2. **本地儲存影片**：上傳影片檔案到伺服器
+ * 教師上傳影片檔案到系統。統一採用本地儲存方式，不再支援 YouTube 連結。
 
-**支援的影片格式：**
-- MP4, AVI, MOV, WMV, QuickTime
-- 檔案大小限制：最大 500MB
+**業務邏輯**：
+- 驗證教師身份和權限
+- 解析 multipart/form-data 表單資料
+- 驗證影片檔案格式和大小（支援 MP4, AVI, MOV, WMV，最大 500MB）
+- 驗證影片基本資料（名稱、分類、介紹）
+- 上傳檔案到 Firebase Storage
+- 建立影片記錄到資料庫
+- 自動清理暫存檔案
 
-**縮圖檔案（選填）：**
-- 格式：JPEG, JPG, PNG, WebP
-- 大小限制：最大 5MB
+**檔案要求**：
+- 支援格式：MP4, AVI, MOV, WMV, QuickTime
+- 檔案大小：最大 500MB
+- 儲存位置：Firebase Storage (`videos/teacher_{teacherId}/`)
 
-**權限要求：**
-- 需要教師身份認證
-- 只能為自己的課程上傳影片
-
- * @summary 上傳課程影片
+ * @summary 上傳影片檔案
  */
-  postApiVideos<TData = PostApiVideos201>(
-    postApiVideosBody: PostApiVideosBodyOne | VideoUploadRequest,
+  postApiVideos<TData = VideoUploadSuccessResponse>(
+    videoUploadRequest: VideoUploadRequest,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  postApiVideos<TData = PostApiVideos201>(
-    postApiVideosBody: PostApiVideosBodyOne | VideoUploadRequest,
+  postApiVideos<TData = VideoUploadSuccessResponse>(
+    videoUploadRequest: VideoUploadRequest,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  postApiVideos<TData = PostApiVideos201>(
-    postApiVideosBody: PostApiVideosBodyOne | VideoUploadRequest,
+  postApiVideos<TData = VideoUploadSuccessResponse>(
+    videoUploadRequest: VideoUploadRequest,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  postApiVideos<TData = PostApiVideos201>(
-    postApiVideosBody: PostApiVideosBodyOne | VideoUploadRequest,
+  postApiVideos<TData = VideoUploadSuccessResponse>(
+    videoUploadRequest: VideoUploadRequest,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.post<TData>(`/api/videos`, postApiVideosBody, options);
+    const formData = new FormData();
+    formData.append(`name`, videoUploadRequest.name);
+    formData.append(`category`, videoUploadRequest.category);
+    formData.append(`intro`, videoUploadRequest.intro);
+    if (videoUploadRequest.videoFile !== undefined) {
+      formData.append(`videoFile`, videoUploadRequest.videoFile);
+    }
+
+    return this.http.post<TData>(`/api/videos`, formData, options);
   }
   /**
- * 取得教師的影片列表，支援分頁、搜索和分類篩選。
-只能查看自己上傳的影片。
+ * 取得目前登入教師的影片列表。支援分頁、分類篩選和關鍵字搜尋。
 
-**功能特色：**
-- 支援分頁瀏覽
-- 支援影片名稱搜索
-- 支援分類篩選
-- 按上傳時間排序（最新優先）
+**業務邏輯**：
+- 驗證教師身份和權限
+- 驗證查詢參數
+- 只回傳該教師的影片（權限隔離）
+- 支援分類模糊搜尋篩選
+- 支援關鍵字搜尋（影片名稱和介紹）
+- 分頁查詢，預設每頁 20 筆
+- 依建立時間倒序排列
+- 排除已軟刪除的影片
 
-**權限要求：**
-- 需要教師身份認證
-- 只能查看自己的影片
+**查詢功能**：
+- `category`: 分類篩選（模糊搜尋）
+- `search`: 關鍵字搜尋（搜尋標題和介紹）
+- `page`: 分頁頁碼
+- `per_page`: 每頁筆數（最大 100）
 
- * @summary 取得影片列表
+ * @summary 取得教師影片列表
  */
-  getApiVideos<TData = GetApiVideos200>(
+  getApiVideos<TData = VideoListSuccessResponse>(
     params?: DeepNonNullable<GetApiVideosParams>,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  getApiVideos<TData = GetApiVideos200>(
+  getApiVideos<TData = VideoListSuccessResponse>(
     params?: DeepNonNullable<GetApiVideosParams>,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  getApiVideos<TData = GetApiVideos200>(
+  getApiVideos<TData = VideoListSuccessResponse>(
     params?: DeepNonNullable<GetApiVideosParams>,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  getApiVideos<TData = GetApiVideos200>(
+  getApiVideos<TData = VideoListSuccessResponse>(
     params?: DeepNonNullable<GetApiVideosParams>,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
@@ -150,119 +162,149 @@ export class VideoManagementService {
     });
   }
   /**
- * 取得指定影片的詳細資訊，包含完整的影片資料和統計資訊。
-只能查看自己上傳的影片。
+ * 取得指定影片的詳細資訊和使用統計。只能查看自己上傳的影片。
 
-**返回資訊：**
-- 影片基本資訊（名稱、分類、介紹）
-- 影片檔案資訊（URL、大小、時長）
-- 縮圖資訊
-- 上傳和更新時間
+**業務邏輯**：
+- 驗證教師身份和權限
+- 驗證影片 ID 格式
+- 查詢影片基本資訊
+- 驗證影片所有權（只能查看自己的影片）
+- 取得影片使用統計資訊
+- 排除已軟刪除的影片
 
-**權限要求：**
+**權限控制**：
 - 需要教師身份認證
-- 只能查看自己的影片
+- 只能查看自己上傳的影片
+- 無法查看已刪除的影片
 
- * @summary 取得影片詳情
+ * @summary 取得影片詳細資訊
  */
-  getApiVideosId<TData = GetApiVideosId200>(
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  getApiVideosId<TData = GetApiVideosId200>(
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  getApiVideosId<TData = GetApiVideosId200>(
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  getApiVideosId<TData = GetApiVideosId200>(
+  getApiVideosId<TData = VideoDetailSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
     return this.http.get<TData>(`/api/videos/${id}`, options);
   }
   /**
- * 更新指定影片的基本資訊，包含名稱、分類和介紹。
-只能更新自己上傳的影片。
+ * 更新指定影片的基本資訊和檔案。支援部分欄位更新和檔案替換，只能更新自己上傳的影片。
 
-**可更新欄位：**
-- name：影片名稱
-- category：影片分類
-- intro：影片介紹
+**業務邏輯**：
+- 驗證教師身份和權限
+- 解析 multipart/form-data 表單資料（支援檔案替換）
+- 驗證影片檔案格式和大小（如有提供新檔案）
+- 查詢現有影片記錄並驗證所有權
+- 上傳新檔案到 Firebase Storage（如有提供）
+- 更新影片資訊到資料庫
+- 清理舊影片檔案（如有替換檔案）
+- 自動清理暫存檔案
 
-**注意事項：**
-- 至少需要提供一個要更新的欄位
-- 不能更改影片類型或檔案
-- 縮圖更新需使用專門的上傳端點
+**可更新欄位**：
+- `name`: 影片名稱（1-200字元）
+- `category`: 影片分類（1-100字元） 
+- `intro`: 影片介紹（1-2000字元）
+- `videoFile`: 影片檔案（可選，支援 MP4, AVI, MOV, WMV，最大 500MB）
 
-**權限要求：**
-- 需要教師身份認證
-- 只能更新自己的影片
+**檔案替換功能**：
+- 支援可選影片檔案上傳
+- 上傳新檔案時自動刪除舊檔案
+- 檔案上傳失敗時自動回滾
+- 支援與課程編輯相同的檔案替換邏輯
+
+**注意事項**：
+- 所有欄位均為可選（至少需要提供一個欄位）
+- 檔案為可選，不提供時保持原有檔案
+- 檔案格式限制：MP4, AVI, MOV, WMV, QuickTime
+- 檔案大小限制：最大 500MB
+- 無法更新已刪除的影片
 
  * @summary 更新影片資訊
  */
-  putApiVideosId<TData = PutApiVideosId200>(
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  putApiVideosId<TData = PutApiVideosId200>(
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  putApiVideosId<TData = PutApiVideosId200>(
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  putApiVideosId<TData = PutApiVideosId200>(
+  putApiVideosId<TData = VideoUpdateSuccessResponse>(
     id: number,
-    videoUpdateRequest: VideoUpdateRequest,
+    putApiVideosIdBody: PutApiVideosIdBody,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
-    return this.http.put<TData>(
-      `/api/videos/${id}`,
-      videoUpdateRequest,
-      options,
-    );
+    const formData = new FormData();
+    if (putApiVideosIdBody.name !== undefined) {
+      formData.append(`name`, putApiVideosIdBody.name);
+    }
+    if (putApiVideosIdBody.category !== undefined) {
+      formData.append(`category`, putApiVideosIdBody.category);
+    }
+    if (putApiVideosIdBody.intro !== undefined) {
+      formData.append(`intro`, putApiVideosIdBody.intro);
+    }
+    if (putApiVideosIdBody.videoFile !== undefined) {
+      formData.append(`videoFile`, putApiVideosIdBody.videoFile);
+    }
+
+    return this.http.put<TData>(`/api/videos/${id}`, formData, options);
   }
   /**
- * 刪除指定的影片及相關檔案。
-只能刪除自己上傳的影片。
+ * 刪除指定的影片記錄和檔案。這是軟刪除操作，會同時清理 Firebase Storage 中的影片檔案。
 
-**刪除內容：**
-- 影片資料庫記錄
-- 影片檔案（如果是本地儲存）
-- 縮圖檔案（如果有）
-- 相關的觀看記錄和統計資料
+**業務邏輯**：
+- 驗證教師身份和權限
+- 驗證影片 ID 格式
+- 查詢影片記錄並驗證所有權
+- 檢查影片是否正在被課程使用
+- 執行軟刪除操作（設定 deleted_at 時間戳）
+- 刪除 Firebase Storage 中的影片檔案
+- 檔案刪除失敗不影響軟刪除操作
 
-**注意事項：**
-- 刪除是永久性的，無法恢復
-- YouTube 影片只會刪除資料庫記錄，不會影響 YouTube 上的影片
-- 如果影片正在被課程使用，可能會被拒絕刪除
-
-**權限要求：**
+**權限控制**：
 - 需要教師身份認證
-- 只能刪除自己的影片
+- 只能刪除自己上傳的影片
+- 無法刪除已被軟刪除的影片
+
+**注意事項**：
+- 這是軟刪除，不會真正刪除資料庫記錄
+- 正在被課程使用的影片無法刪除
+- Firebase Storage 檔案會同步刪除
+- 檔案刪除失敗僅記錄錯誤，不影響主要操作
 
  * @summary 刪除影片
  */
-  deleteApiVideosId<TData = SuccessResponse>(
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: 'body' },
   ): Observable<TData>;
-  deleteApiVideosId<TData = SuccessResponse>(
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'events' },
   ): Observable<HttpEvent<TData>>;
-  deleteApiVideosId<TData = SuccessResponse>(
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe: 'response' },
   ): Observable<AngularHttpResponse<TData>>;
-  deleteApiVideosId<TData = SuccessResponse>(
+  deleteApiVideosId<TData = VideoDeleteSuccessResponse>(
     id: number,
     options?: HttpClientOptions & { observe?: any },
   ): Observable<any> {
@@ -270,8 +312,11 @@ export class VideoManagementService {
   }
 }
 
-export type PostApiVideosClientResult = NonNullable<PostApiVideos201>;
-export type GetApiVideosClientResult = NonNullable<GetApiVideos200>;
-export type GetApiVideosIdClientResult = NonNullable<GetApiVideosId200>;
-export type PutApiVideosIdClientResult = NonNullable<PutApiVideosId200>;
-export type DeleteApiVideosIdClientResult = NonNullable<SuccessResponse>;
+export type PostApiVideosClientResult = NonNullable<VideoUploadSuccessResponse>;
+export type GetApiVideosClientResult = NonNullable<VideoListSuccessResponse>;
+export type GetApiVideosIdClientResult =
+  NonNullable<VideoDetailSuccessResponse>;
+export type PutApiVideosIdClientResult =
+  NonNullable<VideoUpdateSuccessResponse>;
+export type DeleteApiVideosIdClientResult =
+  NonNullable<VideoDeleteSuccessResponse>;

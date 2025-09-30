@@ -11,7 +11,7 @@ import { ReviewCard } from '@components/review-card/review-card';
 import { WeeklyCalendar } from '@components/weekly-calendar/weekly-calendar';
 import { InputPlan } from '@components/form/input-plan/input-plan';
 import { PublicCoursesService } from '@app/api/generated/public-courses/public-courses.service';
-import { PublicCourseDetailSuccessResponseData, PublicCourseVideo } from '@app/api/generated/talentMatchAPI.schemas';
+import { PublicCourseDetailSuccessResponseData } from '@app/api/generated/talentMatchAPI.schemas';
 import { CartService } from '@app/services/cart.service';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/video-viewer-dialog';
@@ -68,6 +68,16 @@ export default class CourseDetail implements OnInit {
   );
   // 短影音
   videos = computed(() => this.courseDetail()?.videos || []);
+  // 將影片轉換為 VideoCardData 格式
+  videoCards = computed(() =>
+    this.videos().map(video => ({
+      id: video.id.toString(),
+      tag: video.category || '',
+      description: video.intro,
+      videoSrc: video.url,
+      isPlaying: false
+    } as VideoCardData))
+  );
   // UI 狀態
   activeSection = signal('sectionA');
   isAddingToCart = signal<boolean>(false);
@@ -191,24 +201,11 @@ export default class CourseDetail implements OnInit {
 
   openSurvey() {}
 
-  // 將 PublicCourseVideo 轉換為 VideoCardData
-  convertToVideoCardData(video: PublicCourseVideo): VideoCardData {
-    return {
-      id: video.id.toString(),
-      tag: '', // PublicCourseVideo 沒有 category 欄位
-      description: video.intro,
-      videoSrc: video.url,
-      isPlaying: false
-    };
-  }
-
   // 開啟影片預覽
   openVideoViewer(index: number): void {
-    const videoCards = this.videos().map(v => this.convertToVideoCardData(v));
-
     this.dialog.open(VideoViewerDialogComponent, {
       data: {
-        videos: videoCards,
+        videos: this.videoCards(),
         initialIndex: index
       },
       panelClass: 'video-viewer-dialog-panel',

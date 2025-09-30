@@ -93,7 +93,8 @@ export class VideoViewerDialogComponent implements OnInit, AfterViewInit, OnDest
     this.dialogRef.close();
   }
 
-  onVideoClick(video: HTMLVideoElement) {
+  onVideoClick(event: Event) {
+    const video = event.target as HTMLVideoElement;
     if (video.paused) {
       video.play();
       this.isPlaying.set(true);
@@ -103,7 +104,13 @@ export class VideoViewerDialogComponent implements OnInit, AfterViewInit, OnDest
     }
   }
 
-  updateProgress(video: HTMLVideoElement) {
+  updateProgress(event: Event, videoIndex: number) {
+    // 只更新當前活動影片的進度
+    if (videoIndex !== this.currentVideoIndex()) {
+      return;
+    }
+
+    const video = event.target as HTMLVideoElement;
     if (video.duration) {
       this.progress.set((video.currentTime / video.duration) * 100);
     }
@@ -119,9 +126,11 @@ export class VideoViewerDialogComponent implements OnInit, AfterViewInit, OnDest
     videos.forEach(video => {
       if (video instanceof HTMLVideoElement) {
         video.pause();
+        video.currentTime = 0; // 重置播放位置到開頭
       }
     });
     this.isPlaying.set(false);
+    this.progress.set(0); // 重置進度條
   }
 
   private playCurrentVideo() {

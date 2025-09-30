@@ -209,13 +209,13 @@
             {{ course().content || "課程介紹資訊暫無提供" }}
           </p>
           <!-- 影片區塊 -->
-          @if (videos().length > 0) {
+          @if (videoCards().length > 0) {
             <div
               class="custom-scrollbar flex w-full items-center gap-6 overflow-x-auto pb-8"
             >
-              @for (video of videos(); track video.id; let i = $index) {
+              @for (videoCard of videoCards(); track videoCard.id; let i = $index) {
                 <div class="cursor-pointer" (click)="openVideoViewer(i)">
-                  <tmf-video-card [video]="convertToVideoCardData(video)">
+                  <tmf-video-card [video]="videoCard">
                   </tmf-video-card>
                 </div>
               }

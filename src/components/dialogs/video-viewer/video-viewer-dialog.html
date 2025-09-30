@@ -31,8 +31,8 @@
               muted
               loop
               playsinline
-              (click)="onVideoClick($any($event.target))"
-              (timeupdate)="updateProgress($any($event.target))"
+              (click)="onVideoClick($event)"
+              (timeupdate)="updateProgress($event, i)"
             ></video>
 
             <!-- Bottom Gradient Mask -->

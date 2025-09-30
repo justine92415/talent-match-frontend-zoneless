@@ -4182,6 +4182,11 @@ export interface PublicCourseVideo {
   id: number;
   /** 影片名稱 */
   name: string;
+  /**
+   * 影片分類
+   * @nullable
+   */
+  category?: string | null;
   /** 影片簡介 */
   intro: string;
   /** 影片 URL */

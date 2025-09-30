@@ -177,6 +177,27 @@
         </div>
       </div>
 
+      <!-- 課程短影音 -->
+      <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-grey-33 mb-4">課程短影音</h2>
+
+        @if (selectedVideos().length > 0) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (video of selectedVideos(); track video.id; let i = $index) {
+              <div class="relative cursor-pointer" (click)="openVideoViewer(video, i)">
+                <tmf-video-card [video]="convertToVideoCardData(video)">
+                </tmf-video-card>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-8 text-grey-66">
+            <mat-icon class="text-grey-9f mb-2" style="font-size: 3rem; width: 3rem; height: 3rem;">video_library</mat-icon>
+            <p>此課程尚無短影音</p>
+          </div>
+        }
+      </div>
+
       <!-- 課程時間資訊 -->
       <div class="bg-white border border-grey-d4 rounded-xl shadow-sm p-6">
         <h2 class="text-xl font-semibold text-grey-33 mb-6">時間資訊</h2>

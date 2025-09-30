@@ -3011,9 +3011,52 @@ export interface CourseBasicInfo {
   updated_at?: string;
 }
 
+/**
+ * 短影音詳細資訊
+ */
+export type CourseWithPriceOptionsAllOfSelectedVideosItemVideoInfo = {
+  /** 短影音 ID */
+  id?: number;
+  /** 短影音 UUID */
+  uuid?: string;
+  /** 短影音名稱 */
+  name?: string;
+  /**
+   * 短影音分類
+   * @nullable
+   */
+  category?: string | null;
+  /**
+   * 短影音簡介
+   * @nullable
+   */
+  intro?: string | null;
+  /**
+   * 短影音 URL
+   * @nullable
+   */
+  url?: string | null;
+  /** 短影音建立時間 */
+  created_at?: string;
+};
+
+/**
+ * 關聯的短影音資訊
+ */
+export type CourseWithPriceOptionsAllOfSelectedVideosItem = {
+  /** 短影音 ID */
+  video_id?: number;
+  /** 顯示順序 */
+  display_order?: number;
+  /** 短影音詳細資訊 */
+  video_info?: CourseWithPriceOptionsAllOfSelectedVideosItemVideoInfo;
+};
+
 export type CourseWithPriceOptionsAllOf = {
   /** 課程價格方案列表 */
   price_options?: PriceOption[];
+  /** 課程關聯的短影音列表 (最多3支，按顯示順序排列) */
+  selected_videos?: CourseWithPriceOptionsAllOfSelectedVideosItem[];
 };
 
 export type CourseWithPriceOptions = CourseBasicInfo &
@@ -3085,10 +3128,10 @@ export const GetCourseSuccessResponseStatus = {
 } as const;
 
 /**
- * 課程詳細資料
+ * 完整課程詳細資料，包含價格方案和短影音
  */
 export type GetCourseSuccessResponseData = {
-  course?: CourseBasicInfo;
+  course?: CourseWithPriceOptions;
 };
 
 export interface GetCourseSuccessResponse {
@@ -3099,7 +3142,7 @@ export interface GetCourseSuccessResponse {
    * @nullable
    */
   message?: string | null;
-  /** 課程詳細資料 */
+  /** 完整課程詳細資料，包含價格方案和短影音 */
   data?: GetCourseSuccessResponseData;
 }
 

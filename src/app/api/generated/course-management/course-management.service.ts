@@ -222,7 +222,12 @@ export class CourseManagementService {
     return this.http.put<TData>(`/api/courses/${id}`, formData, options);
   }
   /**
- * 取得指定課程的詳細資訊。根據使用者身份和課程狀態決定存取權限。
+ * 取得指定課程的完整詳細資訊，包含價格方案和關聯的短影音。根據使用者身份和課程狀態決定存取權限。
+
+**🆕 回應內容（與編輯 API 一致）**：
+- 完整課程基本資訊 (CourseBasicInfo)
+- 所有價格方案列表 (按價格排序)
+- 關聯的短影音列表 (最多3支，按顯示順序排列)
 
 **存取權限規則**：
 - 未登入：只能查看已發布 (published) 的課程
@@ -234,9 +239,17 @@ export class CourseManagementService {
 - 查詢指定 ID 的課程
 - 檢查課程是否存在
 - 根據使用者身份驗證存取權限
+- 查詢價格方案 (按價格升序排列)
+- 查詢關聯的短影音 (包含影片詳細資訊)
 - 回傳完整的課程資訊
 
- * @summary 取得課程詳細資訊
+**短影音功能**：
+- 回傳課程關聯的短影音列表
+- 包含影片 ID、名稱、類別、簡介、URL 和建立時間
+- 按顯示順序排列，供前端播放器使用
+- 最多可關聯 3 支短影音
+
+ * @summary 取得課程完整詳細資訊
  */
   getApiCoursesId<TData = GetCourseSuccessResponse>(
     id: number,

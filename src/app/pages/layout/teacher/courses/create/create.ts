@@ -320,7 +320,7 @@ export default class CourseCreate implements OnInit {
     if (this.courseForm.valid) {
       const formData = this.courseForm.getRawValue();
 
-      // 準備課程基本資料（包含短影音 ID）
+      // 準備課程基本資料（包含短影音）
       const courseData = {
         name: formData.name,
         content: formData.content,
@@ -331,7 +331,12 @@ export default class CourseCreate implements OnInit {
         address: formData.address || null,
         survey_url: formData.survey_url || null,
         purchase_message: formData.purchase_message || null,
-        video_ids: this.selectedVideos().map(v => v.id).filter(Boolean) // 加入短影音 ID
+        selectedVideos: this.selectedVideos()
+          .filter(v => v.id)
+          .map((v, index) => ({
+            video_id: v.id!,
+            display_order: index + 1
+          }))
       };
 
       // 準備價格方案資料
@@ -348,6 +353,8 @@ export default class CourseCreate implements OnInit {
       };
 
       console.log('準備發送資料:', requestData);
+      console.log('選擇的短影音:', courseData.selectedVideos);
+      console.log('courseData 包含 selectedVideos:', courseData);
 
       // 呼叫 API 建立課程
       this.courseService.postApiCourses(requestData).subscribe({

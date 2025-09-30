@@ -92,6 +92,39 @@ export class CourseReservationsComponent {
     });
   }
 
+  // 完成課程
+  onCompleteReservation(reservationId: number) {
+    this.dialogService.openConfirm({
+      title: '完成課程',
+      message: '確認此課程已完成？',
+      type: 'info'
+    }).subscribe(result => {
+      if (result.confirmed) {
+        this.reservationService.putApiReservationsIdStatus(reservationId, {
+          status_type: 'student-complete'
+        }).subscribe({
+          next: () => {
+            // 完成成功，重新載入預約記錄
+            this.reservationsResource.reload();
+            this.dialogService.openAlert({
+              title: '成功',
+              message: '課程已標記為完成',
+              type: 'success'
+            }).subscribe();
+          },
+          error: (error) => {
+            console.error('完成課程失敗:', error);
+            this.dialogService.openAlert({
+              title: '錯誤',
+              message: '完成課程失敗，請稍後再試',
+              type: 'error'
+            }).subscribe();
+          }
+        });
+      }
+    });
+  }
+
   // 分頁切換
   onPageChange(page: number) {
     if (page >= 1 && page <= (this.reservationsResource.value()?.data?.pagination?.total_pages || 1)) {

@@ -5790,6 +5790,28 @@ export type PurchaseBusinessErrorResponseAllOf = {
 export type PurchaseBusinessErrorResponse = BusinessErrorResponse &
   PurchaseBusinessErrorResponseAllOf;
 
+/**
+ * 狀態類型 (teacher-complete: 教師標記完成, student-complete: 學生標記完成)
+ */
+export type UpdateReservationStatusRequestStatusType =
+  (typeof UpdateReservationStatusRequestStatusType)[keyof typeof UpdateReservationStatusRequestStatusType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateReservationStatusRequestStatusType = {
+  'teacher-complete': 'teacher-complete',
+  'student-complete': 'student-complete',
+} as const;
+
+export interface UpdateReservationStatusRequest {
+  /** 狀態類型 (teacher-complete: 教師標記完成, student-complete: 學生標記完成) */
+  status_type: UpdateReservationStatusRequestStatusType;
+  /**
+   * 備註或回饋 (可選，最多500字元)
+   * @maxLength 500
+   */
+  notes?: string;
+}
+
 export interface CreateReservationRequest {
   /** 課程 ID (必填，學生必須已購買此課程) */
   course_id: number;
@@ -5998,6 +6020,25 @@ export interface CancelReservationResponse {
   reservation?: CancelReservationResponseReservation;
   /** 退還的課程堂數 */
   refunded_lessons?: number;
+}
+
+/**
+ * 回應狀態
+ */
+export type UpdateReservationStatusSuccessResponseStatus =
+  (typeof UpdateReservationStatusSuccessResponseStatus)[keyof typeof UpdateReservationStatusSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateReservationStatusSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface UpdateReservationStatusSuccessResponse {
+  /** 回應狀態 */
+  status?: UpdateReservationStatusSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: UpdateReservationStatusResponse;
 }
 
 /**
@@ -7096,6 +7137,10 @@ export const GetApiReservationsCourseReservationsStatus = {
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
+
+export type PutApiReservationsIdStatus400 =
+  | ReservationValidationErrorResponse
+  | ReservationBusinessErrorResponse;
 
 export type DeleteApiReservationsId400 =
   | ReservationValidationErrorResponse

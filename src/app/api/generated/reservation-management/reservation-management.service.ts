@@ -50,6 +50,8 @@ import type {
   RejectReservationSuccessResponse,
   ReservationListSuccessResponse,
   TeacherReservationSuccessResponse,
+  UpdateReservationStatusRequest,
+  UpdateReservationStatusSuccessResponse,
 } from '../talentMatchAPI.schemas';
 
 interface HttpClientOptions {
@@ -230,6 +232,48 @@ export class ReservationManagementService {
     });
   }
   /**
+ * 教師或學生手動標記預約為完成狀態，用於確認課程已完成。
+
+**業務邏輯**：
+- 驗證使用者身份認證和權限
+- 檢查預約是否存在且屬於該使用者
+- 驗證課程時間（只有課程結束後才能標記完成）
+- 檢查當前狀態是否允許標記完成（必須是 reserved 或 overdue）
+- 根據 status_type 更新對應的狀態
+  - teacher-complete: 更新教師狀態為 completed
+  - student-complete: 更新學生狀態為 completed
+- 檢查是否雙方都已確認完成
+- 回傳更新後的預約資訊
+
+ * @summary 更新預約完成狀態
+ */
+  putApiReservationsIdStatus<TData = UpdateReservationStatusSuccessResponse>(
+    id: number,
+    updateReservationStatusRequest: UpdateReservationStatusRequest,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  putApiReservationsIdStatus<TData = UpdateReservationStatusSuccessResponse>(
+    id: number,
+    updateReservationStatusRequest: UpdateReservationStatusRequest,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  putApiReservationsIdStatus<TData = UpdateReservationStatusSuccessResponse>(
+    id: number,
+    updateReservationStatusRequest: UpdateReservationStatusRequest,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  putApiReservationsIdStatus<TData = UpdateReservationStatusSuccessResponse>(
+    id: number,
+    updateReservationStatusRequest: UpdateReservationStatusRequest,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.put<TData>(
+      `/api/reservations/${id}/status`,
+      updateReservationStatusRequest,
+      options,
+    );
+  }
+  /**
  * 學生或教師取消預約，系統會自動退還課程堂數並更新預約狀態。
 
 **業務邏輯**：
@@ -354,6 +398,8 @@ export type GetApiReservationsMyReservationsClientResult =
   NonNullable<ReservationListSuccessResponse>;
 export type GetApiReservationsCourseReservationsClientResult =
   NonNullable<TeacherReservationSuccessResponse>;
+export type PutApiReservationsIdStatusClientResult =
+  NonNullable<UpdateReservationStatusSuccessResponse>;
 export type DeleteApiReservationsIdClientResult =
   NonNullable<CancelReservationSuccessResponse>;
 export type PostApiReservationsIdConfirmClientResult =

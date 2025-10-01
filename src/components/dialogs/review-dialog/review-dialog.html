@@ -1,0 +1,79 @@
+<div class="bg-white rounded-2xl w-full">
+  <!-- Dialog 標題 -->
+  <div class="flex items-center justify-between p-6 border-b border-grey-d4">
+    <h2 class="text-2xl font-bold text-grey-33">課程評價</h2>
+    <button
+      type="button"
+      (click)="close()"
+      class="text-grey-66 hover:text-grey-33 transition-colors">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Dialog 內容 - 上下排列 -->
+  <form [formGroup]="reviewForm" class="p-6 space-y-6">
+    <!-- 評分 -->
+    <div>
+      <label class="block text-sm font-medium text-grey-33 mb-3">
+        評分 <span class="text-red-500">*</span>
+      </label>
+      <div class="flex gap-2 mb-2">
+        @for (star of [1, 2, 3, 4, 5]; track star) {
+          <button
+            type="button"
+            (click)="setRating(star)"
+            class="transition-colors focus:outline-none"
+            [class.text-yellow]="star <= selectedRating()"
+            [class.text-grey-d4]="star > selectedRating()">
+            <mat-icon class="!text-5xl !w-12 !h-12">
+              {{ star <= selectedRating() ? 'star' : 'star_border' }}
+            </mat-icon>
+          </button>
+        }
+      </div>
+      @if (selectedRating() === 0) {
+        <p class="text-sm text-grey-66">請選擇評分</p>
+      } @else {
+        <p class="text-lg font-medium text-grey-33">{{ selectedRating() }} 顆星</p>
+      }
+    </div>
+
+    <!-- 評論內容 -->
+    <div>
+      <label class="block text-sm font-medium text-grey-33 mb-2">
+        評論內容 <span class="text-red-500">*</span>
+      </label>
+      <textarea
+        formControlName="comment"
+        rows="5"
+        placeholder="請分享您的上課體驗..."
+        class="w-full px-3 py-2 border border-grey-d4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+        [class.border-red-500]="reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched">
+      </textarea>
+      <div class="flex justify-between mt-1">
+        <p class="text-xs text-grey-66">
+          {{ reviewForm.get('comment')?.value?.length || 0 }} / 1000
+        </p>
+        @if (reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched) {
+          <p class="text-xs text-red-500">請輸入評論內容</p>
+        }
+      </div>
+    </div>
+  </form>
+
+  <!-- Dialog 操作按鈕 -->
+  <div class="flex gap-3 p-6 border-t border-grey-d4">
+    <tmf-button
+      class="flex-1"
+      (click)="submitReview()"
+      [disabled]="!reviewForm.valid || selectedRating() === 0 || isSubmitting()">
+      {{ isSubmitting() ? '提交中...' : '提交評論' }}
+    </tmf-button>
+    <tmf-button
+      variant="secondary"
+      (click)="close()"
+      [disabled]="isSubmitting()">
+      取消
+    </tmf-button>
+  </div>
+</div>

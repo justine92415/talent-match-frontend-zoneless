@@ -22,17 +22,25 @@
             <div class="flex-1">
               <div class="flex items-center gap-3">
                 <span class="font-medium">{{ reservation.reserve_time | date:'yyyy-MM-dd HH:mm':'UTC' }}</span>
-                <span
-                  class="px-2 py-1 text-xs rounded-full"
-                  [ngClass]="{
-                    'text-green-55': reservation.teacher_status === 'reserved' && reservation.student_status === 'reserved',
-                    'bg-orange-95 text-orange-55': reservation.teacher_status === 'pending' && reservation.student_status === 'reserved',
-                    'bg-blue-95 text-blue-50': reservation.student_status === 'completed',
-                    'bg-grey-f4 text-grey-66': reservation.student_status === 'overdue',
-                    'bg-grey-d4 text-grey-66':  reservation.student_status === 'cancelled'
-                  }">
-                  {{ reservation.teacher_status | reservationStatus: reservation.student_status }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="px-2 py-1 text-xs rounded-full"
+                    [ngClass]="{
+                      'text-green-55': reservation.teacher_status === 'reserved' && reservation.student_status === 'reserved',
+                      'bg-orange-95 text-orange-55': reservation.teacher_status === 'pending' && reservation.student_status === 'reserved',
+                      'bg-blue-95 text-blue-50': reservation.student_status === 'completed',
+                      'bg-grey-f4 text-grey-66': reservation.student_status === 'overdue',
+                      'bg-grey-d4 text-grey-66':  reservation.student_status === 'cancelled'
+                    }">
+                    {{ reservation.teacher_status | reservationStatus: reservation.student_status }}
+                  </span>
+                  @if (reservation.is_reviewed) {
+                    <div class="flex items-center gap-1 text-green-55">
+                      <mat-icon class="!w-4 !h-4 !text-base !leading-4">check_circle</mat-icon>
+                      <p class="text-xs leading-3 align-top">已評論</p>
+                    </div>
+                  }
+                </div>
               </div>
 
               <!-- 拒絕原因 (如果存在) -->
@@ -42,21 +50,32 @@
                 </div>
               }
             </div>
-            @if (reservation.student_status === 'reserved' && (reservation.teacher_status === 'reserved' || reservation.teacher_status === 'pending')) {
-              <tmf-button
-                variant="tertiary"
-                size="sm"
-                (click)="onCancelReservation(reservation.id!)">
-                取消預約
-              </tmf-button>
-            } @else if (reservation.student_status === 'overdue') {
-              <tmf-button
-                variant="primary"
-                size="sm"
-                (click)="onCompleteReservation(reservation.id!)">
-                完成課程
-              </tmf-button>
-            }
+            <div class="flex gap-2">
+              @if (reservation.student_status === 'reserved' && (reservation.teacher_status === 'reserved' || reservation.teacher_status === 'pending')) {
+                <tmf-button
+                  variant="tertiary"
+                  size="sm"
+                  (click)="onCancelReservation(reservation.id!)">
+                  取消預約
+                </tmf-button>
+              } @else if (reservation.student_status === 'overdue') {
+                <tmf-button
+                  variant="primary"
+                  size="sm"
+                  (click)="onCompleteReservation(reservation.id!)">
+                  完成課程
+                </tmf-button>
+              }
+
+              @if (reservation.student_status === 'completed' && !reservation.is_reviewed) {
+                <tmf-button
+                  variant="secondary"
+                  size="sm"
+                  (click)="openReviewDialog(reservation)">
+                  評論
+                </tmf-button>
+              }
+            </div>
           </div>
         </div>
       }

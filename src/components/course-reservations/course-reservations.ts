@@ -1,5 +1,7 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Dialog } from '@angular/cdk/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { ReservationStatusPipe } from './reservation-status.pipe';
 import { ReservationManagementService } from '@app/api/generated/reservation-management/reservation-management.service';
@@ -7,10 +9,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable, merge, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { DialogService } from '@share/services/dialog.service';
+import { ReviewDialogComponent } from '@components/dialogs/review-dialog/review-dialog';
 
 @Component({
   selector: 'tmf-course-reservations',
-  imports: [CommonModule, Button, ReservationStatusPipe],
+  imports: [CommonModule, Button, MatIconModule, ReservationStatusPipe],
   templateUrl: './course-reservations.html',
   styles: ``
 })
@@ -27,6 +30,7 @@ export class CourseReservationsComponent {
 
   private reservationService = inject(ReservationManagementService);
   private dialogService = inject(DialogService);
+  private dialog = inject(Dialog);
 
   // 使用 rxResource 載入預約記錄
   reservationsResource = rxResource({
@@ -121,6 +125,28 @@ export class CourseReservationsComponent {
             }).subscribe();
           }
         });
+      }
+    });
+  }
+
+  // 開啟評論 dialog
+  openReviewDialog(reservation: any) {
+    const dialogRef = this.dialog.open(ReviewDialogComponent, {
+      data: {
+        reservationUuid: reservation.uuid
+      },
+      width: '800px'
+    });
+
+    dialogRef.closed.subscribe((success) => {
+      if (success) {
+        // 提交成功，重新載入列表
+        this.reservationsResource.reload();
+        this.dialogService.openAlert({
+          title: '成功',
+          message: '感謝您的評價！',
+          type: 'success'
+        }).subscribe();
       }
     });
   }

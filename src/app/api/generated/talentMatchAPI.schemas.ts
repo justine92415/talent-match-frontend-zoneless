@@ -5932,6 +5932,8 @@ export interface ReservationDetail {
   teacher_status?: ReservationDetailTeacherStatus;
   /** 學生端預約狀態 */
   student_status?: ReservationDetailStudentStatus;
+  /** 是否已由學生留下評價 */
+  is_reviewed?: boolean;
   /** 預約建立時間 */
   created_at?: string;
   /** 預約更新時間 */
@@ -6423,6 +6425,82 @@ export interface TeacherReservationSuccessResponse {
   /** 教師預約查詢結果資料 */
   data?: TeacherReservationSuccessResponseData;
 }
+
+export interface ReviewSubmitRequest {
+  /** 預約紀錄的 UUID (必填，用於確認學生所預約的課程記錄，需為 v4 UUID 格式) */
+  reservation_uuid: string;
+  /**
+   * 學生對課程的評分 (必填，範圍 1-5，僅允許整數)
+   * @minimum 1
+   * @maximum 5
+   */
+  rate: number;
+  /**
+   * 學生的文字評語 (必填，至少 1 個字元，最多 1000 個字元)
+   * @minLength 1
+   * @maxLength 1000
+   */
+  comment: string;
+}
+
+/**
+ * 回應狀態指示 (固定為 success 表示操作成功)
+ */
+export type ReviewSubmitSuccessResponseStatus =
+  (typeof ReviewSubmitSuccessResponseStatus)[keyof typeof ReviewSubmitSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReviewSubmitSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 評價建立後回傳的資料內容
+ */
+export type ReviewSubmitSuccessResponseData = {
+  /** 新建立評價的資料庫 ID */
+  id?: number;
+  /** 評價的星等分數 (1-5) */
+  rate?: number;
+  /** 學生撰寫的評語內容 */
+  comment?: string;
+  /** 評價建立時間 (ISO 8601 時間戳) */
+  created_at?: string;
+};
+
+export interface ReviewSubmitSuccessResponse {
+  /** 回應狀態指示 (固定為 success 表示操作成功) */
+  status?: ReviewSubmitSuccessResponseStatus;
+  /** 成功訊息內容 (使用專案既有的成功訊息常數) */
+  message?: string;
+  /** 評價建立後回傳的資料內容 */
+  data?: ReviewSubmitSuccessResponseData;
+}
+
+/**
+ * 各欄位的錯誤訊息清單
+ */
+export type ReviewSubmitValidationErrorResponseAllOfErrors = {
+  [key: string]: string[];
+};
+
+export type ReviewSubmitValidationErrorResponseAllOf = {
+  /** 驗證失敗的錯誤訊息 */
+  message?: string;
+  /** 各欄位的錯誤訊息清單 */
+  errors?: ReviewSubmitValidationErrorResponseAllOfErrors;
+};
+
+export type ReviewSubmitValidationErrorResponse = ValidationErrorResponse &
+  ReviewSubmitValidationErrorResponseAllOf;
+
+export type ReviewSubmitBusinessErrorResponseAllOf = {
+  /** 業務邏輯錯誤訊息 (例如重複評論、預約尚未完成等) */
+  message?: string;
+};
+
+export type ReviewSubmitBusinessErrorResponse = BusinessErrorResponse &
+  ReviewSubmitBusinessErrorResponseAllOf;
 
 /**
  * 伺服器內部錯誤
@@ -7154,6 +7232,10 @@ export type PostApiReservationsIdConfirm400 =
 export type PostApiReservationsIdReject400 =
   | ValidationErrorResponse
   | ReservationStatusInvalidErrorResponse;
+
+export type PostApiReviews400 =
+  | ReviewSubmitValidationErrorResponse
+  | ReviewSubmitBusinessErrorResponse;
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

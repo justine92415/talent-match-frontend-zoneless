@@ -12,19 +12,17 @@ import { ReviewCard } from '@components/review-card/review-card';
 import { WeeklyCalendar } from '@components/weekly-calendar/weekly-calendar';
 import { InputPlan } from '@components/form/input-plan/input-plan';
 import { PublicCoursesService } from '@app/api/generated/public-courses/public-courses.service';
-import { PublicCourseDetailSuccessResponseData } from '@app/api/generated/talentMatchAPI.schemas';
 import { CartService } from '@app/services/cart.service';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/video-viewer-dialog';
+import { AllReviewsDialogComponent } from '@components/dialogs/all-reviews-dialog/all-reviews-dialog';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'tmf-course-detail',
   imports: [
     MatIconModule,
     NgClass,
-    DatePipe,
     ReactiveFormsModule,
     CourseDetailSectionTitle,
     Button,
@@ -137,8 +135,7 @@ export default class CourseDetail implements OnDestroy {
     });
 
     // 監聽滾動結束事件
-    this.scrollEnd$.pipe(
-    ).subscribe(() => {
+    this.scrollEnd$.subscribe(() => {
       this.isScrolling.set(false);
     });
   }
@@ -206,7 +203,26 @@ export default class CourseDetail implements OnDestroy {
   navigateToTeacherDetail() {}
   addFavorite() {}
   copyToClipboard() {}
-  openAllReviews() {}
+
+  openAllReviews() {
+    const courseUuid = this.course()?.uuid;
+    const courseName = this.course()?.name;
+
+    if (!courseUuid || !courseName) {
+      return;
+    }
+
+    this.dialog.open(AllReviewsDialogComponent, {
+      data: {
+        courseUuid,
+        courseName,
+      },
+      panelClass: 'all-reviews-dialog-panel',
+      hasBackdrop: true,
+      disableClose: false,
+    });
+  }
+
   openTeacherDetailPage() {}
 
   // 加入購物車

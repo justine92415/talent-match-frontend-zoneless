@@ -2956,8 +2956,6 @@ export interface CourseBasicInfo {
   review_count?: number;
   /** 瀏覽次數 */
   view_count?: number;
-  /** 購買次數 */
-  purchase_count?: number;
   /** 學生人數 */
   student_count?: number;
   /**
@@ -4073,8 +4071,6 @@ export interface PublicCourseDetail {
   review_count: number;
   /** 學生人數 */
   student_count: number;
-  /** 購買次數 */
-  purchase_count: number;
   /**
    * 問卷調查連結
    * @nullable
@@ -6512,6 +6508,147 @@ export type ReviewSubmitBusinessErrorResponse = BusinessErrorResponse &
   ReviewSubmitBusinessErrorResponseAllOf;
 
 /**
+ * 回應狀態指示 (固定為 success 表示操作成功)
+ */
+export type CourseReviewsSuccessResponseStatus =
+  (typeof CourseReviewsSuccessResponseStatus)[keyof typeof CourseReviewsSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseReviewsSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 評價學生資訊
+ */
+export type CourseReviewsSuccessResponseDataReviewsItemStudent = {
+  /** 學生暱稱 */
+  name?: string;
+  /**
+   * 學生頭貼圖片 URL (可為 null)
+   * @nullable
+   */
+  avatar_image?: string | null;
+};
+
+export type CourseReviewsSuccessResponseDataReviewsItem = {
+  /** 評價資料庫 ID */
+  id?: number;
+  /** 評價唯一識別碼 (v4 UUID) */
+  uuid?: string;
+  /** 評分星等 (1-5) */
+  rate?: number;
+  /** 評語內容 */
+  comment?: string;
+  /** 評價建立時間 (ISO 8601 時間戳) */
+  created_at?: string;
+  /** 評價學生資訊 */
+  student?: CourseReviewsSuccessResponseDataReviewsItemStudent;
+};
+
+/**
+ * 分頁資訊
+ */
+export type CourseReviewsSuccessResponseDataPagination = {
+  /** 當前頁碼 */
+  current_page?: number;
+  /** 每頁筆數 */
+  per_page?: number;
+  /** 總筆數 */
+  total?: number;
+  /** 總頁數 */
+  total_pages?: number;
+};
+
+/**
+ * 課程基本資訊
+ */
+export type CourseReviewsSuccessResponseDataCourse = {
+  /** 課程資料庫 ID */
+  id?: number;
+  /** 課程唯一識別碼 (v4 UUID) */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+};
+
+/**
+ * 各星等的評價數量分佈
+ */
+export type CourseReviewsSuccessResponseDataRatingStatsRatingDistribution = {
+  /** 1 星評價數量 */
+  '1'?: number;
+  /** 2 星評價數量 */
+  '2'?: number;
+  /** 3 星評價數量 */
+  '3'?: number;
+  /** 4 星評價數量 */
+  '4'?: number;
+  /** 5 星評價數量 */
+  '5'?: number;
+};
+
+/**
+ * 課程評分統計資訊
+ */
+export type CourseReviewsSuccessResponseDataRatingStats = {
+  /** 平均評分 (小數點後一位) */
+  average_rating?: string;
+  /** 總評價數量 */
+  total_reviews?: number;
+  /** 各星等的評價數量分佈 */
+  rating_distribution?: CourseReviewsSuccessResponseDataRatingStatsRatingDistribution;
+};
+
+/**
+ * 課程評價列表與統計資料
+ */
+export type CourseReviewsSuccessResponseData = {
+  /** 評價記錄陣列 */
+  reviews?: CourseReviewsSuccessResponseDataReviewsItem[];
+  /** 分頁資訊 */
+  pagination?: CourseReviewsSuccessResponseDataPagination;
+  /** 課程基本資訊 */
+  course?: CourseReviewsSuccessResponseDataCourse;
+  /** 課程評分統計資訊 */
+  rating_stats?: CourseReviewsSuccessResponseDataRatingStats;
+};
+
+export interface CourseReviewsSuccessResponse {
+  /** 回應狀態指示 (固定為 success 表示操作成功) */
+  status?: CourseReviewsSuccessResponseStatus;
+  /** 成功訊息內容 */
+  message?: string;
+  /** 課程評價列表與統計資料 */
+  data?: CourseReviewsSuccessResponseData;
+}
+
+export type CourseReviewsNotFoundErrorResponseAllOf = {
+  /** 課程不存在或 UUID 格式錯誤的錯誤訊息 */
+  message?: string;
+};
+
+export type CourseReviewsNotFoundErrorResponse = NotFoundErrorResponse &
+  CourseReviewsNotFoundErrorResponseAllOf;
+
+/**
+ * 各欄位的錯誤訊息清單
+ */
+export type CourseReviewsValidationErrorResponseAllOfErrors = {
+  [key: string]: string[];
+};
+
+export type CourseReviewsValidationErrorResponseAllOf = {
+  /** 參數驗證失敗的錯誤訊息 */
+  message?: string;
+  /** 各欄位的錯誤訊息清單 */
+  errors?: CourseReviewsValidationErrorResponseAllOfErrors;
+};
+
+export type CourseReviewsValidationErrorResponse = ValidationErrorResponse &
+  CourseReviewsValidationErrorResponseAllOf;
+
+/**
  * 伺服器內部錯誤
  */
 export type InternalServerErrorResponse = ServerErrorResponse;
@@ -7245,6 +7382,52 @@ export type PostApiReservationsIdReject400 =
 export type PostApiReviews400 =
   | ReviewSubmitValidationErrorResponse
   | ReviewSubmitBusinessErrorResponse;
+
+export type GetApiReviewsCoursesUuidParams = {
+  /**
+   * 頁碼 (選填，預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁筆數 (選填，預設 10，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /**
+   * 依評分篩選 (選填，範圍 1-5)
+   * @minimum 1
+   * @maximum 5
+   */
+  rating?: number;
+  /**
+   * 排序欄位 (選填，預設為 created_at)
+   */
+  sort_by?: GetApiReviewsCoursesUuidSortBy;
+  /**
+   * 排序方向 (選填，預設為 desc 降冪)
+   */
+  sort_order?: GetApiReviewsCoursesUuidSortOrder;
+};
+
+export type GetApiReviewsCoursesUuidSortBy =
+  (typeof GetApiReviewsCoursesUuidSortBy)[keyof typeof GetApiReviewsCoursesUuidSortBy];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiReviewsCoursesUuidSortBy = {
+  created_at: 'created_at',
+  rating: 'rating',
+} as const;
+
+export type GetApiReviewsCoursesUuidSortOrder =
+  (typeof GetApiReviewsCoursesUuidSortOrder)[keyof typeof GetApiReviewsCoursesUuidSortOrder];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiReviewsCoursesUuidSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

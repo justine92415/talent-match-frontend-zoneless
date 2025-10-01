@@ -238,7 +238,7 @@
               >學生評論</tmf-course-detail-section-title
             >
             @if (hasReviews()) {
-              <tmf-button variant="secondary" [iconName]="'keyboard_arrow_right'">
+              <tmf-button (click)="openAllReviews()" variant="secondary" [iconName]="'keyboard_arrow_right'">
                 <p class="text-sm font-normal">顯示所有評價</p>
               </tmf-button>
             }
@@ -253,7 +253,7 @@
                   [review]="{
                     id: review.id.toString(),
                     name: review.user.nick_name,
-                    date: (review.created_at | date: 'yyyy-MM-dd') || '',
+                    date: (review.created_at) || '',
                     title: '',
                     content: review.comment,
                     rating: review.rate,

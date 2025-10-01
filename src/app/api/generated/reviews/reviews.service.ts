@@ -18,9 +18,28 @@ import type {
 
 import { Injectable, inject } from '@angular/core';
 
+// import type { DeepNonNullable } from '@orval/core/src/utils/deep-non-nullable';
+
+// 使用 TypeScript 內建的 NonNullable 型別
+type DeepNonNullable<T> = T extends (...args: any[]) => any
+  ? T
+  : T extends any[]
+  ? _DeepNonNullableArray<T[number]>
+  : T extends object
+  ? _DeepNonNullableObject<T>
+  : NonNullable<T>;
+
+type _DeepNonNullableArray<T> = Array<DeepNonNullable<NonNullable<T>>>;
+
+type _DeepNonNullableObject<T> = {
+  [P in keyof T]-?: DeepNonNullable<NonNullable<T[P]>>;
+};
+
 import { Observable } from 'rxjs';
 
 import type {
+  CourseReviewsSuccessResponse,
+  GetApiReviewsCoursesUuidParams,
   ReviewSubmitRequest,
   ReviewSubmitSuccessResponse,
 } from '../talentMatchAPI.schemas';
@@ -80,7 +99,53 @@ export class ReviewsService {
   ): Observable<any> {
     return this.http.post<TData>(`/api/reviews`, reviewSubmitRequest, options);
   }
+  /**
+ * 取得指定課程的所有評價記錄，包含評價內容、學生資訊和評分統計。
+
+**業務邏輯**：
+- 驗證課程 UUID 格式是否正確
+- 確認課程存在且狀態為已發佈 (published)
+- 支援依評分篩選評價
+- 支援依建立時間或評分排序
+- 使用分頁機制提升效能
+- 並行查詢評價列表、總數與統計資訊
+- 回傳課程基本資訊、評價列表、分頁資訊和評分統計
+
+**查詢優化**：
+- 使用 LEFT JOIN 一次查詢取得學生資訊
+- 並行執行評價列表、總數和統計查詢
+- 使用資料庫索引加速排序和篩選
+
+ * @summary 取得課程評價列表
+ */
+  getApiReviewsCoursesUuid<TData = CourseReviewsSuccessResponse>(
+    uuid: string,
+    params?: DeepNonNullable<GetApiReviewsCoursesUuidParams>,
+    options?: HttpClientOptions & { observe?: 'body' },
+  ): Observable<TData>;
+  getApiReviewsCoursesUuid<TData = CourseReviewsSuccessResponse>(
+    uuid: string,
+    params?: DeepNonNullable<GetApiReviewsCoursesUuidParams>,
+    options?: HttpClientOptions & { observe: 'events' },
+  ): Observable<HttpEvent<TData>>;
+  getApiReviewsCoursesUuid<TData = CourseReviewsSuccessResponse>(
+    uuid: string,
+    params?: DeepNonNullable<GetApiReviewsCoursesUuidParams>,
+    options?: HttpClientOptions & { observe: 'response' },
+  ): Observable<AngularHttpResponse<TData>>;
+  getApiReviewsCoursesUuid<TData = CourseReviewsSuccessResponse>(
+    uuid: string,
+    params?: DeepNonNullable<GetApiReviewsCoursesUuidParams>,
+    options?: HttpClientOptions & { observe?: any },
+  ): Observable<any> {
+    return this.http.get<TData>(`/api/reviews/courses/${uuid}`, {
+      ...options,
+      params: { ...params, ...options?.params },
+    });
+  }
 }
 
 export type PostApiReviewsClientResult =
   NonNullable<ReviewSubmitSuccessResponse>;
+export type GetApiReviewsCoursesUuidClientResult =
+  NonNullable<CourseReviewsSuccessResponse>;

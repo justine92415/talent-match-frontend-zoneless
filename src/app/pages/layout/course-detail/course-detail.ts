@@ -1,9 +1,10 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, inject, signal, OnInit, OnDestroy, AfterViewInit, computed, ViewChildren, QueryList, ElementRef, viewChildren, effect } from '@angular/core';
+import { Component, inject, signal, OnDestroy, computed, viewChildren, effect, ElementRef } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { CourseDetailSectionTitle } from '@components/course-detail-section-title/course-detail-section-title';
 import { Button } from '@components/button/button';
 import { StarRating } from '@components/star-rating/star-rating';
@@ -40,24 +41,39 @@ import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/vid
     }
   `,
 })
-export default class CourseDetail implements OnInit, OnDestroy {
+export default class CourseDetail implements OnDestroy {
   sections = viewChildren<ElementRef<HTMLElement>>('section');
-  // @ViewChildren('section') sections!: QueryList<ElementRef>;
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private dialog = inject(Dialog);
   private publicCoursesService = inject(PublicCoursesService);
   private cartService = inject(CartService);
 
-  // 課程詳情資料
-  courseDetail = signal<PublicCourseDetailSuccessResponseData | null>(null);
-  isLoading = signal<boolean>(false);
-  error = signal<string | null>(null);
+  // 從路由取得課程 ID
+  private courseId = signal<number | null>(null);
+
+  // 使用 rxResource 載入課程詳情
+  courseDetailResource = rxResource({
+    params: () => this.courseId(),
+    stream: ({params: courseId}) => {
+      if (!courseId) {
+        throw new Error('課程ID無效');
+      }
+      return this.publicCoursesService.getApiCoursesPublicId(courseId);
+    }
+  });
+
+  // 從 resource 取得資料
+  courseDetail = computed(() => {
+    const response = this.courseDetailResource.value() as any;
+    return response?.data || null;
+  });
 
   course = computed(() => {
+    const detail = this.courseDetail();
     return {
-      ...this.courseDetail()?.course,
-      rate: Number(this.courseDetail()?.course?.rate),
+      ...detail?.course,
+      rate: Number(detail?.course?.rate),
     };
   });
   teacher = computed(() => this.courseDetail()?.teacher);
@@ -78,7 +94,7 @@ export default class CourseDetail implements OnInit, OnDestroy {
   videos = computed(() => this.courseDetail()?.videos || []);
   // 將影片轉換為 VideoCardData 格式
   videoCards = computed(() =>
-    this.videos().map(video => ({
+    this.videos().map((video: any) => ({
       id: video.id.toString(),
       tag: video.category || '',
       description: video.intro,
@@ -103,16 +119,18 @@ export default class CourseDetail implements OnInit, OnDestroy {
   });
 
   constructor() {
+    // 初始化課程 ID
+    const courseIdParam = this.route.snapshot.paramMap.get('id');
+    if (courseIdParam) {
+      this.courseId.set(Number(courseIdParam));
+    }
+
+    // 當 sections 載入完成後設置 IntersectionObserver
     effect(() => {
-      console.log('signal' , this.sections().length);
       if (this.sections().length > 0) {
         this.setupIntersectionObserver();
       }
     });
-  }
-
-  ngOnInit() {
-    this.loadCourseDetail();
   }
 
   ngOnDestroy() {
@@ -168,49 +186,6 @@ export default class CourseDetail implements OnInit, OnDestroy {
     }
   }
 
-  loadCourseDetail() {
-    // 從路由參數取得課程ID
-    const courseId = this.route.snapshot.paramMap.get('id');
-    if (!courseId) {
-      this.error.set('課程ID無效');
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.error.set(null);
-
-    this.publicCoursesService
-      .getApiCoursesPublicId(Number(courseId))
-      .subscribe({
-        next: (response) => {
-          if (response.data) {
-            this.courseDetail.set(response.data);
-          } else {
-            this.error.set('找不到課程資料');
-          }
-          this.isLoading.set(false);
-        },
-        error: (error) => {
-          console.error('載入課程詳情失敗:', error);
-          this.handleLoadError(error);
-          this.isLoading.set(false);
-        },
-      });
-  }
-
-  private handleLoadError(error: any): void {
-    let errorMessage = '載入課程詳情失敗，請稍後再試。';
-
-    if (error.status === 404) {
-      errorMessage = '課程不存在或已下架。';
-    } else if (error.status === 403) {
-      errorMessage = '此課程尚未公開。';
-    } else if (error.status >= 500) {
-      errorMessage = '伺服器暫時無法處理請求，請稍後再試。';
-    }
-
-    this.error.set(errorMessage);
-  }
 
   navigateToTeacherDetail() {}
   addFavorite() {}

@@ -1204,6 +1204,8 @@ export type TeacherProfileSuccessResponseDataTeacher = {
   total_courses?: number;
   /** 平均評分 */
   average_rating?: number;
+  /** 累積完成課堂數 */
+  total_completed_lessons?: number;
   /** 總收入 */
   total_earnings?: number;
   /** 建立時間 */
@@ -4149,6 +4151,8 @@ export interface PublicCourseTeacherInfo {
   total_courses: number;
   /** 教師平均評分 */
   average_rating: number;
+  /** 累積完成課堂數 */
+  total_completed_lessons: number;
 }
 
 export interface PublicCoursePriceOption {

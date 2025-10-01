@@ -65,7 +65,7 @@ export default class CourseDetail implements OnDestroy {
 
   // 從 resource 取得資料
   courseDetail = computed(() => {
-    const response = this.courseDetailResource.value() as any;
+    const response = this.courseDetailResource.value();
     return response?.data || null;
   });
 

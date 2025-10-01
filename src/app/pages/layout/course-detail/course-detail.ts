@@ -1,5 +1,5 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, inject, signal, OnDestroy, computed, viewChildren, effect, ElementRef } from '@angular/core';
+import { Component, inject, signal, OnDestroy, computed, viewChildren, effect, ElementRef, HostListener } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
@@ -16,6 +16,8 @@ import { PublicCourseDetailSuccessResponseData } from '@app/api/generated/talent
 import { CartService } from '@app/services/cart.service';
 import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/video-viewer-dialog';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'tmf-course-detail',
@@ -107,6 +109,8 @@ export default class CourseDetail implements OnDestroy {
   isAddingToCart = signal<boolean>(false);
 
   private observer: IntersectionObserver | null = null;
+  private isScrolling = signal(false);
+  private scrollEnd$ = new Subject<void>();
 
   formGroup = this.fb.group({
     purchase_item_id: this.fb.control(''),
@@ -131,12 +135,24 @@ export default class CourseDetail implements OnDestroy {
         this.setupIntersectionObserver();
       }
     });
+
+    // 監聽滾動結束事件
+    this.scrollEnd$.pipe(
+    ).subscribe(() => {
+      this.isScrolling.set(false);
+    });
+  }
+
+  @HostListener('window:scrollend')
+  onWindowScroll() {
+    this.scrollEnd$.next();
   }
 
   ngOnDestroy() {
     if (this.observer) {
       this.observer.disconnect();
     }
+    this.scrollEnd$.complete();
   }
 
   // 設置 IntersectionObserver 監聽區塊
@@ -151,7 +167,7 @@ export default class CourseDetail implements OnDestroy {
 
     this.observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !this.isScrolling()) {
           const sectionId = entry.target.id;
           console.log('Setting activeSection to:', sectionId);
           this.activeSection.set(sectionId);
@@ -166,15 +182,15 @@ export default class CourseDetail implements OnDestroy {
 
   // 點擊導航滾動到對應區塊
   scrollToSection(sectionId: string) {
-    console.log('scrollToSection clicked:', sectionId);
+    // 設定正在滾動狀態，暫時停用 IntersectionObserver
+    this.isScrolling.set(true);
     // 立即更新 activeSection
     this.activeSection.set(sectionId);
-    console.log('activeSection set to:', this.activeSection());
 
-    const element = document.getElementById(sectionId);
-    if (element) {
+    const section = this.sections().find(s => s.nativeElement.id === sectionId);
+    if (section) {
       const navHeight = 100; // 導航列高度 + 間距
-      const elementPosition = element.getBoundingClientRect().top;
+      const elementPosition = section.nativeElement.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - navHeight;
 
       window.scrollTo({
@@ -182,7 +198,7 @@ export default class CourseDetail implements OnDestroy {
         behavior: 'smooth'
       });
     } else {
-      console.error('Element not found:', sectionId);
+      this.isScrolling.set(false);
     }
   }
 

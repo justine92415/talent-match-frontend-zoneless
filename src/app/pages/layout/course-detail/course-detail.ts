@@ -1,8 +1,8 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, AfterViewInit, computed, ViewChildren, QueryList, ElementRef, viewChildren, effect } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Dialog } from '@angular/cdk/dialog';
 import { CourseDetailSectionTitle } from '@components/course-detail-section-title/course-detail-section-title';
 import { Button } from '@components/button/button';
@@ -22,7 +22,6 @@ import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/vid
     MatIconModule,
     NgClass,
     DatePipe,
-    RouterLink,
     ReactiveFormsModule,
     CourseDetailSectionTitle,
     Button,
@@ -33,9 +32,17 @@ import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/vid
     VideoCard,
   ],
   templateUrl: './course-detail.html',
-  styles: ``,
+  styles: `
+    .active {
+      color: #F97316;
+      font-weight: 600;
+      border-bottom: 2px solid #F97316;
+    }
+  `,
 })
-export default class CourseDetail implements OnInit {
+export default class CourseDetail implements OnInit, OnDestroy {
+  sections = viewChildren<ElementRef<HTMLElement>>('section');
+  // @ViewChildren('section') sections!: QueryList<ElementRef>;
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private dialog = inject(Dialog);
@@ -83,6 +90,8 @@ export default class CourseDetail implements OnInit {
   activeSection = signal('sectionA');
   isAddingToCart = signal<boolean>(false);
 
+  private observer: IntersectionObserver | null = null;
+
   formGroup = this.fb.group({
     purchase_item_id: this.fb.control(''),
   });
@@ -93,8 +102,70 @@ export default class CourseDetail implements OnInit {
     return value ? Number(value) : null;
   });
 
+  constructor() {
+    effect(() => {
+      console.log('signal' , this.sections().length);
+      if (this.sections().length > 0) {
+        this.setupIntersectionObserver();
+      }
+    });
+  }
+
   ngOnInit() {
     this.loadCourseDetail();
+  }
+
+  ngOnDestroy() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
+  // 設置 IntersectionObserver 監聽區塊
+  setupIntersectionObserver() {
+    console.log('setupIntersectionObserver called');
+
+    const options = {
+      root: null,
+      rootMargin: '-20% 0px -70% 0px',
+      threshold: 0
+    };
+
+    this.observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          console.log('Setting activeSection to:', sectionId);
+          this.activeSection.set(sectionId);
+        }
+      });
+    }, options);
+
+    this.sections().forEach((section) => {
+      this.observer?.observe(section.nativeElement);
+    });
+  }
+
+  // 點擊導航滾動到對應區塊
+  scrollToSection(sectionId: string) {
+    console.log('scrollToSection clicked:', sectionId);
+    // 立即更新 activeSection
+    this.activeSection.set(sectionId);
+    console.log('activeSection set to:', this.activeSection());
+
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const navHeight = 100; // 導航列高度 + 間距
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    } else {
+      console.error('Element not found:', sectionId);
+    }
   }
 
   loadCourseDetail() {

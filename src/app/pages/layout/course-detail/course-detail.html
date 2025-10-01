@@ -160,37 +160,33 @@
       >
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionA' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionA"
+            (click)="scrollToSection('sectionA')"
             >課程介紹</a
           >
         </li>
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionB' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionB"
+            (click)="scrollToSection('sectionB')"
             >授課時間</a
           >
         </li>
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionC' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionC"
+            (click)="scrollToSection('sectionC')"
             >學生評論</a
           >
         </li>
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionD' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionD"
+            (click)="scrollToSection('sectionD')"
             >教師履歷</a
           >
         </li>

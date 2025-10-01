@@ -1,10 +1,11 @@
-import { Component, inject, signal, Inject } from '@angular/core';
+import { Component, inject, Inject } from '@angular/core';
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { ReviewsService } from '@app/api/generated/reviews/reviews.service';
+import { InputRating } from '@components/form/input-rating/input-rating';
+import { InputTextarea } from '@components/form/input-textarea/input-textarea';
 
 export interface ReviewDialogData {
   reservationUuid: string;
@@ -13,7 +14,7 @@ export interface ReviewDialogData {
 @Component({
   selector: 'tmf-review-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, Button],
+  imports: [ReactiveFormsModule, MatIconModule, Button, InputRating, InputTextarea],
   templateUrl: './review-dialog.html',
   styles: `
     :host {
@@ -25,10 +26,8 @@ export class ReviewDialogComponent {
   private fb = inject(FormBuilder);
   private reviewsService = inject(ReviewsService);
 
-  selectedRating = signal<number>(0);
-  isSubmitting = signal<boolean>(false);
-
   reviewForm: FormGroup = this.fb.group({
+    rate: [0, [Validators.required, Validators.min(1), Validators.max(5)]],
     comment: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(1000)]],
   });
 
@@ -37,22 +36,16 @@ export class ReviewDialogComponent {
     @Inject(DIALOG_DATA) public data: ReviewDialogData
   ) {}
 
-  // 設定評分
-  setRating(rating: number): void {
-    this.selectedRating.set(rating);
-  }
-
   // 提交評論
   submitReview(): void {
-    if (!this.reviewForm.valid || this.selectedRating() === 0) {
+    if (!this.reviewForm.valid) {
+      this.reviewForm.markAllAsTouched();
       return;
     }
 
-    this.isSubmitting.set(true);
-
     const reviewData = {
       reservation_uuid: this.data.reservationUuid,
-      rate: this.selectedRating(),
+      rate: this.reviewForm.get('rate')?.value,
       comment: this.reviewForm.get('comment')?.value,
     };
 
@@ -62,7 +55,6 @@ export class ReviewDialogComponent {
       },
       error: (error) => {
         console.error('提交評論失敗:', error);
-        this.isSubmitting.set(false);
         alert('提交評論失敗，請稍後再試');
       },
     });

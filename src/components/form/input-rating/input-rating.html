@@ -1,0 +1,28 @@
+<div
+  class="flex items-center gap-2"
+  (mouseleave)="onMouseLeave()"
+>
+  @for (star of stars(); track star; let idx = $index) {
+    <button
+      type="button"
+      (click)="onStarClick(star)"
+      (mouseenter)="onStarHover(star)"
+      [disabled]="isDisabled()"
+      class="transition-colors duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+      [class.text-yellow]="starFilled()[idx]"
+      [class.text-grey-d4]="!starFilled()[idx]"
+      [class.hover:text-yellow]="!isDisabled() && value() === 0"
+    >
+      <mat-icon class="filled cursor-pointer" [class]="iconSize()">
+        {{ starFilled()[idx] ? 'star' : 'star_border' }}
+      </mat-icon>
+    </button>
+  }
+</div>
+<div>
+  @if(ctrlDir.touched && ctrlDir.invalid) {
+    <div class="mt-1 text-sm text-red-500">
+      {{ ctrlDir.getError('error') }}
+    </div>
+  }
+</div>

@@ -1,4 +1,4 @@
-import { JsonPipe, NgClass } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,6 +21,7 @@ import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/vid
   imports: [
     MatIconModule,
     NgClass,
+    DatePipe,
     RouterLink,
     ReactiveFormsModule,
     CourseDetailSectionTitle,

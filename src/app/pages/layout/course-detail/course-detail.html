@@ -247,21 +247,28 @@
           </div>
           <!-- 評論區 -->
           <div class="flex flex-col gap-4">
-            <!-- 評論卡片 -->
-            <tmf-review-card
-              class="w-full"
-              type="bordered"
-              [review]="{
-                id: 'review-1',
-                name: 'Eric Clapton',
-                date: '2023-08-09',
-                title: '可以一展長才的平台',
-                content:
-                  '可以認識不同領域的高手，並且把喜歡的領域做推廣，是一件開心的事。',
-                rating: 5,
-                avatar: '/assets/images/teacher-avatar-1.jpg',
-              }"
-            ></tmf-review-card>
+            @if (hasReviews()) {
+              @for (review of reviews(); track review.id) {
+                <tmf-review-card
+                  class="w-full"
+                  type="bordered"
+                  [review]="{
+                    id: review.id.toString(),
+                    name: review.user.nick_name,
+                    date: (review.created_at | date: 'yyyy-MM-dd') || '',
+                    title: '',
+                    content: review.comment,
+                    rating: review.rate,
+                    avatar: review.user.avatar_image || undefined
+                  }"
+                ></tmf-review-card>
+              }
+            } @else {
+              <div class="text-center p-8 text-grey-66">
+                <div class="mb-2">💬</div>
+                <div>尚無評論</div>
+              </div>
+            }
           </div>
         </section>
 

@@ -4215,6 +4215,11 @@ export interface PublicCourseFile {
 export type PublicCourseReviewUser = {
   /** 評價者暱稱 */
   nick_name: string;
+  /**
+   * 評價者頭像 URL (可能為空字串表示尚未上傳)
+   * @nullable
+   */
+  avatar_image?: string | null;
 };
 
 /**

@@ -241,9 +241,11 @@
             <tmf-course-detail-section-title
               >學生評論</tmf-course-detail-section-title
             >
-            <tmf-button variant="secondary" [iconName]="'keyboard_arrow_right'">
-              <p class="text-sm font-normal">顯示所有評價</p>
-            </tmf-button>
+            @if (hasReviews()) {
+              <tmf-button variant="secondary" [iconName]="'keyboard_arrow_right'">
+                <p class="text-sm font-normal">顯示所有評價</p>
+              </tmf-button>
+            }
           </div>
           <!-- 評論區 -->
           <div class="flex flex-col gap-4">
@@ -265,7 +267,7 @@
               }
             } @else {
               <div class="text-center p-8 text-grey-66">
-                <div class="mb-2">💬</div>
+                <mat-icon class="!text-5xl !w-12 !h-12 mb-2">chat_bubble_outline</mat-icon>
                 <div>尚無評論</div>
               </div>
             }
@@ -283,21 +285,21 @@
             <div class="flex items-center gap-2 xl:gap-6">
               <img
                 class="h-16 w-16 rounded-full border border-grey-e9 xl:h-20 xl:w-20"
-                [src]="'course.teacher.avatar'"
-                alt=""
+                [src]="teacher()?.user?.avatar_image || '/assets/images/default-avatar.png'"
+                [alt]="teacher()?.user?.nick_name || '教師'"
               />
               <div>
                 <p class="text-lg font-medium text-grey-33 xl:mb-1 xl:text-2xl">
-                  Eric Clapton
+                  {{ teacher()?.user?.nick_name || '教師名稱' }}
                 </p>
                 <p class="text-sm font-medium text-grey-9f">
-                  累積完成 120 堂課程
+                  累積完成 {{ teacher()?.total_students || 0 }} 位學生
                 </p>
               </div>
             </div>
             <!-- 自介 -->
             <p
-              class="line-clamp-3 text-base text-grey-33"
+              class="text-base text-grey-33 whitespace-pre-wrap break-words"
               [innerHTML]="teacher()?.introduction || '教師自介資訊暫無提供'"
             ></p>
             <!-- 工作經驗 -->

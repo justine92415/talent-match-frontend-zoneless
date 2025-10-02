@@ -9,6 +9,7 @@ import { InputTextarea } from '@components/form/input-textarea/input-textarea';
 
 export interface ReviewDialogData {
   reservationUuid: string;
+  studentStatus?: string;
 }
 
 @Component({
@@ -35,6 +36,11 @@ export class ReviewDialogComponent {
     public dialogRef: DialogRef<boolean, ReviewDialogComponent>,
     @Inject(DIALOG_DATA) public data: ReviewDialogData
   ) {}
+
+  // 判斷是否為 OVERDUE 狀態
+  get isOverdue(): boolean {
+    return this.data.studentStatus === 'overdue';
+  }
 
   // 提交評論
   submitReview(): void {

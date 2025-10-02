@@ -12,6 +12,7 @@ import { TeacherManagementService } from '@app/api/generated/teacher-management/
 import { rxResource } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { DialogService } from '@share/services/dialog.service';
+import { ReservationStatusPipe, ReservationStatusClassPipe } from '@components/course-reservations/reservation-status.pipe';
 
 @Component({
   selector: 'tmf-reservation',
@@ -23,6 +24,8 @@ import { DialogService } from '@share/services/dialog.service';
     ReactiveFormsModule,
     Skeleton,
     MatIconModule,
+    ReservationStatusPipe,
+    ReservationStatusClassPipe,
   ],
   templateUrl: './reservation.html',
   styles: ``,
@@ -81,6 +84,7 @@ export default class Reservation {
     { value: 'all', label: '全部狀態' },
     { value: 'pending', label: '待確認' },
     { value: 'reserved', label: '已預約' },
+    { value: 'overdue', label: '已結束' },
     { value: 'completed', label: '已完成' },
     { value: 'cancelled', label: '已取消' },
   ];
@@ -288,43 +292,44 @@ export default class Reservation {
       });
   }
 
-  // 獲取狀態顯示文字
-  getStatusText(
-    teacherStatus: string | undefined,
-    studentStatus: string | undefined,
-  ): string {
-    if (teacherStatus === 'pending' && studentStatus === 'reserved') {
-      return '待確認';
-    }
-    if (teacherStatus === 'reserved' && studentStatus === 'reserved') {
-      return '已確認';
-    }
-    if (teacherStatus === 'completed' && studentStatus === 'completed') {
-      return '已完成';
-    }
-    if (teacherStatus === 'cancelled' || studentStatus === 'cancelled') {
-      return '已取消';
-    }
-    return '未知';
+  // 完成課程
+  onCompleteReservation(reservationId: number) {
+    this.dialogService
+      .openConfirm({
+        title: '完成課程',
+        message: '確認此課程已完成？',
+        type: 'info',
+      })
+      .subscribe((result) => {
+        if (result.confirmed) {
+          this.reservationService
+            .putApiReservationsIdStatus(reservationId, {
+              status_type: 'teacher-complete',
+            })
+            .subscribe({
+              next: () => {
+                this.reservationsResource.reload();
+                this.dialogService
+                  .openAlert({
+                    title: '成功',
+                    message: '課程已標記為完成',
+                    type: 'success',
+                  })
+                  .subscribe();
+              },
+              error: (error) => {
+                console.error('完成課程失敗:', error);
+                this.dialogService
+                  .openAlert({
+                    title: '錯誤',
+                    message: '完成課程失敗，請稍後再試',
+                    type: 'error',
+                  })
+                  .subscribe();
+              },
+            });
+        }
+      });
   }
 
-  // 獲取狀態樣式
-  getStatusClass(
-    teacherStatus: string | undefined,
-    studentStatus: string | undefined,
-  ): string {
-    if (teacherStatus === 'pending' && studentStatus === 'reserved') {
-      return 'bg-orange-95 text-orange-55';
-    }
-    if (teacherStatus === 'reserved' && studentStatus === 'reserved') {
-      return 'bg-green-95 text-green-55';
-    }
-    if (teacherStatus === 'completed' && studentStatus === 'completed') {
-      return 'bg-blue-95 text-blue-50';
-    }
-    if (teacherStatus === 'cancelled' || studentStatus === 'cancelled') {
-      return 'bg-grey-f4 text-grey-66';
-    }
-    return 'bg-grey-f4 text-grey-66';
-  }
 }

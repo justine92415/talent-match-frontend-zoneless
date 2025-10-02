@@ -1,0 +1,129 @@
+<div class="bg-white rounded-2xl w-[56rem] max-w-[90vw] max-h-[90vh] flex flex-col">
+  <!-- Dialog 標題 -->
+  <div class="flex items-center justify-between p-6 border-b border-grey-d4">
+    <div>
+      <h2 class="text-2xl font-bold text-grey-33">課程評價</h2>
+      <p class="text-sm text-grey-66 mt-1">{{ data.courseName }}</p>
+    </div>
+    <button
+      type="button"
+      (click)="close()"
+      class="text-grey-66 hover:text-grey-33 transition-colors">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- 評分統計 -->
+  @if (ratingStats(); as stats) {
+    <div class="p-6 border-b border-grey-d4">
+      <div class="flex items-center gap-6">
+        <div class="text-center">
+          <div class="text-5xl font-bold text-grey-33">{{ stats.average_rating }}</div>
+          <tmf-star-rating [rating]="toNumber(stats.average_rating)" [starSize]="'small'" class="mt-2"></tmf-star-rating>
+          <div class="text-sm text-grey-66 mt-1">共 {{ stats.total_reviews }} 則評價</div>
+        </div>
+
+        <div class="flex-1 space-y-2">
+          @for (star of [5, 4, 3, 2, 1]; track star) {
+            <div class="flex items-center gap-3">
+              <button
+                (click)="filterByRating(star)"
+                class="text-sm text-grey-66 hover:text-primary transition-colors"
+                [class.text-primary]="selectedRating() === star"
+                [class.font-bold]="selectedRating() === star">
+                {{ star }} 星
+              </button>
+              <div class="flex-1 h-2 bg-grey-e9 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-yellow transition-all"
+                  [style.width.%]="stats.total_reviews ? getRatingCount(star) / stats.total_reviews * 100 : 0">
+                </div>
+              </div>
+              <span class="text-sm text-grey-66 w-12 text-right">
+                {{ getRatingCount(star) }}
+              </span>
+            </div>
+          }
+          @if (selectedRating() !== undefined) {
+            <button
+              (click)="filterByRating(undefined)"
+              class="text-sm text-primary hover:underline">
+              清除篩選
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- 評價列表 -->
+  <div class="flex-1 overflow-y-auto p-6">
+    @if (isLoading()) {
+      <!-- Skeleton Loading -->
+      <div class="space-y-4">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="w-full bg-white rounded-xl p-6 border border-grey-d4">
+            <div class="flex justify-between items-start mb-6">
+              <div class="flex items-center gap-2">
+                <tmf-skeleton [class]="'w-12 h-12 rounded-full'"></tmf-skeleton>
+                <div class="flex flex-col gap-2">
+                  <tmf-skeleton [class]="'w-24 h-4 rounded'"></tmf-skeleton>
+                  <tmf-skeleton [class]="'w-20 h-3 rounded'"></tmf-skeleton>
+                </div>
+              </div>
+              <tmf-skeleton [class]="'w-16 h-4 rounded'"></tmf-skeleton>
+            </div>
+            <div class="space-y-3">
+              <tmf-skeleton [class]="'w-full h-4 rounded'"></tmf-skeleton>
+              <tmf-skeleton [class]="'w-full h-4 rounded'"></tmf-skeleton>
+              <tmf-skeleton [class]="'w-3/4 h-4 rounded'"></tmf-skeleton>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (reviewCards().length === 0) {
+      <div class="text-center py-12">
+        <mat-icon class="text-6xl text-grey-d4">chat_bubble_outline</mat-icon>
+        <p class="text-grey-66 mt-4">目前無評論</p>
+      </div>
+    } @else {
+      <div class="space-y-4">
+        @for (reviewCard of reviewCards(); track reviewCard.id) {
+          <tmf-review-card [review]="reviewCard" [type]="'bordered'"></tmf-review-card>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- 分頁 -->
+  @if (pagination(); as page) {
+    @if (page.total_pages && page.total_pages > 1) {
+      <div class="flex items-center justify-center gap-2 p-6 border-t border-grey-d4">
+        <button
+          (click)="goToPage(currentPage() - 1)"
+          [disabled]="currentPage() === 1"
+          class="px-3 py-2 rounded-lg border border-grey-d4 hover:bg-grey-f7 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        @for (pageNum of [].constructor(page.total_pages); track $index; let i = $index) {
+          <button
+            (click)="goToPage(i + 1)"
+            [class.bg-primary]="currentPage() === i + 1"
+            [class.text-white]="currentPage() === i + 1"
+            [class.border-primary]="currentPage() === i + 1"
+            class="px-4 py-2 rounded-lg border border-grey-d4 hover:bg-grey-f7 transition-colors">
+            {{ i + 1 }}
+          </button>
+        }
+
+        <button
+          (click)="goToPage(currentPage() + 1)"
+          [disabled]="currentPage() === page.total_pages"
+          class="px-3 py-2 rounded-lg border border-grey-d4 hover:bg-grey-f7 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  }
+</div>

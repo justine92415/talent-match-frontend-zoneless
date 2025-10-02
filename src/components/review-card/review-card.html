@@ -27,7 +27,7 @@
         <tmf-star-rating [rating]="review().rating"></tmf-star-rating>
       </div>
     </div>
-    <span class="text-grey-9f text-sm font-medium">{{ review().date }}</span>
+    <span class="text-grey-9f text-sm font-medium">{{ review().date | date: 'yyyy-MM-dd' }}</span>
   </div>
 
   <!-- Content -->

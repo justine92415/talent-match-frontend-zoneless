@@ -1204,6 +1204,8 @@ export type TeacherProfileSuccessResponseDataTeacher = {
   total_courses?: number;
   /** 平均評分 */
   average_rating?: number;
+  /** 累積完成課堂數 */
+  total_completed_lessons?: number;
   /** 總收入 */
   total_earnings?: number;
   /** 建立時間 */
@@ -2954,8 +2956,6 @@ export interface CourseBasicInfo {
   review_count?: number;
   /** 瀏覽次數 */
   view_count?: number;
-  /** 購買次數 */
-  purchase_count?: number;
   /** 學生人數 */
   student_count?: number;
   /**
@@ -4071,8 +4071,6 @@ export interface PublicCourseDetail {
   review_count: number;
   /** 學生人數 */
   student_count: number;
-  /** 購買次數 */
-  purchase_count: number;
   /**
    * 問卷調查連結
    * @nullable
@@ -4149,6 +4147,8 @@ export interface PublicCourseTeacherInfo {
   total_courses: number;
   /** 教師平均評分 */
   average_rating: number;
+  /** 累積完成課堂數 */
+  total_completed_lessons: number;
 }
 
 export interface PublicCoursePriceOption {
@@ -4215,6 +4215,11 @@ export interface PublicCourseFile {
 export type PublicCourseReviewUser = {
   /** 評價者暱稱 */
   nick_name: string;
+  /**
+   * 評價者頭像 URL (可能為空字串表示尚未上傳)
+   * @nullable
+   */
+  avatar_image?: string | null;
 };
 
 /**
@@ -5790,6 +5795,28 @@ export type PurchaseBusinessErrorResponseAllOf = {
 export type PurchaseBusinessErrorResponse = BusinessErrorResponse &
   PurchaseBusinessErrorResponseAllOf;
 
+/**
+ * 狀態類型 (teacher-complete: 教師標記完成, student-complete: 學生標記完成)
+ */
+export type UpdateReservationStatusRequestStatusType =
+  (typeof UpdateReservationStatusRequestStatusType)[keyof typeof UpdateReservationStatusRequestStatusType];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateReservationStatusRequestStatusType = {
+  'teacher-complete': 'teacher-complete',
+  'student-complete': 'student-complete',
+} as const;
+
+export interface UpdateReservationStatusRequest {
+  /** 狀態類型 (teacher-complete: 教師標記完成, student-complete: 學生標記完成) */
+  status_type: UpdateReservationStatusRequestStatusType;
+  /**
+   * 備註或回饋 (可選，最多500字元)
+   * @maxLength 500
+   */
+  notes?: string;
+}
+
 export interface CreateReservationRequest {
   /** 課程 ID (必填，學生必須已購買此課程) */
   course_id: number;
@@ -5873,6 +5900,7 @@ export type ReservationDetailTeacherStatus =
 export const ReservationDetailTeacherStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -5887,6 +5915,7 @@ export type ReservationDetailStudentStatus =
 export const ReservationDetailStudentStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -5908,6 +5937,8 @@ export interface ReservationDetail {
   teacher_status?: ReservationDetailTeacherStatus;
   /** 學生端預約狀態 */
   student_status?: ReservationDetailStudentStatus;
+  /** 是否已由學生留下評價 */
+  is_reviewed?: boolean;
   /** 預約建立時間 */
   created_at?: string;
   /** 預約更新時間 */
@@ -5959,6 +5990,7 @@ export type CancelReservationResponseReservationTeacherStatus =
 export const CancelReservationResponseReservationTeacherStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -5973,6 +6005,7 @@ export type CancelReservationResponseReservationStudentStatus =
 export const CancelReservationResponseReservationStudentStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -5994,6 +6027,25 @@ export interface CancelReservationResponse {
   reservation?: CancelReservationResponseReservation;
   /** 退還的課程堂數 */
   refunded_lessons?: number;
+}
+
+/**
+ * 回應狀態
+ */
+export type UpdateReservationStatusSuccessResponseStatus =
+  (typeof UpdateReservationStatusSuccessResponseStatus)[keyof typeof UpdateReservationStatusSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UpdateReservationStatusSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface UpdateReservationStatusSuccessResponse {
+  /** 回應狀態 */
+  status?: UpdateReservationStatusSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  data?: UpdateReservationStatusResponse;
 }
 
 /**
@@ -6263,6 +6315,7 @@ export type TeacherReservationItemTeacherStatus =
 export const TeacherReservationItemTeacherStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -6277,6 +6330,7 @@ export type TeacherReservationItemStudentStatus =
 export const TeacherReservationItemStudentStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -6291,6 +6345,7 @@ export type TeacherReservationItemOverallStatus =
 export const TeacherReservationItemOverallStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -6375,6 +6430,223 @@ export interface TeacherReservationSuccessResponse {
   /** 教師預約查詢結果資料 */
   data?: TeacherReservationSuccessResponseData;
 }
+
+export interface ReviewSubmitRequest {
+  /** 預約紀錄的 UUID (必填，用於確認學生所預約的課程記錄，需為 v4 UUID 格式) */
+  reservation_uuid: string;
+  /**
+   * 學生對課程的評分 (必填，範圍 1-5，僅允許整數)
+   * @minimum 1
+   * @maximum 5
+   */
+  rate: number;
+  /**
+   * 學生的文字評語 (必填，至少 1 個字元，最多 1000 個字元)
+   * @minLength 1
+   * @maxLength 1000
+   */
+  comment: string;
+}
+
+/**
+ * 回應狀態指示 (固定為 success 表示操作成功)
+ */
+export type ReviewSubmitSuccessResponseStatus =
+  (typeof ReviewSubmitSuccessResponseStatus)[keyof typeof ReviewSubmitSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReviewSubmitSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 評價建立後回傳的資料內容
+ */
+export type ReviewSubmitSuccessResponseData = {
+  /** 新建立評價的資料庫 ID */
+  id?: number;
+  /** 評價的星等分數 (1-5) */
+  rate?: number;
+  /** 學生撰寫的評語內容 */
+  comment?: string;
+  /** 評價建立時間 (ISO 8601 時間戳) */
+  created_at?: string;
+};
+
+export interface ReviewSubmitSuccessResponse {
+  /** 回應狀態指示 (固定為 success 表示操作成功) */
+  status?: ReviewSubmitSuccessResponseStatus;
+  /** 成功訊息內容 (使用專案既有的成功訊息常數) */
+  message?: string;
+  /** 評價建立後回傳的資料內容 */
+  data?: ReviewSubmitSuccessResponseData;
+}
+
+/**
+ * 各欄位的錯誤訊息清單
+ */
+export type ReviewSubmitValidationErrorResponseAllOfErrors = {
+  [key: string]: string[];
+};
+
+export type ReviewSubmitValidationErrorResponseAllOf = {
+  /** 驗證失敗的錯誤訊息 */
+  message?: string;
+  /** 各欄位的錯誤訊息清單 */
+  errors?: ReviewSubmitValidationErrorResponseAllOfErrors;
+};
+
+export type ReviewSubmitValidationErrorResponse = ValidationErrorResponse &
+  ReviewSubmitValidationErrorResponseAllOf;
+
+export type ReviewSubmitBusinessErrorResponseAllOf = {
+  /** 業務邏輯錯誤訊息 (例如重複評論、預約尚未完成等) */
+  message?: string;
+};
+
+export type ReviewSubmitBusinessErrorResponse = BusinessErrorResponse &
+  ReviewSubmitBusinessErrorResponseAllOf;
+
+/**
+ * 回應狀態指示 (固定為 success 表示操作成功)
+ */
+export type CourseReviewsSuccessResponseStatus =
+  (typeof CourseReviewsSuccessResponseStatus)[keyof typeof CourseReviewsSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const CourseReviewsSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+/**
+ * 評價學生資訊
+ */
+export type CourseReviewsSuccessResponseDataReviewsItemStudent = {
+  /** 學生暱稱 */
+  name?: string;
+  /**
+   * 學生頭貼圖片 URL (可為 null)
+   * @nullable
+   */
+  avatar_image?: string | null;
+};
+
+export type CourseReviewsSuccessResponseDataReviewsItem = {
+  /** 評價資料庫 ID */
+  id?: number;
+  /** 評價唯一識別碼 (v4 UUID) */
+  uuid?: string;
+  /** 評分星等 (1-5) */
+  rate?: number;
+  /** 評語內容 */
+  comment?: string;
+  /** 評價建立時間 (ISO 8601 時間戳) */
+  created_at?: string;
+  /** 評價學生資訊 */
+  student?: CourseReviewsSuccessResponseDataReviewsItemStudent;
+};
+
+/**
+ * 分頁資訊
+ */
+export type CourseReviewsSuccessResponseDataPagination = {
+  /** 當前頁碼 */
+  current_page?: number;
+  /** 每頁筆數 */
+  per_page?: number;
+  /** 總筆數 */
+  total?: number;
+  /** 總頁數 */
+  total_pages?: number;
+};
+
+/**
+ * 課程基本資訊
+ */
+export type CourseReviewsSuccessResponseDataCourse = {
+  /** 課程資料庫 ID */
+  id?: number;
+  /** 課程唯一識別碼 (v4 UUID) */
+  uuid?: string;
+  /** 課程名稱 */
+  name?: string;
+};
+
+/**
+ * 各星等的評價數量分佈
+ */
+export type CourseReviewsSuccessResponseDataRatingStatsRatingDistribution = {
+  /** 1 星評價數量 */
+  '1'?: number;
+  /** 2 星評價數量 */
+  '2'?: number;
+  /** 3 星評價數量 */
+  '3'?: number;
+  /** 4 星評價數量 */
+  '4'?: number;
+  /** 5 星評價數量 */
+  '5'?: number;
+};
+
+/**
+ * 課程評分統計資訊
+ */
+export type CourseReviewsSuccessResponseDataRatingStats = {
+  /** 平均評分 (小數點後一位) */
+  average_rating?: string;
+  /** 總評價數量 */
+  total_reviews?: number;
+  /** 各星等的評價數量分佈 */
+  rating_distribution?: CourseReviewsSuccessResponseDataRatingStatsRatingDistribution;
+};
+
+/**
+ * 課程評價列表與統計資料
+ */
+export type CourseReviewsSuccessResponseData = {
+  /** 評價記錄陣列 */
+  reviews?: CourseReviewsSuccessResponseDataReviewsItem[];
+  /** 分頁資訊 */
+  pagination?: CourseReviewsSuccessResponseDataPagination;
+  /** 課程基本資訊 */
+  course?: CourseReviewsSuccessResponseDataCourse;
+  /** 課程評分統計資訊 */
+  rating_stats?: CourseReviewsSuccessResponseDataRatingStats;
+};
+
+export interface CourseReviewsSuccessResponse {
+  /** 回應狀態指示 (固定為 success 表示操作成功) */
+  status?: CourseReviewsSuccessResponseStatus;
+  /** 成功訊息內容 */
+  message?: string;
+  /** 課程評價列表與統計資料 */
+  data?: CourseReviewsSuccessResponseData;
+}
+
+export type CourseReviewsNotFoundErrorResponseAllOf = {
+  /** 課程不存在或 UUID 格式錯誤的錯誤訊息 */
+  message?: string;
+};
+
+export type CourseReviewsNotFoundErrorResponse = NotFoundErrorResponse &
+  CourseReviewsNotFoundErrorResponseAllOf;
+
+/**
+ * 各欄位的錯誤訊息清單
+ */
+export type CourseReviewsValidationErrorResponseAllOfErrors = {
+  [key: string]: string[];
+};
+
+export type CourseReviewsValidationErrorResponseAllOf = {
+  /** 參數驗證失敗的錯誤訊息 */
+  message?: string;
+  /** 各欄位的錯誤訊息清單 */
+  errors?: CourseReviewsValidationErrorResponseAllOfErrors;
+};
+
+export type CourseReviewsValidationErrorResponse = ValidationErrorResponse &
+  CourseReviewsValidationErrorResponseAllOf;
 
 /**
  * 伺服器內部錯誤
@@ -7021,6 +7293,7 @@ export type GetApiReservationsMyReservationsStatus =
 export const GetApiReservationsMyReservationsStatus = {
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
@@ -7084,9 +7357,14 @@ export const GetApiReservationsCourseReservationsStatus = {
   all: 'all',
   pending: 'pending',
   reserved: 'reserved',
+  overdue: 'overdue',
   completed: 'completed',
   cancelled: 'cancelled',
 } as const;
+
+export type PutApiReservationsIdStatus400 =
+  | ReservationValidationErrorResponse
+  | ReservationBusinessErrorResponse;
 
 export type DeleteApiReservationsId400 =
   | ReservationValidationErrorResponse
@@ -7100,6 +7378,56 @@ export type PostApiReservationsIdConfirm400 =
 export type PostApiReservationsIdReject400 =
   | ValidationErrorResponse
   | ReservationStatusInvalidErrorResponse;
+
+export type PostApiReviews400 =
+  | ReviewSubmitValidationErrorResponse
+  | ReviewSubmitBusinessErrorResponse;
+
+export type GetApiReviewsCoursesUuidParams = {
+  /**
+   * 頁碼 (選填，預設為 1)
+   * @minimum 1
+   */
+  page?: number;
+  /**
+   * 每頁筆數 (選填，預設 10，最大 100)
+   * @minimum 1
+   * @maximum 100
+   */
+  limit?: number;
+  /**
+   * 依評分篩選 (選填，範圍 1-5)
+   * @minimum 1
+   * @maximum 5
+   */
+  rating?: number;
+  /**
+   * 排序欄位 (選填，預設為 created_at)
+   */
+  sort_by?: GetApiReviewsCoursesUuidSortBy;
+  /**
+   * 排序方向 (選填，預設為 desc 降冪)
+   */
+  sort_order?: GetApiReviewsCoursesUuidSortOrder;
+};
+
+export type GetApiReviewsCoursesUuidSortBy =
+  (typeof GetApiReviewsCoursesUuidSortBy)[keyof typeof GetApiReviewsCoursesUuidSortBy];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiReviewsCoursesUuidSortBy = {
+  created_at: 'created_at',
+  rating: 'rating',
+} as const;
+
+export type GetApiReviewsCoursesUuidSortOrder =
+  (typeof GetApiReviewsCoursesUuidSortOrder)[keyof typeof GetApiReviewsCoursesUuidSortOrder];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GetApiReviewsCoursesUuidSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type GetApiTeacherDashboardTeacherIdOverviewParams = {
   /**

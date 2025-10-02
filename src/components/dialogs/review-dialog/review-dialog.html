@@ -1,0 +1,51 @@
+<div class="bg-white rounded-2xl w-full">
+  <!-- Dialog 標題 -->
+  <div class="flex items-center justify-between p-6 border-b border-grey-d4">
+    <h2 class="text-2xl font-bold text-grey-33">課程評價</h2>
+    <button
+      type="button"
+      (click)="close()"
+      class="text-grey-66 hover:text-grey-33 transition-colors">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Dialog 內容 - 上下排列 -->
+  <form [formGroup]="reviewForm" class="p-6 space-y-6">
+    <!-- 評分 -->
+    <div>
+      <label class="block text-sm font-medium text-grey-33 mb-3">
+        評分 <span class="text-red-500">*</span>
+      </label>
+      <tmf-input-rating formControlName="rate" [size]="'md'"></tmf-input-rating>
+    </div>
+
+    <!-- 評論內容 -->
+    <div>
+      <label class="block text-sm font-medium text-grey-33 mb-2">
+        評論內容 <span class="text-red-500">*</span>
+      </label>
+      <tmf-input-textarea
+        formControlName="comment"
+        [placeholder]="'請分享您的上課體驗...'"
+        [rows]="5"
+        [maxLength]="1000"
+        [showCounter]="true">
+      </tmf-input-textarea>
+    </div>
+  </form>
+
+  <!-- Dialog 操作按鈕 -->
+  <div class="flex gap-3 p-6 border-t border-grey-d4">
+    <tmf-button
+      class="flex-1"
+      (click)="submitReview()">
+      提交評論
+    </tmf-button>
+    <tmf-button
+      variant="secondary"
+      (click)="close()">
+      取消
+    </tmf-button>
+  </div>
+</div>

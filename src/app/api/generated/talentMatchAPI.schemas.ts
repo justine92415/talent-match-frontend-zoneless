@@ -3921,6 +3921,11 @@ export interface PublicCourseListItem {
   /** 課程名稱 */
   name: string;
   /**
+   * 課程簡介說明
+   * @nullable
+   */
+  description?: string | null;
+  /**
    * 課程主圖 URL
    * @nullable
    */

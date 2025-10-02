@@ -182,6 +182,7 @@ export default class ResultTag implements OnInit {
   // 課程列表
   courses = computed(() => {
     const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
+    console.log('Courses Data:', coursesData);
     return coursesData?.courses || [];
   });
 
@@ -285,9 +286,9 @@ export default class ResultTag implements OnInit {
   // 轉換 API 回應為 CourseCardData 格式
   private transformApiCoursesToCardData(apiCourses: any[]): CourseCardData[] {
     return apiCourses.map(course => ({
-      id: course.uuid || course.id?.toString() || '',
+      id: course.id?.toString() || '',
       title: course.name || '',
-      description: '', // API 回應中沒有 description，可能需要另外處理
+      description: course.description || '',
       imageSrc: course.main_image || 'assets/images/default-course.jpg',
       level: '一般班', // API 回應中沒有 level，可能需要根據其他資料推斷
       category: `${course.main_category?.name || ''}－${course.sub_category?.name || ''}`,

@@ -39,8 +39,8 @@ export default class Login {
   }
 
   form = this.fb.group({
-    email: ['test001@gmail.com', emailValidator],
-    password: ['1qaz2wsx', passwordValidator],
+    email: ['', emailValidator],
+    password: ['', passwordValidator],
   });
 
   goBack() {

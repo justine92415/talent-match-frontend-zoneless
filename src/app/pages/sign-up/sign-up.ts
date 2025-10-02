@@ -31,10 +31,10 @@ export default class SignUp {
 
   constructor() {
     this.signUpForm = this.fb.group({
-      nickName: ['測試用戶002', [nickNameValidator]],
-      email: ['test002@example.com', [userEmailValidator]],
-      password: ['Password123', [passwordValidator]],
-      confirmPassword: ['Password123', [confirmPasswordValidator]]
+      nickName: ['', [nickNameValidator]],
+      email: ['', [userEmailValidator]],
+      password: ['', [passwordValidator]],
+      confirmPassword: ['', [confirmPasswordValidator]]
     }, { validators: passwordMatchValidator });
   }
 

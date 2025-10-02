@@ -431,7 +431,8 @@
 
     <!-- 成為教師 CTA Card -->
     <div
-      class="bg-white rounded-xl overflow-hidden shadow-lg p-6 pt-25 pb-6 w-130 flex flex-col gap-4 relative bg-[url('/assets/images/cta-teach.svg')] bg-no-repeat bg-right-top bg-[length:300px_200px]"
+      (click)="onBecomeTeacherClick()"
+      class="bg-white rounded-xl overflow-hidden shadow-lg p-6 pt-25 pb-6 w-130 flex flex-col gap-4 relative bg-[url('/assets/images/cta-teach.svg')] bg-no-repeat bg-right-top bg-[length:300px_200px] cursor-pointer hover:shadow-xl transition-shadow duration-300"
     >
       <!-- Title -->
       <h3 class="text-grey-33 font-bold text-3xl-bold leading-9">成為教師</h3>

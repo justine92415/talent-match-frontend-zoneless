@@ -1,5 +1,6 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { Dialog } from '@angular/cdk/dialog';
 import { SectionTitle } from '@components/section-title/section-title';
@@ -22,6 +23,7 @@ import { InputGlobalSearch, GlobalSearchValue } from "@components/form/input-glo
 export default class Home {
   fb = inject(FormBuilder);
   dialog = inject(Dialog);
+  router = inject(Router);
 
   // Form for global search testing
   searchForm = this.fb.group({
@@ -297,6 +299,10 @@ export default class Home {
   onGlobalSearch(searchValue: GlobalSearchValue) {
     console.log('Global search submitted:', searchValue);
     // Handle search logic here
+  }
+
+  onBecomeTeacherClick() {
+    this.router.navigate(['/teacher-apply']);
   }
 
   onVideoClick(video: VideoCardData) {

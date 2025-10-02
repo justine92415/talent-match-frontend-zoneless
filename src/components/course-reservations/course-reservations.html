@@ -58,21 +58,14 @@
                   (click)="onCancelReservation(reservation.id!)">
                   取消預約
                 </tmf-button>
-              } @else if (reservation.student_status === 'overdue') {
-                <tmf-button
-                  variant="primary"
-                  size="sm"
-                  (click)="onCompleteReservation(reservation.id!)">
-                  完成課程
-                </tmf-button>
               }
 
-              @if (reservation.student_status === 'completed' && !reservation.is_reviewed) {
+              @if ((reservation.student_status === 'overdue' || reservation.student_status === 'completed') && !reservation.is_reviewed) {
                 <tmf-button
                   variant="secondary"
                   size="sm"
                   (click)="openReviewDialog(reservation)">
-                  評論
+                  評價課程
                 </tmf-button>
               }
             </div>

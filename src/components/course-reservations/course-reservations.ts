@@ -96,44 +96,12 @@ export class CourseReservationsComponent {
     });
   }
 
-  // 完成課程
-  onCompleteReservation(reservationId: number) {
-    this.dialogService.openConfirm({
-      title: '完成課程',
-      message: '確認此課程已完成？',
-      type: 'info'
-    }).subscribe(result => {
-      if (result.confirmed) {
-        this.reservationService.putApiReservationsIdStatus(reservationId, {
-          status_type: 'student-complete'
-        }).subscribe({
-          next: () => {
-            // 完成成功，重新載入預約記錄
-            this.reservationsResource.reload();
-            this.dialogService.openAlert({
-              title: '成功',
-              message: '課程已標記為完成',
-              type: 'success'
-            }).subscribe();
-          },
-          error: (error) => {
-            console.error('完成課程失敗:', error);
-            this.dialogService.openAlert({
-              title: '錯誤',
-              message: '完成課程失敗，請稍後再試',
-              type: 'error'
-            }).subscribe();
-          }
-        });
-      }
-    });
-  }
-
   // 開啟評論 dialog
   openReviewDialog(reservation: any) {
     const dialogRef = this.dialog.open(ReviewDialogComponent, {
       data: {
-        reservationUuid: reservation.uuid
+        reservationUuid: reservation.uuid,
+        studentStatus: reservation.student_status
       },
       width: '800px'
     });
@@ -142,9 +110,15 @@ export class CourseReservationsComponent {
       if (success) {
         // 提交成功，重新載入列表
         this.reservationsResource.reload();
+
+        // 根據狀態顯示不同訊息
+        const message = reservation.student_status === 'overdue'
+          ? '感謝您的評價！課程已自動標記為完成。'
+          : '感謝您的評價！';
+
         this.dialogService.openAlert({
           title: '成功',
-          message: '感謝您的評價！',
+          message: message,
           type: 'success'
         }).subscribe();
       }

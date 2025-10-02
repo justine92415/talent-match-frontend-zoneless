@@ -18,11 +18,11 @@ export class ReservationStatusPipe implements PipeTransform {
       return '已預約';
     }
 
-    if (studentStatus === 'overdue') {
+    if (teacherStatus === 'overdue') {
       return '已結束';
     }
 
-    if (studentStatus === 'completed') {
+    if (teacherStatus === 'completed') {
       return '已完成';
     }
 

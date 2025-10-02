@@ -12,6 +12,18 @@
 
   <!-- Dialog 內容 - 上下排列 -->
   <form [formGroup]="reviewForm" class="p-6 space-y-6">
+    <!-- OVERDUE 狀態提示 -->
+    @if (isOverdue) {
+      <div class="bg-orange-95 border border-orange-85 rounded-lg p-4">
+        <div class="flex items-start gap-2">
+          <mat-icon class="text-primary !w-5 !h-5 !text-xl !leading-5">info</mat-icon>
+          <p class="text-sm text-grey-33">
+            提交評價後，系統將自動將此課程標記為已完成。
+          </p>
+        </div>
+      </div>
+    }
+
     <!-- 評分 -->
     <div>
       <label class="block text-sm font-medium text-grey-33 mb-3">

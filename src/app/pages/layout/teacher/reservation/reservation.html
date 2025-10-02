@@ -165,7 +165,7 @@
                     <tmf-button variant="tertiary" size="sm" class="text-red-50" (click)="onCancelReservation(reservation.id!)">
                       取消預約
                     </tmf-button>
-                  } @else if (reservation.teacher_status === 'overdue' || reservation.student_status === 'overdue') {
+                  } @else if (reservation.teacher_status === 'overdue') {
                     <tmf-button variant="primary" size="sm" (click)="onCompleteReservation(reservation.id!)">
                       完成課程
                     </tmf-button>

@@ -1,4 +1,4 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatIcon } from '@angular/material/icon';
 import { Dialog } from '@angular/cdk/dialog';
@@ -11,11 +11,10 @@ import { SwiperWapper, SwiperConfig } from '@components/swiper-wapper/swiper-wap
 import { TmfIconEnum } from '@share/icon.enum';
 import { StarRating } from "@components/star-rating/star-rating";
 import { InputGlobalSearch, GlobalSearchValue } from "@components/form/input-global-search/input-global-search";
-import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'tmf-home',
-  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon, StarRating, ReactiveFormsModule, InputGlobalSearch, JsonPipe],
+  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon, StarRating, ReactiveFormsModule, InputGlobalSearch],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styles: ``

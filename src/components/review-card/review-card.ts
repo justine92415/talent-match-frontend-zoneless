@@ -1,4 +1,4 @@
-import { NgClass } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -21,7 +21,7 @@ type ReviewCardType = 'bordered' | 'shadowed';
 
 @Component({
   selector: 'tmf-review-card',
-  imports: [StarRating, NgClass],
+  imports: [StarRating, NgClass, DatePipe],
   templateUrl: './review-card.html',
   styles: `
     :host {

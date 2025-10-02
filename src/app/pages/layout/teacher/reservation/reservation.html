@@ -125,8 +125,8 @@
                     </div>
                     <div class="text-lg text-grey-66">{{ reservation.reserve_start_time }} - {{ reservation.reserve_end_time }}</div>
                   </div>
-                  <span class="px-3 py-1 text-sm rounded-full" [ngClass]="getStatusClass(reservation.teacher_status, reservation.student_status)">
-                    {{ getStatusText(reservation.teacher_status, reservation.student_status) }}
+                  <span class="px-3 py-1 text-sm rounded-full" [ngClass]="reservation.teacher_status | reservationStatusClass: reservation.student_status">
+                    {{ reservation.teacher_status | reservationStatus: reservation.student_status }}
                   </span>
                 </div>
 
@@ -164,6 +164,10 @@
                   } @else if (reservation.teacher_status === 'reserved' && reservation.student_status === 'reserved') {
                     <tmf-button variant="tertiary" size="sm" class="text-red-50" (click)="onCancelReservation(reservation.id!)">
                       取消預約
+                    </tmf-button>
+                  } @else if (reservation.teacher_status === 'overdue' || reservation.student_status === 'overdue') {
+                    <tmf-button variant="primary" size="sm" (click)="onCompleteReservation(reservation.id!)">
+                      完成課程
                     </tmf-button>
                   }
                 </div>

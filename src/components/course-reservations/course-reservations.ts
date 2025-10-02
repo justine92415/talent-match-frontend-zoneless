@@ -1,5 +1,7 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Dialog } from '@angular/cdk/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { Button } from '@components/button/button';
 import { ReservationStatusPipe } from './reservation-status.pipe';
 import { ReservationManagementService } from '@app/api/generated/reservation-management/reservation-management.service';
@@ -7,10 +9,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable, merge, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { DialogService } from '@share/services/dialog.service';
+import { ReviewDialogComponent } from '@components/dialogs/review-dialog/review-dialog';
 
 @Component({
   selector: 'tmf-course-reservations',
-  imports: [CommonModule, Button, ReservationStatusPipe],
+  imports: [CommonModule, Button, MatIconModule, ReservationStatusPipe],
   templateUrl: './course-reservations.html',
   styles: ``
 })
@@ -27,6 +30,7 @@ export class CourseReservationsComponent {
 
   private reservationService = inject(ReservationManagementService);
   private dialogService = inject(DialogService);
+  private dialog = inject(Dialog);
 
   // 使用 rxResource 載入預約記錄
   reservationsResource = rxResource({
@@ -88,6 +92,61 @@ export class CourseReservationsComponent {
             }
           }
         });
+      }
+    });
+  }
+
+  // 完成課程
+  onCompleteReservation(reservationId: number) {
+    this.dialogService.openConfirm({
+      title: '完成課程',
+      message: '確認此課程已完成？',
+      type: 'info'
+    }).subscribe(result => {
+      if (result.confirmed) {
+        this.reservationService.putApiReservationsIdStatus(reservationId, {
+          status_type: 'student-complete'
+        }).subscribe({
+          next: () => {
+            // 完成成功，重新載入預約記錄
+            this.reservationsResource.reload();
+            this.dialogService.openAlert({
+              title: '成功',
+              message: '課程已標記為完成',
+              type: 'success'
+            }).subscribe();
+          },
+          error: (error) => {
+            console.error('完成課程失敗:', error);
+            this.dialogService.openAlert({
+              title: '錯誤',
+              message: '完成課程失敗，請稍後再試',
+              type: 'error'
+            }).subscribe();
+          }
+        });
+      }
+    });
+  }
+
+  // 開啟評論 dialog
+  openReviewDialog(reservation: any) {
+    const dialogRef = this.dialog.open(ReviewDialogComponent, {
+      data: {
+        reservationUuid: reservation.uuid
+      },
+      width: '800px'
+    });
+
+    dialogRef.closed.subscribe((success) => {
+      if (success) {
+        // 提交成功，重新載入列表
+        this.reservationsResource.reload();
+        this.dialogService.openAlert({
+          title: '成功',
+          message: '感謝您的評價！',
+          type: 'success'
+        }).subscribe();
       }
     });
   }

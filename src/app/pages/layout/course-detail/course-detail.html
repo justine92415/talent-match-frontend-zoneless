@@ -1,5 +1,5 @@
 <!-- 載入中狀態 -->
-@if (isLoading()) {
+@if (courseDetailResource.isLoading()) {
   <div class="flex justify-center items-center py-12">
     <div
       class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"
@@ -9,18 +9,18 @@
 }
 
 <!-- 錯誤狀態 -->
-@if (error()) {
+@if (courseDetailResource.error()) {
   <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
     <div class="flex">
       <mat-icon class="text-red-500 mr-3">error</mat-icon>
       <div>
         <h3 class="text-red-800 font-medium">載入失敗</h3>
-        <p class="text-red-700 mt-1">{{ error() }}</p>
+        <p class="text-red-700 mt-1">載入課程詳情失敗，請稍後再試</p>
         <tmf-button
           type="button"
           variant="secondary"
           class="mt-3"
-          (click)="loadCourseDetail()"
+          (click)="courseDetailResource.reload()"
         >
           重新載入
         </tmf-button>
@@ -30,7 +30,7 @@
 }
 
 <!-- 課程詳情 -->
-@if (!isLoading() && !error() && courseDetail()) {
+@if (courseDetail()) {
   <div class="relative">
     <div
       [style]="{
@@ -160,37 +160,33 @@
       >
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionA' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionA"
+            (click)="scrollToSection('sectionA')"
             >課程介紹</a
           >
         </li>
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionB' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionB"
+            (click)="scrollToSection('sectionB')"
             >授課時間</a
           >
         </li>
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionC' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionC"
+            (click)="scrollToSection('sectionC')"
             >學生評論</a
           >
         </li>
         <li>
           <a
-            class="py-3"
+            class="pt-3 pb-4 cursor-pointer"
             [ngClass]="{ active: activeSection() === 'sectionD' }"
-            [routerLink]="['/course-detail/', 'course_id']"
-            fragment="sectionD"
+            (click)="scrollToSection('sectionD')"
             >教師履歷</a
           >
         </li>
@@ -241,27 +237,36 @@
             <tmf-course-detail-section-title
               >學生評論</tmf-course-detail-section-title
             >
-            <tmf-button variant="secondary" [iconName]="'keyboard_arrow_right'">
-              <p class="text-sm font-normal">顯示所有評價</p>
-            </tmf-button>
+            @if (hasReviews()) {
+              <tmf-button (click)="openAllReviews()" variant="secondary" [iconName]="'keyboard_arrow_right'">
+                <p class="text-sm font-normal">顯示所有評價</p>
+              </tmf-button>
+            }
           </div>
           <!-- 評論區 -->
           <div class="flex flex-col gap-4">
-            <!-- 評論卡片 -->
-            <tmf-review-card
-              class="w-full"
-              type="bordered"
-              [review]="{
-                id: 'review-1',
-                name: 'Eric Clapton',
-                date: '2023-08-09',
-                title: '可以一展長才的平台',
-                content:
-                  '可以認識不同領域的高手，並且把喜歡的領域做推廣，是一件開心的事。',
-                rating: 5,
-                avatar: '/assets/images/teacher-avatar-1.jpg',
-              }"
-            ></tmf-review-card>
+            @if (hasReviews()) {
+              @for (review of reviews(); track review.id) {
+                <tmf-review-card
+                  class="w-full"
+                  type="bordered"
+                  [review]="{
+                    id: review.id.toString(),
+                    name: review.user.nick_name,
+                    date: (review.created_at) || '',
+                    title: '',
+                    content: review.comment,
+                    rating: review.rate,
+                    avatar: review.user.avatar_image || undefined
+                  }"
+                ></tmf-review-card>
+              }
+            } @else {
+              <div class="text-center p-8 text-grey-66">
+                <mat-icon class="!text-5xl !w-12 !h-12 mb-2">chat_bubble_outline</mat-icon>
+                <div>尚無評論</div>
+              </div>
+            }
           </div>
         </section>
 
@@ -276,21 +281,21 @@
             <div class="flex items-center gap-2 xl:gap-6">
               <img
                 class="h-16 w-16 rounded-full border border-grey-e9 xl:h-20 xl:w-20"
-                [src]="'course.teacher.avatar'"
-                alt=""
+                [src]="teacher()?.user?.avatar_image || '/assets/images/default-avatar.png'"
+                [alt]="teacher()?.user?.nick_name || '教師'"
               />
               <div>
                 <p class="text-lg font-medium text-grey-33 xl:mb-1 xl:text-2xl">
-                  Eric Clapton
+                  {{ teacher()?.user?.nick_name || '教師名稱' }}
                 </p>
                 <p class="text-sm font-medium text-grey-9f">
-                  累積完成 120 堂課程
+                  累積完成 {{ teacher()?.total_completed_lessons }} 課堂數 (含教師其他開設課程)
                 </p>
               </div>
             </div>
             <!-- 自介 -->
             <p
-              class="line-clamp-3 text-base text-grey-33"
+              class="text-base text-grey-33 whitespace-pre-wrap break-words"
               [innerHTML]="teacher()?.introduction || '教師自介資訊暫無提供'"
             ></p>
             <!-- 工作經驗 -->

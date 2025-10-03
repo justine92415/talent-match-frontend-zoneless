@@ -483,8 +483,8 @@ export default class TeacherApply implements OnInit {
       next: (success: any) => {
         if (success) {
           console.log('角色更新成功，已獲得 teacher_pending 角色');
-          // 重定向到適當頁面，例如待審核狀態頁面
-          this.router.navigate(['/dashboard']);
+          // 重定向到教師申請狀態頁面
+          this.router.navigate(['/dashboard/teacher/apply-status']);
         } else {
           // 角色更新失敗的情況
           console.error('角色更新失敗');

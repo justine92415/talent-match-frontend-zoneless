@@ -62,7 +62,7 @@
               <label class="block text-sm text-grey-66">地區</label>
               <tmf-input-select
                 [placeholder]="'請選擇地區'"
-                [options]="districtOptionsMap().get($index) || []"
+                [options]="getDistrictOptions($index)"
                 formControlName="district"
               ></tmf-input-select>
               @if (

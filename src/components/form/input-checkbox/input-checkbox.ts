@@ -19,6 +19,51 @@ import { distinctUntilChanged } from 'rxjs';
       display: block;
       width: 100%;
     }
+
+    /* 自訂 checkbox 樣式 */
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid var(--color-grey-d4);
+      border-radius: 0.25rem;
+      background-color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    input[type="checkbox"]:checked {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+
+    /* 勾勾符號 */
+    input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 45%;
+      transform: translate(-50%, -50%) rotate(45deg);
+      width: 0.25rem;
+      height: 0.5rem;
+      border-right: 2px solid var(--color-orange-95);
+      border-bottom: 2px solid var(--color-orange-95);
+    }
+
+    input[type="checkbox"]:focus {
+      outline: none;
+      ring: 2px;
+      ring-color: var(--color-primary);
+      ring-offset: 2px;
+    }
+
+    input[type="checkbox"]:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

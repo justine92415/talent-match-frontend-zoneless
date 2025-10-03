@@ -181,3 +181,49 @@ body {
 .cdk-overlay-pane {
   position: relative;
 }
+
+/* Snackbar Styles - 優雅、符合網站風格的設計 */
+.success-snackbar .mdc-snackbar__surface {
+  background: linear-gradient(135deg, var(--color-green-55) 0%, #00a300 100%) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 179, 0, 0.25) !important;
+  min-width: 280px !important;
+  max-width: 400px !important;
+}
+
+.success-snackbar .mdc-snackbar__label {
+  color: var(--color-white) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.error-snackbar .mdc-snackbar__surface {
+  background: linear-gradient(135deg, #ff3b30 0%, #d32f2f 100%) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.25) !important;
+  min-width: 280px !important;
+  max-width: 400px !important;
+}
+
+.error-snackbar .mdc-snackbar__label {
+  color: var(--color-white) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}
+
+.info-snackbar .mdc-snackbar__surface {
+  background: linear-gradient(135deg, var(--color-blue-50) 0%, #0891e0 100%) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(13, 166, 242, 0.25) !important;
+  min-width: 280px !important;
+  max-width: 400px !important;
+}
+
+.info-snackbar .mdc-snackbar__label {
+  color: var(--color-white) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+}

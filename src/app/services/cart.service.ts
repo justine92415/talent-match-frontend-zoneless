@@ -2,30 +2,44 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { CartService as CartApiService } from '@app/api/generated/cart/cart.service';
+import { AuthService } from '@app/services/auth.service';
 import {
   AddCartItemRequest,
   GetCartSuccessResponse,
   CartData,
   CartItemWithDetails
 } from '@app/api/generated/talentMatchAPI.schemas';
-import { map, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private cartApiService = inject(CartApiService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
-  // 購物車資源管理
+  // 購物車資源管理 - 只在已登入時載入
   cartResource = rxResource({
-    stream: () => this.cartApiService.getApiCart().pipe(
-      map(response => {
-        if (response.status && response.data) {
-          return response.data;
-        }
-        throw new Error('載入購物車失敗');
-      })
-    )
+    params: () => ({ isAuthenticated: this.authService.isAuthenticated() }),
+    stream: ({ params }) => {
+      // 只有在已登入時才請求購物車數據
+      if (!params.isAuthenticated) {
+        return of({ items: [], summary: { total_amount: 0 } } as CartData);
+      }
+
+      return this.cartApiService.getApiCart().pipe(
+        map(response => {
+          if (response.status && response.data) {
+            return response.data;
+          }
+          throw new Error('載入購物車失敗');
+        }),
+        catchError(error => {
+          console.error('載入購物車失敗:', error);
+          return of({ items: [], summary: { total_amount: 0 } } as CartData);
+        })
+      );
+    }
   });
 
   // 購物車項目數量計算

@@ -3,6 +3,7 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
 import { InputMultiSelect, MultiSelectOption } from '@components/form/input-multi-select/input-multi-select';
+import { InputTextarea } from '@components/form/input-textarea/input-textarea';
 import { TagsService } from '../../../api/generated/tags/tags.service';
 import { TagItem } from '../../../api/generated/talentMatchAPI.schemas';
 import { Cities } from '@share/cities';
@@ -13,6 +14,7 @@ import { Cities } from '@share/cities';
     InputText,
     InputSelect,
     InputMultiSelect,
+    InputTextarea,
     ReactiveFormsModule
   ],
   templateUrl: './basic-info-form.html',

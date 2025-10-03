@@ -1,0 +1,26 @@
+<div class="flex items-center gap-2">
+  <input
+    #checkboxInput
+    type="checkbox"
+    [checked]="value()"
+    (change)="onChange($event)"
+    (blur)="onTouched()"
+    [disabled]="isDisabled()"
+  />
+  @if (label()) {
+    <label
+      class="text-base text-grey-33 cursor-pointer select-none leading-none"
+      [class.opacity-50]="isDisabled()"
+      (click)="onLabelClick(checkboxInput)"
+    >
+      {{ label() }}
+    </label>
+  }
+</div>
+<div>
+  @if(ctrlDir.touched && ctrlDir.invalid) {
+    <div class="mt-1 text-sm text-red-500">
+      {{ ctrlDir.getError('error') }}
+    </div>
+  }
+</div>

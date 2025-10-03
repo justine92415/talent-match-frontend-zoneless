@@ -5,6 +5,7 @@
     type="button"
     class="flex font-normal gap-1 items-center justify-between w-full px-3 py-2 bg-white border border-grey-d4 rounded-xl text-grey-9f transition-all duration-200 focus:outline-none focus:border-primary"
     [class.border-primary]="isOpen()"
+    [class.border-red-500]="ctrlDir.touched && ctrlDir.invalid"
     [class.text-grey-33]="selectedValues().length > 0"
     (click)="toggleDropdown()"
     [disabled]="isDisabled()"
@@ -36,7 +37,7 @@
           </button>
         </div>
       }
-      
+
       <!-- Options list -->
       <ul class="max-h-60 overflow-y-auto">
         @for (option of options(); track option.value) {
@@ -67,4 +68,11 @@
       </ul>
     </div>
   </ng-template>
+</div>
+<div>
+  @if(ctrlDir.touched && ctrlDir.invalid) {
+  <div class="mt-1 text-sm text-red-500">
+    {{ ctrlDir.getError('error') }}
+  </div>
+  }
 </div>

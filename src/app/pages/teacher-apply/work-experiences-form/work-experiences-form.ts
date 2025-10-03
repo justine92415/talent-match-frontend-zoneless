@@ -1,7 +1,8 @@
-import { Component, input, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, input, OnInit, inject } from '@angular/core';
 import { FormGroup, FormArray, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
+import { InputCheckbox } from '@components/form/input-checkbox/input-checkbox';
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
@@ -12,6 +13,7 @@ import { Cities } from '@share/cities';
   imports: [
     InputText,
     InputSelect,
+    InputCheckbox,
     Button,
     ReactiveFormsModule,
     MatIcon
@@ -66,34 +68,34 @@ export class WorkExperiencesForm implements OnInit {
     return { value: month.toString(), label: `${month}月` };
   });
 
-  // 每個工作經驗的地區選項 - 使用 Map 來管理多個下拉選單
-  districtOptionsMap = signal<Map<number, SelectOption[]>>(new Map());
-
   ngOnInit() {
     // 初始化現有工作經驗項目的選項和監聽器
     this.setupExistingExperiences();
   }
 
   private setupExistingExperiences() {
-    this.experiencesArray.controls.forEach((control, index) => {
+    this.experiencesArray.controls.forEach((control) => {
       const formGroup = control as FormGroup;
-      this.setupExperienceListeners(formGroup, index);
+      this.setupExperienceListeners(formGroup);
 
       // 如果已有縣市值，初始化地區選項
       const currentCity = formGroup.get('city')?.value;
       if (currentCity) {
-        this.updateDistrictOptions(index, currentCity);
+        this.updateDistrictOptions(formGroup, currentCity);
       }
+
+      // 設定目前在職狀態的驗證邏輯
+      this.setupWorkingStatusValidation(formGroup);
     });
   }
 
-  private setupExperienceListeners(experienceForm: FormGroup, index: number) {
+  private setupExperienceListeners(experienceForm: FormGroup) {
     // 追蹤之前的縣市值，避免初始化時誤清空
     let previousCity = experienceForm.get('city')?.value;
 
     // 監聽縣市變化，更新地區選項
     experienceForm.get('city')?.valueChanges.subscribe((city: string | null) => {
-      this.updateDistrictOptions(index, city);
+      this.updateDistrictOptions(experienceForm, city);
       // 只有在實際改變時才清空地區
       if (previousCity !== null && previousCity !== city) {
         experienceForm.patchValue({ district: '' });
@@ -102,13 +104,10 @@ export class WorkExperiencesForm implements OnInit {
     });
   }
 
-  private updateDistrictOptions(index: number, city: string | null) {
-    const currentMap = this.districtOptionsMap();
-    const newMap = new Map(currentMap);
-
+  private updateDistrictOptions(experienceForm: FormGroup, city: string | null) {
     if (!city) {
-      newMap.set(index, []);
-      this.districtOptionsMap.set(newMap);
+      // 在 FormGroup 上存儲空陣列
+      (experienceForm as any)._districtOptions = [];
       return;
     }
 
@@ -118,31 +117,69 @@ export class WorkExperiencesForm implements OnInit {
         value: district.name,
         label: district.name
       }));
-      newMap.set(index, districts);
+      // 在 FormGroup 上存儲地區選項
+      (experienceForm as any)._districtOptions = districts;
     } else {
-      newMap.set(index, []);
+      (experienceForm as any)._districtOptions = [];
     }
+  }
 
-    this.districtOptionsMap.set(newMap);
+  // 取得特定工作經驗的地區選項
+  getDistrictOptions(index: number): SelectOption[] {
+    const experienceForm = this.experiencesArray.at(index) as FormGroup;
+    return (experienceForm as any)._districtOptions || [];
   }
 
   // 新增工作經驗
   addExperience(): void {
-    const newIndex = this.experiencesArray.length;
     const experienceGroup = this.createExperience();
     this.experiencesArray.push(experienceGroup);
 
     // 為新項目設定監聽器
-    this.setupExperienceListeners(experienceGroup, newIndex);
+    this.setupExperienceListeners(experienceGroup);
 
     // 初始化新項目的地區選項為空
-    this.updateDistrictOptions(newIndex, null);
+    this.updateDistrictOptions(experienceGroup, null);
   }
 
   // 移除工作經驗
   removeExperience(index: number): void {
     if (this.experiencesArray.length > 1) {
       this.experiencesArray.removeAt(index);
+    }
+  }
+
+  // 設定目前在職狀態的驗證邏輯
+  private setupWorkingStatusValidation(experienceGroup: FormGroup) {
+    // 監聽目前在職狀態
+    experienceGroup.get('is_working')?.valueChanges.subscribe(isWorking => {
+      const endYearControl = experienceGroup.get('end_year');
+      const endMonthControl = experienceGroup.get('end_month');
+
+      if (isWorking) {
+        endYearControl?.clearValidators();
+        endMonthControl?.clearValidators();
+        endYearControl?.setValue('');
+        endMonthControl?.setValue('');
+      } else {
+        endYearControl?.setValidators([Validators.required]);
+        endMonthControl?.setValidators([Validators.required]);
+      }
+
+      endYearControl?.updateValueAndValidity();
+      endMonthControl?.updateValueAndValidity();
+    });
+
+    // 初始化時也檢查一次，確保現有資料的驗證狀態正確
+    const isWorking = experienceGroup.get('is_working')?.value;
+    const endYearControl = experienceGroup.get('end_year');
+    const endMonthControl = experienceGroup.get('end_month');
+
+    if (!isWorking) {
+      endYearControl?.setValidators([Validators.required]);
+      endMonthControl?.setValidators([Validators.required]);
+      endYearControl?.updateValueAndValidity();
+      endMonthControl?.updateValueAndValidity();
     }
   }
 
@@ -162,24 +199,8 @@ export class WorkExperiencesForm implements OnInit {
       end_month: ['']
     });
 
-    // 監聽目前在職狀態
-    experienceGroup.get('is_working')?.valueChanges.subscribe(isWorking => {
-      const endYearControl = experienceGroup.get('end_year');
-      const endMonthControl = experienceGroup.get('end_month');
-      
-      if (isWorking) {
-        endYearControl?.clearValidators();
-        endMonthControl?.clearValidators();
-        endYearControl?.setValue('');
-        endMonthControl?.setValue('');
-      } else {
-        endYearControl?.setValidators([Validators.required]);
-        endMonthControl?.setValidators([Validators.required]);
-      }
-      
-      endYearControl?.updateValueAndValidity();
-      endMonthControl?.updateValueAndValidity();
-    });
+    // 設定目前在職狀態的驗證邏輯
+    this.setupWorkingStatusValidation(experienceGroup);
 
     return experienceGroup;
   }

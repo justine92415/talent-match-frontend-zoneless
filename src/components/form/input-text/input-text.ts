@@ -38,6 +38,7 @@ export class InputText implements ControlValueAccessor {
   placeholder = input<string>('');
   iconName = input<TmfIconType | null>(null);
   type = input<'text' | 'email' | 'password' | 'search'>('text');
+  autocomplete = input<string>('');
 
   // 輸出事件
   iconClick = output<void>();

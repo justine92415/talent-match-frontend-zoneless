@@ -6,6 +6,7 @@ import { InputCheckbox } from '@components/form/input-checkbox/input-checkbox';
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
+import { dateRangeValidator } from '@share/validator';
 
 @Component({
   selector: 'tmf-learning-experiences-form',
@@ -85,13 +86,13 @@ export class LearningExperiencesForm implements OnInit {
       start_month: ['', Validators.required],
       end_year: [''],
       end_month: ['']
-    });
+    }, { validators: dateRangeValidator });
 
     // 監聽目前就學狀態
     educationGroup.get('is_in_school')?.valueChanges.subscribe(isStudying => {
       const endYearControl = educationGroup.get('end_year');
       const endMonthControl = educationGroup.get('end_month');
-      
+
       if (isStudying) {
         endYearControl?.clearValidators();
         endMonthControl?.clearValidators();
@@ -101,9 +102,18 @@ export class LearningExperiencesForm implements OnInit {
         endYearControl?.setValidators([Validators.required]);
         endMonthControl?.setValidators([Validators.required]);
       }
-      
+
       endYearControl?.updateValueAndValidity();
       endMonthControl?.updateValueAndValidity();
+      // 觸發表單層級的日期範圍驗證
+      educationGroup.updateValueAndValidity();
+    });
+
+    // 監聽日期欄位變化，觸發日期範圍驗證
+    ['start_year', 'start_month', 'end_year', 'end_month'].forEach(fieldName => {
+      educationGroup.get(fieldName)?.valueChanges.subscribe(() => {
+        educationGroup.updateValueAndValidity();
+      });
     });
 
     return educationGroup;

@@ -28,18 +28,12 @@
             placeholder="請輸入公司名稱"
             formControlName="company_name"
           ></tmf-input-text>
-          @if (
-            experience.get("company_name")?.invalid &&
-            experience.get("company_name")?.touched
-          ) {
-            <div class="text-red-500 text-sm">請輸入公司名稱</div>
-          }
         </div>
 
         <!-- 工作地點 -->
         <div class="space-y-4">
           <label class="block text-base font-medium text-grey-33">工作地點</label>
-          
+
           <div class="flex flex-col md:flex-row gap-4">
             <!-- 縣市 -->
             <div class="space-y-2 flex-1">
@@ -49,12 +43,6 @@
                 [options]="cityOptions"
                 formControlName="city"
               ></tmf-input-select>
-              @if (
-                experience.get("city")?.invalid &&
-                experience.get("city")?.touched
-              ) {
-                <div class="text-red-500 text-sm">請選擇縣市</div>
-              }
             </div>
 
             <!-- 地區 -->
@@ -65,12 +53,6 @@
                 [options]="getDistrictOptions($index)"
                 formControlName="district"
               ></tmf-input-select>
-              @if (
-                experience.get("district")?.invalid &&
-                experience.get("district")?.touched
-              ) {
-                <div class="text-red-500 text-sm">請選擇地區</div>
-              }
             </div>
           </div>
         </div>
@@ -84,12 +66,6 @@
               [options]="jobCategoryOptions"
               formControlName="job_category"
             ></tmf-input-select>
-            @if (
-              experience.get("job_category")?.invalid &&
-              experience.get("job_category")?.touched
-            ) {
-              <div class="text-red-500 text-sm">請選擇工作類別</div>
-            }
           </div>
 
           <div class="space-y-2">
@@ -98,12 +74,6 @@
               placeholder="請輸入職稱"
               formControlName="job_title"
             ></tmf-input-text>
-            @if (
-              experience.get("job_title")?.invalid &&
-              experience.get("job_title")?.touched
-            ) {
-              <div class="text-red-500 text-sm">請輸入職稱</div>
-            }
           </div>
         </div>
 
@@ -167,6 +137,11 @@
                 <div class="text-red-500 text-sm">請選擇結束時間</div>
               }
             </div>
+          }
+
+          <!-- 日期範圍驗證錯誤 -->
+          @if (experience.hasError('dateRangeInvalid') && experience.touched) {
+            <div class="text-red-500 text-sm">結束日期不得早於開始日期</div>
           }
         </div>
       </div>

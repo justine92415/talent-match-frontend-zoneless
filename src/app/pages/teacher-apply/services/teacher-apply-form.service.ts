@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ApplyStatusData } from '../types/teacher-apply.types';
-import { requiredValidator, minLengthValidator, arrayRequiredValidator } from '@share/validator';
+import { requiredValidator, minLengthValidator, arrayRequiredValidator, dateRangeValidator } from '@share/validator';
 
 @Injectable({
   providedIn: 'root'
@@ -57,7 +57,7 @@ export class TeacherApplyFormService {
       start_month: ['', requiredValidator('開始月份')],
       end_year: [''],
       end_month: ['']
-    });
+    }, { validators: dateRangeValidator });
 
     // 設定監聽器
     this.setupWorkExperienceListeners(experienceForm);
@@ -79,7 +79,7 @@ export class TeacherApplyFormService {
       start_month: ['', requiredValidator('入學月份')],
       end_year: [''],
       end_month: ['']
-    });
+    }, { validators: dateRangeValidator });
 
     // 設定監聽器
     this.setupEducationListeners(educationForm);
@@ -126,6 +126,15 @@ export class TeacherApplyFormService {
 
       endYearControl?.updateValueAndValidity();
       endMonthControl?.updateValueAndValidity();
+      // 觸發表單層級的日期範圍驗證
+      experienceForm.updateValueAndValidity();
+    });
+
+    // 監聽日期欄位變化，觸發日期範圍驗證
+    ['start_year', 'start_month', 'end_year', 'end_month'].forEach(fieldName => {
+      experienceForm.get(fieldName)?.valueChanges.subscribe(() => {
+        experienceForm.updateValueAndValidity();
+      });
     });
 
     // 監聽縣市變化，重置地區選項
@@ -155,6 +164,15 @@ export class TeacherApplyFormService {
 
       endYearControl?.updateValueAndValidity();
       endMonthControl?.updateValueAndValidity();
+      // 觸發表單層級的日期範圍驗證
+      educationForm.updateValueAndValidity();
+    });
+
+    // 監聽日期欄位變化，觸發日期範圍驗證
+    ['start_year', 'start_month', 'end_year', 'end_month'].forEach(fieldName => {
+      educationForm.get(fieldName)?.valueChanges.subscribe(() => {
+        educationForm.updateValueAndValidity();
+      });
     });
   }
 
@@ -198,7 +216,7 @@ export class TeacherApplyFormService {
           start_month: [exp.start_month?.toString() || '', Validators.required],
           end_year: [exp.end_year?.toString() || ''],
           end_month: [exp.end_month?.toString() || '']
-        });
+        }, { validators: dateRangeValidator });
 
         // 重新設定監聽器
         this.setupWorkExperienceListeners(experienceForm);
@@ -227,7 +245,7 @@ export class TeacherApplyFormService {
           start_month: [edu.start_month?.toString() || '', Validators.required],
           end_year: [edu.end_year?.toString() || ''],
           end_month: [edu.end_month?.toString() || '']
-        });
+        }, { validators: dateRangeValidator });
 
         // 重新設定監聽器
         this.setupEducationListeners(educationForm);

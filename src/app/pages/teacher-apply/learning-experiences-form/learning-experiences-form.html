@@ -28,12 +28,6 @@
             placeholder="請輸入學校名稱"
             formControlName="school_name"
           ></tmf-input-text>
-          @if (
-            education.get("school_name")?.invalid &&
-            education.get("school_name")?.touched
-          ) {
-            <div class="text-red-500 text-sm">請輸入學校名稱</div>
-          }
         </div>
 
         <!-- 科系與學位 -->
@@ -44,12 +38,6 @@
               placeholder="請輸入科系名稱"
               formControlName="department"
             ></tmf-input-text>
-            @if (
-              education.get("department")?.invalid &&
-              education.get("department")?.touched
-            ) {
-              <div class="text-red-500 text-sm">請輸入科系名稱</div>
-            }
           </div>
 
           <div class="space-y-2">
@@ -59,12 +47,6 @@
               [options]="degreeOptions"
               formControlName="degree"
             ></tmf-input-select>
-            @if (
-              education.get("degree")?.invalid &&
-              education.get("degree")?.touched
-            ) {
-              <div class="text-red-500 text-sm">請選擇學位</div>
-            }
           </div>
         </div>
 
@@ -128,6 +110,11 @@
                 <div class="text-red-500 text-sm">請選擇畢業時間</div>
               }
             </div>
+          }
+
+          <!-- 日期範圍驗證錯誤 -->
+          @if (education.hasError('dateRangeInvalid') && education.touched) {
+            <div class="text-red-500 text-sm">結束日期不得早於開始日期</div>
           }
         </div>
       </div>

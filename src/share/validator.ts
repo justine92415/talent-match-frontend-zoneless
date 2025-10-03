@@ -139,3 +139,34 @@ export function arrayRequiredValidator(fieldName: string) {
     return null;
   };
 }
+
+/**
+ * 驗證結束日期是否晚於開始日期
+ * 用於工作經驗和學歷背景表單
+ *
+ * 注意：此驗證器只在表單層級返回錯誤，不在子欄位設定錯誤
+ * 錯誤訊息應在模板中透過 formGroup.hasError('dateRangeInvalid') 顯示
+ */
+export function dateRangeValidator(
+  form: AbstractControl,
+): ValidationErrors | null {
+  const startYear = form.get('start_year');
+  const startMonth = form.get('start_month');
+  const endYear = form.get('end_year');
+  const endMonth = form.get('end_month');
+
+  // 如果任一欄位為空，不進行驗證（由 required validator 處理）
+  if (!startYear?.value || !startMonth?.value || !endYear?.value || !endMonth?.value) {
+    return null;
+  }
+
+  const startDate = new Date(parseInt(startYear.value), parseInt(startMonth.value) - 1);
+  const endDate = new Date(parseInt(endYear.value), parseInt(endMonth.value) - 1);
+
+  if (endDate < startDate) {
+    // 只在表單層級返回錯誤，不修改子欄位的錯誤狀態
+    return { dateRangeInvalid: true };
+  }
+
+  return null;
+}

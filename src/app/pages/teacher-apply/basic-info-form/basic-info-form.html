@@ -8,12 +8,6 @@
         [options]="cityOptions"
         formControlName="city"
       ></tmf-input-select>
-      @if (
-        formGroup().get("city")?.invalid &&
-        formGroup().get("city")?.touched
-      ) {
-        <div class="text-red-500 text-sm">請選擇縣市</div>
-      }
     </div>
 
     <div class="space-y-2">

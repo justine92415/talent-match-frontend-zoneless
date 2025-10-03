@@ -58,11 +58,12 @@
 
   <div class="space-y-2">
     <label class="block text-base font-medium text-grey-33">自我介紹</label>
-    <textarea
-      class="w-full px-3 py-2 border border-grey-d4 rounded-xl resize-vertical min-h-32 focus:outline-none focus:border-primary transition-colors"
+    <tmf-input-textarea
       placeholder="請簡述您的教學經驗、專長及教學理念..."
       formControlName="introduction"
-      rows="6"
-    ></textarea>
+      [rows]="6"
+      [showCounter]="true"
+      [maxLength]="500"
+    ></tmf-input-textarea>
   </div>
 </div>

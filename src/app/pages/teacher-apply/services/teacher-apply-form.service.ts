@@ -1,23 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ApplyStatusData } from '../types/teacher-apply.types';
+import { requiredValidator, minLengthValidator, arrayRequiredValidator } from '@share/validator';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeacherApplyFormService {
   private fb = inject(FormBuilder);
-
-  /**
-   * 自訂陣列長度驗證器
-   */
-  private arrayRequiredValidator(control: any): any {
-    const value = control.value;
-    if (!Array.isArray(value) || value.length === 0) {
-      return { required: true };
-    }
-    return null;
-  }
 
   /**
    * 建立完整的教師申請表單
@@ -42,12 +32,12 @@ export class TeacherApplyFormService {
    */
   private createBasicInfoForm(): FormGroup {
     return this.fb.group({
-      city: ['', Validators.required],
-      district: ['', Validators.required],
-      address: ['', Validators.required],
-      main_category_id: [null, Validators.required],
-      sub_category_ids: [[] as number[], this.arrayRequiredValidator],
-      introduction: ['', [Validators.required, Validators.minLength(100)]]
+      city: ['', requiredValidator('縣市')],
+      district: ['', requiredValidator('地區')],
+      address: ['', requiredValidator('詳細地址')],
+      main_category_id: [null, requiredValidator('教授科目')],
+      sub_category_ids: [[] as number[], arrayRequiredValidator('教學專長')],
+      introduction: ['', minLengthValidator('自我介紹', 100)]
     });
   }
 
@@ -57,14 +47,14 @@ export class TeacherApplyFormService {
   createWorkExperienceForm(): FormGroup {
     const experienceForm = this.fb.group({
       id: [null],
-      company_name: ['', Validators.required],
-      city: ['', Validators.required],
-      district: ['', Validators.required],
-      job_category: ['', Validators.required],
-      job_title: ['', Validators.required],
+      company_name: ['', requiredValidator('公司名稱')],
+      city: ['', requiredValidator('縣市')],
+      district: ['', requiredValidator('地區')],
+      job_category: ['', requiredValidator('工作類別')],
+      job_title: ['', requiredValidator('職稱')],
       is_working: [false],
-      start_year: ['', Validators.required],
-      start_month: ['', Validators.required],
+      start_year: ['', requiredValidator('開始年份')],
+      start_month: ['', requiredValidator('開始月份')],
       end_year: [''],
       end_month: ['']
     });
@@ -81,12 +71,12 @@ export class TeacherApplyFormService {
   createEducationForm(): FormGroup {
     const educationForm = this.fb.group({
       id: [null],
-      school_name: ['', Validators.required],
-      department: ['', Validators.required],
-      degree: ['', Validators.required],
+      school_name: ['', requiredValidator('學校名稱')],
+      department: ['', requiredValidator('科系')],
+      degree: ['', requiredValidator('學位')],
       is_in_school: [false],
-      start_year: ['', Validators.required],
-      start_month: ['', Validators.required],
+      start_year: ['', requiredValidator('入學年份')],
+      start_month: ['', requiredValidator('入學月份')],
       end_year: [''],
       end_month: ['']
     });
@@ -103,13 +93,13 @@ export class TeacherApplyFormService {
   createCertificateForm(): FormGroup {
     return this.fb.group({
       id: [null],
-      holder_name: ['', Validators.required],
-      license_number: ['', Validators.required],
-      license_name: ['', Validators.required],
-      category_id: ['', Validators.required],
-      verifying_institution: ['', Validators.required],
-      issue_year: ['', Validators.required],
-      issue_month: ['', Validators.required],
+      holder_name: ['', requiredValidator('持有人姓名')],
+      license_number: ['', requiredValidator('證書號碼')],
+      license_name: ['', requiredValidator('證照名稱')],
+      category_id: ['', requiredValidator('證書主題')],
+      verifying_institution: ['', requiredValidator('核發機構')],
+      issue_year: ['', requiredValidator('取得年份')],
+      issue_month: ['', requiredValidator('取得月份')],
       file_path: [null],
       file_name: ['']
     });
@@ -130,8 +120,8 @@ export class TeacherApplyFormService {
         endYearControl?.setValue('');
         endMonthControl?.setValue('');
       } else {
-        endYearControl?.setValidators([Validators.required]);
-        endMonthControl?.setValidators([Validators.required]);
+        endYearControl?.setValidators([requiredValidator('結束年份')]);
+        endMonthControl?.setValidators([requiredValidator('結束月份')]);
       }
 
       endYearControl?.updateValueAndValidity();
@@ -159,8 +149,8 @@ export class TeacherApplyFormService {
         endYearControl?.setValue('');
         endMonthControl?.setValue('');
       } else {
-        endYearControl?.setValidators([Validators.required]);
-        endMonthControl?.setValidators([Validators.required]);
+        endYearControl?.setValidators([requiredValidator('畢業年份')]);
+        endMonthControl?.setValidators([requiredValidator('畢業月份')]);
       }
 
       endYearControl?.updateValueAndValidity();

@@ -103,3 +103,39 @@ export function passwordMatchValidator(
     return null;
   }
 }
+
+// 教師申請表單驗證器
+export function requiredValidator(fieldName: string) {
+  return (ctrl: AbstractControl): ValidationErrors | null => {
+    if (Validators.required(ctrl)) {
+      return { error: `${fieldName}為必填欄位` };
+    }
+    return null;
+  };
+}
+
+export function minLengthValidator(fieldName: string, minLength: number) {
+  return (ctrl: AbstractControl): ValidationErrors | null => {
+    const value = ctrl.value;
+
+    if (Validators.required(ctrl)) {
+      return { error: `${fieldName}為必填欄位` };
+    }
+
+    if (value && value.length < minLength) {
+      return { error: `${fieldName}長度不能少於 ${minLength} 個字元` };
+    }
+
+    return null;
+  };
+}
+
+export function arrayRequiredValidator(fieldName: string) {
+  return (ctrl: AbstractControl): ValidationErrors | null => {
+    const value = ctrl.value;
+    if (!Array.isArray(value) || value.length === 0) {
+      return { error: `請至少選擇一個${fieldName}` };
+    }
+    return null;
+  };
+}

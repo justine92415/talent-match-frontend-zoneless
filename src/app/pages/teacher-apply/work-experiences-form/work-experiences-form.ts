@@ -83,6 +83,9 @@ export class WorkExperiencesForm implements OnInit {
       if (currentCity) {
         this.updateDistrictOptions(formGroup, currentCity);
       }
+
+      // 設定目前在職狀態的驗證邏輯
+      this.setupWorkingStatusValidation(formGroup);
     });
   }
 
@@ -146,6 +149,40 @@ export class WorkExperiencesForm implements OnInit {
     }
   }
 
+  // 設定目前在職狀態的驗證邏輯
+  private setupWorkingStatusValidation(experienceGroup: FormGroup) {
+    // 監聽目前在職狀態
+    experienceGroup.get('is_working')?.valueChanges.subscribe(isWorking => {
+      const endYearControl = experienceGroup.get('end_year');
+      const endMonthControl = experienceGroup.get('end_month');
+
+      if (isWorking) {
+        endYearControl?.clearValidators();
+        endMonthControl?.clearValidators();
+        endYearControl?.setValue('');
+        endMonthControl?.setValue('');
+      } else {
+        endYearControl?.setValidators([Validators.required]);
+        endMonthControl?.setValidators([Validators.required]);
+      }
+
+      endYearControl?.updateValueAndValidity();
+      endMonthControl?.updateValueAndValidity();
+    });
+
+    // 初始化時也檢查一次，確保現有資料的驗證狀態正確
+    const isWorking = experienceGroup.get('is_working')?.value;
+    const endYearControl = experienceGroup.get('end_year');
+    const endMonthControl = experienceGroup.get('end_month');
+
+    if (!isWorking) {
+      endYearControl?.setValidators([Validators.required]);
+      endMonthControl?.setValidators([Validators.required]);
+      endYearControl?.updateValueAndValidity();
+      endMonthControl?.updateValueAndValidity();
+    }
+  }
+
   // 建立工作經驗 FormGroup
   private createExperience(): FormGroup {
     const experienceGroup = this.fb.group({
@@ -162,24 +199,8 @@ export class WorkExperiencesForm implements OnInit {
       end_month: ['']
     });
 
-    // 監聽目前在職狀態
-    experienceGroup.get('is_working')?.valueChanges.subscribe(isWorking => {
-      const endYearControl = experienceGroup.get('end_year');
-      const endMonthControl = experienceGroup.get('end_month');
-      
-      if (isWorking) {
-        endYearControl?.clearValidators();
-        endMonthControl?.clearValidators();
-        endYearControl?.setValue('');
-        endMonthControl?.setValue('');
-      } else {
-        endYearControl?.setValidators([Validators.required]);
-        endMonthControl?.setValidators([Validators.required]);
-      }
-      
-      endYearControl?.updateValueAndValidity();
-      endMonthControl?.updateValueAndValidity();
-    });
+    // 設定目前在職狀態的驗證邏輯
+    this.setupWorkingStatusValidation(experienceGroup);
 
     return experienceGroup;
   }

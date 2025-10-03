@@ -2,6 +2,7 @@ import { Component, input, OnInit, inject, signal, computed } from '@angular/cor
 import { FormGroup, FormArray, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { InputText } from '@components/form/input-text/input-text';
 import { InputSelect, SelectOption } from '@components/form/input-select/input-select';
+import { InputCheckbox } from '@components/form/input-checkbox/input-checkbox';
 import { Button } from '@components/button/button';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
@@ -12,6 +13,7 @@ import { Cities } from '@share/cities';
   imports: [
     InputText,
     InputSelect,
+    InputCheckbox,
     Button,
     ReactiveFormsModule,
     MatIcon

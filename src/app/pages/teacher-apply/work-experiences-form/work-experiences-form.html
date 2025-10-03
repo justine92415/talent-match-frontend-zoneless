@@ -108,14 +108,10 @@
         </div>
 
         <!-- 目前在職 checkbox -->
-        <div class="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            formControlName="is_working"
-            class="w-4 h-4 text-primary border-grey-d4 rounded focus:ring-primary"
-          />
-          <label class="text-base text-grey-33">目前在職</label>
-        </div>
+        <tmf-input-checkbox
+          label="目前在職"
+          formControlName="is_working"
+        ></tmf-input-checkbox>
 
         <!-- 工作期間 -->
         <div class="space-y-4">

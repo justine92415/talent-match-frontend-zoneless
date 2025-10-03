@@ -139,6 +139,9 @@ export class TeacherApplyApiService {
    * 轉換表單資料為 API 格式 - 工作經驗
    */
   transformWorkExperienceForApi(formData: any): WorkExperienceData {
+    // 當 is_working 為 true 時,強制將結束日期設為 null
+    const shouldClearEndDate = formData.is_working === true;
+
     return {
       ...(formData.id && { id: formData.id }),
       company_name: formData.company_name,
@@ -149,8 +152,8 @@ export class TeacherApplyApiService {
       is_working: formData.is_working,
       start_year: parseInt(formData.start_year),
       start_month: parseInt(formData.start_month),
-      end_year: formData.end_year ? parseInt(formData.end_year) : null,
-      end_month: formData.end_month ? parseInt(formData.end_month) : null
+      end_year: shouldClearEndDate ? null : (formData.end_year ? parseInt(formData.end_year) : null),
+      end_month: shouldClearEndDate ? null : (formData.end_month ? parseInt(formData.end_month) : null)
     };
   }
 
@@ -158,6 +161,9 @@ export class TeacherApplyApiService {
    * 轉換表單資料為 API 格式 - 學歷背景
    */
   transformLearningExperienceForApi(formData: any): any {
+    // 當 is_in_school 為 true 時,強制將結束日期設為 null
+    const shouldClearEndDate = formData.is_in_school === true;
+
     return {
       ...(formData.id && { id: formData.id }),
       school_name: formData.school_name,
@@ -166,8 +172,8 @@ export class TeacherApplyApiService {
       is_in_school: formData.is_in_school,
       start_year: parseInt(formData.start_year),
       start_month: parseInt(formData.start_month),
-      end_year: formData.end_year ? parseInt(formData.end_year) : null,
-      end_month: formData.end_month ? parseInt(formData.end_month) : null
+      end_year: shouldClearEndDate ? null : (formData.end_year ? parseInt(formData.end_year) : null),
+      end_month: shouldClearEndDate ? null : (formData.end_month ? parseInt(formData.end_month) : null)
     };
   }
 

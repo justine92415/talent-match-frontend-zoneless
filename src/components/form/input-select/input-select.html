@@ -5,6 +5,7 @@
     type="button"
     class="w-full flex font-normal gap-1 items-center justify-between px-3 py-2 bg-white border border-grey-d4 rounded-xl text-grey-9f transition-all duration-200 focus:outline-none focus:border-primary"
     [class.border-primary]="isOpen()"
+    [class.border-red-500]="ctrlDir.touched && ctrlDir.invalid"
     (click)="toggleDropdown()"
     [disabled]="isDisabled()"
   >
@@ -38,4 +39,11 @@
       </ul>
     </div>
   </ng-template>
+</div>
+<div>
+  @if(ctrlDir.touched && ctrlDir.invalid) {
+  <div class="mt-1 text-sm text-red-500">
+    {{ ctrlDir.getError('error') }}
+  </div>
+  }
 </div>

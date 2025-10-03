@@ -2800,6 +2800,33 @@ export interface GetTagsSuccessResponse {
   data: TagItem[];
 }
 
+export interface PriceOption {
+  /** 價格方案 ID */
+  id: number;
+  /** 價格方案唯一識別碼 */
+  uuid: string;
+  /** 所屬課程 ID */
+  course_id: number;
+  /**
+   * 方案價格（新台幣）
+   * @minimum 1
+   * @maximum 999999.99
+   */
+  price: number;
+  /**
+   * 方案堂數
+   * @minimum 1
+   * @maximum 999
+   */
+  quantity: number;
+  /** 是否啟用 */
+  is_active: boolean;
+  /** 建立時間 */
+  created_at: string;
+  /** 更新時間 */
+  updated_at: string;
+}
+
 export interface CreateCourseRequest {
   /**
    * 課程名稱 (必填，1-255字元)
@@ -3921,6 +3948,11 @@ export interface PublicCourseListItem {
   /** 課程名稱 */
   name: string;
   /**
+   * 課程簡介說明
+   * @nullable
+   */
+  description?: string | null;
+  /**
    * 課程主圖 URL
    * @nullable
    */
@@ -4705,33 +4737,6 @@ export type VideoCannotDeleteErrorResponseAllOf = {
 
 export type VideoCannotDeleteErrorResponse = BusinessErrorResponse &
   VideoCannotDeleteErrorResponseAllOf;
-
-export interface PriceOption {
-  /** 價格方案 ID */
-  id: number;
-  /** 價格方案唯一識別碼 */
-  uuid: string;
-  /** 所屬課程 ID */
-  course_id: number;
-  /**
-   * 方案價格（新台幣）
-   * @minimum 1
-   * @maximum 999999.99
-   */
-  price: number;
-  /**
-   * 方案堂數
-   * @minimum 1
-   * @maximum 999
-   */
-  quantity: number;
-  /** 是否啟用 */
-  is_active: boolean;
-  /** 建立時間 */
-  created_at: string;
-  /** 更新時間 */
-  updated_at: string;
-}
 
 /**
  * 標準教學時段
@@ -7120,27 +7125,6 @@ export type GetApiPaymentsEcpayReturnParams = {
    */
   RtnMsg?: string;
 };
-
-export type GetApiCoursesCourseIdPriceOptions200AllOf = {
-  data?: PriceOptionInfo[];
-};
-
-export type GetApiCoursesCourseIdPriceOptions200 = SuccessResponse &
-  GetApiCoursesCourseIdPriceOptions200AllOf;
-
-export type PostApiCoursesCourseIdPriceOptions201AllOf = {
-  data?: PriceOptionInfo;
-};
-
-export type PostApiCoursesCourseIdPriceOptions201 = SuccessResponse &
-  PostApiCoursesCourseIdPriceOptions201AllOf;
-
-export type PutApiCoursesCourseIdPriceOptionsId200AllOf = {
-  data?: PriceOptionInfo;
-};
-
-export type PutApiCoursesCourseIdPriceOptionsId200 = SuccessResponse &
-  PutApiCoursesCourseIdPriceOptionsId200AllOf;
 
 export type GetApiCoursesPublicParams = {
   /**

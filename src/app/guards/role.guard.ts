@@ -122,7 +122,7 @@ export const teacherApplyGuard: CanActivateFn = (_route, state) => {
     
     // 如果已有 teacher_pending 或 teacher 角色，不允許訪問申請頁面
     if (userRoles.includes('teacher_pending') || userRoles.includes('teacher')) {
-      router.navigate(['/dashboard']);
+      router.navigate(['/dashboard/teacher/apply-status']);
       return false;
     }
     

@@ -11,6 +11,7 @@ import { InputText } from "@components/form/input-text/input-text";
 import { Layout1Wapper } from '@components/layout-1-wapper/layout-1-wapper';
 import { AuthenticationService } from '@app/api/generated/authentication/authentication.service';
 import { RegisterRequest } from '@app/api/generated/talentMatchAPI.schemas';
+import { NotificationService } from '@share/services/notification.service';
 
 @Component({
   selector: 'tmf-sign-up',
@@ -24,6 +25,7 @@ export default class SignUp {
   private authService = inject(AuthenticationService);
   private router = inject(Router);
   private location = inject(Location);
+  private notification = inject(NotificationService);
 
   signUpForm: FormGroup;
   isLoading = signal(false);
@@ -31,10 +33,10 @@ export default class SignUp {
 
   constructor() {
     this.signUpForm = this.fb.group({
-      nickName: ['測試用戶002', [nickNameValidator]],
-      email: ['test002@example.com', [userEmailValidator]],
-      password: ['Password123', [passwordValidator]],
-      confirmPassword: ['Password123', [confirmPasswordValidator]]
+      nickName: ['', [nickNameValidator]],
+      email: ['', [userEmailValidator]],
+      password: ['', [passwordValidator]],
+      confirmPassword: ['', [confirmPasswordValidator]]
     }, { validators: passwordMatchValidator });
   }
 
@@ -69,8 +71,12 @@ export default class SignUp {
         .subscribe({
           next: (response) => {
             if (response.status === 'success') {
-              // 註冊成功後導向到登入頁面或首頁
-              this.router.navigate(['/login']);
+              // 顯示成功訊息
+              this.notification.success('註冊成功！請登入您的帳號');
+              // 註冊成功後導向到登入頁面，並傳遞信箱
+              this.router.navigate(['/login'], {
+                state: { email: formValue.email }
+              });
             }
           },
           error: (error: any) => {

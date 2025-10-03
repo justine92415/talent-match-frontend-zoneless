@@ -1,5 +1,6 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, signal } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { Dialog } from '@angular/cdk/dialog';
 import { SectionTitle } from '@components/section-title/section-title';
@@ -11,11 +12,10 @@ import { SwiperWapper, SwiperConfig } from '@components/swiper-wapper/swiper-wap
 import { TmfIconEnum } from '@share/icon.enum';
 import { StarRating } from "@components/star-rating/star-rating";
 import { InputGlobalSearch, GlobalSearchValue } from "@components/form/input-global-search/input-global-search";
-import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'tmf-home',
-  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon, StarRating, ReactiveFormsModule, InputGlobalSearch, JsonPipe],
+  imports: [SectionTitle, VideoCard, CourseCard, ReviewCard, SwiperWapper, MatIcon, StarRating, ReactiveFormsModule, InputGlobalSearch],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './home.html',
   styles: ``
@@ -23,6 +23,7 @@ import { JsonPipe } from '@angular/common';
 export default class Home {
   fb = inject(FormBuilder);
   dialog = inject(Dialog);
+  router = inject(Router);
 
   // Form for global search testing
   searchForm = this.fb.group({
@@ -298,6 +299,10 @@ export default class Home {
   onGlobalSearch(searchValue: GlobalSearchValue) {
     console.log('Global search submitted:', searchValue);
     // Handle search logic here
+  }
+
+  onBecomeTeacherClick() {
+    this.router.navigate(['/teacher-apply']);
   }
 
   onVideoClick(video: VideoCardData) {

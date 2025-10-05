@@ -17,6 +17,7 @@ import { VideoCard, VideoCardData } from '@components/video-card/video-card';
 import { VideoViewerDialogComponent } from '@components/dialogs/video-viewer/video-viewer-dialog';
 import { AllReviewsDialogComponent } from '@components/dialogs/all-reviews-dialog/all-reviews-dialog';
 import { Subject } from 'rxjs';
+import { DegreePipe } from "../../../../shared/pipes/degree.pipe";
 
 @Component({
   selector: 'tmf-course-detail',
@@ -31,7 +32,8 @@ import { Subject } from 'rxjs';
     WeeklyCalendar,
     InputPlan,
     VideoCard,
-  ],
+    DegreePipe
+],
   templateUrl: './course-detail.html',
   styles: `
     .active {

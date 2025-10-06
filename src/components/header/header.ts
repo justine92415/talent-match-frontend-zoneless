@@ -13,7 +13,7 @@ import {
 import { rxResource } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { OverlayModule } from '@angular/cdk/overlay';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink, Router, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TmfIconEnum } from '@share/icon.enum';
 import { DropdownManagerService } from './dropdown-manager.service';
@@ -21,7 +21,10 @@ import { Button } from '@components/button/button';
 import { Skeleton } from '@components/skeleton/skeleton';
 import { AuthService } from '@app/services/auth.service';
 import { TagsService } from '@app/api/generated/tags/tags.service';
-import { TagItem, SubCategoryItem } from '@app/api/generated/talentMatchAPI.schemas';
+import {
+  TagItem,
+  SubCategoryItem,
+} from '@app/api/generated/talentMatchAPI.schemas';
 import { CartService } from '@app/services/cart.service';
 import { map } from 'rxjs/operators';
 
@@ -79,7 +82,14 @@ const DROPDOWN_IDS = {
 
 @Component({
   selector: 'tmf-header',
-  imports: [MatIconModule, OverlayModule, Button, Skeleton, RouterLink, CommonModule],
+  imports: [
+    MatIconModule,
+    OverlayModule,
+    Button,
+    Skeleton,
+    RouterLink,
+    CommonModule
+  ],
   providers: [DropdownManagerService],
   templateUrl: './header.html',
   styleUrl: './header.css',
@@ -113,9 +123,10 @@ export class Header implements OnInit, AfterViewInit {
   isAuthenticated = this.authService.isAuthenticated;
   user = this.authService.user;
   isLoading = this.authService.isLoading;
-  userName = computed(() => this.user()?.nick_name || this.user()?.name || '用戶');
+  userName = computed(
+    () => this.user()?.nick_name || this.user()?.name || '用戶',
+  );
   userRole = computed(() => this.user()?.account_status);
-
 
   // 城市 Mock Data
   readonly cities = signal<City[]>([
@@ -135,14 +146,15 @@ export class Header implements OnInit, AfterViewInit {
 
   // 使用 rxResource 管理 tags 資料
   tagsResource = rxResource({
-    stream: () => this.tagsService.getApiTags().pipe(
-      map(response => {
-        if (response.status && response.data) {
-          return response.data;
-        }
-        throw new Error('載入分類失敗');
-      })
-    )
+    stream: () =>
+      this.tagsService.getApiTags().pipe(
+        map((response) => {
+          if (response.status && response.data) {
+            return response.data;
+          }
+          throw new Error('載入分類失敗');
+        }),
+      ),
   });
 
   // 通知 Mock Data
@@ -185,11 +197,6 @@ export class Header implements OnInit, AfterViewInit {
     const role = this.userRole();
     const commonItems: UserMenuItem[] = [
       {
-        id: 'account-settings',
-        label: '帳戶管理',
-        icon: TmfIconEnum.Settings,
-      },
-      {
         id: 'divider-1',
         label: '',
         icon: '',
@@ -222,15 +229,9 @@ export class Header implements OnInit, AfterViewInit {
       return [
         {
           id: 'teacher-info',
-          label: '教師資訊管理',
+          label: '基本資訊',
           icon: TmfIconEnum.Face,
           route: '/dashboard/teacher/info',
-        },
-        {
-          id: 'teacher-videos',
-          label: '影片管理',
-          icon: TmfIconEnum.SmartDisplay,
-          route: '/dashboard/teacher/videos',
         },
         {
           id: 'teacher-reservation',
@@ -243,6 +244,18 @@ export class Header implements OnInit, AfterViewInit {
           label: '課程管理',
           icon: TmfIconEnum.LabProfile,
           route: '/dashboard/teacher/courses',
+        },
+        {
+          id: 'teacher-videos',
+          label: '影片管理',
+          icon: TmfIconEnum.SmartDisplay,
+          route: '/dashboard/teacher/videos',
+        },
+        {
+          id: 'teacher-schedule',
+          label: '時段管理',
+          icon: 'schedule',
+          route: '/dashboard/teacher/schedule',
         },
         {
           id: 'teacher-record',
@@ -309,13 +322,13 @@ export class Header implements OnInit, AfterViewInit {
       sub_category: [],
       icon_url: null,
       isSelected: selectedCat !== null && selectedId === null,
-      isExpanded: expandedCategoryId === 'all'
+      isExpanded: expandedCategoryId === 'all',
     };
 
     const categoriesWithSelection = tags.map((tag: TagItem) => ({
       ...tag,
       isSelected: selectedCat !== null && selectedId === tag.id,
-      isExpanded: expandedCategoryId === tag.id?.toString()
+      isExpanded: expandedCategoryId === tag.id?.toString(),
     }));
 
     return [allCategory, ...categoriesWithSelection];
@@ -324,7 +337,11 @@ export class Header implements OnInit, AfterViewInit {
   // 計算當前選中主分類的子分類
   currentSubCategories = computed(() => {
     const selectedCat = this.selectedCategory();
-    if (!selectedCat || !selectedCat.sub_category || selectedCat.sub_category.length === 0) {
+    if (
+      !selectedCat ||
+      !selectedCat.sub_category ||
+      selectedCat.sub_category.length === 0
+    ) {
       return [];
     }
     return selectedCat.sub_category;
@@ -333,7 +350,11 @@ export class Header implements OnInit, AfterViewInit {
   // 計算是否應該顯示子分類區域
   shouldShowSubCategories = computed(() => {
     const selectedCat = this.selectedCategory();
-    return selectedCat && selectedCat.sub_category && selectedCat.sub_category.length > 0;
+    return (
+      selectedCat &&
+      selectedCat.sub_category &&
+      selectedCat.sub_category.length > 0
+    );
   });
 
   // 計算當前選中分類的主分類ID（用於子分類導航）
@@ -388,7 +409,7 @@ export class Header implements OnInit, AfterViewInit {
     } else {
       // 特定分類 - 傳入主分類ID
       this.router.navigate(['/result-tag'], {
-        queryParams: { mainCategory: category.id }
+        queryParams: { mainCategory: category.id },
       });
     }
 
@@ -398,12 +419,15 @@ export class Header implements OnInit, AfterViewInit {
   }
 
   // 點擊子分類導航到 result-tag 頁面
-  navigateToSubcategory(subcategory: SubcategoryWithSelection, mainCategoryId: number): void {
+  navigateToSubcategory(
+    subcategory: SubcategoryWithSelection,
+    mainCategoryId: number,
+  ): void {
     this.router.navigate(['/result-tag'], {
       queryParams: {
         mainCategory: mainCategoryId,
-        subCategory: subcategory.id
-      }
+        subCategory: subcategory.id,
+      },
     });
 
     // 導航後還原下拉選單狀態
@@ -471,7 +495,7 @@ export class Header implements OnInit, AfterViewInit {
       },
       error: (error) => {
         console.error('移除購物車項目失敗:', error);
-      }
+      },
     });
   }
 
@@ -536,7 +560,10 @@ export class Header implements OnInit, AfterViewInit {
     }
   }
 
-  onMobileSubcategoryClick(subcategory: SubcategoryWithSelection, event: Event): void {
+  onMobileSubcategoryClick(
+    subcategory: SubcategoryWithSelection,
+    event: Event,
+  ): void {
     event.stopPropagation(); // 防止事件冒泡到父分類
 
     // 找到當前展開的主分類ID
@@ -547,7 +574,6 @@ export class Header implements OnInit, AfterViewInit {
       this.closeMobileMenu(); // 導航後關閉手機選單
     }
   }
-
 
   ngAfterViewInit(): void {
     // 註冊所有下拉選單

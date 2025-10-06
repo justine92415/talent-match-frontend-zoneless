@@ -20,7 +20,7 @@ interface SidebarMenuItem {
     :host {
       display: block;
     }
-  `
+  `,
 })
 export class DashboardSidebar implements OnInit {
   private authService = inject(AuthService);
@@ -28,7 +28,7 @@ export class DashboardSidebar implements OnInit {
 
   user = this.authService.user;
   roles = this.authService.roles;
-  
+
   // 當前顯示的角色 (用於控制 sidebar 顯示內容)
   currentRole = signal<Role>('student');
 
@@ -43,7 +43,10 @@ export class DashboardSidebar implements OnInit {
 
     if (url.includes('/dashboard/teacher')) {
       // 根據具體路由和用戶角色決定顯示方式
-      if (url.includes('/apply-status') && userRoles.includes('teacher_pending')) {
+      if (
+        url.includes('/apply-status') &&
+        userRoles.includes('teacher_pending')
+      ) {
         this.currentRole.set('teacher_pending');
       } else if (userRoles.includes('teacher')) {
         this.currentRole.set('teacher');
@@ -69,47 +72,51 @@ export class DashboardSidebar implements OnInit {
   // 角色顯示標籤
   roleLabel = computed(() => {
     const current = this.currentRole();
-    return current === 'student' ? '學生' :
-           current === 'teacher' ? '教師' :
-           current === 'teacher_pending' ? '教師 (待審核)' : '用戶';
+    return current === 'student'
+      ? '學生'
+      : current === 'teacher'
+        ? '教師'
+        : current === 'teacher_pending'
+          ? '教師 (待審核)'
+          : '用戶';
   });
 
   // 根據當前選擇的角色生成導航選單
   navigationItems = computed<SidebarMenuItem[]>(() => {
     const current = this.currentRole();
-    
+
     if (current === 'student') {
       return [
         {
           id: 'info',
           label: '基本資訊',
           icon: 'face',
-          route: '/dashboard/student/info'
+          route: '/dashboard/student/info',
         },
         {
           id: 'courses',
           label: '我的課程',
           icon: 'lab_profile',
-          route: '/dashboard/student/courses'
+          route: '/dashboard/student/courses',
         },
         {
           id: 'favorites',
           label: '收藏課程',
           icon: 'favorite',
-          route: '/dashboard/student/favorites'
+          route: '/dashboard/student/favorites',
         },
         {
           id: 'calendar',
           label: '行事曆',
           icon: 'edit_calendar',
-          route: '/dashboard/student/calendar'
+          route: '/dashboard/student/calendar',
         },
         {
           id: 'record',
           label: '交易紀錄',
           icon: 'account_balance_wallet',
-          route: '/dashboard/student/record'
-        }
+          route: '/dashboard/student/record',
+        },
       ];
     } else if (current === 'teacher') {
       return [
@@ -117,38 +124,39 @@ export class DashboardSidebar implements OnInit {
           id: 'info',
           label: '基本資訊',
           icon: 'face',
-          route: '/dashboard/teacher/info'
-        },
-        {
-          id: 'videos',
-          label: '影片管理',
-          icon: 'smart_display',
-          route: '/dashboard/teacher/videos'
-        },
-        {
-          id: 'schedule',
-          label: '時段管理',
-          icon: 'schedule',
-          route: '/dashboard/teacher/schedule'
+          route: '/dashboard/teacher/info',
         },
         {
           id: 'reservation',
           label: '預約管理',
           icon: 'event_note',
-          route: '/dashboard/teacher/reservation'
+          route: '/dashboard/teacher/reservation',
         },
         {
           id: 'courses',
           label: '課程管理',
           icon: 'lab_profile',
-          route: '/dashboard/teacher/courses'
+          route: '/dashboard/teacher/courses',
         },
+        {
+          id: 'videos',
+          label: '影片管理',
+          icon: 'smart_display',
+          route: '/dashboard/teacher/videos',
+        },
+        {
+          id: 'schedule',
+          label: '時段管理',
+          icon: 'schedule',
+          route: '/dashboard/teacher/schedule',
+        },
+
         {
           id: 'record',
           label: '交易紀錄',
           icon: 'account_balance_wallet',
-          route: '/dashboard/teacher/record'
-        }
+          route: '/dashboard/teacher/record',
+        },
       ];
     } else if (current === 'teacher_pending') {
       return [
@@ -156,18 +164,21 @@ export class DashboardSidebar implements OnInit {
           id: 'apply-status',
           label: '申請狀態',
           icon: 'assignment',
-          route: '/dashboard/teacher/apply-status'
-        }
+          route: '/dashboard/teacher/apply-status',
+        },
       ];
     }
-    
+
     return [];
   });
 
   // 檢查是否可以切換角色
   canSwitchRole = computed(() => {
     const userRoles = this.roles();
-    return userRoles.includes('student') && (userRoles.includes('teacher') || userRoles.includes('teacher_pending'));
+    return (
+      userRoles.includes('student') &&
+      (userRoles.includes('teacher') || userRoles.includes('teacher_pending'))
+    );
   });
 
   // 獲取切換目標角色的標籤

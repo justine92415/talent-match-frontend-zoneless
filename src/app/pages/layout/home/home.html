@@ -130,7 +130,7 @@
         @for (course of courses; track course.id) {
         <div class="swiper-slide">
           <!-- Course Card -->
-          <tmf-course-card class="w-75.5" [course]="course"></tmf-course-card>
+          <tmf-course-card class="w-75.5" [hasShadow]="false" [course]="course" (courseClick)="navigateToCourseDetail($event)"></tmf-course-card>
         </div>
         }
       }

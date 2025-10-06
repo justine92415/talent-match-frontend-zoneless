@@ -181,4 +181,8 @@ export default class Home {
       });
     }
   }
+
+  navigateToCourseDetail(courseId: string) {
+    this.router.navigate(['/course-detail', courseId]);
+  }
 }

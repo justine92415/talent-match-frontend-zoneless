@@ -6653,6 +6653,290 @@ export type CourseReviewsValidationErrorResponseAllOf = {
 export type CourseReviewsValidationErrorResponse = ValidationErrorResponse &
   CourseReviewsValidationErrorResponseAllOf;
 
+export interface ReviewsSummaryQueryParams {
+  /**
+   * 精選評論數量，預設為 6，最小 1，最大 20
+   * @minimum 1
+   * @maximum 20
+   */
+  limit?: number;
+}
+
+/**
+ * 學生資訊
+ */
+export type FeaturedReviewItemStudent = {
+  /** 學生暱稱 */
+  name?: string;
+  /**
+   * 學生頭像 URL
+   * @nullable
+   */
+  avatar?: string | null;
+};
+
+export interface FeaturedReviewItem {
+  /** 評論 ID */
+  reviewId?: number;
+  /** 學生資訊 */
+  student?: FeaturedReviewItemStudent;
+  /** 評論標題（目前為空字串） */
+  title?: string;
+  /** 評論內容（至少 20 字） */
+  content?: string;
+  /** 評論建立時間 */
+  createdAt?: string;
+}
+
+export interface ReviewsSummaryData {
+  /** 整體平均評分（四捨五入到小數點第一位） */
+  overallRating?: number;
+  /** 精選評論列表（評分 >= 4 且內容 >= 20 字，每位學生最多一則，取最新） */
+  featuredReviews?: FeaturedReviewItem[];
+}
+
+/**
+ * 回應狀態
+ */
+export type ReviewsSummarySuccessResponseStatus =
+  (typeof ReviewsSummarySuccessResponseStatus)[keyof typeof ReviewsSummarySuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReviewsSummarySuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface ReviewsSummarySuccessResponse {
+  /** 回應狀態 */
+  status?: ReviewsSummarySuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 評論摘要資料 */
+  data?: ReviewsSummaryData;
+}
+
+export interface ShortVideosQueryParams {
+  /**
+   * 主分類 ID（選填，用於篩選特定分類的影片）
+   * @minimum 1
+   */
+  mainCategoryId?: number;
+  /**
+   * 返回數量，預設為 5，最小 1，最大 20
+   * @minimum 1
+   * @maximum 20
+   */
+  limit?: number;
+}
+
+/**
+ * 主分類資訊
+ */
+export type ShortVideoItemMainCategory = {
+  /** 主分類 ID */
+  id?: number;
+  /** 主分類名稱 */
+  name?: string;
+};
+
+/**
+ * 課程資訊
+ */
+export type ShortVideoItemCourse = {
+  /** 課程 ID */
+  id?: number;
+  /** 課程標題 */
+  title?: string;
+};
+
+/**
+ * 教師資訊
+ */
+export type ShortVideoItemTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師姓名 */
+  name?: string;
+};
+
+export interface ShortVideoItem {
+  /** 影片 ID */
+  videoId?: number;
+  /** 所屬課程 ID */
+  courseId?: number;
+  /** 影片標題 */
+  title?: string;
+  /** 縮圖 URL（目前使用影片 URL） */
+  thumbnailUrl?: string;
+  /** 影片播放 URL */
+  videoUrl?: string;
+  /** 影片長度（秒，目前預設為 0） */
+  duration?: number;
+  /** 主分類資訊 */
+  mainCategory?: ShortVideoItemMainCategory;
+  /** 課程資訊 */
+  course?: ShortVideoItemCourse;
+  /** 教師資訊 */
+  teacher?: ShortVideoItemTeacher;
+}
+
+export interface ShortVideosData {
+  /** 短影片列表（依評分、熱門度、完整度、發布時間排序） */
+  videos?: ShortVideoItem[];
+}
+
+/**
+ * 回應狀態
+ */
+export type ShortVideosSuccessResponseStatus =
+  (typeof ShortVideosSuccessResponseStatus)[keyof typeof ShortVideosSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ShortVideosSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface ShortVideosSuccessResponse {
+  /** 回應狀態 */
+  status?: ShortVideosSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 短影片資料 */
+  data?: ShortVideosData;
+}
+
+export interface RecommendedCoursesQueryParams {
+  /**
+   * 縣市 ID（選填，用於優先顯示該地區課程）
+   * @minimum 1
+   */
+  cityId?: number;
+  /**
+   * 返回數量，預設為 6，最小 1，最大 20
+   * @minimum 1
+   * @maximum 20
+   */
+  limit?: number;
+}
+
+/**
+ * 教師資訊
+ */
+export type RecommendedCourseItemTeacher = {
+  /** 教師 ID */
+  id?: number;
+  /** 教師姓名 */
+  name?: string;
+  /** 教師頭像 URL */
+  avatar?: string;
+};
+
+/**
+ * 價格範圍
+ */
+export type RecommendedCourseItemPriceRange = {
+  /** 最低價格 */
+  min?: number;
+  /** 計價單位 */
+  perUnit?: string;
+};
+
+/**
+ * 主分類資訊
+ */
+export type RecommendedCourseItemMainCategory = {
+  /** 主分類 ID */
+  id?: number;
+  /** 主分類名稱 */
+  name?: string;
+};
+
+/**
+ * 子分類資訊
+ */
+export type RecommendedCourseItemSubCategory = {
+  /** 子分類 ID */
+  id?: number;
+  /** 子分類名稱 */
+  name?: string;
+};
+
+/**
+ * 評分資訊
+ */
+export type RecommendedCourseItemRating = {
+  /** 平均評分 */
+  average?: number;
+  /** 評論數量 */
+  count?: number;
+};
+
+/**
+ * 城市資訊
+ */
+export type RecommendedCourseItemCity = {
+  /** 城市 ID（目前為 0） */
+  id?: number;
+  /** 城市名稱 */
+  name?: string;
+};
+
+export interface RecommendedCourseItem {
+  /** 課程 ID */
+  courseId?: number;
+  /** 課程標題 */
+  title?: string;
+  /** 課程描述（最多 100 字，超過會截斷並加 ...） */
+  description?: string;
+  /** 課程封面圖片 URL */
+  coverImage?: string;
+  /** 教師資訊 */
+  teacher?: RecommendedCourseItemTeacher;
+  /** 價格範圍 */
+  priceRange?: RecommendedCourseItemPriceRange;
+  /** 主分類資訊 */
+  mainCategory?: RecommendedCourseItemMainCategory;
+  /** 子分類資訊 */
+  subCategory?: RecommendedCourseItemSubCategory;
+  /** 評分資訊 */
+  rating?: RecommendedCourseItemRating;
+  /** 城市資訊 */
+  city?: RecommendedCourseItemCity;
+}
+
+export interface RecommendedCoursesData {
+  /** 推薦課程列表（依地區匹配、評分、可預約性、完整度排序，同一教師最多一堂課） */
+  courses?: RecommendedCourseItem[];
+}
+
+/**
+ * 回應狀態
+ */
+export type RecommendedCoursesSuccessResponseStatus =
+  (typeof RecommendedCoursesSuccessResponseStatus)[keyof typeof RecommendedCoursesSuccessResponseStatus];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const RecommendedCoursesSuccessResponseStatus = {
+  success: 'success',
+} as const;
+
+export interface RecommendedCoursesSuccessResponse {
+  /** 回應狀態 */
+  status?: RecommendedCoursesSuccessResponseStatus;
+  /** 成功訊息 */
+  message?: string;
+  /** 推薦課程資料 */
+  data?: RecommendedCoursesData;
+}
+
+export type HomeValidationErrorResponseAllOf = {
+  message?: unknown;
+  errors?: unknown;
+};
+
+export type HomeValidationErrorResponse = ValidationErrorResponse &
+  HomeValidationErrorResponseAllOf;
+
 /**
  * 伺服器內部錯誤
  */
@@ -7084,6 +7368,43 @@ export type GetApiFilesTestConnection200 = {
   success?: boolean;
   message?: string;
   data?: GetApiFilesTestConnection200Data;
+};
+
+export type GetApiHomeReviewsSummaryParams = {
+  /**
+   * 精選評論數量（預設 6，最小 1，最大 20）
+   * @minimum 1
+   * @maximum 20
+   */
+  limit?: number;
+};
+
+export type GetApiHomeShortVideosParams = {
+  /**
+   * 主分類 ID，用於篩選特定分類的影片（選填）
+   * @minimum 1
+   */
+  mainCategoryId?: number;
+  /**
+   * 返回數量（預設 5，最小 1，最大 20）
+   * @minimum 1
+   * @maximum 20
+   */
+  limit?: number;
+};
+
+export type GetApiHomeRecommendedCoursesParams = {
+  /**
+   * 縣市 ID，用於優先顯示該地區課程（選填）
+   * @minimum 1
+   */
+  cityId?: number;
+  /**
+   * 返回數量（預設 6，最小 1，最大 20）
+   * @minimum 1
+   * @maximum 20
+   */
+  limit?: number;
 };
 
 export type PostApiOrders400 =

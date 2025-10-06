@@ -86,10 +86,12 @@
 
     <!-- Video Grid with Navigation -->
     <tmf-swiper-wapper [config]="videoSwiperConfig">
-      @for (video of videos; track video.id) {
-      <div class="swiper-slide">
-        <tmf-video-card [video]="video" (videoClick)="onVideoClick($event)"></tmf-video-card>
-      </div>
+      @if (shortVideosResource.value(); as videos) {
+        @for (video of videos; track video.id) {
+        <div class="swiper-slide">
+          <tmf-video-card [video]="video" (videoClick)="onVideoClick($event)"></tmf-video-card>
+        </div>
+        }
       }
     </tmf-swiper-wapper>
   </div>
@@ -124,11 +126,13 @@
       [config]="courseSwiperConfig"
       leftIconClasses="text-white"
     >
-      @for (course of courses; track course.id) {
-      <div class="swiper-slide">
-        <!-- Course Card -->
-        <tmf-course-card class="w-75.5" [course]="course"></tmf-course-card>
-      </div>
+      @if (recommendedCoursesResource.value(); as courses) {
+        @for (course of courses; track course.id) {
+        <div class="swiper-slide">
+          <!-- Course Card -->
+          <tmf-course-card class="w-75.5" [course]="course"></tmf-course-card>
+        </div>
+        }
       }
     </tmf-swiper-wapper>
   </div>
@@ -150,6 +154,7 @@
       <tmf-section-title>學員導師好評推薦！</tmf-section-title>
 
       <!-- Main Content -->
+      @if (reviewsSummaryResource.value(); as reviewsSummary) {
       <div class="flex flex-col items-center gap-6">
         <!-- First Row -->
         <div class="flex items-stretch gap-6 w-full">
@@ -159,63 +164,80 @@
           >
             <p class="text-grey-9f text-xl-bold mb-3">使用好評高達</p>
             <div class="flex flex-col items-center gap-1">
-              <span class="text-grey-33 text-5xl font-medium">4.7</span>
+              <span class="text-grey-33 text-5xl font-medium">{{ reviewsSummary.averageRating | number:'1.1-1' }}</span>
               <tmf-star-rating
                 starSize="large"
-                [rating]="4.7"
+                [rating]="reviewsSummary.averageRating"
               ></tmf-star-rating>
             </div>
           </div>
 
+          @if (reviewsSummary.reviews[0]) {
           <!-- Review Card 1 -->
           <tmf-review-card
             class="w-102.75"
             type="shadowed"
-            [review]="reviews[0]"
+            [review]="reviewsSummary.reviews[0]"
           ></tmf-review-card>
+          }
 
+          @if (reviewsSummary.reviews[1]) {
           <!-- Review Card 2 -->
           <tmf-review-card
             class="w-102.75"
             type="shadowed"
-            [review]="reviews[1]"
+            [review]="reviewsSummary.reviews[1]"
           ></tmf-review-card>
+          }
         </div>
 
+        @if (reviewsSummary.reviews[2] || reviewsSummary.reviews[3]) {
         <!-- Second Row -->
         <div class="flex justify-center gap-6 w-full">
+          @if (reviewsSummary.reviews[2]) {
           <!-- Review Card 3 -->
           <tmf-review-card
             class="w-102.75"
             type="shadowed"
-            [review]="reviews[2]"
+            [review]="reviewsSummary.reviews[2]"
           ></tmf-review-card>
+          }
 
+          @if (reviewsSummary.reviews[3]) {
           <!-- Review Card 4 -->
           <tmf-review-card
             class="w-102.75"
             type="shadowed"
-            [review]="reviews[3]"
+            [review]="reviewsSummary.reviews[3]"
           ></tmf-review-card>
+          }
         </div>
+        }
 
+        @if (reviewsSummary.reviews[4] || reviewsSummary.reviews[5]) {
         <!-- Third Row -->
         <div class="flex justify-end gap-6 w-full">
+          @if (reviewsSummary.reviews[4]) {
           <!-- Review Card 5 -->
           <tmf-review-card
             class="w-102.75"
             type="shadowed"
-            [review]="reviews[4]"
+            [review]="reviewsSummary.reviews[4]"
           ></tmf-review-card>
+          }
 
+          @if (reviewsSummary.reviews[5]) {
           <!-- Review Card 6 -->
           <tmf-review-card
             class="w-102.75"
             type="shadowed"
-            [review]="reviews[5]"
+            [review]="reviewsSummary.reviews[5]"
           ></tmf-review-card>
+          }
         </div>
+        }
       </div>
+      }
     </div>
   </div>
 </section>

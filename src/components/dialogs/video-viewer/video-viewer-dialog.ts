@@ -65,19 +65,28 @@ export class VideoViewerDialogComponent implements OnInit, AfterViewInit, OnDest
         mousewheel: {
           enabled: true,
           forceToAxis: true,
+          sensitivity: 1,
+          releaseOnEdges: true,
         },
         keyboard: {
           enabled: true,
           onlyInViewport: true,
         },
-        speed: 300,
+        speed: 600,
+        longSwipesRatio: 0.3,
+        longSwipesMs: 300,
+        shortSwipes: false,
+        threshold: 50,
+        touchRatio: 1,
+        touchAngle: 45,
+        resistance: true,
+        resistanceRatio: 0.85,
         initialSlide: this.data.initialIndex,
         on: {
           slideChange: () => {
             if (this.swiper) {
               this.currentVideoIndex.set(this.swiper.activeIndex);
               this.pauseAllVideos();
-              this.playCurrentVideo();
             }
           },
           slideChangeTransitionEnd: () => {
@@ -116,7 +125,7 @@ export class VideoViewerDialogComponent implements OnInit, AfterViewInit, OnDest
     }
   }
 
-  setProgress(event: MouseEvent) {
+  setProgress(_event: MouseEvent) {
     // 簡化實現，暫時移除進度條點擊功能
     // 可以在後續需要時重新實現
   }

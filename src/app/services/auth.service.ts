@@ -150,7 +150,6 @@ export class AuthService {
   }
 
   logout(): void {
-    console.log('Performing logout - clearing auth state');
     this.clearStoredAuth();
     this.updateAuthState({
       isAuthenticated: false,
@@ -266,15 +265,12 @@ export class AuthService {
 
   loadUserProfile(): Observable<boolean> {
     if (!this.isAuthenticated()) {
-      console.log('Not authenticated, cannot load user profile');
       return of(false);
     }
 
-    console.log('Loading user profile...');
     return this.authApi.getApiAuthProfile().pipe(
       tap((response: GetProfileResponse) => {
         if (response.status === 'success' && response.data?.user) {
-          console.log('User profile loaded successfully');
           this.updateAuthState({
             ...this.authState(),
             user: response.data.user,
@@ -284,7 +280,6 @@ export class AuthService {
       }),
       map((response: GetProfileResponse) => response.status === 'success' && !!response.data?.user),
       catchError((error) => {
-        console.error('Failed to load user profile:', error);
         // 設定 loading 為 false
         this.updateAuthState({
           ...this.authState(),
@@ -292,7 +287,6 @@ export class AuthService {
         });
         // 如果是認證相關錯誤 (401, 403) 或伺服器錯誤，清空登入狀態
         if (error.status === 401 || error.status === 403 || error.status >= 500) {
-          console.warn(`Authentication failed or server error (${error.status}), logging out user`);
           this.logout();
           return of(false);
         }
@@ -317,7 +311,6 @@ export class AuthService {
         ...currentState,
         user: newUser
       });
-      console.log('User profile updated in AuthService:', newUser);
     }
   }
 }

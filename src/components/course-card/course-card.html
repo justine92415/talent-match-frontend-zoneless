@@ -1,20 +1,23 @@
 <div
-  class="group relative m-auto w-full h-full overflow-hidden rounded-xl bg-white max-w-80 cursor-pointer shadow-lg"
+  class="group relative m-auto w-full h-full overflow-hidden rounded-xl bg-white max-w-80 cursor-pointer"
+  [class]="{
+    'shadow-lg': hasShadow()
+  }"
   (click)="onCourseClick()"
 >
   <div class="h-45 w-full bg-tmf-gray-4">
     <img
       class="h-full w-full object-cover"
-      [src]="course.imageSrc"
-      [alt]="course.title"
+      [src]="course().imageSrc"
+      [alt]="course().title"
     />
   </div>
   <div class="p-4 h-44">
     <h3 class="mb-2 line-clamp-2 h-16 text-2xl-bold text-grey-33">
-      {{ course.title }}
+      {{ course().title }}
     </h3>
     <div class="line-clamp-3 tracking-wide min-h-15 text-base text-grey-66">
-      {{ course.description }}
+      {{ course().description }}
     </div>
   </div>
   <div
@@ -26,34 +29,34 @@
       >
         <img
           class="h-full w-full object-cover"
-          [src]="course.teacher.avatar"
-          [alt]="course.teacher.name"
+          [src]="course().teacher.avatar"
+          [alt]="course().teacher.name"
         />
       </div>
-      <p class="mr-[31px] whitespace-nowrap text-base font-medium text-grey-66">
-        {{ course.teacher.name }}
+      <p class="mr-[31px] whitespace-nowrap text-xs font-medium text-grey-66">
+        {{ course().teacher.name }}
       </p>
     </span>
     <p class="text-base text-orange-55">
-      NT$ {{ course.price }}
+      NT$ {{ course().price }}
       <span class="mr-1 text-sm text-grey-33">/ 堂</span>
     </p>
   </div>
   <div class="flex items-center justify-start p-4">
     <div class="mr-4 flex h-10 flex-col items-start justify-between">
       <p class="text-sm font-normal text-grey-9f">類型</p>
-      <p class="text-sm-bold text-black">{{ course.category }}</p>
+      <p class="text-xs-bold text-black">{{ course().category }}</p>
     </div>
     <div class="mr-4 flex h-10 flex-col items-start justify-between">
       <p class="text-sm font-normal text-grey-9f">評分</p>
       <div class="flex items-center gap-1">
         <tmf-star-rating
-          [rating]="course.rating.score"
+          [rating]="course().rating.score"
           starSize="small"
         ></tmf-star-rating>
         <p class="flex font-inter items-center gap-1 text-sm font-medium">
-          <span class="text-black">{{ course.rating.score }}</span>
-          <span class="text-grey-66">({{ course.rating.count }})</span>
+          <span class="text-black">{{ course().rating.score }}</span>
+          <span class="text-grey-66">({{ course().rating.count }})</span>
         </p>
       </div>
     </div>

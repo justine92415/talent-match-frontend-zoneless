@@ -352,19 +352,13 @@ export default class CourseCreate implements OnInit {
         courseImage: this.imageFile() || undefined
       };
 
-      console.log('準備發送資料:', requestData);
-      console.log('選擇的短影音:', courseData.selectedVideos);
-      console.log('courseData 包含 selectedVideos:', courseData);
-
       // 呼叫 API 建立課程
       this.courseService.postApiCourses(requestData).subscribe({
         next: (response) => {
-          console.log('課程建立成功:', response);
           alert('課程建立成功！');
           this.goBack();
         },
         error: (error) => {
-          console.error('課程建立失敗:', error);
           this.handleSaveError(error);
         }
       });

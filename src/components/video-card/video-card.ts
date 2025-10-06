@@ -33,12 +33,10 @@ export class VideoCard {
 
   // 滑鼠進入時播放預覽
   onMouseEnter(videoElement: HTMLVideoElement) {
-    console.log('Mouse enter - video data:', this.video()); // 除錯用
-    console.log('Video element:', videoElement); // 除錯用
     if (videoElement && this.video().videoSrc) {
       videoElement.currentTime = 0;
       videoElement.play().catch((error) => {
-        console.error('Video play failed:', error); // 除錯用
+        // console.error('Video play failed:', error); // 除錯用
       });
     }
   }

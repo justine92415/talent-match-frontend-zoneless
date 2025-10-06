@@ -167,8 +167,6 @@ export default class Info {
   }
 
   onAvatarUploadSuccess(newAvatarUrl: string): void {
-    console.log('Avatar upload success, new URL:', newAvatarUrl);
-    
     // 更新本地用戶資料
     if (this.user()) {
       const updatedUser = { ...this.user()!, avatar_image: newAvatarUrl };
@@ -183,7 +181,6 @@ export default class Info {
   }
   
   onAvatarUploadError(errorMessage: string): void {
-    console.error('Avatar upload error:', errorMessage);
     this.errorMessage.set(errorMessage);
   }
 }

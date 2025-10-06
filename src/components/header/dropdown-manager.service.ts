@@ -121,7 +121,7 @@ export class DropdownManagerService {
       config.overlayRef = this.overlay.create({
         positionStrategy,
         hasBackdrop: false,
-        scrollStrategy: this.overlay.scrollStrategies.reposition(),
+        scrollStrategy: this.overlay.scrollStrategies.close(),
       });
 
       if (!config.overlayRef) {

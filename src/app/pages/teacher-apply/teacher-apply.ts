@@ -460,39 +460,31 @@ export default class TeacherApply implements OnInit {
   private submitFinalApplication() {
     // 檢查所有步驟是否都已完成
     if (!this.canSubmitFinal()) {
-      console.error('申請提交失敗：尚有步驟未完成');
       return;
     }
 
     // 呼叫最終提交 API
     this.apiService.submitFinalApplication().pipe(
-      tap((response: any) => {
-        console.log('申請提交成功:', response);
+      tap(() => {
         this.stateService.setSubmitted(true); // 設定為已提交狀態
       }),
       switchMap(() => {
         // 提交成功後，刷新 token 以取得 teacher_pending 角色
         return this.authService.refreshToken();
       }),
-      catchError((error) => {
-        console.error('申請提交失敗:', error);
+      catchError(() => {
         alert('申請提交失敗，請稍後再試。');
         return of(false); // 回傳 false 表示失敗
       })
     ).subscribe({
-      next: (success: any) => {
+      next: (success) => {
         if (success) {
-          console.log('角色更新成功，已獲得 teacher_pending 角色');
           this.router.navigate(['/dashboard/teacher/apply-status']);
         } else {
-          // 角色更新失敗的情況
-          console.error('角色更新失敗');
           alert('申請已成功提交！請重新登入以更新權限。');
         }
       },
-      error: (error: any) => {
-        console.error('角色更新失敗:', error);
-        // 即使角色更新失敗，申請仍然成功提交
+      error: () => {
         alert('申請已成功提交！請重新登入以更新權限。');
       }
     });

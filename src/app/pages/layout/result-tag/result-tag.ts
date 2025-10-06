@@ -182,7 +182,6 @@ export default class ResultTag implements OnInit {
   // 課程列表
   courses = computed(() => {
     const coursesData = this.coursesResource.value() as { totalResults: number; courses: CourseCardData[] } | undefined;
-    console.log('Courses Data:', coursesData);
     return coursesData?.courses || [];
   });
 

@@ -10,10 +10,6 @@ export const API_BASE_URL = new InjectionToken<string>('apiBaseUrl');
 export class ApiConfigService {
   public readonly baseUrl = environment.apiBaseUrl;
   
-  constructor() {
-    console.log('API Base URL:', this.baseUrl);
-  }
-  
   getFullUrl(endpoint: string): string {
     // 確保端點以 / 開頭
     const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

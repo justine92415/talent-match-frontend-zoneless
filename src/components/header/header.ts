@@ -443,8 +443,6 @@ export class Header implements OnInit, AfterViewInit {
     } else if (item.route) {
       // 有路由則導航
       this.router.navigate([item.route]);
-    } else {
-      console.log(`點擊選單項目: ${item.label} (無路由設定)`);
     }
 
     // 點擊選單項目後關閉下拉選單
@@ -536,7 +534,6 @@ export class Header implements OnInit, AfterViewInit {
   }
 
   toggleMobileCitySelection(): void {
-    // 這裡可以實作城市選擇邏輯，目前先簡單 console.log
     console.log('Toggle mobile city selection');
   }
 

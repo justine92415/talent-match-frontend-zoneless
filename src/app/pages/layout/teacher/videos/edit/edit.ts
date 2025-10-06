@@ -136,14 +136,9 @@ export default class VideoEdit implements OnInit {
 
   // 儲存影片
   saveVideo(): void {
-    console.log('saveVideo 被調用');
-    console.log('表單狀態:', this.videoForm.valid);
-    console.log('影片 ID:', this.videoId());
-
     if (this.videoForm.valid) {
       const videoId = this.videoId();
       if (!videoId) {
-        console.error('影片 ID 不存在');
         return;
       }
 
@@ -160,17 +155,13 @@ export default class VideoEdit implements OnInit {
         videoFile: this.videoFile() || undefined  // 可選的檔案
       };
 
-      console.log('更新影片資料:', updateData);
-
       this.videoService.putApiVideosId(videoId, updateData).subscribe({
-        next: (response) => {
-          console.log('影片更新成功:', response);
+        next: () => {
           this.isLoading.set(false);
           alert('影片更新成功！');
           this.goBack();
         },
         error: (error) => {
-          console.error('影片更新失敗:', error);
           this.isLoading.set(false);
           this.handleSaveError(error);
         }

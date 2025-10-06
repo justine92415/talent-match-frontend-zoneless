@@ -356,23 +356,18 @@ export default class Cart {
   private processPayment(selectedItems: CartItemWithDetails[], totalAmount: number): void {
     this.isCheckingOut.set(true);
 
-    console.log('開始結帳流程，項目：', selectedItems);
-    console.log('總金額：', totalAmount);
-
     // 先建立訂單
     this.createOrder(selectedItems, totalAmount);
   }
 
   // 建立訂單
   private createOrder(selectedItems: CartItemWithDetails[], totalAmount: number): void {
-    console.log('選中的購物車項目：', selectedItems);
 
     // 檢查並取得有效的購物車項目ID
     const cartItemIds = selectedItems
       .map(item => item.id)
       .filter(id => id !== undefined && id !== null) as number[];
 
-    console.log('提取的購物車項目ID：', cartItemIds);
 
     if (cartItemIds.length === 0) {
       alert('沒有有效的購物車項目ID，無法建立訂單');
@@ -392,25 +387,18 @@ export default class Cart {
       buyer_email: formValue.buyer_email.trim()
     };
 
-    console.log('創建訂單請求：', createOrderRequest);
-
     this.ordersService.postApiOrders(createOrderRequest).subscribe({
       next: (orderResponse) => {
-        console.log('訂單建立成功：', orderResponse);
-        console.log('回應資料結構：', JSON.stringify(orderResponse, null, 2));
 
         if (orderResponse.data?.order?.id) {
           // 使用真實的訂單ID進行付款
           this.processOrderPayment(orderResponse.data.order.id, totalAmount);
         } else {
-          console.error('訂單資料無效：', orderResponse);
           alert(`訂單建立失敗：無效的訂單資料\n回應狀態: ${orderResponse.status}\n回應訊息: ${orderResponse.message}\n訂單資料: ${JSON.stringify(orderResponse.data)}`);
           this.isCheckingOut.set(false);
         }
       },
       error: (error) => {
-        console.error('建立訂單失敗:', error);
-        console.error('錯誤詳細資訊：', JSON.stringify(error, null, 2));
 
         let errorMessage = '建立訂單失敗，請稍後再試';
         if (error.error?.message) {
@@ -428,7 +416,6 @@ export default class Cart {
 
   // 處理訂單付款
   private processOrderPayment(orderId: number, totalAmount: number): void {
-    console.log('開始處理付款，訂單ID：', orderId);
 
     // 創建付款請求體，包含必要欄位
     const paymentRequest = {
@@ -439,7 +426,6 @@ export default class Cart {
     // 直接使用 HttpClient 發送包含請求體的 POST 請求
     this.http.post<any>(`/api/orders/${orderId}/payment`, paymentRequest).subscribe({
       next: (response) => {
-        console.log('付款API回應：', response);
         if (response.data?.html_form) {
           // 使用綠界提供的 HTML 表單
           this.submitEcpayForm(response.data.html_form);

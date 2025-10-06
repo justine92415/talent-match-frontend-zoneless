@@ -156,8 +156,6 @@ export default class CourseDetail implements OnDestroy {
 
   // 設置 IntersectionObserver 監聽區塊
   setupIntersectionObserver() {
-    console.log('setupIntersectionObserver called');
-
     const options = {
       root: null,
       rootMargin: '-20% 0px -70% 0px',
@@ -168,7 +166,6 @@ export default class CourseDetail implements OnDestroy {
       entries.forEach(entry => {
         if (entry.isIntersecting && !this.isScrolling()) {
           const sectionId = entry.target.id;
-          console.log('Setting activeSection to:', sectionId);
           this.activeSection.set(sectionId);
         }
       });

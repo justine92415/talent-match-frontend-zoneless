@@ -54,8 +54,6 @@ export default class Schedule implements OnInit {
       // 同時更新備份資料
       this.originalScheduleData.set([...scheduleData]);
     } catch (error) {
-      console.error('載入排程資料失敗:', error);
-
       let errorMessage = '載入排程資料失敗';
       if (error instanceof HttpErrorResponse) {
         switch (error.status) {
@@ -96,7 +94,6 @@ export default class Schedule implements OnInit {
 
   // 處理排程變更
   onScheduleChange(newSchedule: ScheduleData[]) {
-    console.log('排程已變更:', newSchedule);
     this.scheduleData.set(newSchedule);
     this.saveSuccess.set(false); // 重置儲存狀態
   }
@@ -146,8 +143,6 @@ export default class Schedule implements OnInit {
       // 轉換資料格式
       const requestData = this.transformScheduleToApiFormat(this.scheduleData());
 
-      console.log('準備發送給後端的資料:', requestData);
-
       // 呼叫真實API
       await firstValueFrom(this.teachersService.putApiTeachersSchedule(requestData));
 
@@ -158,8 +153,6 @@ export default class Schedule implements OnInit {
       setTimeout(() => this.saveSuccess.set(false), 3000); // 3秒後隱藏成功訊息
 
     } catch (error) {
-      console.error('儲存失敗:', error);
-
       let errorMessage = '儲存失敗，請稍後再試';
 
       if (error instanceof HttpErrorResponse) {

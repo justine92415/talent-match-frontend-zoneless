@@ -185,7 +185,6 @@ export default class CourseEdit implements OnInit {
         this.mainCategories.set(mainCategoryOptions);
       },
       error: (error) => {
-        console.error('載入標籤資料失敗:', error);
         this.error.set('載入標籤資料失敗');
       }
     });
@@ -201,14 +200,12 @@ export default class CourseEdit implements OnInit {
 
     this.courseService.getApiCoursesIdEdit(courseId).subscribe({
       next: (response) => {
-        console.log('課程編輯資料:', response);
         if (response.data && response.data.course) {
           this.populateForm(response.data.course, response.data.course.price_options || []);
         }
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('載入課程資料失敗:', error);
         let errorMessage = '載入課程資料失敗';
         if (error.status === 404) {
           errorMessage = '課程不存在';
@@ -277,7 +274,6 @@ export default class CourseEdit implements OnInit {
         .map((item: any) => item.video_info)
         .filter((video: any) => video !== null && video !== undefined);
       this.selectedVideos.set(videos);
-      console.log('載入選擇的短影音:', videos);
     }
   }
 
@@ -463,18 +459,12 @@ export default class CourseEdit implements OnInit {
         courseImage: this.imageFile() || null
       };
 
-      console.log('更新課程資料:', requestData);
-      console.log('選擇的短影音:', courseData.selectedVideos);
-      console.log('courseData 包含 selectedVideos:', courseData);
-
       this.courseService.putApiCoursesId(courseId, requestData).subscribe({
-        next: (response) => {
-          console.log('課程更新成功:', response);
+        next: () => {
           alert('課程更新成功！');
           this.goBack();
         },
         error: (error) => {
-          console.error('課程更新失敗:', error);
           this.handleSaveError(error);
         }
       });

@@ -144,17 +144,13 @@ export default class VideoCreate implements OnInit {
         videoFile: this.videoFile()!
       };
 
-      console.log('準備上傳影片:', requestData);
-
       // 呼叫 API 上傳影片
       this.videoService.postApiVideos(requestData).subscribe({
         next: (response) => {
-          console.log('影片上傳成功:', response);
           alert('短影音上傳成功！');
           this.goBack();
         },
         error: (error) => {
-          console.error('影片上傳失敗:', error);
           this.handleUploadError(error);
         },
         complete: () => {

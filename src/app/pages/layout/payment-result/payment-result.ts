@@ -33,7 +33,6 @@ export default class PaymentResultComponent {
 
 
   goToShopping() {
-    console.log('go to shopping');
     this.router.navigate(['/result-tag']);
   }
 

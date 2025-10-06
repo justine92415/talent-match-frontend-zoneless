@@ -90,14 +90,12 @@ export default class CourseView implements OnInit {
 
     this.courseService.getApiCoursesId(courseId).subscribe({
       next: (response) => {
-        console.log('課程檢視資料:', response);
         if (response.data && response.data.course) {
           this.transformAndSetCourseData(response.data.course, response.data.course.price_options || [], response.data.course.selected_videos || []);
         }
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('載入課程資料失敗:', error);
         let errorMessage = '載入課程資料失敗';
         if (error.status === 404) {
           errorMessage = '課程不存在';
@@ -143,7 +141,6 @@ export default class CourseView implements OnInit {
         .map((item: any) => item.video_info)
         .filter((video: any) => video !== null && video !== undefined);
       this.selectedVideos.set(videos);
-      console.log('載入課程短影音:', videos);
     }
   }
 

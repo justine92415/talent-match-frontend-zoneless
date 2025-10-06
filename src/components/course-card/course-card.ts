@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, output, input } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TmfIconEnum } from '@share/icon.enum';
 import { StarRating } from "@components/star-rating/star-rating";
@@ -33,8 +33,9 @@ export interface CourseCardData {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CourseCard {
-  @Input() course!: CourseCardData;
-  @Output() courseClick = new EventEmitter<string>();
+  course = input.required<CourseCardData>();
+  hasShadow = input(true);
+  courseClick = output<string>();
 
   // Math object for template use
   Math = Math;
@@ -44,6 +45,6 @@ export class CourseCard {
   }
 
   onCourseClick(): void {
-    this.courseClick.emit(this.course.id);
+    this.courseClick.emit(this.course().id);
   }
 }

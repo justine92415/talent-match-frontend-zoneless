@@ -52,7 +52,6 @@ export default class Videos {
   // 轉換為 VideoCardData 格式
   videoCards = computed(() => {
     const videos = this.videos();
-    console.log('Videos data:', videos); // 除錯用
     return videos.map((video: VideoBasicInfo) => {
       const cardData = {
         id: video.id?.toString() || video.uuid || '',
@@ -60,7 +59,6 @@ export default class Videos {
         description: video.intro || video.name || '無描述',
         videoSrc: video.url
       } as VideoCardData;
-      console.log('Video card data:', cardData); // 除錯用
       return cardData;
     });
   });
@@ -112,14 +110,11 @@ export default class Videos {
 
   // 編輯影片
   editVideo(videoId: string): void {
-    console.log('編輯影片 ID:', videoId);
     this.router.navigate(['/dashboard/teacher/videos/edit', videoId]);
   }
 
   // 刪除影片
   deleteVideo(videoId: string): void {
-    console.log('刪除影片 ID:', videoId);
-    // TODO: 顯示確認對話框並執行刪除
     // TODO: 呼叫刪除 API 並重新載入資料
   }
 

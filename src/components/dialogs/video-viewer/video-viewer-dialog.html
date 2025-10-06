@@ -94,19 +94,6 @@
                   </mat-icon>
                 </div>
               </div>
-
-              <!-- Swipe Hints - only show on first video -->
-              @if (i === 0 && data.videos.length > 1) {
-                <div
-                  class="absolute right-14 top-1/2 transform -translate-y-1/2 text-white text-opacity-50 animate-bounce"
-                >
-                  <div class="flex flex-col items-center gap-2">
-                    <mat-icon class="!w-6 !h-6">keyboard_arrow_up</mat-icon>
-                    <span class="text-xs">滑動切換</span>
-                    <mat-icon class="!w-6 !h-6">keyboard_arrow_down</mat-icon>
-                  </div>
-                </div>
-              }
             </div>
           </div>
         </div>

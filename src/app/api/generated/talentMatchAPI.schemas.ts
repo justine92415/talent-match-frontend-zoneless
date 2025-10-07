@@ -6766,6 +6766,8 @@ export interface ShortVideoItem {
   courseId?: number;
   /** 影片標題 */
   title?: string;
+  /** 影片描述/介紹 */
+  description?: string;
   /** 縮圖 URL（目前使用影片 URL） */
   thumbnailUrl?: string;
   /** 影片播放 URL */

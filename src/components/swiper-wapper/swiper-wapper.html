@@ -1,13 +1,15 @@
 <!-- Swiper Wrapper with Navigation -->
 <div class="relative">
   <!-- Left Navigation Button -->
-  <button
-    class="cursor-pointer absolute text-white left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-grey-9f"
-    [disabled]="!canGoPrev()"
-    (click)="goPrev()"
-  >
-    <mat-icon>{{TmfIcon.KeyboardArrowLeft}}</mat-icon>
-  </button>
+  @if (!hideNavigation()) {
+    <button
+      class="cursor-pointer absolute text-white left-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center transition-colors hover:bg-primary disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-grey-9f"
+      [disabled]="!canGoPrev()"
+      (click)="goPrev()"
+    >
+      <mat-icon>{{TmfIcon.KeyboardArrowLeft}}</mat-icon>
+    </button>
+  }
 
   <!-- Swiper Container -->
   <div #swiperContainer class="swiper overflow-hidden">
@@ -17,11 +19,13 @@
   </div>
 
   <!-- Right Navigation Button -->
-  <button
-    class="cursor-pointer absolute text-white right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-grey-9f"
-    [disabled]="!canGoNext()"
-    (click)="goNext()"
-  >
-    <mat-icon> {{TmfIcon.KeyboardArrowRight}} </mat-icon>
-  </button>
+  @if (!hideNavigation()) {
+    <button
+      class="cursor-pointer absolute text-white right-[-24px] top-1/2 transform -translate-y-1/2 z-20 w-12 h-12 bg-primary rounded-xl flex justify-center items-center hover:bg-primary/90 transition-colors disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-grey-9f"
+      [disabled]="!canGoNext()"
+      (click)="goNext()"
+    >
+      <mat-icon> {{TmfIcon.KeyboardArrowRight}} </mat-icon>
+    </button>
+  }
 </div>

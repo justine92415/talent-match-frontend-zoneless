@@ -102,16 +102,12 @@
     <!-- City Selection -->
     <div class="flex justify-center items-center gap-4 mb-6">
       <span class="text-base-bold text-grey-33">選擇地區</span>
-      <div class="flex items-center gap-6 bg-white rounded-xl px-2 py-2">
-        <div class="flex items-center gap-1">
-          <mat-icon class="!text-primary !w-5 !h-5 !text-xl !leading-5">
-            {{ TmfIcon.PinDrop }}
-          </mat-icon>
-          <span class="text-base text-grey-33">台北市</span>
-        </div>
-        <mat-icon class="text-grey-9f w-5 h-5">
-          {{ TmfIcon.ExpandMore }}
-        </mat-icon>
+      <div class="w-48">
+        <tmf-input-select
+          [options]="cityOptions"
+          placeholder="全部地區"
+          [formControl]="cityControl"
+        />
       </div>
     </div>
 
@@ -120,7 +116,14 @@
       [config]="courseSwiperConfig"
       leftIconClasses="text-white"
     >
-      @if (recommendedCoursesResource.value(); as courses) {
+      @if (recommendedCoursesResource.isLoading()) {
+        <!-- Loading state: show 4 skeleton cards -->
+        @for (i of [0, 1, 2, 3]; track i) {
+          <div class="swiper-slide">
+            <tmf-skeleton class="rounded-xl" width="302px" height="492px"></tmf-skeleton>
+          </div>
+        }
+      } @else if (recommendedCoursesResource.value(); as courses) {
         @for (course of courses; track course.id) {
         <div class="swiper-slide">
           <!-- Course Card -->

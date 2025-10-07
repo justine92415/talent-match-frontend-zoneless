@@ -24,7 +24,7 @@ export interface SwiperConfig {
 })
 export class SwiperWapper implements AfterViewInit, OnDestroy {
   swiperContainer = viewChild.required<ElementRef>('swiperContainer');
-  
+
   config = input<SwiperConfig>({
     slidesPerView: 4,
     spaceBetween: 24,
@@ -35,18 +35,46 @@ export class SwiperWapper implements AfterViewInit, OnDestroy {
       1280: { slidesPerView: 4, spaceBetween: 24 }
     }
   });
-  
+
   navigationId = input('');
+  hideNavigation = input(false);
 
   private swiper?: Swiper;
   canGoPrev = signal(false);
   canGoNext = signal(true);
+  private observer?: MutationObserver;
 
   ngAfterViewInit() {
     this.initSwiper();
+    this.observeContentChanges();
+  }
+
+  private observeContentChanges() {
+    const containerEl = this.swiperContainer();
+    if (!containerEl) return;
+
+    const wrapper = containerEl.nativeElement.querySelector('.swiper-wrapper');
+    if (!wrapper) return;
+
+    this.observer = new MutationObserver(() => {
+      if (this.swiper) {
+        setTimeout(() => {
+          this.swiper?.update();
+          this.updateNavigationState();
+        }, 50);
+      }
+    });
+
+    this.observer.observe(wrapper, {
+      childList: true,
+      subtree: true
+    });
   }
 
   ngOnDestroy() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
     if (this.swiper) {
       this.swiper.destroy();
     }

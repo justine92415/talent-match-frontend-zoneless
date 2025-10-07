@@ -29,6 +29,11 @@ export interface CourseCardData {
     :host {
       display: block;
     }
+
+    /* 優化圖片容器的渲染性能 */
+    .swiper-slide :host {
+      will-change: transform;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
